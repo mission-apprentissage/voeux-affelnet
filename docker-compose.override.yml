@@ -1,0 +1,53 @@
+#Override containers for dev
+version: "2.4"
+services:
+  reverse_proxy:
+    volumes:
+      - .local/nginx:/data
+
+  ui:
+    command: yarn start
+    mem_limit: 1g
+    stdin_open: true
+    build:
+      args:
+        - VOEUX_AFFELNET_ENV=dev
+    environment:
+      - FAST_REFRESH=false
+    volumes:
+      - ./ui:/app #Allows source folders to be watched
+
+  server:
+    command: ["yarn", "debug"]
+    ports:
+      - "127.0.0.1:9229:9229" #Allows remote debugging
+    volumes:
+      - ./server/src:/app/src #Allows source folders to be watched
+      - .local/server:/data
+      - .local/dne:/dne
+    environment:
+      - VOEUX_AFFELNET_ENV=dev
+      - VOEUX_AFFELNET_AUTH_PASSWORD_HASH_ROUNDS=1000
+      - VOEUX_AFFELNET_LOG_LEVEL=debug
+      - VOEUX_AFFELNET_SMTP_HOST=smtp
+      - VOEUX_AFFELNET_SMTP_PORT=1025
+    depends_on:
+      - smtp
+
+  mongodb:
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - .local/mongodb/db:/data/db
+      - .local/mongodb/configdb:/data/configdb
+
+  smtp:
+    image: mailhog/mailhog
+    container_name: voeux_affelnet_smtp
+    mem_limit: 128m
+    ports:
+      - 1025:1025
+    networks:
+      - voeux_affelnet_network
+    environment:
+      - MH_UI_WEB_PATH=smtp
