@@ -1,0 +1,69 @@
+<mjml>
+    <%- include('./common/head.ejs'); %>
+
+    <mj-body background-color="#f9fafc">
+        <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+            <mj-section background-color="#ffffff" padding-top="0">
+                <mj-column>
+                    <mj-text>
+                        Madame la directrice, Monsieur le directeur,
+                    </mj-text>
+                    <mj-text>
+                        Des jeunes intéressés par une formation en tant qu’apprentis au sein de votre établissement ont
+                        exprimé des vœux via la procédure Affelnet-lycée. La liste de ces jeunes et de leurs coordonnées
+                        est disponible dès aujourd’hui au téléchargement.
+                    </mj-text>
+                    <mj-text>
+                        Nous vous avons envoyé plusieurs courriels depuis le 10 mai 2021 vous invitant à nous confirmer
+                        l’adresse à laquelle les vœux formulés pourront être transmis. Sauf erreur de notre part, ces
+                        courriels sont restés sans réponse de votre part.
+                    </mj-text>
+
+                    <mj-text>
+                        Nous vous rappelons que <a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000035274717/">l’arrêté
+                            du 17 juillet
+                            2017</a>,
+                        à l’article 4 au 7ème alinéa précise
+                        que <strong>seuls les directeurs des centres de formation d'apprentis sont habilités à recevoir
+                            les données transmises</strong>
+                        mentionnées à l’article 3 de ce même arrêté.
+                    </mj-text>
+
+                    <mj-button
+                            href="<%= utils.getPublicUrl(`/confirmation?actionToken=${data.actionToken}`) %>"
+                            background-color="#0e4194" color="white">
+                        Confirmer l'adresse email pour l'uai <%= data.cfa.uai %>
+                    </mj-button>
+
+                    <mj-text>
+                        La transmission des vœux des candidats et de leurs coordonnées se fera par transmission de
+                        fichiers. Jusqu’à trois fichiers seront transmis correspondant à différentes phases de saisie et
+                        de traitement des vœux exprimés : le premier est disponible au 03 juin 2021, puis le second en
+                        semaine 25 et enfin le dernier en semaine 27.
+                    </mj-text>
+                    <mj-text>
+                        Une fois votre adresse mail confirmée, vous allez recevoir un email vous demandant d'activer
+                        votre compte. Une fois activé, vous accédez à votre compte et pouvez directement télécharger les
+                        vœux. Les modes opératoires convenus avec les éditeurs de logiciels de gestion sont disponibles
+                        sur
+                        la page de téléchargement et visibles après votre connexion.
+                    </mj-text>
+
+                    <mj-text>
+                        Ce nouveau service qui permet d’accélérer la transmission des informations est
+                        développé par notre mission, dans le cadre du mandat qui lui a été confié par les quatre
+                        ministres chargés de l’éducation nationale, de l’enseignement supérieur, du travail et de la
+                        transformation publique.
+                    </mj-text>
+
+                    <%- include('./common/signature_abt.ejs'); %>
+                    <%- include('./common/signature.ejs'); %>
+                </mj-column>
+            </mj-section>
+
+        </mj-wrapper>
+        <%- include('./common/footer.ejs'); %>
+    </mj-body>
+
+</mjml>

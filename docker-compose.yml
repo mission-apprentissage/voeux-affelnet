@@ -1,0 +1,57 @@
+version: "2.4"
+services:
+
+  reverse_proxy:
+    image: voeux_affelnet_reverse_proxy
+    container_name: voeux_affelnet_reverse_proxy
+    build:
+      context: reverse_proxy
+    mem_limit: 256m
+    restart: unless-stopped
+    ports:
+      - 80:80
+    networks:
+      - voeux_affelnet_network
+    depends_on:
+      - server
+      - ui
+
+  ui:
+    image: voeux_affelnet_ui
+    container_name: voeux_affelnet_ui
+    build:
+      context: ui
+    mem_limit: 256m
+    networks:
+      - voeux_affelnet_network
+    depends_on:
+      - server
+
+  server:
+    image: voeux_affelnet_server
+    container_name: voeux_affelnet_server
+    build:
+      context: server
+    mem_limit: 1g
+    restart: unless-stopped
+    networks:
+      - voeux_affelnet_network
+    depends_on:
+      - mongodb
+    environment:
+      - VOEUX_AFFELNET_MONGODB_URI=mongodb://mongodb:27017/voeux_affelnet?retryWrites=true&w=majority
+      - VOEUX_AFFELNET_LOG_DESTINATIONS=stdout,mongodb
+      - VOEUX_AFFELNET_OUTPUT_DIR=/data
+
+  mongodb:
+    image: mongo:4.4.5-bionic
+    container_name: voeux_affelnet_mongodb
+    command: --wiredTigerCacheSizeGB 1 --port 27017
+    mem_limit: 1g
+    restart: unless-stopped
+    networks:
+      - voeux_affelnet_network
+
+networks:
+  voeux_affelnet_network:
+    name: voeux_affelnet_network
