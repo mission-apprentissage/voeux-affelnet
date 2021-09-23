@@ -18,6 +18,9 @@ stop:
 test:
 	yarn --cwd server test
 
+coverage:
+	yarn --cwd server coverage
+
 lint:
 	yarn --cwd server lint
 
@@ -28,4 +31,4 @@ dataset:
 	docker exec voeux_affelnet_server yarn --silent --cwd server cli misc injectDataset
 
 
-ci: install-server lint start-mongodb test clean
+ci: install-server lint start-mongodb coverage clean
