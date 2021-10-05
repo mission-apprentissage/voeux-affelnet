@@ -1,6 +1,10 @@
 # Voeux Afflenet
 
-Ce repository permet d'importer les voeux Affelnet afin de les exposer aux CFAs concernés via une interface web.
+Ce repository contient l'application qui permet de transmettre aux CFA les voeux formulés en apprentissage sur Affelnet.
+A la réception des voeux, les CFA concernés sont notifiés par email et peuvent se connecter pour les télécharger.
+
+![schema](./misc/doc/voeux-affelnet-fonctionnement.drawio.png)
+
 
 ### Pré-requis
 
@@ -20,7 +24,7 @@ Cette commande démarre les containers définis dans le fichier `docker-compose.
 
 L'application est ensuite accessible à l'url [http://localhost](http://localhost)
 
-Il est possible de créer un jeu de données afin de pouvoir tester l'application
+Il est possible de créer un jeu de données afin de pouvoir tester l'application :
 
 ```sh
 make dataset
