@@ -50,4 +50,9 @@ module.exports = {
   sentry: {
     dsn: env.get("VOEUX_AFFELNET_SENTRY_DSN").asString(),
   },
+  ovh: {
+    storage: {
+      uri: env.get("VOEUX_AFFELNET_OVH_STORAGE_URI").asString(),
+    },
+  },
 };

@@ -3313,6 +3313,11 @@ mimic-response@^1.0.0, mimic-response@^1.0.1:
   resolved "https://registry.yarnpkg.com/mimic-response/-/mimic-response-1.0.1.tgz#4923538878eef42063cb8a3e3b0798781487ab1b"
   integrity sha512-j5EctnkH7amfV/q5Hgmoal1g2QHFJRraOtmx0JpIqkxhBhI/lJSl1nMpQ45hVarwNETOoWEimndZ4QK0RHxuxQ==
 
+miniget@4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/miniget/-/miniget-4.2.1.tgz#11a1c24817a059e292378eb9cff4328d9240c665"
+  integrity sha512-O/DduzDR6f+oDtVype9S/Qu5hhnx73EDYGyZKwU/qN82lehFZdfhoa4DT51SpsO+8epYrB3gcRmws56ROfTIoQ==
+
 "minimatch@2 || 3", minimatch@3.0.4, minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
@@ -3968,10 +3973,10 @@ object-visit@^1.0.0:
   dependencies:
     isobject "^3.0.0"
 
-oleoduc@0.5.9:
-  version "0.5.9"
-  resolved "https://registry.yarnpkg.com/oleoduc/-/oleoduc-0.5.9.tgz#f888e2a7776b3774e457887d6e425c108d04eac4"
-  integrity sha512-3fQqs/KghgB7xPUlh36HnMlBZ0lvOBlm8eZudDn+3TeBf1W7BrpiHy9dtWOe4rUDKk7rlQW4c0Mjjeu2ByHl7w==
+oleoduc@0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/oleoduc/-/oleoduc-0.6.0.tgz#cdab4be5caae575b0cae5218a4a390a688603323"
+  integrity sha512-0jB/qzhhI+D1dYla2Wq9w9I6bOIGbjZbEfnLogG8tAZY3YwzYd5K06n05sqiESs50PHslhSm6RUAxIW+DJkSOw==
   dependencies:
     cyclist "1.0.1"
     duplexer3 "0.1.4"
