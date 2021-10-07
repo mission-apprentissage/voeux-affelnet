@@ -6,6 +6,12 @@ A la réception des voeux, les CFA concernés sont notifiés par email et peuven
 ![schema](./misc/doc/voeux-affelnet-fonctionnement.drawio.png)
 
 
+## Développement
+
+![ci](https://github.com/mission-apprentissage/voeux-affelnet/actions/workflows/ci.yml/badge.svg)
+![codecov](https://codecov.io/gh/mission-apprentissage/voeux-affelnet/branch/main/graph/badge.svg?token=CVNNCH0GYA)
+
+
 ### Pré-requis
 
 - Docker 19+
