@@ -61,7 +61,10 @@ let schema = new Schema({
         type: String,
         index: true,
       },
-      code_formation_diplome: String,
+      code_formation_diplome: {
+        type: String,
+        index: true,
+      },
       mef: String,
       libelle: String,
     }),
@@ -114,6 +117,11 @@ let schema = new Schema({
 schema.index(
   { "academie.code": 1, "apprenant.ine": 1, "formation.code_affelnet": 1 },
   { name: "voeu_unique_identifier", unique: true }
+);
+
+schema.index(
+  { "apprenant.ine": 1, "etablissement_accueil.uai": 1, "formation.code_formation_diplome": 1 },
+  { name: "croisement_tdb", unique: true }
 );
 
 module.exports = model("Voeu", schema, "voeux");

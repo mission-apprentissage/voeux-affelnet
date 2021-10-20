@@ -11,6 +11,7 @@ let schema = new Schema({
   },
   siret: {
     type: String,
+    index: true,
   },
   raison_sociale: {
     type: String,
