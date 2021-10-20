@@ -38,9 +38,19 @@ function flattenObject(obj, parent, res = {}) {
   return res;
 }
 
+function optionalItem(key, value) {
+  return value ? [{ [key]: value }] : [];
+}
+
+function optionalObject(key, value) {
+  return value ? { [key]: value } : {};
+}
+
 module.exports = {
   omitEmpty,
   deepOmitEmpty,
   trimValues,
   flattenObject,
+  optionalObject,
+  optionalItem,
 };

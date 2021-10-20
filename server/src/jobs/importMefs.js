@@ -1,8 +1,8 @@
-const csv = require("csv-parse");
 const logger = require("../common/logger");
 const { Mef } = require("../common/model");
 const { getFileAsStream } = require("../common/utils/httpUtils");
 const { oleoduc, writeData, transformData } = require("oleoduc");
+const { parseCsv } = require("../common/utils/csvUtils");
 
 async function importMefs(options = {}) {
   let stats = { total: 0, created: 0, updated: 0, failed: 0, invalid: 0 };
@@ -18,10 +18,8 @@ async function importMefs(options = {}) {
       },
       { objectMode: false }
     ),
-    csv({
+    parseCsv({
       delimiter: "|",
-      trim: true,
-      columns: true,
     }),
     writeData(async (data) => {
       try {
@@ -51,4 +49,5 @@ async function importMefs(options = {}) {
 
   return stats;
 }
+
 module.exports = importMefs;

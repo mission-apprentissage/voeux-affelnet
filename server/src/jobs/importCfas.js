@@ -1,10 +1,10 @@
 const { oleoduc, filterData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const parseCsv = require("csv-parse");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
 const { findAcademieByUai } = require("../common/academies");
 const { Cfa, Voeu } = require("../common/model");
+const { parseCsv } = require("../common/utils/csvUtils");
 
 let schema = Joi.object({
   uai: Joi.string()
@@ -32,9 +32,6 @@ async function importCfas(cfaCsv) {
   await oleoduc(
     cfaCsv,
     parseCsv({
-      delimiter: ";",
-      trim: true,
-      columns: true,
       on_record: (record) => omitEmpty(record),
     }),
     filterData(async (json) => {

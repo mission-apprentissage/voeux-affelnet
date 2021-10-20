@@ -1,6 +1,5 @@
 const { oleoduc, transformData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const parseCsv = require("csv-parse");
 const { pickBy, isEmpty, uniqBy } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
@@ -8,6 +7,7 @@ const { Voeu, Cfa, Mef } = require("../common/model");
 const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
+const { parseCsv } = require("../common/utils/csvUtils");
 
 let schema = Joi.object({
   academie: Joi.object({
@@ -81,10 +81,7 @@ function parseVoeuxCsv(source) {
   return oleoduc(
     source,
     parseCsv({
-      delimiter: ";",
       quote: '"',
-      trim: true,
-      columns: true,
       on_record: (record) => {
         let filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
         return trimValues(filtered);
