@@ -14,6 +14,7 @@ const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
 const importCfas = require("./jobs/importCfas");
 const computeStats = require("./jobs/computeStats");
+const croisementTdb = require("./jobs/croisementTdb");
 const exportCfas = require("./jobs/exportCfas");
 const exportCfasInconnus = require("./jobs/exportCfasInconnus");
 const createUser = require("./jobs/createUser");
@@ -205,6 +206,12 @@ cli
 cli.command("computeStats").action(() => {
   runScript(() => {
     return computeStats();
+  });
+});
+
+cli.command("croisementTdb").action(() => {
+  runScript(() => {
+    return croisementTdb();
   });
 });
 
