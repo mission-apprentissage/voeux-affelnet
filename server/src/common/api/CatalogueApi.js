@@ -1,43 +1,38 @@
-const axios = require("axios");
+const RateLimitedApi = require("./RateLimitedApi");
+const { getUrl } = require("../utils/httpUtils");
 const queryString = require("query-string");
 const logger = require("../logger");
-const ApiError = require("./ApiError");
-const RateLimitedApi = require("./RateLimitedApi");
+
+function convertQueryIntoParams(query, options = {}) {
+  return queryString.stringify(
+    {
+      query: JSON.stringify(query),
+      ...Object.keys(options).reduce((acc, key) => {
+        return {
+          ...acc,
+          [key]: JSON.stringify(options[key]),
+        };
+      }, {}),
+    },
+    { encode: false }
+  );
+}
 
 class CatalogueApi extends RateLimitedApi {
   constructor(options = {}) {
-    super("CatalogueApi", options);
-    this.client =
-      options.axios ||
-      axios.create({
-        baseURL: "https://catalogue.apprentissage.beta.gouv.fr",
-        timeout: 10000,
-      });
+    super("CatalogueApi", { nbRequests: 5, durationInSeconds: 1, ...options });
   }
 
-  getFormations(params, { annee, ...options }) {
-    return this.execute(async () => {
-      try {
-        let query = queryString.stringify(
-          {
-            query: JSON.stringify(params),
-            ...Object.keys(options).reduce((acc, key) => {
-              return {
-                ...acc,
-                [key]: JSON.stringify(options[key]),
-              };
-            }, {}),
-          },
-          { encode: false }
-        );
+  static get baseApiUrl() {
+    return "https://catalogue.apprentissage.beta.gouv.fr/api";
+  }
 
-        let version = `${annee || ""}`;
-        logger.debug(`[Catalogue API] Fetching formations ${version} with params ${query}...`);
-        let response = await this.client.get(`api/entity/formations${version}?${query}`);
-        return response.data;
-      } catch (e) {
-        throw new ApiError("Api Catalogue", e.message, e.code || e.response.status);
-      }
+  async getFormations(query, options) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching formations...`, query);
+      let params = convertQueryIntoParams(query, options);
+      let response = await getUrl(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`);
+      return response.data;
     });
   }
 }
