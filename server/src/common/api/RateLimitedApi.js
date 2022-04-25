@@ -1,14 +1,13 @@
-const axios = require("axios");
 const logger = require("../logger");
 const RateLimiter = require("./RateLimiter");
+const ApiError = require("./ApiError");
 
 class RateLimitedApi {
-  constructor(name, baseURL, options = {}) {
+  constructor(name, options = {}) {
     this.name = name;
     this.rateLimiter = new RateLimiter(this.name, {
-      nbRequests: 5,
-      durationInSeconds: 1,
-      client: options.axios || axios.create({ baseURL, timeout: 10000 }),
+      nbRequests: options.nbRequests || 1,
+      durationInSeconds: options.durationInSeconds || 1,
     });
 
     this.rateLimiter.on("status", ({ queueSize, maxQueueSize }) => {
@@ -19,7 +18,11 @@ class RateLimitedApi {
   }
 
   execute(callback) {
-    return this.rateLimiter.execute(callback);
+    try {
+      return this.rateLimiter.execute(callback);
+    } catch (e) {
+      throw new ApiError(this.name, e.message, e.code || e.response?.status, { cause: e });
+    }
   }
 }
 
