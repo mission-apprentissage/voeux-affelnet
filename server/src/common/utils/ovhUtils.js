@@ -1,6 +1,6 @@
 const axios = require("axios");
 const config = require("../../config");
-const { getFileAsStream } = require("./httpUtils");
+const { fetch } = require("./httpUtils");
 
 let getAuth = async (uri) => {
   let regExp = new RegExp(/^(https:\/\/)(.+):(.+):(.+)@(.*)$/);
@@ -41,7 +41,7 @@ module.exports = {
     let { token, baseUrl } = await getAuth(config.ovh.storage.uri);
 
     let fullPath = encodeURI(`${baseUrl}/${storage}/${relativePath}`);
-    return getFileAsStream(fullPath, {
+    return fetch(fullPath, {
       headers: {
         "X-Auth-Token": token,
         Accept: "application/json",
