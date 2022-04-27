@@ -1,32 +1,23 @@
 const logger = require("../logger");
-const nodeFetch = require("node-fetch");
+const axios = require("axios");
 const { compose, transformData } = require("oleoduc");
-
-class HTTPResponseError extends Error {
-  constructor(response, ...args) {
-    super(`HTTP Error Response: ${response.status} ${response.statusText}`, ...args);
-    this.response = response;
-  }
-}
 
 module.exports = {
   fetch: async (url, options = {}) => {
-    let { method = "GET", body, ...rest } = options;
+    let { method = "GET", data, ...rest } = options;
     logger.debug(`${method} ${url}...`);
 
-    const response = await nodeFetch(url, {
+    const response = await axios.request({
+      url,
       method,
-      ...(body ? { body: JSON.stringify(body) } : {}),
+      responseType: "stream",
+      ...(data ? { data } : {}),
       ...rest,
     });
 
-    if (response.ok) {
-      return compose(
-        response.body,
-        transformData((d) => d.toString())
-      );
-    } else {
-      throw new HTTPResponseError(response);
-    }
+    return compose(
+      response.data,
+      transformData((d) => d.toString())
+    );
   },
 };
