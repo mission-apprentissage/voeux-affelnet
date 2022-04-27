@@ -26,7 +26,7 @@ function initCfaCsv(input) {
       async (siret) => {
         let [organisme, { formations }] = await Promise.all([
           referentielApi.getOrganisme(siret, {
-            champs: "siret,uai,nature,raison_sociale",
+            champs: "siret,uai,nature,raison_sociale,adresse",
           }),
           catalogueApi.getFormations(
             {
@@ -55,13 +55,16 @@ function initCfaCsv(input) {
 
         return {
           uai: uai || "",
-          siret: organisme.siret,
-          raison_sociale: organisme.raison_sociale,
+          siret: organisme?.siret,
+          raison_sociale: organisme?.raison_sociale,
+          academie: organisme?.adresse?.academie.nom,
+          region: organisme?.adresse?.region.nom,
+          nature: organisme?.nature,
+          statut: cfa?.statut,
           email_directeur: "",
           email_contact: mostFrequentEmail,
           email_voeux: cfa?.email || "",
-          nature: organisme.nature,
-          "Présent en 2021": cfa ? "Oui" : "Non",
+          email_voeux_2: cfa?.contacts.join(", ") || "",
         };
       },
       { parallel: 10 }

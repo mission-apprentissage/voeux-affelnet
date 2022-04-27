@@ -13,6 +13,7 @@ const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
 const initCfaCsv = require("./jobs/initCfaCsv");
+const evaluation = require("./jobs/evaluation");
 const importCfas = require("./jobs/importCfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
@@ -29,6 +30,17 @@ process.stdout.on("error", function (err) {
     process.exit(0);
   }
 });
+
+cli
+  .command("evaluation")
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action(({ out }) => {
+    runScript(async () => {
+      let output = out || writeToStdout();
+
+      return oleoduc(evaluation(), transformIntoCSV(), output);
+    });
+  });
 
 cli
   .command("initCfaCsv")
