@@ -8,11 +8,10 @@ services:
   ui:
     build:
       dockerfile: Dockerfile.dev
-    mem_limit: 1g
-    stdin_open: true
-    build:
       args:
         - VOEUX_AFFELNET_ENV=dev
+    mem_limit: 1g
+    stdin_open: true
     environment:
       - FAST_REFRESH=false
     volumes:
