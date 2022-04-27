@@ -37,7 +37,7 @@ cli
 Ce script identifie les CFA à partir du fichier AFFELNET-LYCEE-20XX-OF_apprentissage.csv et va chercher les adresses email dans le catalogue.
     `
   )
-  .arguments("[file]")
+  .arguments("<file>")
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action((file, { out }) => {
     runScript(async () => {
@@ -112,7 +112,7 @@ cli
     }
     return importDate.toJSDate();
   })
-  .arguments("[file]")
+  .arguments("<file>")
   .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET", {
     file: "Le fichier CSV contentant les voeux  (default: stdin)",
   })
