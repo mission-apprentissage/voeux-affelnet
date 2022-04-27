@@ -23,7 +23,7 @@ class RateLimiter extends EventEmitter {
       queueSize: this.queue._queueLimiters.limiter._queue.length,
       maxQueueSize: this.maxQueueSize,
     });
-    return callback(this.options.client);
+    return callback();
   }
 }
 

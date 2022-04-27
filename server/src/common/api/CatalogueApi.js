@@ -1,36 +1,38 @@
+const RateLimitedApi = require("./RateLimitedApi");
+const { getUrl } = require("../utils/httpUtils");
 const queryString = require("query-string");
 const logger = require("../logger");
-const ApiError = require("./ApiError");
-const RateLimitedApi = require("./RateLimitedApi");
+
+function convertQueryIntoParams(query, options = {}) {
+  return queryString.stringify(
+    {
+      query: JSON.stringify(query),
+      ...Object.keys(options).reduce((acc, key) => {
+        return {
+          ...acc,
+          [key]: JSON.stringify(options[key]),
+        };
+      }, {}),
+    },
+    { encode: false }
+  );
+}
 
 class CatalogueApi extends RateLimitedApi {
   constructor(options = {}) {
-    super("CatalogueApi", "https://catalogue.apprentissage.beta.gouv.fr", options);
+    super("CatalogueApi", { nbRequests: 5, durationInSeconds: 1, ...options });
   }
 
-  getFormations(query, { annee, ...options }) {
-    return this.execute(async (client) => {
-      try {
-        let params = queryString.stringify(
-          {
-            query: JSON.stringify(query),
-            ...Object.keys(options).reduce((acc, key) => {
-              return {
-                ...acc,
-                [key]: JSON.stringify(options[key]),
-              };
-            }, {}),
-          },
-          { encode: false }
-        );
+  static get baseApiUrl() {
+    return "https://catalogue.apprentissage.beta.gouv.fr/api";
+  }
 
-        let version = `${annee || ""}`;
-        logger.debug(`[Catalogue API] Fetching formations ${version} with params ${params}...`);
-        let response = await client.get(`api/entity/formations${version}?${params}`);
-        return response.data;
-      } catch (e) {
-        throw new ApiError("Api Catalogue", e.message, e.code || e.response.status);
-      }
+  async getFormations(query, options) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching formations...`, query);
+      let params = convertQueryIntoParams(query, options);
+      let response = await getUrl(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`);
+      return response.data;
     });
   }
 }

@@ -12,7 +12,6 @@ function newLine(custom = {}) {
       raison_sociale: faker.company.companyName(),
       email_directeur: faker.internet.email(),
       email_contact: faker.internet.email(),
-      localisation: faker.address.city(),
       ...custom,
     },
     custom,

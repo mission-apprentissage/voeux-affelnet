@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { program: cli } = require("commander");
-const { writeToStdout } = require("oleoduc");
+const { writeToStdout, oleoduc, transformIntoCSV } = require("oleoduc");
 const { createReadStream, createWriteStream } = require("fs");
 const { runScript } = require("./jobs/utils/jobWrapper");
 const logger = require("./common/logger");
@@ -12,6 +12,7 @@ const sendActivationEmails = require("./jobs/sendActivationEmails");
 const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
+const initCfaCsv = require("./jobs/initCfaCsv");
 const importCfas = require("./jobs/importCfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
@@ -30,10 +31,28 @@ process.stdout.on("error", function (err) {
 });
 
 cli
+  .command("initCfaCsv")
+  .description(
+    `Génère un fichier qui servira de base à l'import des CFA.
+Ce script identifie les CFA à partir du fichier AFFELNET-LYCEE-20XX-OF_apprentissage.csv et va chercher les adresses email dans le catalogue.
+    `
+  )
+  .arguments("<file>")
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action((file, { out }) => {
+    runScript(async () => {
+      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+      let output = out || writeToStdout();
+
+      return oleoduc(initCfaCsv(input), transformIntoCSV(), output);
+    });
+  });
+
+cli
   .command("importCfas <cfaCsv>")
   .description(
     "Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes :" +
-      "'uai,siret,raison_sociale,email_directeur,email_contact,localisation'"
+      "'uai,siret,raison_sociale,email_directeur,email_contact'"
   )
   .action((cfaCsv) => {
     runScript(() => {
@@ -93,15 +112,15 @@ cli
     }
     return importDate.toJSDate();
   })
-  .arguments("[file]")
+  .arguments("<file>")
   .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET", {
     file: "Le fichier CSV contentant les voeux  (default: stdin)",
   })
   .action((file, options) => {
     runScript(async () => {
-      const inputStream = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
 
-      return importVoeux(inputStream, options);
+      return importVoeux(input, options);
     });
   });
 
