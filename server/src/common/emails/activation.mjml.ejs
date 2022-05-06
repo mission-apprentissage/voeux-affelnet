@@ -1,48 +1,38 @@
 <mjml>
-    <%- include('./common/head.ejs'); %>
+  <%- include('./common/head.ejs'); %>
 
-    <mj-body background-color="#f9fafc">
-        <%- include('./common/header.ejs'); %>
-        <mj-wrapper padding="10px 20px">
-            <mj-section background-color="#ffffff" padding-top="0">
-                <mj-column>
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text> Madame la directrice, Monsieur le directeur, </mj-text>
 
-                    <mj-text>
-                        Madame la directrice, Monsieur le directeur,
-                    </mj-text>
+          <mj-text>
+            Vous pouvez dès à présent télécharger les vœux exprimés via la procédure AFFELNET par des jeunes intéressés
+            à poursuivre leur formation en tant qu’apprentis au sein de votre établissement. Ceci permettra d’établir
+            plus rapidement avec eux un premier contact et favorisera l’efficacité de l’accompagnement vers l’emploi que
+            vous leur proposerez.
+          </mj-text>
 
-                    <mj-text>
-                        Vous pouvez dès à présent télécharger les vœux exprimés via la procédure AFFELNET par des
-                        jeunes intéressés à poursuivre leur formation en tant qu’apprentis au sein de votre
-                        établissement. Ceci permettra d’établir plus rapidement avec eux un premier contact et
-                        favorisera l’efficacité de l’accompagnement vers l’emploi que vous leur proposerez.
-                    </mj-text>
+          <mj-button
+            href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            J'accède au téléchargement des voeux
+          </mj-button>
 
-                    <mj-button
-                            href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
-                            background-color="#0e4194" color="white">
-                        J'active mon compte
-                    </mj-button>
+          <mj-text>
+            Ce nouveau service qui permet d’accélérer la transmission des informations est développé par notre mission,
+            dans le cadre du mandat qui lui a été confié par les quatre ministres chargés de l’éducation nationale, de
+            l’enseignement supérieur, du travail et de la transformation publique.
+          </mj-text>
 
-                    <mj-text>
-                        Ce nouveau service qui permet d’accélérer la transmission des informations
-                        est développé par notre mission, dans le cadre du mandat qui lui a été confié par les quatre
-                        ministres chargés de l’éducation nationale, de l’enseignement supérieur, du travail et de la
-                        transformation publique.
-                    </mj-text>
-
-                    <mj-text>
-                        Si vous avez déjà activé votre compte vous pouvez vous y connecter en cliquant
-                        <a href="<%= utils.getPublicUrl("/login") %>">ici</a>
-                        (identifiant <strong><%= data.user.username %></strong>)
-                    </mj-text>
-
-                    <%- include('./common/signature.ejs'); %>
-                </mj-column>
-            </mj-section>
-
-        </mj-wrapper>
-        <%- include('./common/footer.ejs'); %>
-    </mj-body>
-
+          <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
 </mjml>

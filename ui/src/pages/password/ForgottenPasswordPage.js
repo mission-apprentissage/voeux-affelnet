@@ -1,6 +1,6 @@
 import React from "react";
 import * as Yup from "yup";
-import { Form as TablerForm, Card, Page, Button, Grid } from "tabler-react";
+import { Alert, Form as TablerForm, Card, Page, Button, Grid } from "tabler-react";
 import { Formik, Field, Form } from "formik";
 import { useHistory } from "react-router-dom";
 import useAuth from "../../common/hooks/useAuth";
@@ -82,6 +82,13 @@ function ForgottenPasswordPage() {
                   </Formik>
                 </Card.Body>
               </Card>
+            </CenteredCol>
+          </Grid.Row>
+          <Grid.Row>
+            <CenteredCol>
+              <Alert type={"info"}>
+                <p>L'UAI figure dans l'objet du mail que vous avez précédemment reçu.</p>
+              </Alert>
             </CenteredCol>
           </Grid.Row>
         </Page.Content>

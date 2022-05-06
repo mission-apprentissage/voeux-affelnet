@@ -13,6 +13,8 @@ import ErrorMessage from "../common/components/ErrorMessage";
 import { useFetch } from "../common/hooks/useFetch";
 
 function StatusErrorMessage({ error, username }) {
+  const history = useHistory();
+
   if (error.statusCode === 401) {
     return (
       <Alert type={"danger"}>
@@ -24,37 +26,23 @@ function StatusErrorMessage({ error, username }) {
       </Alert>
     );
   } else if (error.statusCode === 400) {
-    return (
-      <Alert type={"info"}>
-        <p>Une personne de votre structure a déjà activé le compte {username}</p>
-        <p>
-          Vous avez la possibilité de générer &nbsp;
-          <NavLink to="/forgotten-password">un nouveau mot de passe</NavLink>. Un email sera alors envoyé à l'adresse
-          qui nous a été confirmée précédemment.
-        </p>
-        <p>
-          Pour plus d'informations, merci de prendre contact avec un administrateur en précisant votre identifiant (
-          {username}) via :&nbsp;
-          <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
-        </p>
-      </Alert>
-    );
+    history.push(`/login?alreadyActivated=true&username=${username}`);
   }
   return <div />;
 }
 
 function ActivationPage() {
-  let [, setAuth] = useAuth();
-  let history = useHistory();
-  let location = useLocation();
-  let { actionToken } = queryString.parse(location.search);
-  let [message, setMessage] = useState();
-  let username = decodeJWT(actionToken).sub;
-  let [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
+  const [, setAuth] = useAuth();
+  const history = useHistory();
+  const location = useLocation();
+  const { actionToken } = queryString.parse(location.search);
+  const [message, setMessage] = useState();
+  const username = decodeJWT(actionToken).sub;
+  const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
 
-  let activation = async (values) => {
+  const activation = async (values) => {
     try {
-      let { token } = await _post("/api/activation", { ...values, actionToken });
+      const { token } = await _post("/api/activation", { ...values, actionToken });
       setAuth(token);
       history.push("/");
     } catch (e) {
@@ -64,7 +52,7 @@ function ActivationPage() {
     }
   };
 
-  let showForm = !loading && !message && !error;
+  const showForm = !loading && !message && !error;
 
   return (
     <Page>
