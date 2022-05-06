@@ -1,18 +1,22 @@
 import React from "react";
 import * as Yup from "yup";
-import { Form as TablerForm, Card, Page, Button, Grid } from "tabler-react";
+import { Alert, Form as TablerForm, Card, Page, Button, Grid } from "tabler-react";
 import { Formik, Field, Form } from "formik";
 import { NavLink, useHistory } from "react-router-dom";
+import { useQuery } from "../common/hooks/useQuery";
 import useAuth from "../common/hooks/useAuth";
 import { _post } from "../common/httpClient";
 import CenteredCol from "../common/components/CenteredCol";
 import ErrorMessage from "../common/components/ErrorMessage";
 
 function LoginPage() {
-  let [, setAuth] = useAuth();
-  let history = useHistory();
+  const [, setAuth] = useAuth();
+  const history = useHistory();
+  const query = useQuery();
+  const username = query.get("username");
+  const alreadyActivated = query.get("alreadyActivated");
 
-  let feedback = (meta, message) => {
+  const feedback = (meta, message) => {
     return meta.touched && meta.error
       ? {
           feedback: message,
@@ -21,9 +25,9 @@ function LoginPage() {
       : {};
   };
 
-  let login = async (values, { setStatus }) => {
+  const login = async (values, { setStatus }) => {
     try {
-      let { token } = await _post("/api/login", values);
+      const { token } = await _post("/api/login", values);
       setAuth(token);
       history.push("/");
     } catch (e) {
@@ -45,7 +49,7 @@ function LoginPage() {
                 <Card.Body>
                   <Formik
                     initialValues={{
-                      username: "",
+                      username: username ?? "",
                       password: "",
                     }}
                     validationSchema={Yup.object().shape({
@@ -100,6 +104,22 @@ function LoginPage() {
               </Card>
             </CenteredCol>
           </Grid.Row>
+
+          {alreadyActivated && (
+            <Grid.Row>
+              <CenteredCol>
+                <Alert type={"info"}>
+                  <p>
+                    Besoin d'aide ? Prenez contact avec un administrateur à l'adresse mail{" "}
+                    <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">
+                      voeux-affelnet@apprentissage.beta.gouv.fr
+                    </a>{" "}
+                    en précisant votre UAI ({username})
+                  </p>
+                </Alert>
+              </CenteredCol>
+            </Grid.Row>
+          )}
         </Page.Content>
       </Page.Main>
     </Page>
