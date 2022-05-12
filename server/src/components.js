@@ -1,10 +1,7 @@
-const sender = require("./common/sender");
-const createMailer = require("./common/mailer");
+const sender = require("./common/emails/sender");
 
 module.exports = async (options = {}) => {
-  let mailer = options.mailer || createMailer();
-
   return {
-    sender: options.sender || sender(mailer),
+    sender: options.sender || sender(options.transporter),
   };
 };
