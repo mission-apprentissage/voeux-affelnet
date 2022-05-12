@@ -5,11 +5,11 @@ const { DateTime } = require("luxon");
 const resendConfirmationEmails = require("../../../src/jobs/resendConfirmationEmails");
 
 integrationTests(__filename, (context) => {
-  it.only("Vérifie qu'on envoie une relance 7 jours après le premier envoi", async () => {
+  it("Vérifie qu'on envoie une relance 7 jours après le premier envoi", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "11111111100006",
+      siret: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -38,11 +38,11 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on envoie une relance spécifique quand le cfa a des voeux", async () => {
+  it("Vérifie qu'on envoie une relance spécifique quand le cfa a des voeux", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "11111111100006",
+      siret: "11111111100006",
       statut: "en attente",
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
       email: "test1@apprentissage.beta.gouv.fr",
@@ -75,7 +75,7 @@ integrationTests(__filename, (context) => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      siret: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -105,7 +105,7 @@ integrationTests(__filename, (context) => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -131,7 +131,7 @@ integrationTests(__filename, (context) => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -157,7 +157,7 @@ integrationTests(__filename, (context) => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -179,7 +179,7 @@ integrationTests(__filename, (context) => {
     assert.strictEqual(sent.length, 1);
   });
 
-  it("Vérifie qu'on n'envoie pas d'email pour les cfas confirmés ou désinscrits", async () => {
+  it("Vérifie qu'on n'envoie pas d'email pour les CFA confirmés ou désinscrits", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
@@ -199,7 +199,7 @@ integrationTests(__filename, (context) => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -221,8 +221,7 @@ integrationTests(__filename, (context) => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      "Demande d'informations concernant la communication des voeux exprimés en apprentissage" +
-        " via Affelnet pour l'UAI 0751234J"
+      "Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
     );
     assert.deepStrictEqual(stats, {
       total: 1,
@@ -235,7 +234,7 @@ integrationTests(__filename, (context) => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -264,7 +263,7 @@ integrationTests(__filename, (context) => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -278,7 +277,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails, { uai: "0751234J" });
+    let stats = await resendConfirmationEmails(emails, { siret: "11111111100006" });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

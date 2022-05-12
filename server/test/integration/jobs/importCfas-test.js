@@ -18,7 +18,7 @@ const fakeReferentielApi = new FakeReferentielApi({
 });
 
 integrationTests(__filename, () => {
-  it.only("Vérifie qu'on peut importer un cfa", async () => {
+  it("Vérifie qu'on peut importer un cfa", async () => {
     let cfaCsv = createStream(`siret;raison_sociale;email;email_source
 11111111100006;Lycée professionnel;contact@lycee.fr;rco`);
     let relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
@@ -49,7 +49,7 @@ integrationTests(__filename, () => {
     assert.deepStrictEqual(stats, { total: 1, created: 1, updated: 0, invalid: 0, failed: 0 });
   });
 
-  it.only("Vérifie si le cfa a des voeux", async () => {
+  it("Vérifie si le cfa a des voeux", async () => {
     let cfaCsv = createStream(`siret;raison_sociale;email;email_source
 11111111100006;Lycée professionnel;contact@lycee.fr;rco`);
     let relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
@@ -73,7 +73,7 @@ integrationTests(__filename, () => {
     assert.deepStrictEqual(found.etablissements[0].voeux_date, date);
   });
 
-  it.only("Vérifie qu'on peut ignorer les cfas invalides (pas d'emails)", async () => {
+  it("Vérifie qu'on peut ignorer les cfas invalides (pas d'emails)", async () => {
     let cfaCsv = createStream(`siret;raison_sociale;email;email_source
 11111111100006;Lycée professionnel;;rco`);
     let relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
@@ -89,7 +89,7 @@ integrationTests(__filename, () => {
     assert.deepStrictEqual(stats, { total: 1, created: 0, updated: 0, invalid: 1, failed: 0 });
   });
 
-  it.only("Vérifie qu'on peut mettre à jour uniquement certaines des informations", async () => {
+  it("Vérifie qu'on peut mettre à jour uniquement certaines des informations", async () => {
     await importCfas(
       createStream(`siret;raison_sociale;email;email_source
 11111111100006;Lycée professionnel 1;contact@lycee.fr;rco`),

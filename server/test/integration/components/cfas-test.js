@@ -4,7 +4,7 @@ const { insertCfa } = require("../utils/fakeData");
 const { Cfa } = require("../../../src/common/model");
 
 integrationTests(__filename, ({ getComponents }) => {
-  it.only("Vérifie qu'on peut confirmer un cfa", async () => {
+  it("Vérifie qu'on peut confirmer un cfa", async () => {
     const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
@@ -18,7 +18,7 @@ integrationTests(__filename, ({ getComponents }) => {
     assert.strictEqual(found.statut, "confirmé");
   });
 
-  it.only("Vérifie qu'on peut confirmer un cfa avec une nouvelle adresse email", async () => {
+  it("Vérifie qu'on peut confirmer un cfa avec une nouvelle adresse email", async () => {
     const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
@@ -34,7 +34,7 @@ integrationTests(__filename, ({ getComponents }) => {
     assert.deepStrictEqual(found.contacts, ["11111111100006@apprentissage.beta.gouv.fr"]);
   });
 
-  it.only("Vérifie qu'on ne peut pas confirmer un cfa sans une adresse email", async () => {
+  it("Vérifie qu'on ne peut pas confirmer un cfa sans une adresse email", async () => {
     const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
@@ -53,7 +53,7 @@ integrationTests(__filename, ({ getComponents }) => {
     }
   });
 
-  it.only("Vérifie qu'on ne peut pas confirmer un cfa déjà confirmé", async () => {
+  it("Vérifie qu'on ne peut pas confirmer un cfa déjà confirmé", async () => {
     const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
@@ -71,7 +71,7 @@ integrationTests(__filename, ({ getComponents }) => {
     }
   });
 
-  it.only("Vérifie qu'on peut forcer la confirmation", async () => {
+  it("Vérifie qu'on peut forcer la confirmation", async () => {
     const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",

@@ -6,7 +6,7 @@ const fakeMailer = require("../utils/fakeMailer");
 const { User } = require("../../../src/common/model");
 
 integrationTests(__filename, () => {
-  it.only("Vérifie qu'on peut envoyer un email", async () => {
+  it("Vérifie qu'on peut envoyer un email", async () => {
     let emailsSent = [];
     let emails = await createEmails(fakeMailer({ calls: emailsSent }));
     let user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248W" });
@@ -25,7 +25,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.emails[0].templateName, "activation");
   });
 
-  it.only("Vérifie qu'on peut renvoyer un email", async () => {
+  it("Vérifie qu'on peut renvoyer un email", async () => {
     let emailsSent = [];
     let emails = await createEmails(fakeMailer({ calls: emailsSent }));
     await insertUser({
@@ -52,7 +52,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.emails[0].sendDates.length, 2);
   });
 
-  it.only("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
+  it("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
     let emailsSent = [];
     let user1 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
     let user2 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
@@ -67,7 +67,7 @@ integrationTests(__filename, () => {
     assert.ok(results[1].emails[0]);
   });
 
-  it.only("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
+  it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     let user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
     let emails = await createEmails(fakeMailer({ fail: true }));
 
@@ -84,7 +84,7 @@ integrationTests(__filename, () => {
     }
   });
 
-  it.only("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
+  it("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
     let emailsSent = [];
     let emails = await createEmails(fakeMailer({ calls: emailsSent }));
     await insertUser({

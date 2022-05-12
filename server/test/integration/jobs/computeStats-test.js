@@ -5,7 +5,7 @@ const { insertCfa, insertVoeu } = require("../utils/fakeData");
 const computeStats = require("../../../src/jobs/computeStats");
 
 integrationTests(__filename, () => {
-  it("Vérifie qu'on peut calculer les stats", async () => {
+  it.skip("Vérifie qu'on peut calculer les stats", async () => {
     let firstImport = DateTime.fromISO("2021-06-02T14:00:00.000Z");
     let secondImport = DateTime.fromISO("2021-06-15T14:00:00.000Z");
 
@@ -241,7 +241,7 @@ integrationTests(__filename, () => {
     );
   });
 
-  it("Vérifie qu'on peut calculer les stats pour une seule académie", async () => {
+  it.skip("Vérifie qu'on peut calculer les stats pour une seule académie", async () => {
     let stats = await computeStats({ academies: ["01"] });
 
     assert.strictEqual(stats.cfas.length, 1);

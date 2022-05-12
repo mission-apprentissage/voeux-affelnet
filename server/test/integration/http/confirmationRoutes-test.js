@@ -5,7 +5,7 @@ const { createActionToken } = require("../../../src/common/utils/jwtUtils");
 const { Cfa } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
-  it.only("Vérifie qu'un cfa peut récupérer son statut", async () => {
+  it("Vérifie qu'un cfa peut récupérer son statut", async () => {
     const { httpClient } = await startServer();
     await insertCfa({
       username: "11111111100006",
@@ -22,7 +22,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus la confirmation", async () => {
+  it("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus la confirmation", async () => {
     const { httpClient } = await startServer();
     await insertCfa({
       username: "11111111100006",
@@ -39,7 +39,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'un cfa peut confirmer un compte", async () => {
+  it("Vérifie qu'un cfa peut confirmer un compte", async () => {
     const { httpClient } = await startServer();
     await insertCfa({
       username: "11111111100006",
@@ -56,7 +56,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(found.statut, "confirmé");
   });
 
-  it.only("Vérifie qu'un cfa peut confirmer un compte avec une nouvelle adresse email", async () => {
+  it("Vérifie qu'un cfa peut confirmer un compte avec une nouvelle adresse email", async () => {
     const { httpClient } = await startServer();
     await insertCfa({
       username: "11111111100006",
@@ -74,7 +74,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(found.email, "user2@apprentissage.beta.gouv.fr");
   });
 
-  it.only("Vérifie qu'on envoie l'email d'activation après la confirmation", async () => {
+  it("Vérifie qu'on envoie l'email d'activation après la confirmation", async () => {
     const { httpClient, getEmailsSent } = await startServer();
     await insertCfa({
       username: "11111111100006",
@@ -94,7 +94,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(emailsSent[0].subject, "Des voeux Affelnet sont téléchargeables");
   });
 
-  it.only("Vérifie qu'une erreur est retourné quand le token est invalide", async () => {
+  it("Vérifie qu'une erreur est retourné quand le token est invalide", async () => {
     const { httpClient } = await startServer();
     await insertCfa({
       username: "11111111100006",

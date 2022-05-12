@@ -4,7 +4,7 @@ const httpTests = require("../utils/httpTests");
 const { insertCfa, insertVoeu, insertLog } = require("../utils/fakeData");
 
 httpTests(__filename, ({ startServer }) => {
-  it.only("Vérifie qu'on peut obtenir la liste des cfas", async () => {
+  it("Vérifie qu'on peut obtenir la liste des cfas", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -44,7 +44,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on peut obtenir la liste paginée des cfas ", async () => {
+  it("Vérifie qu'on peut obtenir la liste paginée des cfas ", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({ username: "11111111100006" });
@@ -62,7 +62,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(response.data.cfas[0].username, "22222222200006");
   });
 
-  it.only("Vérifie qu'on peut filtrer les cfas", async () => {
+  it("Vérifie qu'on peut filtrer les cfas", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -83,7 +83,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.data.cfas[0].email, "contact@organisme.fr");
   });
 
-  it.only("Vérifie qu'on peut exporter les cfas injoinables", async () => {
+  it("Vérifie qu'on peut exporter les cfas injoinables", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -119,7 +119,7 @@ httpTests(__filename, ({ startServer }) => {
     );
   });
 
-  it.only("Vérifie qu'on peut exporter les cfas à relancer", async () => {
+  it("Vérifie qu'on peut exporter les cfas à relancer", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -150,7 +150,7 @@ httpTests(__filename, ({ startServer }) => {
     );
   });
 
-  it.only("Vérifie qu'on peut exporter les cfas inconnus", async () => {
+  it("Vérifie qu'on peut exporter les cfas inconnus", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertVoeu({
@@ -176,7 +176,7 @@ httpTests(__filename, ({ startServer }) => {
     );
   });
 
-  it.only("Vérifie qu'il faut être admin pour exporter", async () => {
+  it("Vérifie qu'il faut être admin pour exporter", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
@@ -194,7 +194,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on peut voir les consultations de la page stats par académie", async () => {
+  it("Vérifie qu'on peut voir les consultations de la page stats par académie", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertLog({
@@ -226,7 +226,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on peut modifier l'adresse email d'un CFA", async () => {
+  it("Vérifie qu'on peut modifier l'adresse email d'un CFA", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -257,7 +257,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(found.email, "y@organisme.com");
   });
 
-  it.only("Vérifie qu'il faut être admin pour changer l'email", async () => {
+  it("Vérifie qu'il faut être admin pour changer l'email", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
@@ -279,7 +279,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on ne peut renvoyer un email de confirmation", async () => {
+  it("Vérifie qu'on ne peut renvoyer un email de confirmation", async () => {
     let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -331,7 +331,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'il faut être admin pour changer renvoyer un email de confirmation", async () => {
+  it("Vérifie qu'il faut être admin pour changer renvoyer un email de confirmation", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
@@ -353,7 +353,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on peut renvoyer un email d'activation", async () => {
+  it("Vérifie qu'on peut renvoyer un email d'activation", async () => {
     let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -402,7 +402,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'il faut être admin pour changer renvoyer un email d'activation", async () => {
+  it("Vérifie qu'il faut être admin pour changer renvoyer un email d'activation", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
@@ -424,7 +424,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on peut marquer un CFA comme non concerné", async () => {
+  it("Vérifie qu'on peut marquer un CFA comme non concerné", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -454,7 +454,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(found.statut, "confirmé");
   });
 
-  it.only("Vérifie qu'il faut être admin pour le statut d'un CFA", async () => {
+  it("Vérifie qu'il faut être admin pour le statut d'un CFA", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 

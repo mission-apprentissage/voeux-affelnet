@@ -3,7 +3,7 @@ const httpTests = require("../utils/httpTests");
 const { JobEvent } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
-  it("Vérifie qu'on peut obtenir des stats", async () => {
+  it.skip("Vérifie qu'on peut obtenir des stats", async () => {
     let { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",
@@ -29,7 +29,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on peut obtenir des stats instantanées pour toutes les académies", async () => {
+  it.skip("Vérifie qu'on peut obtenir des stats instantanées pour toutes les académies", async () => {
     let { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",
@@ -48,7 +48,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.data._meta.academies.length, 41);
   });
 
-  it("Vérifie qu'on peut obtenir des stats instantanées par académie", async () => {
+  it.skip("Vérifie qu'on peut obtenir des stats instantanées par académie", async () => {
     let { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",

@@ -5,7 +5,7 @@ const { insertUser } = require("../utils/fakeData");
 const { User } = require("../../../src/common/model");
 
 httpTests(__filename, ({ startServer }) => {
-  it.only("Vérifie qu'on peut prévisualier un email", async () => {
+  it("Vérifie qu'on peut prévisualier un email", async () => {
     const { httpClient, components } = await startServer();
     const { emails } = components;
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
@@ -17,7 +17,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.ok(response.data.startsWith("<!doctype html><html "));
   });
 
-  it.only("Vérifie qu'on ne peut pas prévisualiser un token invalide", async () => {
+  it("Vérifie qu'on ne peut pas prévisualiser un token invalide", async () => {
     const { httpClient } = await startServer();
 
     const response = await httpClient.get(`/api/emails/INVALID/preview`);
@@ -25,7 +25,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 404);
   });
 
-  it.only("Vérifie qu'on peut marquer un email comme ouvert", async () => {
+  it("Vérifie qu'on peut marquer un email comme ouvert", async () => {
     const { httpClient, components } = await startServer();
     const { emails } = components;
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
@@ -37,7 +37,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 200);
   });
 
-  it.only("Vérifie qu'un utilisateur peut se désinscrire du service", async () => {
+  it("Vérifie qu'un utilisateur peut se désinscrire du service", async () => {
     const { httpClient, components } = await startServer();
     const { emails } = components;
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
@@ -51,7 +51,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(found.unsubscribe, true);
   });
 
-  it.only("Vérifie qu'on ne peut se désinscrive avec un token invalide", async () => {
+  it("Vérifie qu'on ne peut se désinscrive avec un token invalide", async () => {
     const { httpClient } = await startServer();
 
     const response = await httpClient.get(`/api/emails/INVALID/unsubscribe`);
@@ -59,7 +59,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 404);
   });
 
-  it.only("Vérifie qu'on peut prendre en compte des notifications d'erreur via webhook", async () => {
+  it("Vérifie qu'on peut prendre en compte des notifications d'erreur via webhook", async () => {
     const { httpClient } = await startServer();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
@@ -100,7 +100,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on peut prendre en compte des notifications de réception via webhook", async () => {
+  it("Vérifie qu'on peut prendre en compte des notifications de réception via webhook", async () => {
     const { httpClient } = await startServer();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
@@ -134,7 +134,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.ok(!found.emails[0].error);
   });
 
-  it.only("Vérifie qu'on ne peut pas recevoir des notifications sans webhook key", async () => {
+  it("Vérifie qu'on ne peut pas recevoir des notifications sans webhook key", async () => {
     const { httpClient } = await startServer();
 
     const response = await httpClient.post(`/api/emails/webhook`, {});

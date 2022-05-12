@@ -5,7 +5,7 @@ const integrationTests = require("../utils/integrationTests");
 const resendNotificationEmails = require("../../../src/jobs/resendNotificationEmails");
 
 integrationTests(__filename, (context) => {
-  it.only("Vérifie qu'on envoie une relance au bout de 7 jours si le fichier n'a pas été téléchargé", async () => {
+  it("Vérifie qu'on envoie une relance au bout de 7 jours si le fichier n'a pas été téléchargé", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
@@ -42,7 +42,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on envoie une relance au bout de 7 jours si l'un des fichiers n'a pas été téléchargé", async () => {
+  it("Vérifie qu'on envoie une relance au bout de 7 jours si l'un des fichiers n'a pas été téléchargé", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
@@ -83,7 +83,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on n'envoie pas de relance si le fichier a déjà été téléchargé", async () => {
+  it("Vérifie qu'on n'envoie pas de relance si le fichier a déjà été téléchargé", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
@@ -118,7 +118,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on relance 3 fois maximum", async () => {
+  it("Vérifie qu'on relance 3 fois maximum", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
@@ -149,7 +149,7 @@ integrationTests(__filename, (context) => {
     assert.strictEqual(sent.length, 0);
   });
 
-  it.only("Vérifie qu'on peut limiter les envois", async () => {
+  it("Vérifie qu'on peut limiter les envois", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
@@ -205,7 +205,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on peut renvoyer un email en erreur (retry)", async () => {
+  it("Vérifie qu'on peut renvoyer un email en erreur (retry)", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();

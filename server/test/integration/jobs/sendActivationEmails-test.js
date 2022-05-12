@@ -5,7 +5,7 @@ const integrationTests = require("../utils/integrationTests");
 const sendActivationEmails = require("../../../src/jobs/sendActivationEmails");
 
 integrationTests(__filename, (context) => {
-  it.only("Vérifie qu'on envoie des emails d'activation uniquement aux utilisateurs confirmés", async () => {
+  it("Vérifie qu'on envoie des emails d'activation uniquement aux utilisateurs confirmés", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
@@ -38,7 +38,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on envoie des emails d'activation uniquement aux CFA confirmés", async () => {
+  it("Vérifie qu'on envoie des emails d'activation uniquement aux CFA confirmés", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
@@ -55,7 +55,7 @@ integrationTests(__filename, (context) => {
     assert.deepStrictEqual(sent[0].subject, "Des voeux Affelnet sont téléchargeables");
   });
 
-  it.only("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà activé", async () => {
+  it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà activé", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
@@ -69,7 +69,7 @@ integrationTests(__filename, (context) => {
     assert.strictEqual(sent.length, 0);
   });
 
-  it.only("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
+  it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
@@ -84,7 +84,7 @@ integrationTests(__filename, (context) => {
     assert.strictEqual(sent.length, 0);
   });
 
-  it.only("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
+  it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
@@ -105,7 +105,7 @@ integrationTests(__filename, (context) => {
     assert.strictEqual(sent.length, 0);
   });
 
-  it.only("Vérifie qu'on n'envoie pas d'emails aux cfas n'ayant pas de voeux", async () => {
+  it("Vérifie qu'on n'envoie pas d'emails aux cfas n'ayant pas de voeux", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({

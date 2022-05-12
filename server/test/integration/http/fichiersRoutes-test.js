@@ -5,7 +5,7 @@ const httpTests = require("../utils/httpTests");
 const { insertVoeu } = require("../utils/fakeData");
 
 httpTests(__filename, ({ startServer }) => {
-  it.only("Vérifie qu'un cfa peut accéder à la liste des fichiers en étant authentifié", async () => {
+  it("Vérifie qu'un cfa peut accéder à la liste des fichiers en étant authentifié", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", {
       model: Cfa,
@@ -28,7 +28,7 @@ httpTests(__filename, ({ startServer }) => {
     ]);
   });
 
-  it.only("Vérifie qu'on peut accéder à un fichier", async () => {
+  it("Vérifie qu'on peut accéder à un fichier", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("0751234J", "password", {
       model: Cfa,
@@ -55,7 +55,7 @@ httpTests(__filename, ({ startServer }) => {
     );
   });
 
-  it.only("Vérifie qu'un événement est enregistré quand un cfa télécharge un fichier", async () => {
+  it("Vérifie qu'un événement est enregistré quand un cfa télécharge un fichier", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", {
       model: Cfa,
@@ -77,7 +77,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.ok(found.voeux_telechargements[0].date);
   });
 
-  it.only("Vérifie qu'on indique au cfa quand il y a une nouvelle version du fichier disponible", async () => {
+  it("Vérifie qu'on indique au cfa quand il y a une nouvelle version du fichier disponible", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", {
       model: Cfa,
@@ -106,7 +106,7 @@ httpTests(__filename, ({ startServer }) => {
     ]);
   });
 
-  it.only("Vérifie qu'on indique au cfa si le fichier a déjà été téléchargé", async () => {
+  it("Vérifie qu'on indique au cfa si le fichier a déjà été téléchargé", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", {
       model: Cfa,
@@ -135,7 +135,7 @@ httpTests(__filename, ({ startServer }) => {
     ]);
   });
 
-  it.only("Doit rejeter un utilisateur qui n'est pas un cfa", async () => {
+  it("Doit rejeter un utilisateur qui n'est pas un cfa", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("user1", "password");
 
@@ -148,7 +148,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 403);
   });
 
-  it.only("Doit rejeter un fichier UAI qui n'appartient pas au CFA", async () => {
+  it("Doit rejeter un fichier UAI qui n'appartient pas au CFA", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", { model: Cfa });
 
@@ -161,7 +161,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 404);
   });
 
-  it.only("Doit rejeter un nom de fichier invalide", async () => {
+  it("Doit rejeter un nom de fichier invalide", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", { model: Cfa });
 

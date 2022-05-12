@@ -8,7 +8,7 @@ const httpTests = require("../utils/httpTests");
 const { insertUser } = require("../utils/fakeData");
 
 httpTests(__filename, ({ startServer }) => {
-  it.only("Vérifie qu'un utilisateur peut faire une demande de réinitialisation de mot de passe", async () => {
+  it("Vérifie qu'un utilisateur peut faire une demande de réinitialisation de mot de passe", async () => {
     let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     await createAndLogUser("user1", "password", { isAdmin: true });
 
@@ -28,7 +28,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(emailsSent[0].subject, "Réinitialisation du mot de passe");
   });
 
-  it.only("Vérifie qu'un cfa peut faire une demande de réinitialisation de mot de passe en lower case", async () => {
+  it("Vérifie qu'un cfa peut faire une demande de réinitialisation de mot de passe en lower case", async () => {
     let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     await createAndLogUser("0751234J", "password", { model: Cfa });
 
@@ -41,7 +41,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(emailsSent.length, 1);
   });
 
-  it.only("Vérifie qu'on ne peut pas demander la réinitialisation du mot de passe pour un utilisateur inconnu", async () => {
+  it("Vérifie qu'on ne peut pas demander la réinitialisation du mot de passe pour un utilisateur inconnu", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     await createAndLogUser("admin", "password", { isAdmin: true });
 
@@ -52,7 +52,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 400);
   });
 
-  it.only("Vérifie qu'on ne peut pas demander la réinitialisation pour un utilisateur sans mot de passe", async () => {
+  it("Vérifie qu'on ne peut pas demander la réinitialisation pour un utilisateur sans mot de passe", async () => {
     let { httpClient } = await startServer();
     await insertUser({
       username: "user1",
@@ -65,7 +65,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 400);
   });
 
-  it.only("Vérifie qu'on ne peut pas demander la réinitialisation du mot de passe pour un utilisateur invalide", async () => {
+  it("Vérifie qu'on ne peut pas demander la réinitialisation du mot de passe pour un utilisateur invalide", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     await createAndLogUser("cfa456", "password");
     let user = await insertUser();
@@ -79,7 +79,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 400);
   });
 
-  it.only("Vérifie qu'un utilisateur peut changer son mot de passe", async () => {
+  it("Vérifie qu'un utilisateur peut changer son mot de passe", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     await createAndLogUser("admin", "password", { isAdmin: true });
 
@@ -101,7 +101,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it.only("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
+  it("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     await createAndLogUser("admin", "password", { isAdmin: true });
 

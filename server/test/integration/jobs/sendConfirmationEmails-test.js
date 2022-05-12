@@ -4,7 +4,7 @@ const integrationTests = require("../utils/integrationTests");
 const sendConfirmationEmails = require("../../../src/jobs/sendConfirmationEmails");
 
 integrationTests(__filename, (context) => {
-  it.only("Vérifie qu'on peut envoyer des emails de confirmation", async () => {
+  it("Vérifie qu'on peut envoyer des emails de confirmation", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
@@ -38,7 +38,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
+  it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
@@ -63,7 +63,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
+  it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({

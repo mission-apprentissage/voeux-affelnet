@@ -5,7 +5,7 @@ const integrationTests = require("../utils/integrationTests");
 const sendNotificationEmails = require("../../../src/jobs/sendNotificationEmails");
 
 integrationTests(__filename, (context) => {
-  it.only("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux voeux", async () => {
+  it("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux voeux", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
@@ -37,7 +37,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on n'envoie pas de notification si l'email a déjà été envoyé", async () => {
+  it("Vérifie qu'on n'envoie pas de notification si l'email a déjà été envoyé", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
@@ -72,7 +72,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it.only("Vérifie qu'on peut limiter les envois", async () => {
+  it("Vérifie qu'on peut limiter les envois", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
