@@ -35,8 +35,20 @@ const templates = {
   activation: (user, token, options = {}) => {
     let prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Activation de votre compte pour l'établissement ${user.username}`,
+      subject: `${prefix}Activation de votre compte`,
       template: getTemplate("activation"),
+      data: {
+        user,
+        token,
+        actionToken: createActionToken(user.username),
+      },
+    };
+  },
+  activation_cfa: (user, token, options = {}) => {
+    let prefix = options.resend ? "[Rappel] " : "";
+    return {
+      subject: `${prefix}Des voeux Affelnet sont téléchargeables`,
+      template: getTemplate("activation_cfa"),
       data: {
         user,
         token,

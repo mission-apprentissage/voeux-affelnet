@@ -47,11 +47,11 @@ async function resendConfirmationEmails(emails, options = {}) {
       let templateName = cfa.etablissements.find((e) => e.voeux_date) ? "confirmation_voeux" : previous.templateName;
 
       try {
-        logger.info(`Resending ${templateName} to CFA ${cfa.siret}...`);
+        logger.info(`Resending ${templateName} to CFA ${cfa.username}...`);
         await emails.resend(previous.token, { retry: options.retry, newTemplateName: templateName });
         stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent email to ${cfa.siret}`, e);
+        logger.error(`Unable to sent email to ${cfa.username}`, e);
         stats.failed++;
       }
     });

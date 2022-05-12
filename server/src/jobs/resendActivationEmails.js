@@ -14,7 +14,7 @@ async function resendActivationEmails(emails, options = {}) {
       ? {
           emails: {
             $elemMatch: {
-              templateName: "activation",
+              templateName: /^activation.*/,
               "error.type": "fatal",
             },
           },
@@ -22,7 +22,7 @@ async function resendActivationEmails(emails, options = {}) {
       : {
           emails: {
             $elemMatch: {
-              templateName: "activation",
+              templateName: /^activation.*/,
               ...(options.username
                 ? {}
                 : {
@@ -44,7 +44,7 @@ async function resendActivationEmails(emails, options = {}) {
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
     .eachAsync(async (user) => {
-      let previous = user.emails.find((e) => e.templateName === "activation");
+      let previous = user.emails.find((e) => e.templateName.startsWith("activation"));
 
       try {
         logger.info(`Resending activation to user ${user.username}...`);

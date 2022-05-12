@@ -3,13 +3,12 @@ const { User } = require("../common/model");
 
 async function sendActivationEmails(emails, options = {}) {
   let stats = { total: 0, sent: 0, failed: 0 };
-  let templateName = "activation";
   let query = {
     unsubscribe: false,
     password: { $exists: false },
     statut: "confirmé",
-    "emails.templateName": { $ne: templateName },
-    $or: [{ type: "Cfa", voeux_date: { $exists: true } }, { type: { $exists: false } }],
+    "emails.templateName": { $nin: ["activation", "activation_cfa"] },
+    $or: [{ type: "Cfa", "etablissements.voeux_date": { $exists: true } }, { type: { $exists: false } }],
     ...(options.username ? { username: options.username } : {}),
   };
 
@@ -21,6 +20,7 @@ async function sendActivationEmails(emails, options = {}) {
     .cursor()
     .eachAsync(async (user) => {
       try {
+        const templateName = user.type === "Cfa" ? "activation_cfa" : "activation";
         logger.info(`Sending ${templateName} to user ${user.username}...`);
         await emails.send(user, templateName);
         stats.sent++;
