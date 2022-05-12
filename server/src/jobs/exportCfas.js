@@ -19,7 +19,6 @@ async function exportCfas(output, options = {}) {
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {
-        uai: (data) => data.uai,
         siret: (data) => data.siret,
         raison_sociale: (data) => data.raison_sociale,
         academie: (data) => data.academie?.nom,
