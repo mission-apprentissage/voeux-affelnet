@@ -5,7 +5,7 @@ const users = require("../../../src/common/users");
 const { User } = require("../../../src/common/model");
 
 integrationTests(__filename, () => {
-  it("Vérifie qu'on peut activer un utilisateur", async () => {
+  it.only("Vérifie qu'on peut activer un utilisateur", async () => {
     let { activate } = await users();
     await insertUser({
       username: "user1",
@@ -18,7 +18,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.statut, "activé");
   });
 
-  it("Vérifie qu'on rejete un utilisateur invalide", async () => {
+  it.only("Vérifie qu'on rejete un utilisateur invalide", async () => {
     let { activate } = await users();
     await insertUser({
       username: "user1",
@@ -33,7 +33,7 @@ integrationTests(__filename, () => {
     }
   });
 
-  it("Vérifie qu'on peut supprimer un utilisateur", async () => {
+  it.only("Vérifie qu'on peut supprimer un utilisateur", async () => {
     let { removeUser } = await users();
     await insertUser({
       username: "user1",
@@ -47,7 +47,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(count, 0);
   });
 
-  it("Vérifie qu'on peut changer le mot de passe d'un utilisateur", async () => {
+  it.only("Vérifie qu'on peut changer le mot de passe d'un utilisateur", async () => {
     let { changePassword, activate } = await users();
     await insertUser({
       username: "user",
@@ -61,7 +61,7 @@ integrationTests(__filename, () => {
     assert.ok(found.password !== user.password);
   });
 
-  it("Vérifie qu'on peut désinscrire un utilisateur avec son username", async () => {
+  it.only("Vérifie qu'on peut désinscrire un utilisateur avec son username", async () => {
     let { unsubscribe } = await users();
     await insertUser({
       username: "user1",
@@ -74,7 +74,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.unsubscribe, true);
   });
 
-  it("Vérifie qu'on peut désinscrire un utilisateur avec un token d'email", async () => {
+  it.only("Vérifie qu'on peut désinscrire un utilisateur avec un token d'email", async () => {
     let { unsubscribe } = await users();
     await insertUser({
       unsubscribe: false,

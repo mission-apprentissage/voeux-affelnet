@@ -1,12 +1,12 @@
 const assert = require("assert");
 const integrationTests = require("../utils/integrationTests");
-const { insertUser } = require("../utils/fakeData");
+const { insertUser, insertCfa } = require("../utils/fakeData");
 const createEmails = require("../../../src/common/emails");
 const fakeMailer = require("../utils/fakeMailer");
 const { User } = require("../../../src/common/model");
 
 integrationTests(__filename, () => {
-  it("Vérifie qu'on peut envoyer un email", async () => {
+  it.only("Vérifie qu'on peut envoyer un email", async () => {
     let emailsSent = [];
     let emails = await createEmails(fakeMailer({ calls: emailsSent }));
     let user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248W" });
@@ -16,7 +16,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
     assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "Activation de votre compte pour l'UAI 0648248W");
+    assert.strictEqual(emailsSent[0].subject, "Activation de votre compte");
     let found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.strictEqual(found.emails.length, 1);
     assert.strictEqual(found.emails[0].sendDates.length, 1);
@@ -25,7 +25,7 @@ integrationTests(__filename, () => {
     assert.strictEqual(found.emails[0].templateName, "activation");
   });
 
-  it("Vérifie qu'on peut renvoyer un email", async () => {
+  it.only("Vérifie qu'on peut renvoyer un email", async () => {
     let emailsSent = [];
     let emails = await createEmails(fakeMailer({ calls: emailsSent }));
     await insertUser({
@@ -46,16 +46,16 @@ integrationTests(__filename, () => {
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
     assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "[Rappel] Activation de votre compte pour l'UAI 0648248W");
+    assert.strictEqual(emailsSent[0].subject, "[Rappel] Activation de votre compte");
     let found = await User.findOne().lean();
     assert.strictEqual(found.emails.length, 1);
     assert.strictEqual(found.emails[0].sendDates.length, 2);
   });
 
-  it("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
+  it.only("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
     let emailsSent = [];
-    let user1 = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248W" });
-    let user2 = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248X" });
+    let user1 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
+    let user2 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
     let emails = await createEmails(fakeMailer({ calls: emailsSent }));
 
     await emails.send(user1, "activation");
@@ -67,7 +67,7 @@ integrationTests(__filename, () => {
     assert.ok(results[1].emails[0]);
   });
 
-  it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
+  it.only("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     let user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
     let emails = await createEmails(fakeMailer({ fail: true }));
 
@@ -84,7 +84,7 @@ integrationTests(__filename, () => {
     }
   });
 
-  it("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
+  it.only("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
     let emailsSent = [];
     let emails = await createEmails(fakeMailer({ calls: emailsSent }));
     await insertUser({
