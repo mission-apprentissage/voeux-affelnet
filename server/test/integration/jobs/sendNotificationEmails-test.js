@@ -6,7 +6,7 @@ const sendNotificationEmails = require("../../../src/jobs/sendNotificationEmails
 
 integrationTests(__filename, (context) => {
   it("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux voeux", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
     let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
@@ -23,7 +23,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await sendNotificationEmails(emails);
+    let stats = await sendNotificationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -38,7 +38,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on n'envoie pas de notification si l'email a déjà été envoyé", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
     let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
@@ -61,7 +61,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await sendNotificationEmails(emails);
+    let stats = await sendNotificationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -73,7 +73,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on peut limiter les envois", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
     let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
@@ -98,7 +98,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await sendNotificationEmails(emails, { limit: 1 });
+    let stats = await sendNotificationEmails(sender, { limit: 1 });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

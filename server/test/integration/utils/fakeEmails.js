@@ -1,12 +1,12 @@
 const { createFakeMailer } = require("./fakeMailer");
-const emails = require("../../../src/common/emails");
+const sender = require("../../../src/common/sender");
 
 module.exports = {
   createFakeEmails() {
     const emailsSents = [];
     const mailer = createFakeMailer({ calls: emailsSents });
     return {
-      emails: emails(mailer),
+      sender: sender(mailer),
       getEmailsSent: () => emailsSents,
     };
   },

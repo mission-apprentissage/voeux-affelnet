@@ -23,12 +23,12 @@ function checkWebhookKey() {
   return passport.authenticate("localapikey", { session: false, failWithError: true });
 }
 
-module.exports = ({ emails }) => {
+module.exports = ({ sender }) => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   async function checkEmailToken(req, res, next) {
     let { token } = req.params;
-    if (!(await emails.exists(token))) {
+    if (!(await sender.exists(token))) {
       return next(Boom.notFound());
     }
 
@@ -41,7 +41,7 @@ module.exports = ({ emails }) => {
     tryCatch(async (req, res) => {
       let { token } = req.params;
 
-      let html = await emails.render(token);
+      let html = await sender.render(token);
 
       return sendHTML(html, res);
     })
@@ -52,7 +52,7 @@ module.exports = ({ emails }) => {
     tryCatch(async (req, res) => {
       let { token } = req.params;
 
-      emails.markAsOpened(token);
+      sender.markAsOpened(token);
 
       res.writeHead(200, { "Content-Type": "image/gif" });
       res.end(Buffer.from("R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", "base64"), "binary");
@@ -71,9 +71,9 @@ module.exports = ({ emails }) => {
         .validateAsync(req.body, { abortEarly: false });
 
       if (parameters.event === "delivered") {
-        emails.markAsDelivered(parameters["message-id"]);
+        sender.markAsDelivered(parameters["message-id"]);
       } else {
-        emails.markAsFailed(parameters["message-id"], parameters.event);
+        sender.markAsFailed(parameters["message-id"], parameters.event);
       }
 
       return res.json({});

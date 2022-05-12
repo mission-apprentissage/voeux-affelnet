@@ -80,49 +80,40 @@ const templates = {
   },
 };
 
-module.exports = (mailer) => {
-  async function sendEmail(user, token, { from, subject, template, data, replyTo }) {
-    try {
-      let { messageId } = await mailer.sendEmail(user.email, subject, template, data, { from, replyTo });
-      await User.updateOne(
-        { "emails.token": token },
-        {
-          $addToSet: {
-            "emails.$.messageIds": messageId,
-          },
-          $unset: {
-            "emails.$.error": 1,
+async function sendEmail(mailer, user, token, { from, subject, template, data, replyTo }) {
+  try {
+    let { messageId } = await mailer.sendEmailViaSMTP(user.email, subject, template, data, { from, replyTo });
+    await User.updateOne(
+      { "emails.token": token },
+      {
+        $addToSet: {
+          "emails.$.messageIds": messageId,
+        },
+        $unset: {
+          "emails.$.error": 1,
+        },
+      },
+      { runValidators: true }
+    );
+  } catch (e) {
+    await User.updateOne(
+      { "emails.token": token },
+      {
+        $set: {
+          "emails.$.error": {
+            type: "fatal",
+            message: e.message,
           },
         },
-        { runValidators: true }
-      );
-    } catch (e) {
-      await User.updateOne(
-        { "emails.token": token },
-        {
-          $set: {
-            "emails.$.error": {
-              type: "fatal",
-              message: e.message,
-            },
-          },
-        },
-        { runValidators: true }
-      );
-      throw e;
-    }
+      },
+      { runValidators: true }
+    );
+    throw e;
   }
+}
 
+module.exports = (mailer) => {
   return {
-    async getTemplateName(token) {
-      let found = await User.findOne({ "emails.token": token });
-      if (!found) {
-        return null;
-      }
-
-      let { templateName } = found.emails.find((e) => e.token === token);
-      return templateName;
-    },
     async exists(token) {
       let count = await User.countDocuments({ "emails.token": token });
       return count > 0;
@@ -152,7 +143,7 @@ module.exports = (mailer) => {
         { runValidators: true }
       );
 
-      await sendEmail(user, token, template);
+      await sendEmail(mailer, user, token, template);
 
       return token;
     },
@@ -176,7 +167,7 @@ module.exports = (mailer) => {
         { runValidators: true }
       );
 
-      await sendEmail(user, token, template);
+      await sendEmail(mailer, user, token, template);
 
       return token;
     },

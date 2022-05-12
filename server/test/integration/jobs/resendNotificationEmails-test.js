@@ -6,7 +6,7 @@ const resendNotificationEmails = require("../../../src/jobs/resendNotificationEm
 
 integrationTests(__filename, (context) => {
   it("Vérifie qu'on envoie une relance au bout de 7 jours si le fichier n'a pas été téléchargé", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     let twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
@@ -30,7 +30,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendNotificationEmails(emails);
+    let stats = await resendNotificationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -43,7 +43,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on envoie une relance au bout de 7 jours si l'un des fichiers n'a pas été téléchargé", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
     let eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
@@ -71,7 +71,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendNotificationEmails(emails);
+    let stats = await resendNotificationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -84,7 +84,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on n'envoie pas de relance si le fichier a déjà été téléchargé", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
     let eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
@@ -107,7 +107,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendNotificationEmails(emails);
+    let stats = await resendNotificationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -119,7 +119,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on relance 3 fois maximum", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     let twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
@@ -143,14 +143,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendNotificationEmails(emails);
+    await resendNotificationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut limiter les envois", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
     let eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
@@ -194,7 +194,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendNotificationEmails(emails, { limit: 1 });
+    let stats = await resendNotificationEmails(sender, { limit: 1 });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -206,7 +206,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on peut renvoyer un email en erreur (retry)", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     let today = new Date();
     let yesterday = DateTime.now().minus({ days: 1 }).toJSDate();
@@ -235,7 +235,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendNotificationEmails(emails, { retry: true });
+    let stats = await resendNotificationEmails(sender, { retry: true });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

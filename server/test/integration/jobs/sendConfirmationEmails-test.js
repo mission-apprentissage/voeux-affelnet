@@ -5,7 +5,7 @@ const sendConfirmationEmails = require("../../../src/jobs/sendConfirmationEmails
 
 integrationTests(__filename, (context) => {
   it("Vérifie qu'on peut envoyer des emails de confirmation", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
     await insertCfa({
@@ -19,7 +19,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await sendConfirmationEmails(emails);
+    let stats = await sendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 2);
@@ -39,7 +39,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
@@ -52,7 +52,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await sendConfirmationEmails(emails);
+    let stats = await sendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -64,14 +64,14 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
       unsubscribe: true,
     });
 
-    let stats = await sendConfirmationEmails(emails);
+    let stats = await sendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);

@@ -1,6 +1,6 @@
 const { connectToMongoForTests } = require("./testUtils");
 const { createFakeMailer } = require("./fakeMailer");
-const emails = require("../../../src/common/emails");
+const sender = require("../../../src/common/sender");
 
 async function testContext() {
   const emailsSents = [];
@@ -8,7 +8,7 @@ async function testContext() {
 
   return {
     components: {
-      emails: emails(createFakeMailer({ calls: emailsSents })),
+      sender: sender(createFakeMailer({ calls: emailsSents })),
     },
     helpers: {
       getEmailsSent: () => emailsSents,

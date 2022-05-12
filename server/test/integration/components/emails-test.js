@@ -1,7 +1,7 @@
 const assert = require("assert");
 const integrationTests = require("../utils/integrationTests");
 const { insertUser, insertCfa } = require("../utils/fakeData");
-const createEmails = require("../../../src/common/emails");
+const createEmails = require("../../../src/common/sender");
 const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../../src/common/model");
 

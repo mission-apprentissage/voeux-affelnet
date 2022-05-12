@@ -6,7 +6,7 @@ const sendActivationEmails = require("../../../src/jobs/sendActivationEmails");
 
 integrationTests(__filename, (context) => {
   it("Vérifie qu'on envoie des emails d'activation uniquement aux utilisateurs confirmés", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
@@ -21,7 +21,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await sendActivationEmails(emails);
+    let stats = await sendActivationEmails(sender);
 
     let found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.deepStrictEqual(found.emails[0].templateName, "activation");
@@ -39,7 +39,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on envoie des emails d'activation uniquement aux CFA confirmés", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
@@ -47,7 +47,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
     });
 
-    await sendActivationEmails(emails);
+    await sendActivationEmails(sender);
 
     let found = await Cfa.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.deepStrictEqual(found.emails[0].templateName, "activation_cfa");
@@ -56,21 +56,21 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà activé", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       username: "123457X",
       password: "12345",
     });
 
-    await sendActivationEmails(emails);
+    await sendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       username: "123457X",
@@ -78,14 +78,14 @@ integrationTests(__filename, (context) => {
       unsubscribe: true,
     });
 
-    await sendActivationEmails(emails);
+    await sendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       username: "123457X",
@@ -99,14 +99,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await sendActivationEmails(emails);
+    await sendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux cfas n'ayant pas de voeux", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       username: "11111111100006",
@@ -115,7 +115,7 @@ integrationTests(__filename, (context) => {
     });
     await insertCfa({ username: "22222222200006", statut: "confirmé" });
 
-    let stats = await sendActivationEmails(emails);
+    let stats = await sendActivationEmails(sender);
 
     let found = await Cfa.findOne({ siret: "11111111100006" }).lean();
     assert.strictEqual(found.emails.length, 1);

@@ -7,9 +7,9 @@ const { User } = require("../../../src/common/model");
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie qu'on peut prévisualier un email", async () => {
     const { httpClient, components } = await startServer();
-    const { emails } = components;
+    const { sender } = components;
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await emails.send(user, "activation");
+    const token = await sender.send(user, "activation");
 
     const response = await httpClient.get(`/api/emails/${token}/preview`);
 
@@ -27,9 +27,9 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie qu'on peut marquer un email comme ouvert", async () => {
     const { httpClient, components } = await startServer();
-    const { emails } = components;
+    const { sender } = components;
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await emails.send(user, "activation");
+    const token = await sender.send(user, "activation");
 
     const response = await httpClient.get(`/api/emails/${token}/markAsOpened`);
 
@@ -39,9 +39,9 @@ httpTests(__filename, ({ startServer }) => {
 
   it("Vérifie qu'un utilisateur peut se désinscrire du service", async () => {
     const { httpClient, components } = await startServer();
-    const { emails } = components;
+    const { sender } = components;
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
-    const token = await emails.send(user, "activation");
+    const token = await sender.send(user, "activation");
 
     const response = await httpClient.get(`/api/emails/${token}/unsubscribe`);
 

@@ -15,7 +15,7 @@ const exportCfasInconnus = require("../../jobs/exportCfasInconnus");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 
-module.exports = ({ emails }) => {
+module.exports = ({ sender }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, checkIsAdmin } = authMiddleware();
 
@@ -89,7 +89,7 @@ module.exports = ({ emails }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cfas.cancelUnsubscription(siret);
-      let stats = await resendConfirmationEmails(emails, { siret });
+      let stats = await resendConfirmationEmails(sender, { siret });
 
       return res.json(stats);
     })
@@ -105,7 +105,7 @@ module.exports = ({ emails }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cfas.cancelUnsubscription(siret);
-      let stats = await resendActivationEmails(emails, { username: siret });
+      let stats = await resendActivationEmails(sender, { username: siret });
 
       return res.json(stats);
     })

@@ -13,7 +13,7 @@ function allFilesAsAlreadyBeenDownloaded(cfa) {
   });
 }
 
-async function resendNotificationEmails(emails, options = {}) {
+async function resendNotificationEmails(sender, options = {}) {
   let stats = { total: 0, sent: 0, failed: 0 };
   let limit = options.limit || Number.MAX_SAFE_INTEGER;
   let query = {
@@ -61,7 +61,7 @@ async function resendNotificationEmails(emails, options = {}) {
         stats.total++;
         if (limit > stats.sent) {
           logger.info(`Resending notification to cfa ${cfa.username}...`);
-          await emails.resend(previous.token);
+          await sender.resend(previous.token);
           stats.sent++;
         }
       } catch (e) {

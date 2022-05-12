@@ -7,7 +7,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const validators = require("../utils/validators");
 
-module.exports = ({ emails }) => {
+module.exports = ({ sender }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkResetPasswordToken } = authMiddleware();
   const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
@@ -25,7 +25,7 @@ module.exports = ({ emails }) => {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }
 
-      await emails.send(user, "reset_password");
+      await sender.send(user, "reset_password");
       return res.json({ message: "Un email a été envoyé." });
     })
   );

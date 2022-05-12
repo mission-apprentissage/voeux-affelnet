@@ -29,7 +29,7 @@ module.exports = (transporter = createTransporter(config.smtp)) => {
     return html;
   }
 
-  async function sendEmail(to, subject, template, data, options = {}) {
+  async function sendEmailViaSMTP(to, subject, template, data, options = {}) {
     let address = options.from || "voeux-affelnet@apprentissage.beta.gouv.fr";
 
     return transporter.sendMail({
@@ -48,6 +48,6 @@ module.exports = (transporter = createTransporter(config.smtp)) => {
 
   return {
     renderEmail,
-    sendEmail,
+    sendEmailViaSMTP,
   };
 };

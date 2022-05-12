@@ -6,7 +6,7 @@ const resendConfirmationEmails = require("../../../src/jobs/resendConfirmationEm
 
 integrationTests(__filename, (context) => {
   it("Vérifie qu'on envoie une relance 7 jours après le premier envoi", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       siret: "11111111100006",
@@ -21,7 +21,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails);
+    let stats = await resendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -39,7 +39,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on envoie une relance spécifique quand le cfa a des voeux", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       siret: "11111111100006",
@@ -55,7 +55,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails);
+    let stats = await resendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -72,7 +72,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on ne renvoie pas d'email en erreur", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       siret: "11111111100006",
@@ -90,7 +90,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails);
+    let stats = await resendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -102,7 +102,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on attend avant 7 jours avant d'envoyer une nouvelle relance", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       username: "11111111100006",
@@ -116,7 +116,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails);
+    let stats = await resendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -128,7 +128,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on relance 3 fois maximum par défaut", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       username: "11111111100006",
@@ -147,14 +147,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendConfirmationEmails(emails);
+    await resendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut modifier le nombre de relance maximal", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       username: "11111111100006",
@@ -173,14 +173,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendConfirmationEmails(emails, { max: 4 });
+    await resendConfirmationEmails(sender, { max: 4 });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
   });
 
   it("Vérifie qu'on n'envoie pas d'email pour les CFA confirmés ou désinscrits", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       statut: "confirmé",
@@ -189,14 +189,14 @@ integrationTests(__filename, (context) => {
       unsubscribe: true,
     });
 
-    await resendConfirmationEmails(emails);
+    await resendConfirmationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut renvoyer un email en erreur (retry)", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       username: "11111111100006",
@@ -214,7 +214,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails, { retry: true });
+    let stats = await resendConfirmationEmails(sender, { retry: true });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -231,7 +231,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on ne renvoie pas un email en erreur autre que de type 'fatal' (retry)", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       username: "11111111100006",
@@ -248,7 +248,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails, { retry: true });
+    let stats = await resendConfirmationEmails(sender, { retry: true });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -260,7 +260,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on peut forcer le renvoi d'un email pour un CFA", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       username: "11111111100006",
@@ -277,7 +277,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendConfirmationEmails(emails, { siret: "11111111100006" });
+    let stats = await resendConfirmationEmails(sender, { siret: "11111111100006" });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

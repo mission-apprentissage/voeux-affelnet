@@ -6,7 +6,7 @@ const authMiddleware = require("../../middlewares/authMiddleware");
 const tryCatch = require("../../middlewares/tryCatchMiddleware");
 const sendActivationEmails = require("../../../jobs/sendActivationEmails");
 
-module.exports = ({ emails }) => {
+module.exports = ({ sender }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkActionToken, checkIsCfa } = authMiddleware();
 
@@ -36,7 +36,7 @@ module.exports = ({ emails }) => {
       }).validateAsync(req.body, { abortEarly: false });
 
       await cfas.confirm(cfa.siret, email);
-      await sendActivationEmails(emails, { username: cfa.username });
+      await sendActivationEmails(sender, { username: cfa.username });
 
       return res.json({});
     })

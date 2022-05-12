@@ -6,7 +6,7 @@ const { DateTime } = require("luxon");
 
 integrationTests(__filename, (context) => {
   it("Vérifie qu'on envoie une relance 3 jours après l'envoi initial", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
@@ -32,7 +32,7 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    let stats = await resendActivationEmails(emails);
+    let stats = await resendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -46,7 +46,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on envoie une relance 3 jours après l'envoi initial pour un CFA", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
@@ -61,14 +61,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendActivationEmails(emails);
+    await resendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.deepStrictEqual(sent[0].subject, "[Rappel] Des voeux Affelnet sont téléchargeables");
   });
 
   it("Vérifie qu'on attend 3 jours avant de relancer une deuxième fois", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
@@ -83,14 +83,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendActivationEmails(emails);
+    await resendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on attend 3 jours avant de relancer une deuxième fois (CFA)", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
@@ -105,14 +105,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendActivationEmails(emails);
+    await resendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on relance 3 fois maximum", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
@@ -131,14 +131,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendActivationEmails(emails);
+    await resendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on relance 3 fois maximum (CFA)", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
@@ -157,14 +157,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendActivationEmails(emails);
+    await resendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut modifier le nombre de relance maximal", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       username: "0751234J",
@@ -183,14 +183,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendActivationEmails(emails, { max: 4 });
+    await resendActivationEmails(sender, { max: 4 });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
   });
 
   it("Vérifie qu'on peut renvoyer une email en erreur fatale", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       statut: "confirmé",
@@ -221,7 +221,7 @@ integrationTests(__filename, (context) => {
         },
       ],
     });
-    await resendActivationEmails(emails, { retry: true });
+    await resendActivationEmails(sender, { retry: true });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -229,7 +229,7 @@ integrationTests(__filename, (context) => {
   });
 
   it("Vérifie qu'on envoie pas d'emails aux utilisateurs activé ou désinscrits", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       statut: "activé",
@@ -255,14 +255,14 @@ integrationTests(__filename, (context) => {
       ],
     });
 
-    await resendActivationEmails(emails);
+    await resendActivationEmails(sender);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut forcer le renvoi d'un email pour un utilisateur", async () => {
-    let { emails } = context.getComponents();
+    let { sender } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertUser({
       username: "user1",
@@ -280,7 +280,7 @@ integrationTests(__filename, (context) => {
         },
       ],
     });
-    await resendActivationEmails(emails, { username: "user1" });
+    await resendActivationEmails(sender, { username: "user1" });
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
