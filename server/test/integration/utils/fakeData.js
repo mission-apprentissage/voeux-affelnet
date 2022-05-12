@@ -17,17 +17,16 @@ module.exports = {
     );
   },
   insertCfa: (custom = {}) => {
-    let username = custom.username || faker.helpers.replaceSymbols("#######?");
+    let username = custom.username || faker.helpers.replaceSymbols("#########00015");
 
     return Cfa.create(
       merge(
         {},
         {
           username,
+          siret: username,
           email: faker.internet.email(),
           emails: [],
-          siret: faker.helpers.replaceSymbols("#########00015"),
-          uai: username,
           raison_sociale: faker.company.companyName(),
           academie: { code: "11", nom: "Île-de-France" },
         },

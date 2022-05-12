@@ -49,17 +49,6 @@ cli
   });
 
 cli
-  .command("confirmCfa")
-  .description("Permet de confirmer manuellement un CFA")
-  .arguments("<uai> <email>")
-  .option("--force", "Ecrase les données déjà confirmées")
-  .action((uai, email, { force }) => {
-    runScript(({ cfas }) => {
-      return cfas.confirm(uai, email, { force });
-    });
-  });
-
-cli
   .command("sendConfirmationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
@@ -171,6 +160,17 @@ cli
     runScript(() => {
       let { academie, ...rest } = options;
       return createCfa(username, email, academie, rest);
+    });
+  });
+
+cli
+  .command("confirmCfa")
+  .description("Permet de confirmer manuellement un CFA")
+  .arguments("<siret> <email>")
+  .option("--force", "Ecrase les données déjà confirmées")
+  .action((siret, email, { force }) => {
+    runScript(({ cfas }) => {
+      return cfas.confirm(siret, email, { force });
     });
   });
 

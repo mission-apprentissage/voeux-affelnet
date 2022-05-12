@@ -8,12 +8,12 @@ async function resendConfirmationEmails(emails, options = {}) {
   let query = {
     unsubscribe: false,
     statut: "en attente",
-    ...(options.uai ? { uai: options.uai } : {}),
+    ...(options.siret ? { siret: options.siret } : {}),
     ...(options.retry
       ? {
           emails: {
             $elemMatch: {
-              templateName: /^confirmation_.*/,
+              templateName: /^confirmation.*/,
               "error.type": "fatal",
             },
           },
@@ -21,8 +21,8 @@ async function resendConfirmationEmails(emails, options = {}) {
       : {
           emails: {
             $elemMatch: {
-              templateName: /^confirmation_.*/,
-              ...(options.uai
+              templateName: /^confirmation.*/,
+              ...(options.siret
                 ? {}
                 : {
                     error: { $exists: false },
@@ -43,15 +43,15 @@ async function resendConfirmationEmails(emails, options = {}) {
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
     .eachAsync(async (cfa) => {
-      let previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation_"));
-      let templateName = cfa.voeux_date ? "confirmation_voeux" : previous.templateName;
+      let previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation"));
+      let templateName = cfa.etablissements.find((e) => e.voeux_date) ? "confirmation_voeux" : previous.templateName;
 
       try {
-        logger.info(`Resending ${templateName} to CFA ${cfa.uai}...`);
+        logger.info(`Resending ${templateName} to CFA ${cfa.siret}...`);
         await emails.resend(previous.token, { retry: options.retry, newTemplateName: templateName });
         stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent email to ${cfa.uai}`, e);
+        logger.error(`Unable to sent email to ${cfa.siret}`, e);
         stats.failed++;
       }
     });

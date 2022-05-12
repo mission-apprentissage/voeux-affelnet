@@ -5,17 +5,17 @@ const { DateTime } = require("luxon");
 const resendConfirmationEmails = require("../../../src/jobs/resendConfirmationEmails");
 
 integrationTests(__filename, (context) => {
-  it("Vérifie qu'on envoie une relance 7 jours après le premier envoi", async () => {
+  it.only("Vérifie qu'on envoie une relance 7 jours après le premier envoi", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
         },
       ],
@@ -29,8 +29,7 @@ integrationTests(__filename, (context) => {
     assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      "[Rappel] Demande d'informations concernant la communication des voeux exprimés en apprentissage" +
-        " via Affelnet pour l'UAI 0751234J"
+      "[Rappel] Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
     );
     assert.deepStrictEqual(stats, {
       total: 1,
@@ -39,18 +38,18 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it("Vérifie qu'on envoie une relance spécifique quand le cfa a des voeux", async () => {
+  it.only("Vérifie qu'on envoie une relance spécifique quand le cfa a des voeux", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       statut: "en attente",
-      voeux_date: new Date(),
+      etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
         },
       ],
@@ -63,8 +62,7 @@ integrationTests(__filename, (context) => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      "Mise à disposition des voeux exprimés en apprentissage sur " +
-        "Affelnet en attente de la confirmation de votre adresse mail"
+      "[Rappel] Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
     );
     assert.deepStrictEqual(stats, {
       total: 1,
@@ -82,7 +80,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 3 }).toJSDate()],
           error: {
             type: "fatal",
@@ -112,7 +110,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 10 }).toJSDate(), DateTime.now().minus({ days: 3 }).toJSDate()],
         },
       ],
@@ -139,7 +137,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [
             DateTime.now().minus({ days: 20 }).toJSDate(),
             DateTime.now().minus({ days: 15 }).toJSDate(),
@@ -165,7 +163,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [
             DateTime.now().minus({ days: 20 }).toJSDate(),
             DateTime.now().minus({ days: 15 }).toJSDate(),
@@ -206,7 +204,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 3 }).toJSDate()],
           error: {
             type: "fatal",
@@ -242,7 +240,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 3 }).toJSDate()],
           error: {
             type: "hard_bounce",
@@ -271,7 +269,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
           error: {
             type: "hard_bounce",

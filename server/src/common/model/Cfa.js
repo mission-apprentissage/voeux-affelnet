@@ -67,7 +67,7 @@ let schema = new Schema({
 });
 
 schema.index(
-  { uai: "text", siret: "text", raison_sociale: "text", "academie.nom": "text", email: "text", statut: "text" },
+  { siret: "text", raison_sociale: "text", "academie.nom": "text", email: "text", statut: "text" },
   { default_language: "french" }
 );
 

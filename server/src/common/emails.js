@@ -8,13 +8,11 @@ function getTemplate(name) {
 }
 
 const templates = {
-  confirmation_directeur: (cfa, token, options = {}) => {
+  confirmation: (cfa, token, options = {}) => {
     let prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject:
-        `${prefix}Informations importantes concernant la communication des voeux exprimés en apprentissage` +
-        ` via Affelnet pour l'UAI ${cfa.uai}`,
-      template: getTemplate("confirmation_directeur"),
+      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : ${cfa.siret})`,
+      template: getTemplate("confirmation"),
       data: {
         cfa,
         token,
@@ -22,24 +20,10 @@ const templates = {
       },
     };
   },
-  confirmation_contact: (cfa, token, options = {}) => {
+  confirmation_voeux: (cfa, token, options = {}) => {
     let prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject:
-        `${prefix}Demande d'informations concernant la communication des voeux exprimés en apprentissage via Affelnet ` +
-        `pour l'UAI ${cfa.uai}`,
-      template: getTemplate("confirmation_contact"),
-      data: {
-        cfa,
-        token,
-        actionToken: createActionToken(cfa.username),
-      },
-    };
-  },
-  confirmation_voeux: (cfa, token) => {
-    return {
-      subject:
-        "Mise à disposition des voeux exprimés en apprentissage sur Affelnet en attente de la confirmation de votre adresse mail",
+      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : ${cfa.siret})`,
       template: getTemplate("confirmation_voeux"),
       data: {
         cfa,
@@ -51,7 +35,7 @@ const templates = {
   activation: (user, token, options = {}) => {
     let prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Activation de votre compte pour l'UAI ${user.username}`,
+      subject: `${prefix}Activation de votre compte pour l'établissement ${user.username}`,
       template: getTemplate("activation"),
       data: {
         user,
@@ -62,7 +46,7 @@ const templates = {
   },
   notification: (cfa, token) => {
     return {
-      subject: `Mise à jour des voeux exprimés en apprentissage sur Affelnet pour l'UAI ${cfa.uai}`,
+      subject: `Mise à jour des voeux exprimés en apprentissage sur Affelnet pour l'établissement ${cfa.siret}`,
       template: getTemplate("notification"),
       data: {
         cfa,

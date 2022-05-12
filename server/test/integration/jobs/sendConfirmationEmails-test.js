@@ -4,10 +4,10 @@ const integrationTests = require("../utils/integrationTests");
 const sendConfirmationEmails = require("../../../src/jobs/sendConfirmationEmails");
 
 integrationTests(__filename, (context) => {
-  it("Vérifie qu'on peut envoyer des emails de confirmation (contact)", async () => {
+  it.only("Vérifie qu'on peut envoyer des emails de confirmation", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
-    await insertCfa({ email: "test@apprentissage.beta.gouv.fr" });
+    await insertCfa({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
     await insertCfa({
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -27,6 +27,10 @@ integrationTests(__filename, (context) => {
     assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[1].to, "test1@apprentissage.beta.gouv.fr");
     assert.ok(sent[1].html.indexOf("Madame, Monsieur,") !== -1);
+    assert.strictEqual(
+      sent[0].subject,
+      "Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
+    );
     assert.deepStrictEqual(stats, {
       total: 2,
       sent: 2,
@@ -34,25 +38,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it("Vérifie qu'on peut envoyer des emails de confirmation (directeur)", async () => {
-    let { emails } = context.getComponents();
-    let { getEmailsSent } = context.getHelpers();
-    await insertCfa({ email: "test@apprentissage.beta.gouv.fr", email_source: "directeur" });
-
-    let stats = await sendConfirmationEmails(emails);
-
-    let sent = getEmailsSent();
-    assert.strictEqual(sent.length, 1);
-    assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.ok(sent[0].html.indexOf("Madame la directrice, Monsieur le directeur,") !== -1);
-    assert.deepStrictEqual(stats, {
-      total: 1,
-      sent: 1,
-      failed: 0,
-    });
-  });
-
-  it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
+  it.only("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
@@ -60,7 +46,7 @@ integrationTests(__filename, (context) => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
           sendDates: [new Date()],
         },
       ],
@@ -77,7 +63,7 @@ integrationTests(__filename, (context) => {
     });
   });
 
-  it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
+  it.only("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
     let { emails } = context.getComponents();
     let { getEmailsSent } = context.getHelpers();
     await insertCfa({
