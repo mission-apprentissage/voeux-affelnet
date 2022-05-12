@@ -1,10 +1,10 @@
 const assert = require("assert");
 const config = require("../../../src/config");
-const { activate } = require("../../../src/common/users");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
 const httpTests = require("../utils/httpTests");
 const { insertUser } = require("../utils/fakeData");
+const { activateUser } = require("../../../src/common/actions/activateUser");
 
 httpTests(__filename, ({ startServer }) => {
   it("Vérifie qu'on peut se connecter", async () => {
@@ -13,7 +13,7 @@ httpTests(__filename, ({ startServer }) => {
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
     });
-    await activate("user1", "password");
+    await activateUser("user1", "password");
 
     let response = await httpClient.post("/api/login", {
       username: "user1",
@@ -39,7 +39,7 @@ httpTests(__filename, ({ startServer }) => {
       username: "3319338X",
       email: "user1@apprentissage.beta.gouv.fr",
     });
-    await activate("3319338X", "password");
+    await activateUser("3319338X", "password");
 
     let response = await httpClient.post("/api/login", {
       username: "3319338x",
@@ -56,7 +56,7 @@ httpTests(__filename, ({ startServer }) => {
       email: "user1@apprentissage.beta.gouv.fr",
       isAdmin: true,
     });
-    await activate("user1", "password");
+    await activateUser("user1", "password");
 
     let response = await httpClient.post("/api/login", {
       username: "user1",

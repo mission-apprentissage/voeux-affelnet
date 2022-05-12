@@ -1,11 +1,12 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
-const { getUser, changePassword } = require("../../common/users");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const validators = require("../utils/validators");
+const { getUser } = require("../../common/actions/getUser");
+const { changePassword } = require("../../common/actions/changePassword");
 
 module.exports = ({ sender }) => {
   const router = express.Router(); // eslint-disable-line new-cap

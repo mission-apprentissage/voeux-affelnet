@@ -1,7 +1,7 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
-const cfas = require("../../../common/cfas");
+const { confirm } = require("../../../common/actions/confirm");
 const authMiddleware = require("../../middlewares/authMiddleware");
 const tryCatch = require("../../middlewares/tryCatchMiddleware");
 const sendActivationEmails = require("../../../jobs/sendActivationEmails");
@@ -35,7 +35,7 @@ module.exports = ({ sender }) => {
         email: Joi.string().email().optional(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      await cfas.confirm(cfa.siret, email);
+      await confirm(cfa.siret, email);
       await sendActivationEmails(sender, { username: cfa.username });
 
       return res.json({});

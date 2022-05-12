@@ -2,7 +2,7 @@ const assert = require("assert");
 const integrationTests = require("../utils/integrationTests");
 const { insertCfa } = require("../utils/fakeData");
 const { Cfa } = require("../../../src/common/model");
-const cfas = require("../../../src/common/cfas");
+const { confirm } = require("../../../src/common/actions/confirm");
 
 integrationTests(__filename, () => {
   it("Vérifie qu'on peut confirmer un cfa", async () => {
@@ -12,7 +12,7 @@ integrationTests(__filename, () => {
       email_source: "directeur",
     });
 
-    await cfas.confirm("11111111100006", "11111111100006@apprentissage.beta.gouv.fr");
+    await confirm("11111111100006", "11111111100006@apprentissage.beta.gouv.fr");
     const found = await Cfa.findOne({}, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "confirmé");
   });
@@ -24,12 +24,11 @@ integrationTests(__filename, () => {
       email_source: "contact",
     });
 
-    await cfas.confirm("11111111100006", "user2@apprentissage.beta.gouv.fr");
+    await confirm("11111111100006", "user2@apprentissage.beta.gouv.fr");
 
     const found = await Cfa.findOne({}, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "confirmé");
     assert.strictEqual(found.email, "user2@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(found.contacts, ["11111111100006@apprentissage.beta.gouv.fr"]);
   });
 
   it("Vérifie qu'on ne peut pas confirmer un cfa sans une adresse email", async () => {
@@ -40,7 +39,7 @@ integrationTests(__filename, () => {
     });
 
     try {
-      await cfas.confirm("11111111100006");
+      await confirm("11111111100006");
       assert.fail();
     } catch (e) {
       assert.deepStrictEqual(e.message, "Une confirmation a déjà été enregistrée pour le cfa 11111111100006");
@@ -58,7 +57,7 @@ integrationTests(__filename, () => {
     });
 
     try {
-      await cfas.confirm("11111111100006", "user2@apprentissage.beta.gouv.fr");
+      await confirm("11111111100006", "user2@apprentissage.beta.gouv.fr");
       assert.fail();
     } catch (e) {
       assert.deepStrictEqual(e.message, "Une confirmation a déjà été enregistrée pour le cfa 11111111100006");
@@ -74,7 +73,7 @@ integrationTests(__filename, () => {
       statut: "confirmé",
     });
 
-    await cfas.confirm("11111111100006", "user2@apprentissage.beta.gouv.fr", { force: true });
+    await confirm("11111111100006", "user2@apprentissage.beta.gouv.fr", { force: true });
 
     const found = await Cfa.findOne({}, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "confirmé");

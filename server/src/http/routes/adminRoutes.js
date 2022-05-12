@@ -3,7 +3,6 @@ const { oleoduc, transformIntoJSON } = require("oleoduc");
 const { DateTime } = require("luxon");
 const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
-const cfas = require("../../common/cfas");
 const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { Cfa, Log, Voeu } = require("../../common/model");
@@ -14,6 +13,9 @@ const exportCfas = require("../../jobs/exportCfas");
 const exportCfasInconnus = require("../../jobs/exportCfasInconnus");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
+const { changeEmail } = require("../../common/actions/changeEmail");
+const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
+const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
 
 module.exports = ({ sender }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -73,7 +75,7 @@ module.exports = ({ sender }) => {
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
-      await cfas.changeEmail(siret, email);
+      await changeEmail(siret, email);
 
       return res.json({});
     })
@@ -88,7 +90,7 @@ module.exports = ({ sender }) => {
         siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.cancelUnsubscription(siret);
+      await cancelUnsubscription(siret);
       let stats = await resendConfirmationEmails(sender, { siret });
 
       return res.json(stats);
@@ -104,7 +106,7 @@ module.exports = ({ sender }) => {
         siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.cancelUnsubscription(siret);
+      await cancelUnsubscription(siret);
       let stats = await resendActivationEmails(sender, { username: siret });
 
       return res.json(stats);
@@ -120,7 +122,7 @@ module.exports = ({ sender }) => {
         uai: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.markAsNonConcerne(uai);
+      await markAsNonConcerne(uai);
 
       return res.json({ statut: "non concerné" });
     })

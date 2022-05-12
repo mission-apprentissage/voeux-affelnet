@@ -3,7 +3,7 @@ const config = require("../../config");
 const passport = require("passport");
 const Joi = require("@hapi/joi");
 const Boom = require("boom");
-const { unsubscribe } = require("../../common/users");
+const { unsubscribeUser } = require("../../common/actions/unsubscribeUser");
 const { Strategy: LocalAPIKeyStrategy } = require("passport-localapikey");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { sendHTML } = require("../utils/httpUtils");
@@ -86,7 +86,7 @@ module.exports = ({ sender }) => {
     tryCatch(async (req, res) => {
       let { token } = req.params;
 
-      await unsubscribe(token);
+      await unsubscribeUser(token);
 
       res.set("Content-Type", "text/html");
       res.send(

@@ -1,11 +1,11 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
-const { activate } = require("../../common/users");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const validators = require("../utils/validators");
+const { activateUser } = require("../../common/actions/activateUser");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -38,7 +38,7 @@ module.exports = () => {
         throw Boom.badRequest(`L'utilisateur ${user.username} a déjà été créé.`);
       }
 
-      await activate(user.username, password);
+      await activateUser(user.username, password);
 
       return res.json({ token: createApiToken(user) });
     })

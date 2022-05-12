@@ -4,7 +4,7 @@ const testContext = require("./testContext.js");
 const { insertUser, insertCfa } = require("./fakeData.js");
 const server = require("../../../src/http/server");
 const { User, Cfa } = require("../../../src/common/model");
-const { activate } = require("../../../src/common/users");
+const { activateUser } = require("../../../src/common/actions/activateUser");
 
 let startServer = async (options = {}) => {
   let { components, helpers } = await testContext(options);
@@ -35,7 +35,7 @@ let startServer = async (options = {}) => {
         email: `${username}@apprentissage.beta.gouv.fr`,
         ...(rest || {}),
       });
-      await activate(username, password);
+      await activateUser(username, password);
 
       let auth = await logUser(username, password);
       let user = await Model.findOne({ username });

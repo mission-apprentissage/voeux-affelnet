@@ -40,7 +40,6 @@ integrationTests(__filename, () => {
       academie: { nom: "Toulouse", code: "16" },
       raison_sociale: "Lycée professionnel",
       emails: [],
-      contacts: [],
       etablissements: [{ uai: "0751234J" }],
       voeux_telechargements: [],
       isAdmin: false,

@@ -36,7 +36,6 @@ httpTests(__filename, ({ startServer }) => {
           email_source: "inconnue",
           etablissements: [],
           emails: [],
-          contacts: [],
           voeux_telechargements: [],
         },
       ],

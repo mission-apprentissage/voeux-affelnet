@@ -4,7 +4,7 @@ const Boom = require("boom");
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const { Strategy: LocalStrategy } = require("passport-local");
 const sha512Utils = require("../../common/utils/passwordUtils");
-const { getUser } = require("../../common/users");
+const { getUser } = require("../../common/actions/getUser");
 
 const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 

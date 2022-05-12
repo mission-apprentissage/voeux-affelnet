@@ -47,11 +47,6 @@ let schema = new Schema({
       }),
     ],
   },
-  contacts: {
-    type: [String],
-    required: true,
-    default: [],
-  },
   voeux_telechargements: {
     default: [],
     type: [
