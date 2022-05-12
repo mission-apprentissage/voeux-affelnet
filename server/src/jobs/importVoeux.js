@@ -174,12 +174,13 @@ function hasAnomaliesOnMandatoryFields(anomalies) {
 
 function updateCfa(uai, importDate) {
   return Cfa.updateOne(
-    { uai },
+    { "etablissements.uai": uai },
     {
       $set: {
-        voeux_date: importDate,
+        "etablissements.$.voeux_date": importDate,
       },
-    }
+    },
+    { runValidators: true }
   );
 }
 
