@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { program: cli } = require("commander");
-const { writeToStdout, oleoduc, transformIntoCSV } = require("oleoduc");
+const { writeToStdout } = require("oleoduc");
 const { createReadStream, createWriteStream } = require("fs");
 const { runScript } = require("./jobs/utils/jobWrapper");
 const logger = require("./common/logger");
@@ -12,8 +12,6 @@ const sendActivationEmails = require("./jobs/sendActivationEmails");
 const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
-const initCfaCsv = require("./jobs/initCfaCsv");
-const evaluation = require("./jobs/evaluation");
 const importCfas = require("./jobs/importCfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
@@ -30,35 +28,6 @@ process.stdout.on("error", function (err) {
     process.exit(0);
   }
 });
-
-cli
-  .command("evaluation")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action(({ out }) => {
-    runScript(async () => {
-      let output = out || writeToStdout();
-
-      return oleoduc(evaluation(), transformIntoCSV(), output);
-    });
-  });
-
-cli
-  .command("initCfaCsv")
-  .description(
-    `Génère un fichier qui servira de base à l'import des CFA.
-Ce script identifie les CFA à partir du fichier AFFELNET-LYCEE-20XX-OF_apprentissage.csv et va chercher les adresses email dans le catalogue.
-    `
-  )
-  .arguments("<file>")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action((file, { out }) => {
-    runScript(async () => {
-      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
-      let output = out || writeToStdout();
-
-      return oleoduc(initCfaCsv(input), transformIntoCSV(), output);
-    });
-  });
 
 cli
   .command("importCfas <cfaCsv>")
