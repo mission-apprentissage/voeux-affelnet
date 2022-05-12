@@ -76,7 +76,7 @@ module.exports = (options = {}) => {
     );
   }
 
-  function addSentDate(token, user, templateName) {
+  function addSendDate(token, user, templateName) {
     return User.updateOne(
       { "emails.token": token },
       {
@@ -155,7 +155,7 @@ module.exports = (options = {}) => {
       const template = templates[nextTemplateName](user, token, { resend: !options.retry });
 
       try {
-        await addSentDate(token, user, nextTemplateName);
+        await addSendDate(token, user, nextTemplateName);
         const messageId = await mailer.sendEmail(user.email, template);
         await addMessageId(token, messageId);
       } catch (e) {

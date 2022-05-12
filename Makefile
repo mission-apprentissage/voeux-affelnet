@@ -31,4 +31,4 @@ dataset:
 	docker exec voeux_affelnet_server yarn --silent --cwd server cli db	 injectDataset
 
 
-ci: install-server lint start-mongodb coverage clean
+ci: install-server lint coverage clean

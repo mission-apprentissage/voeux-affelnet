@@ -8,8 +8,8 @@ const importVoeux = require("../importVoeux");
 const createUser = require("../createUser");
 const sendConfirmationEmails = require("../sendConfirmationEmails");
 const sendActivationEmails = require("../sendActivationEmails");
-const FakeReferentielApi = require("../../../test/integration/utils/FakeReferentielApi");
-const { createStream } = require("../../../test/integration/utils/testUtils");
+const FakeReferentielApi = require("../../../tests/utils/FakeReferentielApi");
+const { createStream } = require("../../../tests/utils/testUtils");
 
 async function generateCfa(uaiEtablissement, values = {}) {
   const siret = faker.helpers.replaceSymbols("#########00015");
