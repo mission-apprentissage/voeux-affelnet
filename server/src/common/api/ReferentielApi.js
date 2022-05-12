@@ -15,9 +15,8 @@ class ReferentielApi extends RateLimitedApi {
   async getOrganisme(siret, params = {}) {
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching organisme ${siret}...`);
-      let url = `${ReferentielApi.baseApiUrl}/organismes/${siret}?${queryString.stringify(params)}`;
-      let response = await fetchJson(url);
-      return response.data;
+      const url = `${ReferentielApi.baseApiUrl}/organismes/${siret}?${queryString.stringify(params)}`;
+      return fetchJson(url);
     });
   }
 }

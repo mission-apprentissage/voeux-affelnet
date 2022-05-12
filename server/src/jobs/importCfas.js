@@ -2,7 +2,7 @@ const { oleoduc, filterData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
-const { findAcademieByCode } = require("../common/academies");
+const { findAcademieByCode, findAcademieByName } = require("../common/academies");
 const { Cfa } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 const ReferentielApi = require("../common/api/ReferentielApi");
@@ -51,6 +51,7 @@ async function importCfas(cfaCsv, options = {}) {
 
         try {
           let organisme = await referentielApi.getOrganisme(siret);
+
           let res = await Cfa.updateOne(
             { siret },
             {
@@ -60,8 +61,10 @@ async function importCfas(cfaCsv, options = {}) {
                 email: data.email,
                 email_source: data.email_source,
                 etablissements: await getEtablissements(siret, relations),
-                academie: findAcademieByCode(organisme.adresse?.academie.code),
                 raison_sociale: data.raison_sociale || organisme.raison_sociale,
+                academie: data.academie
+                  ? findAcademieByName(data.academie)
+                  : findAcademieByCode(organisme.adresse?.academie.code),
               },
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }

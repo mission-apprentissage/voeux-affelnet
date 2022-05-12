@@ -79,16 +79,14 @@ cli
 
 cli
   .command("importVoeux")
+  .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
+  .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
   .option("--importDate <importDate>", "Permet de définir manuellement (ISO 8601) la date d'import", (value) => {
     let importDate = DateTime.fromISO(value);
     if (!importDate.isValid) {
       throw new Error(`Invalid date ${value}`);
     }
     return importDate.toJSDate();
-  })
-  .arguments("<file>")
-  .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET", {
-    file: "Le fichier CSV contentant les voeux  (default: stdin)",
   })
   .action((file, options) => {
     runScript(async () => {

@@ -6,8 +6,9 @@ const { createStream } = require("../utils/testUtils");
 const { insertVoeu } = require("../utils/fakeData");
 const FakeReferentielApi = require("../utils/FakeReferentielApi");
 
-const fakeReferentielApi = new FakeReferentielApi({
-  11111111100006: {
+const fakeReferentielApi = new FakeReferentielApi([
+  {
+    siret: "11111111100006",
     adresse: {
       academie: {
         code: "16",
@@ -15,7 +16,7 @@ const fakeReferentielApi = new FakeReferentielApi({
       },
     },
   },
-});
+]);
 
 integrationTests(__filename, () => {
   it("Vérifie qu'on peut importer un cfa", async () => {
@@ -119,5 +120,22 @@ integrationTests(__filename, () => {
       ["0751234J", "0751234X"]
     );
     assert.deepStrictEqual(stats, { total: 1, created: 0, updated: 1, invalid: 0, failed: 0 });
+  });
+
+  it("Vérifie qu'on gère les relations dupliquées", async () => {
+    let cfaCsv = createStream(`siret;raison_sociale;email;email_source
+11111111100006;Lycée professionnel;contact@lycee.fr;rco`);
+    let relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
+0751234J;11111111100006
+0751234J;11111111100006
+`);
+
+    await importCfas(cfaCsv, {
+      relationsCsv,
+      referentielApi: fakeReferentielApi,
+    });
+
+    const found = await Cfa.findOne({ siret: "11111111100006" }, { _id: 0 }).lean();
+    assert.deepStrictEqual(found.etablissements, [{ uai: "0751234J" }]);
   });
 });

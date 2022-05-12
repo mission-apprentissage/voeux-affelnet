@@ -4,7 +4,10 @@ class FakeReferentielApi {
   }
 
   getOrganisme(siret) {
-    return this.responses[siret];
+    if (Array.isArray(this.responses)) {
+      return this.responses.find((r) => r.siret === siret);
+    }
+    return this.responses;
   }
 }
 

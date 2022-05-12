@@ -30,9 +30,8 @@ class CatalogueApi extends RateLimitedApi {
   async getFormations(query, options) {
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching formations...`, query);
-      let params = convertQueryIntoParams(query, options);
-      let response = await fetchJson(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`);
-      return response.data;
+      const params = convertQueryIntoParams(query, options);
+      return fetchJson(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`);
     });
   }
 }

@@ -63,16 +63,18 @@ function newLine(custom = {}) {
   };
 }
 
-function fakeVoeuxCsv(limit, custom) {
+function fakeVoeuxCsv(values, options = {}) {
+  const limit = options.limit || 100;
+
   let cpt = 0;
-  let source = new Readable({
+  const source = new Readable({
     objectMode: true,
     read() {
       if (++cpt > limit) {
         return this.push(null);
       }
 
-      return this.push(newLine(custom));
+      return this.push(newLine(values));
     },
   });
 

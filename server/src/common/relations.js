@@ -4,7 +4,7 @@ const { parseCsv } = require("./utils/csvUtils");
 const { Voeu } = require("./model");
 
 async function loadRelations(relationCsv) {
-  let stream = relationCsv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv"));
+  const stream = relationCsv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv"));
 
   let relations;
   await oleoduc(
@@ -12,12 +12,14 @@ async function loadRelations(relationCsv) {
     parseCsv(),
     accumulateData(
       (acc, data) => {
-        let siret = data["SIRET_UAI_GESTIONNAIRE"];
+        const siret = data["SIRET_UAI_GESTIONNAIRE"];
         if (!acc[siret]) {
           acc[siret] = [];
         }
 
-        acc[siret].push(data["UAI"]);
+        if (!acc[siret].includes(data["UAI"])) {
+          acc[siret].push(data["UAI"]);
+        }
         return acc;
       },
       { accumulator: {} }
@@ -31,7 +33,7 @@ async function loadRelations(relationCsv) {
 }
 
 async function getEtablissements(siret, relations) {
-  let uais = relations[siret] || [];
+  const uais = relations[siret] || [];
 
   return Promise.all(
     uais.map(async (uai) => {
