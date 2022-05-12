@@ -17,7 +17,6 @@ const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
 const exportCfasInconnus = require("./jobs/exportCfasInconnus");
 const createUser = require("./jobs/createUser");
-const createCfa = require("./jobs/createCfa");
 const { DateTime } = require("luxon");
 
 process.on("unhandledRejection", (e) => console.log(e));
@@ -35,7 +34,7 @@ cli
     "Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes :" +
       "'siret,raison_sociale,email_directeur,email_contact'"
   )
-  .options(
+  .option(
     "--relations <relationsCsv>",
     "Le csv contenant la liste des uai d'accueil et leur siret gestionnaire :" + "'UAI,SIRET_UAI_GESTIONNAIRE'",
     createReadStream
@@ -146,20 +145,6 @@ cli
   .action((username, email, options) => {
     runScript(() => {
       return createUser(username, email, options);
-    });
-  });
-
-cli
-  .command("createCfa")
-  .arguments("<username> <email>")
-  .description("Permet de créer un CFA sans passer par l'import des CFA")
-  .requiredOption("--academie <academie>")
-  .option("--raison_sociale <raison_sociale>")
-  .option("--siret <siret>")
-  .action((username, email, options) => {
-    runScript(() => {
-      let { academie, ...rest } = options;
-      return createCfa(username, email, academie, rest);
     });
   });
 
