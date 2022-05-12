@@ -1,39 +1,42 @@
 const express = require("express");
 const Boom = require("boom");
-const { oleoduc } = require("oleoduc");
+const Joi = require("@hapi/joi");
+const { compose } = require("oleoduc");
 const tryCatch = require("../../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../../middlewares/authMiddleware");
+const { validate } = require("../../utils/validators");
 
 module.exports = ({ users, cfas }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, checkIsCfa } = authMiddleware(users);
-
-  function streamVoeux(uai, res) {
-    res.setHeader("Content-disposition", `attachment; filename=${uai}.csv`);
-    res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-    oleoduc(cfas.voeuxCsvStream(uai), res);
-  }
 
   router.get(
     "/api/fichiers",
     checkApiToken(),
     checkIsCfa(),
     tryCatch(async (req, res) => {
-      let cfa = req.user;
+      const cfa = req.user;
 
-      if (!cfa.voeux_date) {
+      if (!cfa.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
-      let lastDownloadDate = cfa.voeux_telechargements.map((e) => e.date).find((date) => date >= cfa.voeux_date);
-      res.json([
-        {
-          //voeux
-          name: `${cfa.uai}.csv`,
-          date: cfa.voeux_date,
-          lastDownloadDate: lastDownloadDate ? lastDownloadDate : null,
-        },
-      ]);
+      res.json(
+        cfa.etablissements.map((etablissement) => {
+          const telechargements = cfa.voeux_telechargements
+            .filter((t) => t.uai === etablissement.uai && t.date >= etablissement.voeux_date)
+            .sort((a, b) => {
+              return a - b;
+            });
+
+          return {
+            //voeux
+            name: `${etablissement.uai}.csv`,
+            date: etablissement.voeux_date,
+            lastDownloadDate: telechargements[0]?.date || null,
+          };
+        })
+      );
     })
   );
 
@@ -42,15 +45,23 @@ module.exports = ({ users, cfas }) => {
     checkApiToken(),
     checkIsCfa(),
     tryCatch(async (req, res) => {
-      let { uai } = req.user;
-      let filename = req.params.file;
+      const { siret } = req.user;
+      const { file } = await validate(req.params, {
+        file: Joi.string()
+          .pattern(/^[0-9]{7}[A-Z]{1}\.csv$/)
+          .required(),
+      });
 
-      if (filename === `${uai}.csv`) {
-        await cfas.markVoeuxAsDownloaded(uai);
-        return streamVoeux(uai, res);
-      } else {
+      const uai = file.split(".csv")[0];
+
+      if (!req.user.etablissements.find((e) => e.uai === uai)) {
         throw Boom.notFound();
       }
+
+      await cfas.markVoeuxAsDownloaded(siret, uai);
+      res.setHeader("Content-disposition", `attachment; filename=${uai}.csv`);
+      res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
+      return compose(cfas.voeuxCsvStream(uai), res);
     })
   );
 

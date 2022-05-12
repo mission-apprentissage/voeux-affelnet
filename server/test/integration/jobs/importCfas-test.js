@@ -56,7 +56,9 @@ integrationTests(__filename, () => {
 0751234J;11111111100006`);
     let date = new Date();
     await insertVoeu({
-      "etablissement_accueil.uai": "0751234J",
+      etablissement_accueil: {
+        uai: "0751234J",
+      },
       _meta: {
         import_dates: [date],
       },

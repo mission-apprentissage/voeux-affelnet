@@ -7,7 +7,7 @@ const { insertCfa, insertUser } = require("../utils/fakeData");
 const { createActionToken } = require("../../../src/common/utils/jwtUtils");
 
 httpTests(__filename, ({ startServer }) => {
-  it("Vérifie qu'un utilisateur peut vérifier son statut", async () => {
+  it.only("Vérifie qu'un utilisateur peut vérifier son statut", async () => {
     let { httpClient } = await startServer();
     let user = await insertUser({
       username: "user1",
@@ -21,7 +21,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(response.data, {});
   });
 
-  it("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus l'activation", async () => {
+  it.only("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus l'activation", async () => {
     let { httpClient } = await startServer();
     let user = await insertUser({
       username: "user1",
@@ -39,7 +39,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'un utilisateur peut activer un compte", async () => {
+  it.only("Vérifie qu'un utilisateur peut activer un compte", async () => {
     let { httpClient } = await startServer();
     let user = await insertUser({
       username: "user1",
@@ -65,7 +65,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'un CFA peut activer un compte", async () => {
+  it.only("Vérifie qu'un CFA peut activer un compte", async () => {
     let { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
@@ -88,7 +88,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
+  it.only("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
     let { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
@@ -100,7 +100,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 400);
   });
 
-  it("Vérifie qu'on ne peut pas créer de compte avec un token invalide", async () => {
+  it.only("Vérifie qu'on ne peut pas créer de compte avec un token invalide", async () => {
     let { httpClient } = await startServer();
 
     let response = await httpClient.post("/api/activation", {
@@ -111,7 +111,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 401);
   });
 
-  it("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
+  it.only("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
     let { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
@@ -123,7 +123,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 401);
   });
 
-  it("Vérifie qu'on ne peut pas utiliser plusieurs fois un token", async () => {
+  it.only("Vérifie qu'on ne peut pas utiliser plusieurs fois un token", async () => {
     let { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
@@ -141,7 +141,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 400);
   });
 
-  it("Vérifie qu'on ne peut pas créer de compte avec un token forgé", async () => {
+  it.only("Vérifie qu'on ne peut pas créer de compte avec un token forgé", async () => {
     let { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 

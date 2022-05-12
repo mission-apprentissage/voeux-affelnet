@@ -1,18 +1,18 @@
 const Boom = require("boom");
-const { oleoduc, transformData, transformIntoCSV } = require("oleoduc");
+const { transformData, transformIntoCSV, compose } = require("oleoduc");
 const { Voeu, Cfa } = require("./model");
 
 module.exports = () => {
   return {
-    async confirm(uai, email, options = {}) {
-      let cfa = await Cfa.findOne({ uai });
+    async confirm(siret, email, options = {}) {
+      let cfa = await Cfa.findOne({ siret });
 
       if (!email || (!options.force && cfa.statut !== "en attente")) {
-        throw Boom.badRequest(`Une confirmation a déjà été enregistrée pour le cfa ${uai}`);
+        throw Boom.badRequest(`Une confirmation a déjà été enregistrée pour le cfa ${siret}`);
       }
 
       return Cfa.findOneAndUpdate(
-        { uai },
+        { siret },
         {
           $set: {
             statut: "confirmé",
@@ -23,9 +23,9 @@ module.exports = () => {
         { new: true }
       ).lean();
     },
-    async changeEmail(uai, newEmail) {
+    async changeEmail(siret, newEmail) {
       return Cfa.findOneAndUpdate(
-        { uai },
+        { siret },
         {
           $set: {
             email: newEmail,
@@ -34,9 +34,9 @@ module.exports = () => {
         { new: true }
       ).lean();
     },
-    async markAsNonConcerne(uai) {
+    async markAsNonConcerne(siret) {
       return Cfa.findOneAndUpdate(
-        { uai },
+        { siret },
         {
           $set: {
             statut: "non concerné",
@@ -45,9 +45,9 @@ module.exports = () => {
         { new: true }
       ).lean();
     },
-    async cancelUnsubscription(uai) {
+    async cancelUnsubscription(siret) {
       return Cfa.findOneAndUpdate(
-        { uai },
+        { siret },
         {
           $set: {
             unsubscribe: false,
@@ -57,7 +57,7 @@ module.exports = () => {
       ).lean();
     },
     voeuxCsvStream(uai) {
-      return oleoduc(
+      return compose(
         Voeu.find({ "etablissement_accueil.uai": uai }).lean().cursor(),
         transformData((voeu) => {
           return {
@@ -85,18 +85,17 @@ module.exports = () => {
             NOM_ETAB_ORIGINE: voeu.etablissement_origine?.nom,
           };
         }),
-        transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
-        { promisify: false }
+        transformIntoCSV({ mapper: (v) => `"${v || ""}"` })
       );
     },
-    markVoeuxAsDownloaded(uai, options = {}) {
+    markVoeuxAsDownloaded(siret, uai) {
       return Cfa.updateOne(
-        { uai },
+        { siret },
         {
           $push: {
             voeux_telechargements: {
-              $each: [{ date: new Date(), ...options }],
-              $slice: 100,
+              $each: [{ uai, date: new Date() }],
+              $slice: 500,
             },
           },
         }

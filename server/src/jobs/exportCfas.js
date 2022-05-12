@@ -27,7 +27,7 @@ async function exportCfas(output, options = {}) {
           let error = data.unsubscribe ? "unsubscribe" : data.emails.find((e) => e.error)?.error?.type;
           return errorMapper[error];
         },
-        voeux: (data) => (data.voeux_date ? "Oui" : "Non"),
+        voeux: (data) => (data.etablissements.find((e) => e.voeux_date) ? "Oui" : "Non"),
         ...columns,
       },
     }),

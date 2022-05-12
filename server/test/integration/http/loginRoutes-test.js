@@ -6,7 +6,7 @@ const httpTests = require("../utils/httpTests");
 const { insertUser } = require("../utils/fakeData");
 
 httpTests(__filename, ({ startServer }) => {
-  it("Vérifie qu'on peut se connecter", async () => {
+  it.only("Vérifie qu'on peut se connecter", async () => {
     let { httpClient, components } = await startServer();
     await insertUser({
       username: "user1",
@@ -32,7 +32,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on peut se connecter en lowercase avec un uai", async () => {
+  it.only("Vérifie qu'on peut se connecter en lowercase avec un uai", async () => {
     let { httpClient, components } = await startServer();
     await insertUser({
       username: "3319338X",
@@ -48,7 +48,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 200);
   });
 
-  it("Vérifie qu'un mot de passe invalide est rejeté", async () => {
+  it.only("Vérifie qu'un mot de passe invalide est rejeté", async () => {
     let { httpClient, components } = await startServer();
     await insertUser({
       username: "user1",
@@ -65,7 +65,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 401);
   });
 
-  it("Vérifie qu'un login invalide est rejeté", async () => {
+  it.only("Vérifie qu'un login invalide est rejeté", async () => {
     let { httpClient } = await startServer();
 
     let response = await httpClient.post("/api/login", {
@@ -76,7 +76,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 401);
   });
 
-  it("Vérifie qu'un utilisateur en attente est rejeté", async () => {
+  it.only("Vérifie qu'un utilisateur en attente est rejeté", async () => {
     let { httpClient } = await startServer();
     await insertUser({
       username: "user1",
@@ -92,7 +92,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 401);
   });
 
-  it("Vérifie qu'un utilisateur confirmé est rejeté", async () => {
+  it.only("Vérifie qu'un utilisateur confirmé est rejeté", async () => {
     let { httpClient } = await startServer();
     await insertUser({
       username: "user1",

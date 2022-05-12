@@ -1,18 +1,18 @@
 const assert = require("assert");
 const { DateTime } = require("luxon");
-const { User, Cfa } = require("../../../src/common/model");
+const { Cfa } = require("../../../src/common/model");
 const httpTests = require("../utils/httpTests");
 const { insertVoeu } = require("../utils/fakeData");
 
 httpTests(__filename, ({ startServer }) => {
-  it("Vérifie qu'un cfa peut accéder à la liste des fichiers en étant authentifié", async () => {
+  it.only("Vérifie qu'un cfa peut accéder à la liste des fichiers en étant authentifié", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("0751234J", "password", {
+    const { auth } = await createAndLogUser("11111111100006", "password", {
       model: Cfa,
-      voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate(),
+      etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
     });
 
-    let response = await httpClient.get("/api/fichiers", {
+    const response = await httpClient.get("/api/fichiers", {
       headers: {
         ...auth,
       },
@@ -28,16 +28,19 @@ httpTests(__filename, ({ startServer }) => {
     ]);
   });
 
-  it("Vérifie qu'on peut accéder à un fichier", async () => {
+  it.only("Vérifie qu'on peut accéder à un fichier", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("0751234J", "password", { model: Cfa, voeux_date: new Date() });
+    const { auth } = await createAndLogUser("0751234J", "password", {
+      model: Cfa,
+      etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
+    });
     await insertVoeu({
       apprenant: { ine: "ABCDEF" },
       etablissement_accueil: { uai: "0751234J" },
       formation: { mef: "2472521431", code_formation_diplome: "40025214" },
     });
 
-    let response = await httpClient.get("/api/fichiers/0751234J.csv", {
+    const response = await httpClient.get("/api/fichiers/0751234J.csv", {
       headers: {
         ...auth,
       },
@@ -52,14 +55,17 @@ httpTests(__filename, ({ startServer }) => {
     );
   });
 
-  it("Vérifie qu'un événement est enregistré quand un cfa télécharge un fichier", async () => {
+  it.only("Vérifie qu'un événement est enregistré quand un cfa télécharge un fichier", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("0751234J", "password", { model: Cfa, voeux_date: new Date() });
+    const { auth } = await createAndLogUser("11111111100006", "password", {
+      model: Cfa,
+      etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
+    });
     await insertVoeu({
       etablissement_accueil: { uai: "0751234J" },
     });
 
-    let response = await httpClient.get("/api/fichiers/0751234J.csv", {
+    const response = await httpClient.get("/api/fichiers/0751234J.csv", {
       headers: {
         ...auth,
       },
@@ -67,23 +73,24 @@ httpTests(__filename, ({ startServer }) => {
 
     assert.strictEqual(response.status, 200);
 
-    let found = await User.findOne({ username: "0751234J", "voeux_telechargements.0": { $exists: true } }).lean();
+    const found = await Cfa.findOne({ username: "11111111100006" }).lean();
     assert.ok(found.voeux_telechargements[0].date);
   });
 
-  it("Vérifie qu'on indique au cfa quand il y a une nouvelle version du fichier disponible", async () => {
+  it.only("Vérifie qu'on indique au cfa quand il y a une nouvelle version du fichier disponible", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("0751234J", "password", {
+    const { auth } = await createAndLogUser("11111111100006", "password", {
       model: Cfa,
-      voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate(),
+      etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: DateTime.fromISO("2021-06-02T14:00:00.000Z").minus({ days: 10 }).toJSDate(),
         },
       ],
     });
 
-    let response = await httpClient.get("/api/fichiers", {
+    const response = await httpClient.get("/api/fichiers", {
       headers: {
         ...auth,
       },
@@ -99,19 +106,20 @@ httpTests(__filename, ({ startServer }) => {
     ]);
   });
 
-  it("Vérifie qu'on indique au cfa si le fichier a déjà été téléchargé", async () => {
+  it.only("Vérifie qu'on indique au cfa si le fichier a déjà été téléchargé", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("0751234J", "password", {
+    const { auth } = await createAndLogUser("11111111100006", "password", {
       model: Cfa,
-      voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate(),
+      etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: DateTime.fromISO("2021-06-03T14:00:00.000Z").toJSDate(),
         },
       ],
     });
 
-    let response = await httpClient.get("/api/fichiers", {
+    const response = await httpClient.get("/api/fichiers", {
       headers: {
         ...auth,
       },
@@ -127,11 +135,11 @@ httpTests(__filename, ({ startServer }) => {
     ]);
   });
 
-  it("Doit rejeter un utilisateur qui n'est pas un cfa", async () => {
+  it.only("Doit rejeter un utilisateur qui n'est pas un cfa", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("user1", "password");
+    const { auth } = await createAndLogUser("user1", "password");
 
-    let response = await httpClient.get("/api/fichiers/unknown.csv", {
+    const response = await httpClient.get("/api/fichiers/unknown.csv", {
       headers: {
         ...auth,
       },
@@ -140,11 +148,11 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 403);
   });
 
-  it("Doit rejeter un fichier inconnu", async () => {
+  it.only("Doit rejeter un fichier UAI qui n'appartient pas au CFA", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("0751234J", "password", { model: Cfa });
+    const { auth } = await createAndLogUser("11111111100006", "password", { model: Cfa });
 
-    let response = await httpClient.get("/api/fichiers/unknown.csv", {
+    const response = await httpClient.get("/api/fichiers/0751234X.csv", {
       headers: {
         ...auth,
       },
@@ -153,10 +161,23 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 404);
   });
 
+  it.only("Doit rejeter un nom de fichier invalide", async () => {
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("11111111100006", "password", { model: Cfa });
+
+    const response = await httpClient.get("/api/fichiers/invalide.csv", {
+      headers: {
+        ...auth,
+      },
+    });
+
+    assert.strictEqual(response.status, 400);
+  });
+
   it("Doit rejeter une requete sans authentification", async () => {
     const { httpClient } = await startServer();
 
-    let response = await httpClient.get("/api/fichiers");
+    const response = await httpClient.get("/api/fichiers");
 
     assert.strictEqual(response.status, 401);
   });

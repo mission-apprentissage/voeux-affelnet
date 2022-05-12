@@ -9,6 +9,10 @@ const customJoi = Joi.extend((joi) => ({
   },
 }));
 
+function validate(obj, validators) {
+  return Joi.object(validators).validateAsync(obj, { abortEarly: false });
+}
+
 module.exports = {
   stringList: () => customJoi.stringList().items(Joi.string()).single(),
   password: () =>
@@ -16,4 +20,5 @@ module.exports = {
     Joi.string().regex(
       /^(?=.*[A-Za-z])(?=.*\d)(?=.*[ !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~])[A-Za-z\d !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]{8,}$/
     ),
+  validate,
 };

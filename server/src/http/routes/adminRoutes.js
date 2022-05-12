@@ -63,48 +63,48 @@ module.exports = ({ users, cfas, emails }) => {
   );
 
   router.put(
-    "/api/admin/cfas/:uai/setEmail",
+    "/api/admin/cfas/:siret/setEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai, email } = await Joi.object({
-        uai: Joi.string().required(),
+      let { siret, email } = await Joi.object({
+        siret: Joi.string().required(),
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
-      await cfas.changeEmail(uai, email);
+      await cfas.changeEmail(siret, email);
 
       return res.json({});
     })
   );
 
   router.put(
-    "/api/admin/cfas/:uai/resendConfirmationEmail",
+    "/api/admin/cfas/:siret/resendConfirmationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai } = await Joi.object({
-        uai: Joi.string().required(),
+      let { siret } = await Joi.object({
+        siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.cancelUnsubscription(uai);
-      let stats = await resendConfirmationEmails(emails, { uai });
+      await cfas.cancelUnsubscription(siret);
+      let stats = await resendConfirmationEmails(emails, { siret });
 
       return res.json(stats);
     })
   );
 
   router.put(
-    "/api/admin/cfas/:uai/resendActivationEmail",
+    "/api/admin/cfas/:siret/resendActivationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai } = await Joi.object({
-        uai: Joi.string().required(),
+      let { siret } = await Joi.object({
+        siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.cancelUnsubscription(uai);
-      let stats = await resendActivationEmails(emails, { username: uai });
+      await cfas.cancelUnsubscription(siret);
+      let stats = await resendActivationEmails(emails, { username: siret });
 
       return res.json(stats);
     })
@@ -151,11 +151,13 @@ module.exports = ({ users, cfas, emails }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       exportCfas(asCsvResponse("cfas-relances", res), {
-        filter: { statut: { $in: ["en attente", "confirmé"] }, voeux_date: { $exists: true } },
+        filter: { statut: { $in: ["en attente", "confirmé"] }, "etablissements.voeux_date": { $exists: true } },
         columns: {
           statut: (data) => data.statut,
           nb_voeux: async (data) => {
-            let count = await Voeu.countDocuments({ "etablissement_accueil.uai": data.uai });
+            let count = await Voeu.countDocuments({
+              "etablissement_accueil.uai": { $in: data.etablissements.map((e) => e.uai) },
+            });
             return count ? count : "0";
           },
         },

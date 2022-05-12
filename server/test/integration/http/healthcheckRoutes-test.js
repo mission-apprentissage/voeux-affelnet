@@ -2,7 +2,7 @@ const assert = require("assert");
 const httpTests = require("../utils/httpTests");
 
 httpTests(__filename, ({ startServer }) => {
-  it("Vérifie que le server fonctionne", async () => {
+  it.only("Vérifie que le server fonctionne", async () => {
     let { httpClient } = await startServer();
 
     let response = await httpClient.get("/api/healthcheck");
@@ -11,7 +11,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.data.healthcheck, true);
   });
 
-  it("Vérifie qu'on peut générer une erreur", async () => {
+  it.only("Vérifie qu'on peut générer une erreur", async () => {
     let { httpClient } = await startServer();
 
     let response = await httpClient.get("/api/healthcheck/error");

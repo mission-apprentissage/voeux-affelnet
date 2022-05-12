@@ -17,6 +17,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: lastWeek,
         },
       ],
@@ -47,6 +48,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: lastWeek,
         },
       ],
@@ -80,15 +82,17 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: lastWeek,
         },
       ],
     });
     await insertCfa({
       statut: "activé",
-      etablissements: [{ uai: "0751234J", voeux_date: today }],
+      etablissements: [{ uai: "0751234X", voeux_date: today }],
       voeux_telechargements: [
         {
+          uai: "0751234X",
           date: lastWeek,
         },
       ],

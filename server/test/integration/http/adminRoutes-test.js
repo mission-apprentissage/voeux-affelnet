@@ -4,16 +4,16 @@ const httpTests = require("../utils/httpTests");
 const { insertCfa, insertVoeu, insertLog } = require("../utils/fakeData");
 
 httpTests(__filename, ({ startServer }) => {
-  it("Vérifie qu'on peut obtenir la liste des cfas", async () => {
+  it.only("Vérifie qu'on peut obtenir la liste des cfas", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       password: "12345",
-      siret: "46016873300015",
       email: "contact@organisme.com",
       raison_sociale: "Organisme de formation",
     });
+
     let response = await httpClient.get("/api/admin/cfas", {
       headers: {
         ...auth,
@@ -24,19 +24,19 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(response.data, {
       cfas: [
         {
-          email_source: "contact",
           statut: "en attente",
           isAdmin: false,
           unsubscribe: false,
           type: "Cfa",
-          username: "0751234J",
-          email: "contact@organisme.com",
-          emails: [],
-          contacts: [],
-          siret: "46016873300015",
-          uai: "0751234J",
+          username: "11111111100006",
+          siret: "11111111100006",
           raison_sociale: "Organisme de formation",
           academie: { code: "11", nom: "Île-de-France" },
+          email: "contact@organisme.com",
+          email_source: "inconnue",
+          etablissements: [],
+          emails: [],
+          contacts: [],
           voeux_telechargements: [],
         },
       ],
@@ -44,12 +44,12 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on peut obtenir la liste paginée des cfas ", async () => {
+  it.only("Vérifie qu'on peut obtenir la liste paginée des cfas ", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertCfa({ username: "0751234J" });
-    await insertCfa({ username: "1234568X" });
-    await insertCfa({ username: "1234569Y" });
+    await insertCfa({ username: "11111111100006" });
+    await insertCfa({ username: "22222222200006" });
+    await insertCfa({ username: "33333333300006" });
 
     let response = await httpClient.get("/api/admin/cfas?page=2&items_par_page=1", {
       headers: {
@@ -59,10 +59,10 @@ httpTests(__filename, ({ startServer }) => {
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.cfas.length, 1);
-    assert.deepStrictEqual(response.data.cfas[0].username, "1234568X");
+    assert.deepStrictEqual(response.data.cfas[0].username, "22222222200006");
   });
 
-  it("Vérifie qu'on peut filtrer les cfas", async () => {
+  it.only("Vérifie qu'on peut filtrer les cfas", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
@@ -83,11 +83,10 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.data.cfas[0].email, "contact@organisme.fr");
   });
 
-  it("Vérifie qu'on peut exporter les cfas injoinables", async () => {
+  it.only("Vérifie qu'on peut exporter les cfas injoinables", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
-      uai: "0751234J",
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
       email: "test@apprentissage.beta.gouv.fr",
@@ -114,22 +113,26 @@ httpTests(__filename, ({ startServer }) => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"uai";"siret";"raison_sociale";"academie";"email";"erreur";"voeux"
-"0751234J";"11111111100015";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
+      `"siret";"raison_sociale";"academie";"email";"erreur";"voeux"
+"11111111100015";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
 `
     );
   });
 
-  it("Vérifie qu'on peut exporter les cfas à relancer", async () => {
+  it.only("Vérifie qu'on peut exporter les cfas à relancer", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
-      uai: "0751234J",
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "en attente",
-      voeux_date: new Date(),
+      etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
+    });
+    await insertVoeu({
+      etablissement_accueil: {
+        uai: "0751234J",
+      },
     });
 
     let response = await httpClient.get("/api/admin/cfas/relances.csv", {
@@ -139,16 +142,15 @@ httpTests(__filename, ({ startServer }) => {
     });
 
     assert.strictEqual(response.status, 200);
-    console.log(response.data);
     assert.strictEqual(
       response.data,
-      `"uai";"siret";"raison_sociale";"academie";"email";"erreur";"voeux";"statut";"nb_voeux"
-"0751234J";"11111111100015";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"0"
+      `"siret";"raison_sociale";"academie";"email";"erreur";"voeux";"statut";"nb_voeux"
+"11111111100015";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"1"
 `
     );
   });
 
-  it("Vérifie qu'on peut exporter les cfas inconnus", async () => {
+  it.only("Vérifie qu'on peut exporter les cfas inconnus", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertVoeu({
@@ -174,7 +176,7 @@ httpTests(__filename, ({ startServer }) => {
     );
   });
 
-  it("Vérifie qu'il faut être admin pour exporter", async () => {
+  it.only("Vérifie qu'il faut être admin pour exporter", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
@@ -192,7 +194,7 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on peut voir les consultations de la page stats par académie", async () => {
+  it.only("Vérifie qu'on peut voir les consultations de la page stats par académie", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertLog({
@@ -224,20 +226,20 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on peut modifier l'adresse email d'un CFA", async () => {
+  it.only("Vérifie qu'on peut modifier l'adresse email d'un CFA", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "x@organisme.com",
     });
     await insertCfa({
-      username: "1234568X",
+      username: "22222222200006",
       email: "y@organisme.com",
     });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/setEmail",
+      "/api/admin/cfas/11111111100006/setEmail",
       {
         email: "robert.hue@organisme.com",
       },
@@ -249,18 +251,18 @@ httpTests(__filename, ({ startServer }) => {
     );
 
     assert.strictEqual(response.status, 200);
-    let found = await Cfa.findOne({ username: "0751234J" });
+    let found = await Cfa.findOne({ username: "11111111100006" });
     assert.deepStrictEqual(found.email, "robert.hue@organisme.com");
-    found = await Cfa.findOne({ username: "1234568X" });
+    found = await Cfa.findOne({ username: "22222222200006" });
     assert.deepStrictEqual(found.email, "y@organisme.com");
   });
 
-  it("Vérifie qu'il faut être admin pour changer l'email", async () => {
+  it.only("Vérifie qu'il faut être admin pour changer l'email", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/setEmail",
+      "/api/admin/cfas/11111111100006/setEmail",
       {},
       {
         headers: {
@@ -277,35 +279,35 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on ne peut renvoyer un email de confirmation", async () => {
+  it.only("Vérifie qu'on ne peut renvoyer un email de confirmation", async () => {
     let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
-      username: "0751234J",
+      siret: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
       unsubscribe: true,
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
         },
       ],
     });
     await insertCfa({
-      username: "1234568X",
+      siret: "22222222200006",
       statut: "en attente",
       email: "test2@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_contact",
+          templateName: "confirmation",
         },
       ],
     });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/resendConfirmationEmail",
+      "/api/admin/cfas/11111111100006/resendConfirmationEmail",
       {},
       {
         headers: {
@@ -319,8 +321,7 @@ httpTests(__filename, ({ startServer }) => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      "[Rappel] Demande d'informations concernant la communication des voeux exprimés " +
-        "en apprentissage via Affelnet pour l'UAI 0751234J"
+      "[Rappel] Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
     );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
@@ -330,12 +331,12 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'il faut être admin pour changer renvoyer un email de confirmation", async () => {
+  it.only("Vérifie qu'il faut être admin pour changer renvoyer un email de confirmation", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/resendConfirmationEmail",
+      "/api/admin/cfas/11111111100006/resendConfirmationEmail",
       {},
       {
         headers: {
@@ -352,35 +353,35 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on peut renvoyer un email d'activation", async () => {
+  it.only("Vérifie qu'on peut renvoyer un email d'activation", async () => {
     let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
-      username: "0751234J",
+      siret: "11111111100006",
       statut: "confirmé",
       email: "test1@apprentissage.beta.gouv.fr",
       unsubscribe: true,
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_cfa",
         },
       ],
     });
     await insertCfa({
-      username: "1234568X",
+      username: "22222222200006",
       statut: "confirmé",
       email: "test2@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_cfa",
         },
       ],
     });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/resendActivationEmail",
+      "/api/admin/cfas/11111111100006/resendActivationEmail",
       {},
       {
         headers: {
@@ -392,7 +393,7 @@ httpTests(__filename, ({ startServer }) => {
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].subject, "[Rappel] Activation de votre compte pour l'UAI 0751234J");
+    assert.deepStrictEqual(sent[0].subject, "[Rappel] Des voeux Affelnet sont téléchargeables");
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
       total: 1,
@@ -401,12 +402,12 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'il faut être admin pour changer renvoyer un email d'activation", async () => {
+  it.only("Vérifie qu'il faut être admin pour changer renvoyer un email d'activation", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/resendActivationEmail",
+      "/api/admin/cfas/11111111100006/resendActivationEmail",
       {},
       {
         headers: {
@@ -423,20 +424,20 @@ httpTests(__filename, ({ startServer }) => {
     });
   });
 
-  it("Vérifie qu'on peut marquer un CFA comme non concerné", async () => {
+  it.only("Vérifie qu'on peut marquer un CFA comme non concerné", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
-      username: "0751234J",
+      siret: "11111111100006",
       statut: "confirmé",
     });
     await insertCfa({
-      username: "1234568X",
+      siret: "22222222200006",
       statut: "confirmé",
     });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/markAsNonConcerne",
+      "/api/admin/cfas/11111111100006/markAsNonConcerne",
       {},
       {
         headers: {
@@ -447,18 +448,18 @@ httpTests(__filename, ({ startServer }) => {
 
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data.statut, "non concerné");
-    let found = await Cfa.findOne({ username: "0751234J" });
+    let found = await Cfa.findOne({ username: "11111111100006" });
     assert.deepStrictEqual(found.statut, "non concerné");
-    found = await Cfa.findOne({ username: "1234568X" });
+    found = await Cfa.findOne({ username: "22222222200006" });
     assert.deepStrictEqual(found.statut, "confirmé");
   });
 
-  it("Vérifie qu'il faut être admin pour le statut d'un CFA", async () => {
+  it.only("Vérifie qu'il faut être admin pour le statut d'un CFA", async () => {
     let { httpClient, createAndLogUser } = await startServer();
     let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     let response = await httpClient.put(
-      "/api/admin/cfas/0751234J/markAsNonConcerne",
+      "/api/admin/cfas/11111111100006/markAsNonConcerne",
       {},
       {
         headers: {

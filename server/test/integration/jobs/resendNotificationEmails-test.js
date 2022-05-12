@@ -17,6 +17,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: twoWeeksAgo,
         },
       ],
@@ -57,6 +58,7 @@ integrationTests(__filename, (context) => {
       ],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: eightDaysAgo,
         },
       ],
@@ -92,6 +94,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: today,
         },
       ],
@@ -100,23 +103,6 @@ integrationTests(__filename, (context) => {
           token: "TOKEN",
           templateName: "notification",
           sendDates: [eightDaysAgo],
-        },
-      ],
-    });
-    await insertCfa({
-      email: "test@apprentissage.beta.gouv.fr",
-      statut: "activé",
-      etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
-      voeux_telechargements: [
-        {
-          date: today,
-        },
-      ],
-      emails: [
-        {
-          token: "TOKEN",
-          templateName: "notification",
-          sendDates: [today],
         },
       ],
     });
@@ -144,6 +130,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: twoWeeksAgo,
         },
       ],
@@ -175,6 +162,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: twoWeeksAgo,
         },
       ],
@@ -193,6 +181,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: twoWeeksAgo,
         },
       ],
@@ -229,6 +218,7 @@ integrationTests(__filename, (context) => {
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [
         {
+          uai: "0751234J",
           date: twoWeeksAgo,
         },
       ],

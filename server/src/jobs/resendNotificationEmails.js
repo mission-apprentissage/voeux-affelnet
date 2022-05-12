@@ -3,7 +3,7 @@ const { DateTime } = require("luxon");
 const { Cfa } = require("../common/model");
 const { every } = require("lodash");
 
-function isAlreadyDownloaded(cfa) {
+function allFilesAsAlreadyBeenDownloaded(cfa) {
   return !!cfa.voeux_telechargements.find((download) => {
     return every(
       cfa.etablissements.map((e) => e.voeux_date),
@@ -46,7 +46,7 @@ async function resendNotificationEmails(emails, options = {}) {
     .lean()
     .cursor()
     .eachAsync(async (cfa) => {
-      if (isAlreadyDownloaded(cfa)) {
+      if (allFilesAsAlreadyBeenDownloaded(cfa)) {
         return;
       }
 

@@ -56,6 +56,10 @@ let schema = new Schema({
     default: [],
     type: [
       nested({
+        uai: {
+          type: String,
+          required: true,
+        },
         date: {
           type: Date,
           required: true,
