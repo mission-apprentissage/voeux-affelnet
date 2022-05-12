@@ -21,30 +21,33 @@ async function importMefs(options = {}) {
     parseCsv({
       delimiter: "|",
     }),
-    writeData(async (data) => {
-      try {
-        stats.total++;
-        let res = await Mef.updateOne(
-          {
-            mef: data.MEF,
-          },
-          {
-            $set: {
+    writeData(
+      async (data) => {
+        try {
+          stats.total++;
+          let res = await Mef.updateOne(
+            {
               mef: data.MEF,
-              libelle_long: data.LIBELLE_LONG,
-              code_formation_diplome: data.FORMATION_DIPLOME,
             },
-          },
-          { upsert: true, setDefaultsOnInsert: true, runValidators: true }
-        );
+            {
+              $set: {
+                mef: data.MEF,
+                libelle_long: data.LIBELLE_LONG,
+                code_formation_diplome: data.FORMATION_DIPLOME,
+              },
+            },
+            { upsert: true, setDefaultsOnInsert: true, runValidators: true }
+          );
 
-        stats.updated += res.nModified || 0;
-        stats.created += (res.upserted && res.upserted.length) || 0;
-      } catch (e) {
-        logger.error(`Impossible d'importer le code mef  ${data.MEF}`);
-        stats.failed++;
-      }
-    })
+          stats.updated += res.nModified || 0;
+          stats.created += (res.upserted && res.upserted.length) || 0;
+        } catch (e) {
+          logger.error(`Impossible d'importer le code mef  ${data.MEF}`);
+          stats.failed++;
+        }
+      },
+      { parallel: 10 }
+    )
   );
 
   return stats;
