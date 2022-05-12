@@ -1,5 +1,5 @@
 const RateLimitedApi = require("./RateLimitedApi");
-const { getUrl } = require("../utils/httpUtils");
+const { fetchJson } = require("../utils/httpUtils");
 const queryString = require("query-string");
 const logger = require("../logger");
 
@@ -31,7 +31,7 @@ class CatalogueApi extends RateLimitedApi {
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching formations...`, query);
       let params = convertQueryIntoParams(query, options);
-      let response = await getUrl(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`);
+      let response = await fetchJson(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`);
       return response.data;
     });
   }

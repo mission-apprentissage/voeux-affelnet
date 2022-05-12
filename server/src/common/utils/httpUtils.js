@@ -1,24 +1,33 @@
-const logger = require("../logger");
 const axios = require("axios");
 const { compose, transformData } = require("oleoduc");
+const logger = require("../logger").child({ context: "http" });
+
+async function _fetch(url, options = {}) {
+  let { method = "GET", data, ...rest } = options;
+  logger.debug(`${method} ${url}...`);
+
+  return axios.request({
+    url,
+    method,
+    ...(data ? { data } : {}),
+    ...rest,
+  });
+}
+
+async function fetchStream(url, options = {}) {
+  let response = await _fetch(url, { ...options, responseType: "stream" });
+  return compose(
+    response.data,
+    transformData((d) => d.toString())
+  );
+}
+
+async function fetchJson(url, options = {}) {
+  let response = await _fetch(url, { ...options, responseType: "json" });
+  return response.data;
+}
 
 module.exports = {
-  getUrl: (url, options) => axios.get(url, options),
-  fetch: async (url, options = {}) => {
-    let { method = "GET", data, ...rest } = options;
-    logger.debug(`${method} ${url}...`);
-
-    const response = await axios.request({
-      url,
-      method,
-      responseType: "stream",
-      ...(data ? { data } : {}),
-      ...rest,
-    });
-
-    return compose(
-      response.data,
-      transformData((d) => d.toString())
-    );
-  },
+  fetchStream,
+  fetchJson,
 };

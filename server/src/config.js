@@ -53,6 +53,7 @@ module.exports = {
   ovh: {
     storage: {
       uri: env.get("VOEUX_AFFELNET_OVH_STORAGE_URI").asString(),
+      storageName: env.get("VOEUX_AFFELNET_OVH_STORAGE_NAME").default("mna-voeux-affelnet").asString(),
     },
   },
 };

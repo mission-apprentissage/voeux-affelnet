@@ -24,7 +24,8 @@ integrationTests(__filename, () => {
     let relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006`);
 
-    let stats = await importCfas(cfaCsv, relationsCsv, {
+    let stats = await importCfas(cfaCsv, {
+      relationsCsv,
       referentielApi: fakeReferentielApi,
     });
 
@@ -61,7 +62,8 @@ integrationTests(__filename, () => {
       },
     });
 
-    await importCfas(cfaCsv, relationsCsv, {
+    await importCfas(cfaCsv, {
+      relationsCsv,
       referentielApi: fakeReferentielApi,
     });
 
@@ -75,7 +77,8 @@ integrationTests(__filename, () => {
     let relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006`);
 
-    let stats = await importCfas(cfaCsv, relationsCsv, {
+    let stats = await importCfas(cfaCsv, {
+      relationsCsv,
       referentielApi: fakeReferentielApi,
     });
 
@@ -88,22 +91,22 @@ integrationTests(__filename, () => {
     await importCfas(
       createStream(`siret;raison_sociale;email;email_source
 11111111100006;Lycée professionnel 1;contact@lycee.fr;rco`),
-      createStream(`UAI;SIRET_UAI_GESTIONNAIRE
-0751234J;11111111100006`),
       {
         referentielApi: fakeReferentielApi,
+        relationsCsv: createStream(`UAI;SIRET_UAI_GESTIONNAIRE
+0751234J;11111111100006`),
       }
     );
 
     let stats = await importCfas(
       createStream(`siret;raison_sociale;email;email_source
 11111111100006;Lycée professionnel 2;contact@lycee.fr;rco`),
-      createStream(`UAI;SIRET_UAI_GESTIONNAIRE
+      {
+        referentielApi: fakeReferentielApi,
+        relationsCsv: createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006
 0751234X;11111111100006
 `),
-      {
-        referentielApi: fakeReferentielApi,
       }
     );
 

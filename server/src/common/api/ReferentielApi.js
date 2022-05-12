@@ -1,7 +1,7 @@
 const logger = require("../logger");
 const queryString = require("query-string");
 const RateLimitedApi = require("./RateLimitedApi");
-const { getUrl } = require("../utils/httpUtils");
+const { fetchJson } = require("../utils/httpUtils");
 
 class ReferentielApi extends RateLimitedApi {
   constructor(options = {}) {
@@ -16,7 +16,7 @@ class ReferentielApi extends RateLimitedApi {
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching organisme ${siret}...`);
       let url = `${ReferentielApi.baseApiUrl}/organismes/${siret}?${queryString.stringify(params)}`;
-      let response = await getUrl(url);
+      let response = await fetchJson(url);
       return response.data;
     });
   }

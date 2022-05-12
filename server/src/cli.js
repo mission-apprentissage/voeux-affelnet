@@ -35,16 +35,16 @@ cli
     "Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes :" +
       "'siret,raison_sociale,email_directeur,email_contact'"
   )
-  .requiredOption(
+  .options(
     "--relations <relationsCsv>",
     "Le csv contenant la liste des uai d'accueil et leur siret gestionnaire :" + "'UAI,SIRET_UAI_GESTIONNAIRE'",
     createReadStream
   )
-  .action((cfaCsv, { relationsCsv }) => {
+  .action((cfaCsv, options) => {
     runScript(() => {
       let input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
 
-      return importCfas(input, relationsCsv);
+      return importCfas(input, options);
     });
   });
 
