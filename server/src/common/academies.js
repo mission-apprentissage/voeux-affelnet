@@ -8,6 +8,16 @@ function findAcademieByName(name) {
   return found || null;
 }
 
+function findAcademieByCode(code) {
+  if (!code) {
+    return null;
+  }
+
+  let found = ACADEMIES.find((academie) => academie.code === code);
+
+  return found || null;
+}
+
 function findAcademieByUai(uai) {
   if (!uai) {
     return null;
@@ -29,6 +39,7 @@ function getAcademies() {
 module.exports = {
   findAcademieByName,
   findAcademieByUai,
+  findAcademieByCode,
   getAcademies,
 };
 

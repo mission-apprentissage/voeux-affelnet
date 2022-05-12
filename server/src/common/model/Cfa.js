@@ -3,15 +3,11 @@ const User = require("./User");
 const { nested } = require("../utils/mongooseUtils");
 
 let schema = new Schema({
-  uai: {
+  siret: {
     type: String,
     required: true,
     index: true,
     unique: true,
-  },
-  siret: {
-    type: String,
-    index: true,
   },
   raison_sociale: {
     type: String,
@@ -34,16 +30,27 @@ let schema = new Schema({
   },
   email_source: {
     type: String,
-    enum: ["contact", "directeur"],
-    default: "contact",
+    default: "inconnue",
+  },
+  etablissements: {
+    required: true,
+    default: [],
+    type: [
+      nested({
+        uai: {
+          type: String,
+          required: true,
+        },
+        voeux_date: {
+          type: Date,
+        },
+      }),
+    ],
   },
   contacts: {
     type: [String],
     required: true,
     default: [],
-  },
-  voeux_date: {
-    type: Date,
   },
   voeux_telechargements: {
     default: [],

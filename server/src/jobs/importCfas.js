@@ -2,32 +2,50 @@ const { oleoduc, filterData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
-const { findAcademieByUai } = require("../common/academies");
+const { findAcademieByCode } = require("../common/academies");
 const { Cfa, Voeu } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
+const ReferentielApi = require("../common/api/ReferentielApi");
 
 let schema = Joi.object({
-  uai: Joi.string()
-    .pattern(/^[0-9]{7}[A-Z]{1}$/)
-    .required(),
   siret: Joi.string()
     .pattern(/^[0-9]{14}$/)
     .optional(),
   raison_sociale: Joi.string().optional(),
-  email_directeur: Joi.string().email().optional(),
-  email_contact: Joi.string().email().optional(),
-})
-  .or("email_directeur", "email_contact")
-  .unknown();
+  email: Joi.string().email().required(),
+  email_source: Joi.string().optional(),
+}).unknown();
 
-async function importCfas(cfaCsv) {
-  let stats = {
+async function loadRelations(relationCsv) {
+  let relations = {};
+
+  await oleoduc(
+    relationCsv,
+    parseCsv(),
+    writeData((data) => {
+      let siret = data["SIRET_UAI_GESTIONNAIRE"];
+      if (!relations[siret]) {
+        relations[siret] = [];
+      }
+
+      relations[siret].push(data["UAI"]);
+    })
+  );
+
+  return relations;
+}
+
+async function importCfas(cfaCsv, relationsCsv, options = {}) {
+  const referentielApi = options.referentielApi || new ReferentielApi();
+  const stats = {
     total: 0,
     created: 0,
     updated: 0,
     invalid: 0,
     failed: 0,
   };
+
+  const relations = await loadRelations(relationsCsv);
 
   await oleoduc(
     cfaCsv,
@@ -42,29 +60,39 @@ async function importCfas(cfaCsv) {
       }
 
       stats.invalid++;
-      logger.warn(`Le cfa ${json.uai} est invalide`, error);
+      logger.warn(`Le cfa ${json.siret} est invalide`, error);
       return false;
     }),
     writeData(
       async (data) => {
-        let uai = data.uai;
+        let siret = data.siret;
 
         try {
-          let voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
+          let organisme = await referentielApi.getOrganisme(siret);
+          let uais = relations[siret] || [];
+          let etablissements = await Promise.all(
+            uais.map(async (uai) => {
+              const voeu = await Voeu.findOne({ "etablissement_accueil.uai": { $in: uais } });
+              return {
+                uai,
+                ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
+              };
+            })
+          );
+
           let res = await Cfa.updateOne(
-            { uai },
+            { siret },
             {
               $setOnInsert: {
-                uai,
-                academie: findAcademieByUai(uai),
-                username: uai,
-                email: data.email_directeur || data.email_contact,
-                email_source: data.email_directeur ? "directeur" : "contact",
+                siret,
+                academie: findAcademieByCode(organisme.adresse?.academie.code),
+                username: siret,
+                email: data.email,
+                email_source: data.email_source,
               },
               $set: {
-                ...(data.siret ? { siret: data.siret } : {}),
+                etablissements,
                 ...(data.raison_sociale ? { raison_sociale: data.raison_sociale } : {}),
-                ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
               },
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
@@ -72,14 +100,14 @@ async function importCfas(cfaCsv) {
 
           if (res.upserted && res.upserted.length) {
             stats.created++;
-            logger.info(`Cfa ${uai} created`);
+            logger.info(`Cfa ${siret} created`);
           } else if (res.nModified) {
             stats.updated++;
-            logger.info(`Cfa ${uai} updated`);
+            logger.info(`Cfa ${siret} updated`);
           }
         } catch (e) {
           stats.failed++;
-          logger.error(`Impossible de traiter le cfa ${uai}`, e);
+          logger.error(`Impossible de traiter le cfa ${siret}`, e);
         }
       },
       { parallel: 10 }
