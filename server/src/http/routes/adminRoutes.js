@@ -3,6 +3,7 @@ const { oleoduc, transformIntoJSON } = require("oleoduc");
 const { DateTime } = require("luxon");
 const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
+const cfas = require("../../common/cfas");
 const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { Cfa, Log, Voeu } = require("../../common/model");
@@ -14,9 +15,9 @@ const exportCfasInconnus = require("../../jobs/exportCfasInconnus");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 
-module.exports = ({ users, cfas, emails }) => {
+module.exports = ({ emails }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkApiToken, checkIsAdmin } = authMiddleware(users);
+  const { checkApiToken, checkIsAdmin } = authMiddleware();
 
   function asCsvResponse(name, res) {
     let date = DateTime.local().setLocale("fr").toFormat("yyyy-MM-dd");

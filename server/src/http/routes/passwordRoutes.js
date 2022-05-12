@@ -1,14 +1,15 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
+const { getUser, changePassword } = require("../../common/users");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const validators = require("../utils/validators");
 
-module.exports = ({ users, emails }) => {
+module.exports = ({ emails }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkResetPasswordToken } = authMiddleware(users);
+  const { checkResetPasswordToken } = authMiddleware();
   const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 
   router.post(
@@ -19,7 +20,7 @@ module.exports = ({ users, emails }) => {
       }).validateAsync(req.body, { abortEarly: false });
 
       let fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
-      let user = await users.getUser(fixed);
+      let user = await getUser(fixed);
       if (!user || !user.password) {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }
@@ -39,7 +40,7 @@ module.exports = ({ users, emails }) => {
         newPassword: validators.password().required(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      await users.changePassword(user.username, newPassword);
+      await changePassword(user.username, newPassword);
 
       return res.json({ token: createApiToken(user) });
     })

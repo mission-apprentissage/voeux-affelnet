@@ -1,14 +1,15 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
+const { activate } = require("../../common/users");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const validators = require("../utils/validators");
 
-module.exports = ({ users }) => {
+module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkActionToken } = authMiddleware(users);
+  const { checkActionToken } = authMiddleware();
 
   router.get(
     "/api/activation/status",
@@ -37,7 +38,7 @@ module.exports = ({ users }) => {
         throw Boom.badRequest(`L'utilisateur ${user.username} a déjà été créé.`);
       }
 
-      await users.activate(user.username, password);
+      await activate(user.username, password);
 
       return res.json({ token: createApiToken(user) });
     })

@@ -1,13 +1,14 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
+const cfas = require("../../../common/cfas");
 const authMiddleware = require("../../middlewares/authMiddleware");
 const tryCatch = require("../../middlewares/tryCatchMiddleware");
 const sendActivationEmails = require("../../../jobs/sendActivationEmails");
 
-module.exports = ({ users, emails, cfas }) => {
+module.exports = ({ emails }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkActionToken, checkIsCfa } = authMiddleware(users);
+  const { checkActionToken, checkIsCfa } = authMiddleware();
 
   router.get(
     "/api/confirmation/status",

@@ -2,10 +2,10 @@ const assert = require("assert");
 const integrationTests = require("../utils/integrationTests");
 const { insertCfa } = require("../utils/fakeData");
 const { Cfa } = require("../../../src/common/model");
+const cfas = require("../../../src/common/cfas");
 
-integrationTests(__filename, ({ getComponents }) => {
+integrationTests(__filename, () => {
   it("Vérifie qu'on peut confirmer un cfa", async () => {
-    const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -13,13 +13,11 @@ integrationTests(__filename, ({ getComponents }) => {
     });
 
     await cfas.confirm("11111111100006", "11111111100006@apprentissage.beta.gouv.fr");
-
     const found = await Cfa.findOne({}, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "confirmé");
   });
 
   it("Vérifie qu'on peut confirmer un cfa avec une nouvelle adresse email", async () => {
-    const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -35,7 +33,6 @@ integrationTests(__filename, ({ getComponents }) => {
   });
 
   it("Vérifie qu'on ne peut pas confirmer un cfa sans une adresse email", async () => {
-    const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -54,7 +51,6 @@ integrationTests(__filename, ({ getComponents }) => {
   });
 
   it("Vérifie qu'on ne peut pas confirmer un cfa déjà confirmé", async () => {
-    const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -72,7 +68,6 @@ integrationTests(__filename, ({ getComponents }) => {
   });
 
   it("Vérifie qu'on peut forcer la confirmation", async () => {
-    const { cfas } = getComponents();
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",

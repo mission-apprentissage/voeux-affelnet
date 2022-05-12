@@ -1,7 +1,7 @@
 const mailer = require("../../../src/common/mailer");
 const uuid = require("uuid");
 
-module.exports = (options = {}) => {
+function createFakeMailer(options = {}) {
   let calls = options.calls || [];
   let registerCall = (parameters) => {
     if (options.fail) {
@@ -18,4 +18,6 @@ module.exports = (options = {}) => {
       return registerCall(args);
     },
   });
-};
+}
+
+module.exports = { createFakeMailer };

@@ -1,16 +1,17 @@
 const Boom = require("boom");
 const express = require("express");
+const mongoose = require("mongoose");
 const logger = require("../../common/logger");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 
-module.exports = ({ db }) => {
+module.exports = () => {
   const router = express.Router();
 
   router.get(
     "/api/healthcheck",
     tryCatch(async (req, res) => {
       let mongodbStatus;
-      await db
+      await mongoose.connection.db
         .collection("voeux")
         .stats()
         .then(() => {

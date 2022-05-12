@@ -2,11 +2,12 @@ const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
 const { compose } = require("oleoduc");
+const cfas = require("../../../common/cfas");
 const tryCatch = require("../../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../../middlewares/authMiddleware");
 const { validate } = require("../../utils/validators");
 
-module.exports = ({ users, cfas }) => {
+module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, checkIsCfa } = authMiddleware(users);
 

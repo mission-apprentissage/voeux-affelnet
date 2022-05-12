@@ -3,6 +3,7 @@ const config = require("../../config");
 const passport = require("passport");
 const Joi = require("@hapi/joi");
 const Boom = require("boom");
+const { unsubscribe } = require("../../common/users");
 const { Strategy: LocalAPIKeyStrategy } = require("passport-localapikey");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { sendHTML } = require("../utils/httpUtils");
@@ -22,7 +23,7 @@ function checkWebhookKey() {
   return passport.authenticate("localapikey", { session: false, failWithError: true });
 }
 
-module.exports = ({ emails, users }) => {
+module.exports = ({ emails }) => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   async function checkEmailToken(req, res, next) {
@@ -85,7 +86,7 @@ module.exports = ({ emails, users }) => {
     tryCatch(async (req, res) => {
       let { token } = req.params;
 
-      await users.unsubscribe(token);
+      await unsubscribe(token);
 
       res.set("Content-Type", "text/html");
       res.send(

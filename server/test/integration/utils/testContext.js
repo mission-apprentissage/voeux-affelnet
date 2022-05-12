@@ -1,29 +1,18 @@
-const { connectToMongoForTests, getMockedAxios } = require("./testUtils.js");
-const users = require("../../../src/common/users");
-const cfas = require("../../../src/common/cfas");
+const { connectToMongoForTests } = require("./testUtils");
+const { createFakeMailer } = require("./fakeMailer");
 const emails = require("../../../src/common/emails");
-const fakeMailer = require("./fakeMailer");
-const createComponents = require("../../../src/components");
 
-async function testContext(options = {}) {
-  let { mock, axios } = getMockedAxios();
-  let emailsSents = [];
-  let mailer = fakeMailer({ calls: emailsSents });
-  let { db } = await connectToMongoForTests();
+async function testContext() {
+  const emailsSents = [];
+  await connectToMongoForTests();
 
   return {
+    components: {
+      emails: emails(createFakeMailer({ calls: emailsSents })),
+    },
     helpers: {
       getEmailsSent: () => emailsSents,
-      axios,
-      apiMocker: mock,
     },
-    components: await createComponents({
-      db,
-      users: await users(),
-      cfas: await cfas(),
-      emails: emails(mailer),
-      ...options,
-    }),
   };
 }
 

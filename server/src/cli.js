@@ -4,6 +4,7 @@ const { writeToStdout } = require("oleoduc");
 const { createReadStream, createWriteStream } = require("fs");
 const { runScript } = require("./jobs/utils/jobWrapper");
 const logger = require("./common/logger");
+const cfas = require("./common/cfas");
 const importMefs = require("./jobs/importMefs");
 const importVoeux = require("./jobs/importVoeux");
 const sendConfirmationEmails = require("./jobs/sendConfirmationEmails");
@@ -152,7 +153,7 @@ cli
   .arguments("<siret> <email>")
   .option("--force", "Ecrase les données déjà confirmées")
   .action((siret, email, { force }) => {
-    runScript(({ cfas }) => {
+    runScript(() => {
       return cfas.confirm(siret, email, { force });
     });
   });

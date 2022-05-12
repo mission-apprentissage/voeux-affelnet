@@ -2,13 +2,13 @@ const assert = require("assert");
 const integrationTests = require("../utils/integrationTests");
 const { insertUser, insertCfa } = require("../utils/fakeData");
 const createEmails = require("../../../src/common/emails");
-const fakeMailer = require("../utils/fakeMailer");
+const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../../src/common/model");
 
 integrationTests(__filename, () => {
   it("Vérifie qu'on peut envoyer un email", async () => {
     let emailsSent = [];
-    let emails = await createEmails(fakeMailer({ calls: emailsSent }));
+    let emails = await createEmails(createFakeMailer({ calls: emailsSent }));
     let user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248W" });
 
     await emails.send(user, "activation");
@@ -27,7 +27,7 @@ integrationTests(__filename, () => {
 
   it("Vérifie qu'on peut renvoyer un email", async () => {
     let emailsSent = [];
-    let emails = await createEmails(fakeMailer({ calls: emailsSent }));
+    let emails = await createEmails(createFakeMailer({ calls: emailsSent }));
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
       username: "0648248W",
@@ -56,7 +56,7 @@ integrationTests(__filename, () => {
     let emailsSent = [];
     let user1 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
     let user2 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
-    let emails = await createEmails(fakeMailer({ calls: emailsSent }));
+    let emails = await createEmails(createFakeMailer({ calls: emailsSent }));
 
     await emails.send(user1, "activation");
     await emails.send(user2, "activation");
@@ -69,7 +69,7 @@ integrationTests(__filename, () => {
 
   it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     let user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    let emails = await createEmails(fakeMailer({ fail: true }));
+    let emails = await createEmails(createFakeMailer({ fail: true }));
 
     try {
       await emails.send(user, "activation");
@@ -86,7 +86,7 @@ integrationTests(__filename, () => {
 
   it("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
     let emailsSent = [];
-    let emails = await createEmails(fakeMailer({ calls: emailsSent }));
+    let emails = await createEmails(createFakeMailer({ calls: emailsSent }));
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
       username: "0648248W",

@@ -1,12 +1,11 @@
 const assert = require("assert");
 const integrationTests = require("../utils/integrationTests");
 const { insertUser } = require("../utils/fakeData");
-const users = require("../../../src/common/users");
+const { activate, changePassword, unsubscribe, removeUser } = require("../../../src/common/users");
 const { User } = require("../../../src/common/model");
 
 integrationTests(__filename, () => {
   it("Vérifie qu'on peut activer un utilisateur", async () => {
-    let { activate } = await users();
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
@@ -14,12 +13,11 @@ integrationTests(__filename, () => {
 
     await activate("user1", "password");
 
-    let found = await User.findOne({}, { _id: 0 }).lean();
+    const found = await User.findOne({}, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "activé");
   });
 
   it("Vérifie qu'on rejete un utilisateur invalide", async () => {
-    let { activate } = await users();
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
@@ -34,7 +32,6 @@ integrationTests(__filename, () => {
   });
 
   it("Vérifie qu'on peut supprimer un utilisateur", async () => {
-    let { removeUser } = await users();
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
@@ -43,26 +40,24 @@ integrationTests(__filename, () => {
 
     await removeUser("user1");
 
-    let count = await User.countDocuments();
+    const count = await User.countDocuments();
     assert.strictEqual(count, 0);
   });
 
   it("Vérifie qu'on peut changer le mot de passe d'un utilisateur", async () => {
-    let { changePassword, activate } = await users();
     await insertUser({
       username: "user",
       email: "user@apprentissage.beta.gouv.fr",
     });
 
-    let user = await activate("user", "Password!123456");
+    const user = await activate("user", "Password!123456");
     await changePassword("user", "password");
 
-    let found = await User.findOne({ username: "user" });
+    const found = await User.findOne({ username: "user" });
     assert.ok(found.password !== user.password);
   });
 
   it("Vérifie qu'on peut désinscrire un utilisateur avec son username", async () => {
-    let { unsubscribe } = await users();
     await insertUser({
       username: "user1",
       unsubscribe: false,
@@ -70,12 +65,11 @@ integrationTests(__filename, () => {
 
     await unsubscribe("user1");
 
-    let found = await User.findOne({}, { _id: 0 }).lean();
+    const found = await User.findOne({}, { _id: 0 }).lean();
     assert.strictEqual(found.unsubscribe, true);
   });
 
   it("Vérifie qu'on peut désinscrire un utilisateur avec un token d'email", async () => {
-    let { unsubscribe } = await users();
     await insertUser({
       unsubscribe: false,
       emails: [
@@ -90,7 +84,7 @@ integrationTests(__filename, () => {
 
     await unsubscribe("TOKEN");
 
-    let found = await User.findOne({}, { _id: 0 }).lean();
+    const found = await User.findOne({}, { _id: 0 }).lean();
     assert.strictEqual(found.unsubscribe, true);
   });
 });
