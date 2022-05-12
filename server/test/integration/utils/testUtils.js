@@ -13,7 +13,7 @@ let mongoHolder = null;
 
 async function connectToMongoForTests() {
   if (!mongoHolder) {
-    let uri = config.mongodb.uri.split("voeux-affelnet").join("voeux-affelnet-test");
+    let uri = config.mongodb.uri.split("voeux_affelnet").join("voeux_affelnet_test");
     mongoHolder = await connectToMongo(uri);
   }
   return mongoHolder;
