@@ -1,5 +1,6 @@
 const { DateTime } = require("luxon");
 const logger = require("../common/logger");
+const config = require("../config");
 const { Cfa } = require("../common/model");
 
 async function resendConfirmationEmails(emails, options = {}) {
@@ -27,7 +28,11 @@ async function resendConfirmationEmails(emails, options = {}) {
                 : {
                     error: { $exists: false },
                     $and: [
-                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 7 }).toJSDate() } } },
+                      {
+                        sendDates: {
+                          $not: { $gt: DateTime.now().minus({ days: config.emails.relances.confirmation }).toJSDate() },
+                        },
+                      },
                       { [`sendDates.${maxNbEmailsSent}`]: { $exists: false } },
                     ],
                   }),

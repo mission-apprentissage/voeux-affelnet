@@ -1,6 +1,7 @@
 const logger = require("../common/logger");
 const { DateTime } = require("luxon");
 const { Cfa } = require("../common/model");
+const config = require("../config");
 const { every } = require("lodash");
 
 function allFilesAsAlreadyBeenDownloaded(cfa) {
@@ -34,7 +35,11 @@ async function resendNotificationEmails(emails, options = {}) {
               templateName: "notification",
               error: { $exists: false },
               $and: [
-                { sendDates: { $not: { $gt: DateTime.now().minus({ days: 7 }).toJSDate() } } },
+                {
+                  sendDates: {
+                    $not: { $gt: DateTime.now().minus({ days: config.emails.relances.notification }).toJSDate() },
+                  },
+                },
                 { "sendDates.2": { $exists: false } },
               ],
             },
