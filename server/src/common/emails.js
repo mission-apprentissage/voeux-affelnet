@@ -58,7 +58,7 @@ const templates = {
   },
   notification: (cfa, token) => {
     return {
-      subject: `Mise à jour des voeux exprimés en apprentissage sur Affelnet pour l'établissement ${cfa.siret}`,
+      subject: `De nouveaux voeux Affelnet sont téléchargeables`,
       template: getTemplate("notification"),
       data: {
         cfa,

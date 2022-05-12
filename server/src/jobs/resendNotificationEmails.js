@@ -1,10 +1,14 @@
 const logger = require("../common/logger");
 const { DateTime } = require("luxon");
 const { Cfa } = require("../common/model");
+const { every } = require("lodash");
 
 function isAlreadyDownloaded(cfa) {
   return !!cfa.voeux_telechargements.find((download) => {
-    return download.date > cfa.voeux_date;
+    return every(
+      cfa.etablissements.map((e) => e.voeux_date),
+      (date) => download.date > date
+    );
   });
 }
 
@@ -14,7 +18,7 @@ async function resendNotificationEmails(emails, options = {}) {
   let query = {
     unsubscribe: false,
     statut: "activé",
-    voeux_date: { $exists: true },
+    "etablissements.voeux_date": { $exists: true },
     ...(options.retry
       ? {
           emails: {
