@@ -4,75 +4,93 @@ const { insertCfa, insertVoeu } = require("../utils/fakeData");
 const computeStats = require("../../src/jobs/computeStats");
 
 describe("computeStats", () => {
-  it.skip("Vérifie qu'on peut calculer les stats", async () => {
+  it("Vérifie qu'on peut calculer les stats", async () => {
     const firstImport = DateTime.fromISO("2021-06-02T14:00:00.000Z");
     const secondImport = DateTime.fromISO("2021-06-15T14:00:00.000Z");
-
-    await insertCfa({
-      username: "0751234J",
-      statut: "activé",
-      voeux_date: new Date(),
-      email: "test@apprentissage.beta.gouv.fr",
-      voeux_telechargements: [{ date: firstImport.plus({ days: 1 }) }, { date: secondImport.plus({ days: 1 }) }],
-    });
-    await insertCfa({
-      statut: "confirmé",
-      voeux_date: new Date(),
-      email: "test@apprentissage.beta.gouv.fr",
-      emails: [
-        {
-          token: "TOKEN1",
-          templateName: "confirmation_contact",
-          to: "test1@apprentissage.beta.gouv.fr",
-          sendDates: [DateTime.now().minus({ days: 10 }).toJSDate(), new Date()],
-          openDate: new Date(),
-        },
-      ],
-    });
-    await insertCfa({
-      statut: "en attente",
-      email: "test@apprentissage.beta.gouv.fr",
-      emails: [
-        {
-          token: "TOKEN1",
-          templateName: "confirmation_contact",
-          to: "test@apprentissage.beta.gouv.fr",
-          sendDates: [DateTime.now().minus({ days: 10 }).toJSDate(), new Date()],
-          error: {
-            type: "fatal",
-            message: "email error",
+    await Promise.all([
+      insertCfa({
+        siret: "11111111100006",
+        statut: "activé",
+        email: "activé_avec_voeux@apprentissage.beta.gouv.fr",
+        etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
+        voeux_telechargements: [
+          { uai: "0751234J", date: firstImport.plus({ days: 1 }) },
+          { uai: "0751234J", date: secondImport.plus({ days: 1 }) },
+        ],
+      }),
+      insertCfa({
+        statut: "confirmé",
+        email: "confirmé_avec_voeux@apprentissage.beta.gouv.fr",
+        etablissements: [{ uai: "0757890U", voeux_date: new Date() }],
+        emails: [
+          {
+            token: "TOKEN1",
+            templateName: "confirmation_contact",
+            to: "test1@apprentissage.beta.gouv.fr",
+            sendDates: [DateTime.now().minus({ days: 10 }).toJSDate(), new Date()],
+            openDate: new Date(),
           },
+        ],
+      }),
+      insertCfa({
+        statut: "en attente",
+        email: "en_attente_avec_voeux@apprentissage.beta.gouv.fr",
+        etablissements: [{ uai: "0754560Z", voeux_date: new Date() }],
+        unsubscribe: true,
+        emails: [
+          {
+            token: "TOKEN1",
+            templateName: "confirmation_contact",
+            to: "test@apprentissage.beta.gouv.fr",
+            sendDates: [DateTime.now().minus({ days: 10 }).toJSDate()],
+            openDate: new Date(),
+          },
+        ],
+      }),
+      insertCfa({
+        statut: "en attente",
+        email: "en_erreur@apprentissage.beta.gouv.fr",
+        emails: [
+          {
+            token: "TOKEN1",
+            templateName: "confirmation_contact",
+            to: "test@apprentissage.beta.gouv.fr",
+            sendDates: [DateTime.now().minus({ days: 10 }).toJSDate(), new Date()],
+            error: {
+              type: "fatal",
+              message: "email error",
+            },
+          },
+        ],
+      }),
+      insertVoeu({
+        "etablissement_accueil.uai": "INCONNNU",
+        _meta: {
+          import_dates: [firstImport.toJSDate(), secondImport.toJSDate()],
         },
-      ],
-    });
-    await insertCfa({
-      statut: "en attente",
-      email: "test@apprentissage.beta.gouv.fr",
-      voeux_date: new Date(),
-      unsubscribe: true,
-      emails: [
-        {
-          token: "TOKEN1",
-          templateName: "confirmation_contact",
-          to: "test@apprentissage.beta.gouv.fr",
-          sendDates: [DateTime.now().minus({ days: 10 }).toJSDate()],
-          openDate: new Date(),
+      }),
+      insertVoeu({
+        apprenant: { ine: "ABCDEF" },
+        "etablissement_accueil.uai": "0751234J",
+        _meta: {
+          import_dates: [firstImport.toJSDate(), secondImport.toJSDate()],
         },
-      ],
-    });
-    await insertVoeu({
-      "etablissement_accueil.uai": "INCONNNU",
-      _meta: {
-        import_dates: [firstImport.toJSDate(), secondImport.toJSDate()],
-      },
-    });
-    await insertVoeu({
-      apprenant: { ine: "ABCDEF" },
-      "etablissement_accueil.uai": "0751234J",
-      _meta: {
-        import_dates: [firstImport.toJSDate(), secondImport.toJSDate()],
-      },
-    });
+      }),
+      insertVoeu({
+        apprenant: { ine: "ABCDEF" },
+        "etablissement_accueil.uai": "0757890U",
+        _meta: {
+          import_dates: [firstImport.toJSDate(), secondImport.toJSDate()],
+        },
+      }),
+      insertVoeu({
+        apprenant: { ine: "ABCDEF" },
+        "etablissement_accueil.uai": "0754560Z",
+        _meta: {
+          import_dates: [firstImport.toJSDate(), secondImport.toJSDate()],
+        },
+      }),
+    ]);
 
     const stats = await computeStats();
 
@@ -136,7 +154,7 @@ describe("computeStats", () => {
       {
         code: "ALL",
         stats: {
-          total: 2,
+          total: 4,
           apprenants: 2,
           cfasInconnus: 1,
           nbVoeuxDiffusés: 1,
@@ -160,7 +178,7 @@ describe("computeStats", () => {
       {
         code: "11",
         stats: {
-          total: 2,
+          total: 4,
           apprenants: 2,
           cfasInconnus: 1,
           nbVoeuxDiffusés: 1,
@@ -240,7 +258,7 @@ describe("computeStats", () => {
     );
   });
 
-  it.skip("Vérifie qu'on peut calculer les stats pour une seule académie", async () => {
+  it("Vérifie qu'on peut calculer les stats pour une seule académie", async () => {
     const stats = await computeStats({ academies: ["01"] });
 
     assert.strictEqual(stats.cfas.length, 1);

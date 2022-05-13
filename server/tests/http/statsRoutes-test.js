@@ -3,7 +3,7 @@ const { JobEvent } = require("../../src/common/model");
 const { startServer } = require("../utils/testUtils");
 
 describe("statsRoutes", () => {
-  it.skip("Vérifie qu'on peut obtenir des stats", async () => {
+  it("Vérifie qu'on peut obtenir des stats", async () => {
     let { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",
@@ -21,6 +21,7 @@ describe("statsRoutes", () => {
         {
           job: "computeStats",
           date: "2021-05-11T07:14:04.182Z",
+          type: "JobEvent",
           stats: {
             value: 1,
           },
@@ -29,7 +30,7 @@ describe("statsRoutes", () => {
     });
   });
 
-  it.skip("Vérifie qu'on peut obtenir des stats instantanées pour toutes les académies", async () => {
+  it("Vérifie qu'on peut obtenir des stats instantanées pour toutes les académies", async () => {
     let { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",
@@ -48,7 +49,7 @@ describe("statsRoutes", () => {
     assert.strictEqual(response.data._meta.academies.length, 41);
   });
 
-  it.skip("Vérifie qu'on peut obtenir des stats instantanées par académie", async () => {
+  it("Vérifie qu'on peut obtenir des stats instantanées par académie", async () => {
     let { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",

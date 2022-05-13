@@ -20,7 +20,9 @@ describe("emails", () => {
     const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.strictEqual(found.emails.length, 1);
     assert.strictEqual(found.emails[0].sendDates.length, 1);
+    assert.strictEqual(found.emails[0].sendDates[0].constructor.name, "Date");
     assert.strictEqual(found.emails[0].messageIds.length, 1);
+    assert.ok(found.emails[0].messageIds[0].indexOf("-") !== -1);
     assert.ok(found.emails[0].token);
     assert.strictEqual(found.emails[0].templateName, "activation");
   });

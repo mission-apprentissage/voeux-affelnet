@@ -6,9 +6,17 @@ function computeCfasStats(filter = {}) {
   return promiseAllProps({
     total: Cfa.countDocuments(filter),
     enAttente: Cfa.countDocuments({ ...filter, statut: "en attente" }),
-    enAttenteAvecVoeux: Cfa.countDocuments({ ...filter, statut: "en attente", voeux_date: { $exists: true } }),
+    enAttenteAvecVoeux: Cfa.countDocuments({
+      ...filter,
+      statut: "en attente",
+      "etablissements.voeux_date": { $exists: true },
+    }),
     confirmés: Cfa.countDocuments({ ...filter, statut: "confirmé" }),
-    confirmésAvecVoeux: Cfa.countDocuments({ ...filter, statut: "confirmé", voeux_date: { $exists: true } }),
+    confirmésAvecVoeux: Cfa.countDocuments({
+      ...filter,
+      statut: "confirmé",
+      "etablissements.voeux_date": { $exists: true },
+    }),
     désinscrits: Cfa.countDocuments({
       ...filter,
       statut: { $ne: "non concerné" },
@@ -16,7 +24,7 @@ function computeCfasStats(filter = {}) {
     }),
     désinscritsAvecVoeux: Cfa.countDocuments({
       ...filter,
-      voeux_date: { $exists: true },
+      "etablissements.voeux_date": { $exists: true },
       statut: { $ne: "non concerné" },
       $or: [{ unsubscribe: true }, { "emails.error.type": { $eq: "blocked" } }],
     }),
@@ -28,7 +36,7 @@ function computeCfasStats(filter = {}) {
     injoinablesAvecVoeux: Cfa.countDocuments({
       ...filter,
       statut: { $ne: "non concerné" },
-      voeux_date: { $exists: true },
+      "etablissements.voeux_date": { $exists: true },
       $and: [{ "emails.error": { $exists: true } }, { "emails.error.type": { $ne: "blocked" } }],
     }),
     activés: Cfa.countDocuments({ ...filter, statut: "activé" }),
@@ -36,7 +44,11 @@ function computeCfasStats(filter = {}) {
 }
 
 async function computeVoeuxStats(filter = {}) {
-  let uais = (await Cfa.find({ ...filter }, { uai: 1 })).map((cfa) => cfa.uai);
+  const etablissements = await Cfa.aggregate([
+    { $match: { ...filter } },
+    { $unwind: "$etablissements" },
+    { $project: { uai: "$etablissements.uai" } },
+  ]);
 
   return promiseAllProps({
     total: Voeu.countDocuments(filter),
@@ -61,7 +73,7 @@ async function computeVoeuxStats(filter = {}) {
         $match: {
           ...filter,
           "etablissement_accueil.uai": {
-            $nin: uais,
+            $nin: etablissements.map((e) => e.uai),
           },
         },
       },
@@ -82,16 +94,27 @@ async function computeVoeuxStats(filter = {}) {
         },
       },
       {
+        $unwind: "$etablissements",
+      },
+      {
+        $group: {
+          _id: null,
+          uais: {
+            $push: "$etablissements.uai",
+          },
+        },
+      },
+      {
         $lookup: {
           from: "voeux",
           let: {
-            uai: "$uai",
+            uais: "$uais",
           },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: ["$etablissement_accueil.uai", "$$uai"],
+                  $in: ["$etablissement_accueil.uai", "$$uais"],
                 },
               },
             },
@@ -176,16 +199,16 @@ function computeEmailsStats(filter = {}) {
 }
 
 async function computeDownloadStats(filter = {}) {
-  let res = await Voeu.aggregate([{ $unwind: "$_meta.import_dates" }, { $group: { _id: "$_meta.import_dates" } }]);
-  let importDates = res
+  const res = await Voeu.aggregate([{ $unwind: "$_meta.import_dates" }, { $group: { _id: "$_meta.import_dates" } }]);
+  const importDates = res
     .map((r) => r._id)
     .sort((a, b) => a - b)
     .reverse();
 
   return Promise.all(
     importDates.map((importDate, index) => {
-      let next = importDates[index - 1];
-      let dateFilter = { date: { $gte: importDate, ...(next ? { $lt: next } : {}) } };
+      const next = importDates[index - 1];
+      const dateFilter = { date: { $gte: importDate, ...(next ? { $lt: next } : {}) } };
 
       return promiseAllProps({
         import_date: importDate,
@@ -196,7 +219,7 @@ async function computeDownloadStats(filter = {}) {
 }
 
 async function computeStats(options = {}) {
-  let list = [
+  const list = [
     { code: "ALL", query: {} },
     { code: "UNKNOWN", query: { "academie.code": { $exists: false } } },
     {

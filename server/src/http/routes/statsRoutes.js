@@ -20,7 +20,7 @@ module.exports = () => {
       }).validateAsync(req.params, { abortEarly: false });
 
       let stream = oleoduc(
-        JobEvent.find({ job: jobName }, { _id: 0, type: 0 }).sort({ date: -1 }).lean().cursor(),
+        JobEvent.find({ job: jobName }, { _id: 0 }).sort({ date: -1 }).lean().cursor(),
         transformIntoJSON({
           arrayPropertyName: "results",
         })
