@@ -35,9 +35,7 @@ async function exportCfasInconnus(output) {
           cfas: 0,
         },
       },
-    ])
-      .cursor()
-      .exec(),
+    ]).cursor(),
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
     }),

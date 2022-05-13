@@ -8,10 +8,8 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
 
     // Set up default mongoose connection
     mongoose.connect(mongoUri, {
-      useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: false,
     });
 
     // Get Mongoose to use the global promise library

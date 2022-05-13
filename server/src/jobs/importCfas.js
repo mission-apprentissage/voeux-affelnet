@@ -70,10 +70,10 @@ async function importCfas(cfaCsv, options = {}) {
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
-          if (res.upserted && res.upserted.length) {
+          if (res.upsertedCount) {
             stats.created++;
             logger.info(`Cfa ${siret} created`);
-          } else if (res.nModified) {
+          } else if (res.modifiedCount) {
             stats.updated++;
             logger.info(`Cfa ${siret} updated`);
           }

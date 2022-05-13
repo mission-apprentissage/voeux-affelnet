@@ -232,7 +232,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
           { upsert: true }
         );
 
-        if (res.upserted && res.upserted.length) {
+        if (res.upsertedCount) {
           logger.info(`Voeu ajouté`, {
             query,
             etablissement_accueil: data.etablissement_accueil.uai,
@@ -241,7 +241,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
         }
 
         if (!isEmpty(differences)) {
-          if (res.nModified) {
+          if (res.modifiedCount) {
             stats.updated++;
             Object.keys(differences).forEach((key) => updatedFields.add(key));
           }
