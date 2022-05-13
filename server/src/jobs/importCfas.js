@@ -2,17 +2,16 @@ const { oleoduc, filterData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
-const { findAcademieByCode, findAcademieByName } = require("../common/academies");
+const { findAcademieByCode } = require("../common/academies");
 const { Cfa } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 const ReferentielApi = require("../common/api/ReferentielApi");
 const { loadRelations, getEtablissements } = require("../common/relations");
 
-let schema = Joi.object({
+const schema = Joi.object({
   siret: Joi.string()
     .pattern(/^[0-9]{14}$/)
-    .optional(),
-  raison_sociale: Joi.string().optional(),
+    .required(),
   email: Joi.string().email().required(),
 }).unknown();
 
@@ -35,7 +34,7 @@ async function importCfas(cfaCsv, options = {}) {
     }),
     filterData(async (json) => {
       stats.total++;
-      let { error } = schema.validate(json, { abortEarly: false });
+      const { error } = schema.validate(json, { abortEarly: false });
       if (!error) {
         return true;
       }
@@ -45,24 +44,33 @@ async function importCfas(cfaCsv, options = {}) {
       return false;
     }),
     writeData(
-      async (data) => {
-        let siret = data.siret;
-
+      async ({ siret, email }) => {
         try {
-          let organisme = await referentielApi.getOrganisme(siret);
+          const etablissements = await getEtablissements(siret, relations);
+          const organisme = await referentielApi.getOrganisme(siret);
 
-          let res = await Cfa.updateOne(
+          if (!organisme.adresse) {
+            logger.warn(`Le CFA ${siret} n'a pas d'académie`);
+          }
+
+          if (etablissements.length === 0) {
+            stats.failed++;
+            logger.error(`Le CFA ${siret} n'a aucun établissement`);
+            return;
+          }
+
+          const res = await Cfa.updateOne(
             { siret },
             {
-              $set: {
+              $setOnInsert: {
                 siret,
                 username: siret,
-                email: data.email,
-                etablissements: await getEtablissements(siret, relations),
-                raison_sociale: data.raison_sociale || organisme.raison_sociale,
-                academie: data.academie
-                  ? findAcademieByName(data.academie)
-                  : findAcademieByCode(organisme.adresse?.academie.code),
+                email,
+              },
+              $set: {
+                etablissements,
+                raison_sociale: organisme.raison_sociale,
+                academie: findAcademieByCode(organisme.adresse?.academie.code),
               },
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
@@ -74,6 +82,8 @@ async function importCfas(cfaCsv, options = {}) {
           } else if (res.modifiedCount) {
             stats.updated++;
             logger.info(`Cfa ${siret} updated`);
+          } else {
+            logger.trace(`Cfa ${siret} déjà à jour`);
           }
         } catch (e) {
           stats.failed++;

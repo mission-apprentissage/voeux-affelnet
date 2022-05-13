@@ -1,25 +1,38 @@
 const { getFromStorage } = require("./utils/ovhUtils");
-const { oleoduc, writeData, accumulateData } = require("oleoduc");
+const { oleoduc, writeData, accumulateData, compose, transformData } = require("oleoduc");
 const { parseCsv } = require("./utils/csvUtils");
 const { Voeu } = require("./model");
 const { isUAIValid } = require("./utils/validationUtils");
 const logger = require("./logger");
 
+async function getDefaultRelations() {
+  let stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv");
+  return compose(
+    stream,
+    parseCsv(),
+    transformData((data) => {
+      return {
+        uai_etablissement_accueil: data["UAI"],
+        siret_gestionnaire: data["SIRET_UAI_GESTIONNAIRE"],
+      };
+    })
+  );
+}
+
 async function loadRelations(relationCsv) {
-  const stream = relationCsv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv"));
+  const stream = relationCsv ? compose(relationCsv, parseCsv()) : await getDefaultRelations();
 
   let relations;
   await oleoduc(
     stream,
-    parseCsv(),
     accumulateData(
       (acc, data) => {
-        const siret = data["SIRET_UAI_GESTIONNAIRE"];
+        const siret = data.siret_gestionnaire;
         if (!acc[siret]) {
           acc[siret] = [];
         }
 
-        const uai = data["UAI"];
+        const uai = data.uai_etablissement_accueil;
         if (!isUAIValid(uai)) {
           isUAIValid(uai);
           logger.warn(`L'UAI de la relation est invalide ${uai}`);

@@ -31,13 +31,10 @@ process.stdout.on("error", function (err) {
 
 cli
   .command("importCfas <cfaCsv>")
-  .description(
-    "Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes :" +
-      "'siret,raison_sociale,email_directeur,email_contact'"
-  )
+  .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
   .option(
     "--relations <relationsCsv>",
-    "Le csv contenant la liste des uai d'accueil et leur siret gestionnaire :" + "'UAI,SIRET_UAI_GESTIONNAIRE'",
+    "Le csv contenant la liste des uai d'accueil et leur siret gestionnaire :" + "'uai,siret_gestionnaire'",
     createReadStream
   )
   .action((cfaCsv, options) => {
