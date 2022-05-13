@@ -10,7 +10,6 @@ describe("confirmationRoutes", () => {
     await insertCfa({
       username: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
-      email_source: "rco",
     });
 
     const response = await httpClient.get(`/api/confirmation/status?token=${createActionToken("11111111100006")}`);
@@ -18,7 +17,6 @@ describe("confirmationRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
       email: "11111111100006@apprentissage.beta.gouv.fr",
-      email_source: "rco",
     });
   });
 

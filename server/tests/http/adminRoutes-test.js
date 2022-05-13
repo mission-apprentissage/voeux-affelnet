@@ -33,7 +33,6 @@ describe("adminRoutes", () => {
           raison_sociale: "Organisme de formation",
           academie: { code: "11", nom: "Île-de-France" },
           email: "contact@organisme.com",
-          email_source: "inconnue",
           etablissements: [],
           emails: [],
           voeux_telechargements: [],

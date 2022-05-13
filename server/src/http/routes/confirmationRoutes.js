@@ -20,7 +20,7 @@ module.exports = ({ sendEmail }) => {
         throw Boom.badRequest(`Une confirmation a déjà été enregistrée pour le cfa ${cfa.siret}`);
       }
 
-      return res.json({ email: cfa.email, email_source: cfa.email_source });
+      return res.json({ email: cfa.email });
     })
   );
 

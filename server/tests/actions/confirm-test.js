@@ -8,7 +8,6 @@ describe("confirm", () => {
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
-      email_source: "directeur",
     });
 
     await confirm("11111111100006", "11111111100006@apprentissage.beta.gouv.fr");
@@ -20,7 +19,6 @@ describe("confirm", () => {
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
-      email_source: "contact",
     });
 
     await confirm("11111111100006", "user2@apprentissage.beta.gouv.fr");
@@ -34,7 +32,6 @@ describe("confirm", () => {
     await insertCfa({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
-      email_source: "contact",
     });
 
     try {
@@ -44,7 +41,6 @@ describe("confirm", () => {
       assert.deepStrictEqual(e.message, "Une confirmation a déjà été enregistrée pour le cfa 11111111100006");
       const found = await Cfa.findOne({}, { _id: 0 }).lean();
       assert.strictEqual(found.email, "11111111100006@apprentissage.beta.gouv.fr");
-      assert.strictEqual(found.email_source, "contact");
     }
   });
 

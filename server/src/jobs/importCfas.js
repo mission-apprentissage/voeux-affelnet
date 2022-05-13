@@ -14,7 +14,6 @@ let schema = Joi.object({
     .optional(),
   raison_sociale: Joi.string().optional(),
   email: Joi.string().email().required(),
-  email_source: Joi.string().optional(),
 }).unknown();
 
 async function importCfas(cfaCsv, options = {}) {
@@ -59,7 +58,6 @@ async function importCfas(cfaCsv, options = {}) {
                 siret,
                 username: siret,
                 email: data.email,
-                email_source: data.email_source,
                 etablissements: await getEtablissements(siret, relations),
                 raison_sociale: data.raison_sociale || organisme.raison_sociale,
                 academie: data.academie

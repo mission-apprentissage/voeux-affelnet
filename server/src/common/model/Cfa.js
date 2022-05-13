@@ -28,10 +28,6 @@ let schema = new Schema({
       { _id: false }
     ),
   },
-  email_source: {
-    type: String,
-    default: "inconnue",
-  },
   etablissements: {
     required: true,
     default: [],

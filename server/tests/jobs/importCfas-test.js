@@ -19,8 +19,8 @@ const fakeReferentielApi = new FakeReferentielApi([
 
 describe("importCfas", () => {
   it("Vérifie qu'on peut importer un cfa", async () => {
-    const cfaCsv = createStream(`siret;raison_sociale;email;email_source
-11111111100006;Lycée professionnel;contact@lycee.fr;rco`);
+    const cfaCsv = createStream(`siret;raison_sociale;email
+11111111100006;Lycée professionnel;contact@lycee.fr`);
     const relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006`);
 
@@ -35,7 +35,6 @@ describe("importCfas", () => {
       username: "11111111100006",
       siret: "11111111100006",
       email: "contact@lycee.fr",
-      email_source: "rco",
       academie: { nom: "Toulouse", code: "16" },
       raison_sociale: "Lycée professionnel",
       emails: [],
@@ -49,8 +48,8 @@ describe("importCfas", () => {
   });
 
   it("Vérifie si le cfa a des voeux", async () => {
-    const cfaCsv = createStream(`siret;raison_sociale;email;email_source
-11111111100006;Lycée professionnel;contact@lycee.fr;rco`);
+    const cfaCsv = createStream(`siret;raison_sociale;email
+11111111100006;Lycée professionnel;contact@lycee.fr`);
     const relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006`);
     const date = new Date();
@@ -73,8 +72,8 @@ describe("importCfas", () => {
   });
 
   it("Vérifie qu'on peut ignorer les cfas invalides (pas d'emails)", async () => {
-    const cfaCsv = createStream(`siret;raison_sociale;email;email_source
-11111111100006;Lycée professionnel;;rco`);
+    const cfaCsv = createStream(`siret;raison_sociale;email
+11111111100006;Lycée professionnel;`);
     const relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006`);
 
@@ -90,8 +89,8 @@ describe("importCfas", () => {
 
   it("Vérifie qu'on peut mettre à jour uniquement certaines des informations", async () => {
     await importCfas(
-      createStream(`siret;raison_sociale;email;email_source
-11111111100006;Lycée professionnel 1;contact@lycee.fr;rco`),
+      createStream(`siret;raison_sociale;email
+11111111100006;Lycée professionnel 1;contact@lycee.fr`),
       {
         referentielApi: fakeReferentielApi,
         relationsCsv: createStream(`UAI;SIRET_UAI_GESTIONNAIRE
@@ -100,8 +99,8 @@ describe("importCfas", () => {
     );
 
     const stats = await importCfas(
-      createStream(`siret;raison_sociale;email;email_source
-11111111100006;Lycée professionnel 2;contact@lycee.fr;rco`),
+      createStream(`siret;raison_sociale;email
+11111111100006;Lycée professionnel 2;contact@lycee.fr`),
       {
         referentielApi: fakeReferentielApi,
         relationsCsv: createStream(`UAI;SIRET_UAI_GESTIONNAIRE
@@ -121,8 +120,8 @@ describe("importCfas", () => {
   });
 
   it("Vérifie qu'on gère les relations dupliquées", async () => {
-    const cfaCsv = createStream(`siret;raison_sociale;email;email_source
-11111111100006;Lycée professionnel;contact@lycee.fr;rco`);
+    const cfaCsv = createStream(`siret;raison_sociale;email
+11111111100006;Lycée professionnel;contact@lycee.fr`);
     const relationsCsv = createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006
 0751234J;11111111100006
