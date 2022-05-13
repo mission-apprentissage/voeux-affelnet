@@ -1,34 +1,38 @@
 <mjml>
-  <%- include('./common/head.ejs'); %>
+    <%- include('./common/head.ejs'); %>
 
-  <mj-body background-color="#f9fafc">
-    <%- include('./common/header.ejs'); %>
-    <mj-wrapper padding="10px 20px">
-      <mj-section background-color="#ffffff" padding-top="0">
-        <mj-column>
+    <mj-body background-color="#f9fafc">
+        <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+            <mj-section background-color="#ffffff" padding-top="0">
+                <mj-column>
 
-          <mj-text>
-            Madame la directrice, Monsieur le directeur,
-          </mj-text>
+                    <mj-text>
+                        Madame la directrice, Monsieur le directeur,
+                    </mj-text>
 
-          <mj-text>
-            Vous pouvez dès à présent télécharger les vœux exprimés via le traitement Affelnet.
-          </mj-text>
+                    <mj-text>
+                        Vous pouvez dès à présent télécharger les vœux exprimés via le traitement Affelnet.
+                    </mj-text>
 
-          <%- include('./common/arrete.ejs'); %>
+                    <%- include('./common/arrete.ejs'); %>
 
-          <mj-button href="<%= utils.getPublicUrl(`/login`) %>" background-color="#0e4194" color="white">
-            Accéder au téléchargement des listes
-          </mj-button>
+                    <mj-button
+                            href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
+                            background-color="#0e4194"
+                            color="white"
+                    >
+                        Accéder au téléchargement des listes
+                    </mj-button>
 
-          <%- include('./common/procedure.ejs'); %>
+                    <%- include('./common/procedure.ejs'); %>
 
-          <%- include('./common/signature.ejs'); %>
-        </mj-column>
-      </mj-section>
+                    <%- include('./common/signature.ejs'); %>
+                </mj-column>
+            </mj-section>
 
-    </mj-wrapper>
-    <%- include('./common/footer.ejs'); %>
-  </mj-body>
+        </mj-wrapper>
+        <%- include('./common/footer.ejs'); %>
+    </mj-body>
 
 </mjml>
