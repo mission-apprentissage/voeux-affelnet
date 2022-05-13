@@ -50,6 +50,7 @@
     "passport-jwt": "4.0.0",
     "passport-local": "1.0.0",
     "passport-localapikey": "0.0.3",
+    "pretty-ms": "7.0.1",
     "prompt-confirm": "2.0.4",
     "proper-lockfile": "4.1.2",
     "query-string": "7.0.0",

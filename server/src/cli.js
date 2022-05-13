@@ -2,7 +2,7 @@ require("dotenv").config();
 const { program: cli } = require("commander");
 const { writeToStdout } = require("oleoduc");
 const { createReadStream, createWriteStream } = require("fs");
-const { runScript } = require("./jobs/utils/jobWrapper");
+const { runScript } = require("./jobs/utils/runScript");
 const logger = require("./common/logger");
 const { confirm } = require("./common/actions/confirm");
 const importMefs = require("./jobs/importMefs");
