@@ -1,34 +1,27 @@
-install: install-server install-ui
-
-install-server:
+install: hooks
 	yarn --cwd server install --frozen-lockfile
-
-install-ui:
 	yarn --cwd ui install --frozen-lockfile
 
 start:
 	docker-compose up --build --force-recreate
 
-start-mongodb:
-	docker-compose up -d mongodb
-
 stop:
 	docker-compose stop
-
-test:
-	yarn --cwd server test
-
-coverage:
-	yarn --cwd server coverage
-
-lint:
-	yarn --cwd server lint
 
 clean:
 	docker-compose down
 
 dataset:
-	docker exec voeux_affelnet_server yarn --silent --cwd server cli db	 injectDataset
+	docker exec voeux_affelnet_server yarn --silent --cwd server cli db	injectDataset
 
+hooks:
+	git config core.hooksPath misc/git-hooks
+	chmod +x misc/git-hooks/*
 
-ci: install-server lint coverage clean
+validate:
+	yarn --cwd server lint
+	yarn --cwd server test
+
+ci: install
+	yarn --cwd server coverage
+	yarn --cwd server lint
