@@ -4,7 +4,7 @@ services:
   reverse_proxy:
     volumes:
       - .local/nginx:/data
-      - ./reverse_proxy/dev/includes:/etc/nginx/templates/includes/env
+      - ./reverse_proxy/optional/includes:/etc/nginx/templates/includes/optional
     environment:
       - SERVERNAME=localhost
 
