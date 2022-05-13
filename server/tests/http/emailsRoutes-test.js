@@ -5,9 +5,9 @@ const { startServer, waitUntil } = require("../utils/testUtils");
 
 describe("emailsRoute", () => {
   it("Vérifie qu'on peut prévisualier un email", async () => {
-    const { httpClient, sender } = await startServer();
+    const { httpClient, sendEmail } = await startServer();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await sender.send(user, "activation");
+    const token = await sendEmail(user, "activation");
 
     const response = await httpClient.get(`/api/emails/${token}/preview`);
 
@@ -24,9 +24,9 @@ describe("emailsRoute", () => {
   });
 
   it("Vérifie qu'on peut marquer un email comme ouvert", async () => {
-    const { httpClient, sender } = await startServer();
+    const { httpClient, sendEmail } = await startServer();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await sender.send(user, "activation");
+    const token = await sendEmail(user, "activation");
 
     const response = await httpClient.get(`/api/emails/${token}/markAsOpened`);
 
@@ -35,9 +35,9 @@ describe("emailsRoute", () => {
   });
 
   it("Vérifie qu'un utilisateur peut se désinscrire du service", async () => {
-    const { httpClient, sender } = await startServer();
+    const { httpClient, sendEmail } = await startServer();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
-    const token = await sender.send(user, "activation");
+    const token = await sendEmail(user, "activation");
 
     const response = await httpClient.get(`/api/emails/${token}/unsubscribe`);
 

@@ -8,7 +8,7 @@ const validators = require("../utils/validators");
 const { getUser } = require("../../common/actions/getUser");
 const { changePassword } = require("../../common/actions/changePassword");
 
-module.exports = ({ sender }) => {
+module.exports = ({ sendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkResetPasswordToken } = authMiddleware();
   const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
@@ -26,7 +26,7 @@ module.exports = ({ sender }) => {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }
 
-      await sender.send(user, "reset_password");
+      await sendEmail(user, "reset_password");
       return res.json({ message: "Un email a été envoyé." });
     })
   );

@@ -2,6 +2,7 @@ const logger = require("../../common/logger").child({ context: "script" });
 const prettyMilliseconds = require("pretty-ms");
 const { isEmpty } = require("lodash");
 const { connectToMongo, closeMongoConnection } = require("../../common/mongodb");
+const createActions = require("../../actions");
 
 process.on("unhandledRejection", (e) => logger.error(e));
 process.on("uncaughtException", (e) => logger.error(e));
@@ -50,8 +51,9 @@ async function runScript(job) {
     timer.start();
 
     await connectToMongo();
+    let actions = await createActions();
 
-    const results = await job();
+    const results = await job(actions);
 
     timer.stop(results);
     await exit();

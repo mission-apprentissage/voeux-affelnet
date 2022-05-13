@@ -33,13 +33,13 @@ async function generateVoeux(values, options) {
   await JobEvent.create({ job: "importVoeux", stats });
 }
 
-async function injectDataset(emails, options = {}) {
+async function injectDataset(sendEmail, options = {}) {
   const uai = faker.helpers.replaceSymbols("#######?");
 
   await importMefs();
 
   await generateCfa(uai);
-  await sendConfirmationEmails(emails);
+  await sendConfirmationEmails(sendEmail);
 
   const { mef, libelle_long } = await Mef.findOne({ mef: "3112320121" });
   await generateVoeux(
@@ -52,7 +52,7 @@ async function injectDataset(emails, options = {}) {
   );
 
   await createUser(faker.internet.userName(), faker.internet.email(), { admin: true });
-  await sendActivationEmails(emails);
+  await sendActivationEmails(sendEmail);
 }
 
-module.exports = injectDataset;
+module.exports = { injectDataset };

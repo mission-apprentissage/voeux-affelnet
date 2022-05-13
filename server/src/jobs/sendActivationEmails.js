@@ -1,7 +1,7 @@
 const logger = require("../common/logger");
 const { User } = require("../common/model");
 
-async function sendActivationEmails(sender, options = {}) {
+async function sendActivationEmails(sendEmail, options = {}) {
   let stats = { total: 0, sent: 0, failed: 0 };
   let query = {
     unsubscribe: false,
@@ -22,7 +22,7 @@ async function sendActivationEmails(sender, options = {}) {
       try {
         const templateName = user.type === "Cfa" ? "activation_cfa" : "activation";
         logger.info(`Sending ${templateName} to user ${user.username}...`);
-        await sender.send(user, templateName);
+        await sendEmail(user, templateName);
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent email to ${user.username}`, e);

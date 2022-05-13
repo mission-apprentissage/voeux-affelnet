@@ -6,7 +6,7 @@ const { createTestContext } = require("../utils/testUtils");
 
 describe("sendActivationEmails", () => {
   it("Vérifie qu'on envoie des emails d'activation uniquement aux utilisateurs confirmés", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
       statut: "confirmé",
@@ -20,7 +20,7 @@ describe("sendActivationEmails", () => {
       ],
     });
 
-    const stats = await sendActivationEmails(sender);
+    const stats = await sendActivationEmails(sendEmail);
 
     const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.deepStrictEqual(found.emails[0].templateName, "activation");
@@ -38,14 +38,14 @@ describe("sendActivationEmails", () => {
   });
 
   it("Vérifie qu'on envoie des emails d'activation uniquement aux CFA confirmés", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
     });
 
-    await sendActivationEmails(sender);
+    await sendActivationEmails(sendEmail);
 
     const found = await Cfa.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.deepStrictEqual(found.emails[0].templateName, "activation_cfa");
@@ -54,34 +54,34 @@ describe("sendActivationEmails", () => {
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà activé", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       username: "123457X",
       password: "12345",
     });
 
-    await sendActivationEmails(sender);
+    await sendActivationEmails(sendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       username: "123457X",
       statut: "confirmé",
       unsubscribe: true,
     });
 
-    await sendActivationEmails(sender);
+    await sendActivationEmails(sendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       username: "123457X",
       statut: "confirmé",
@@ -94,14 +94,14 @@ describe("sendActivationEmails", () => {
       ],
     });
 
-    await sendActivationEmails(sender);
+    await sendActivationEmails(sendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux cfas n'ayant pas de voeux", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       username: "11111111100006",
       statut: "confirmé",
@@ -109,7 +109,7 @@ describe("sendActivationEmails", () => {
     });
     await insertCfa({ username: "22222222200006", statut: "confirmé" });
 
-    const stats = await sendActivationEmails(sender);
+    const stats = await sendActivationEmails(sendEmail);
 
     let found = await Cfa.findOne({ siret: "11111111100006" }).lean();
     assert.strictEqual(found.emails.length, 1);

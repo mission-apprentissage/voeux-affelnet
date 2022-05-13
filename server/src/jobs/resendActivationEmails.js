@@ -3,7 +3,7 @@ const logger = require("../common/logger");
 const config = require("../config");
 const { User } = require("../common/model");
 
-async function resendActivationEmails(sender, options = {}) {
+async function resendActivationEmails(resendEmail, options = {}) {
   let stats = { total: 0, sent: 0, failed: 0 };
   let maxNbEmailsSent = options.max || 2;
   let query = {
@@ -53,7 +53,7 @@ async function resendActivationEmails(sender, options = {}) {
 
       try {
         logger.info(`Resending activation to user ${user.username}...`);
-        await sender.resend(previous.token);
+        await resendEmail(previous.token);
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent email to ${user.username}`, e);

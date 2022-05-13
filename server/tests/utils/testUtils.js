@@ -1,13 +1,14 @@
 const server = require("../../src/http/server");
 // eslint-disable-next-line node/no-unpublished-require
 const axiosist = require("axiosist");
-const { createFakeSender } = require("./fakeSender");
+const { createFakeMailer } = require("./fakeMailer");
+const emailActions = require("../../src/common/actions/emailActions");
 const { User, Cfa } = require("../../src/common/model");
 const { insertCfa, insertUser } = require("./fakeData");
 const { activateUser } = require("../../src/common/actions/activateUser");
 const { Readable } = require("stream");
 const { delay } = require("../../src/common/utils/asyncUtils");
-const assert = require("assert"); // eslint-disable-line node/no-unpublished-require
+const assert = require("assert");
 
 async function waitUntil(callback, options = {}) {
   let { times = 10, timeout = 100 } = options;
@@ -39,16 +40,17 @@ function createStream(content) {
 
 function createTestContext() {
   const emailsSents = [];
+  const mailer = createFakeMailer({ calls: emailsSents });
 
   return {
-    sender: createFakeSender({ calls: emailsSents }),
+    ...emailActions({ mailer }),
     getEmailsSent: () => emailsSents,
   };
 }
 
 async function startServer(options) {
-  let context = createTestContext(options);
-  const app = await server({ sender: context.sender });
+  let testContext = createTestContext(options);
+  const app = await server(testContext);
   const httpClient = axiosist(app);
 
   async function createAndLogUser(username, password, options = {}) {
@@ -81,8 +83,7 @@ async function startServer(options) {
   return {
     httpClient,
     createAndLogUser,
-    logUser,
-    ...context,
+    ...testContext,
   };
 }
 

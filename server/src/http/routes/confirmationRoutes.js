@@ -1,12 +1,12 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
-const { confirm } = require("../../../common/actions/confirm");
-const authMiddleware = require("../../middlewares/authMiddleware");
-const tryCatch = require("../../middlewares/tryCatchMiddleware");
-const sendActivationEmails = require("../../../jobs/sendActivationEmails");
+const { confirm } = require("../../common/actions/confirm");
+const authMiddleware = require("../middlewares/authMiddleware");
+const tryCatch = require("../middlewares/tryCatchMiddleware");
+const sendActivationEmails = require("../../jobs/sendActivationEmails");
 
-module.exports = ({ sender }) => {
+module.exports = ({ sendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkActionToken, checkIsCfa } = authMiddleware();
 
@@ -36,7 +36,7 @@ module.exports = ({ sender }) => {
       }).validateAsync(req.body, { abortEarly: false });
 
       await confirm(cfa.siret, email);
-      await sendActivationEmails(sender, { username: cfa.username });
+      await sendActivationEmails(sendEmail, { username: cfa.username });
 
       return res.json({});
     })

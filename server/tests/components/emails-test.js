@@ -1,15 +1,16 @@
 const assert = require("assert");
 const { insertUser, insertCfa } = require("../utils/fakeData");
-const { createFakeSender } = require("../utils/fakeSender");
+const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../src/common/model");
+const emailActions = require("../../src/common/actions/emailActions");
 const { createTestContext } = require("../utils/testUtils");
 
 describe("emails", () => {
   it("Vérifie qu'on peut envoyer un email", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248W" });
 
-    await sender.send(user, "activation");
+    await sendEmail(user, "activation");
 
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
@@ -25,7 +26,7 @@ describe("emails", () => {
   });
 
   it("Vérifie qu'on peut renvoyer un email", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
       username: "0648248W",
@@ -39,7 +40,7 @@ describe("emails", () => {
       ],
     });
 
-    await sender.resend("TOKEN1");
+    await resendEmail("TOKEN1");
 
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
@@ -52,12 +53,12 @@ describe("emails", () => {
   });
 
   it("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
-    const { sender } = createTestContext();
+    const { sendEmail } = createTestContext();
     const user1 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
     const user2 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
 
-    await sender.send(user1, "activation");
-    await sender.send(user2, "activation");
+    await sendEmail(user1, "activation");
+    await sendEmail(user2, "activation");
 
     const results = await User.find({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.strictEqual(results.length, 2);
@@ -67,10 +68,10 @@ describe("emails", () => {
 
   it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const sender = createFakeSender({ fail: true });
+    const { sendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
 
     try {
-      await sender.send(user, "activation");
+      await sendEmail(user, "activation");
       assert.fail();
     } catch (e) {
       const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
@@ -83,7 +84,7 @@ describe("emails", () => {
   });
 
   it("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
-    const { sender } = createTestContext();
+    const { resendEmail } = createTestContext();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
       username: "0648248W",
@@ -101,7 +102,7 @@ describe("emails", () => {
       ],
     });
 
-    await sender.resend("TOKEN1");
+    await resendEmail("TOKEN1");
 
     const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.strictEqual(found.emails.length, 1);

@@ -2,11 +2,11 @@ const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
 const { compose } = require("oleoduc");
-const tryCatch = require("../../middlewares/tryCatchMiddleware");
-const authMiddleware = require("../../middlewares/authMiddleware");
-const { validate } = require("../../utils/validators");
-const { markVoeuxAsDownloaded } = require("../../../common/actions/markVoeuxAsDownloaded");
-const { voeuxCsvStream } = require("../../../common/voeuxCsvStream");
+const tryCatch = require("../middlewares/tryCatchMiddleware");
+const authMiddleware = require("../middlewares/authMiddleware");
+const { validate } = require("../utils/validators");
+const { markVoeuxAsDownloaded } = require("../../common/actions/markVoeuxAsDownloaded");
+const { voeuxCsvStream } = require("../../common/voeuxCsvStream");
 
 module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap

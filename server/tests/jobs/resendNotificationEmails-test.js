@@ -6,7 +6,7 @@ const { createTestContext } = require("../utils/testUtils");
 
 describe("resendNotificationEmails", () => {
   it("Vérifie qu'on envoie une relance au bout de 7 jours si le fichier n'a pas été téléchargé", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
@@ -29,7 +29,7 @@ describe("resendNotificationEmails", () => {
       ],
     });
 
-    const stats = await resendNotificationEmails(sender);
+    const stats = await resendNotificationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -42,7 +42,7 @@ describe("resendNotificationEmails", () => {
   });
 
   it("Vérifie qu'on envoie une relance au bout de 7 jours si l'un des fichiers n'a pas été téléchargé", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
@@ -69,7 +69,7 @@ describe("resendNotificationEmails", () => {
       ],
     });
 
-    const stats = await resendNotificationEmails(sender);
+    const stats = await resendNotificationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -82,7 +82,7 @@ describe("resendNotificationEmails", () => {
   });
 
   it("Vérifie qu'on n'envoie pas de relance si le fichier a déjà été téléchargé", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     await insertCfa({
@@ -104,7 +104,7 @@ describe("resendNotificationEmails", () => {
       ],
     });
 
-    const stats = await resendNotificationEmails(sender);
+    const stats = await resendNotificationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -116,7 +116,7 @@ describe("resendNotificationEmails", () => {
   });
 
   it("Vérifie qu'on relance 3 fois maximum", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
@@ -139,14 +139,14 @@ describe("resendNotificationEmails", () => {
       ],
     });
 
-    await resendNotificationEmails(sender);
+    await resendNotificationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut limiter les envois", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
@@ -189,7 +189,7 @@ describe("resendNotificationEmails", () => {
       ],
     });
 
-    const stats = await resendNotificationEmails(sender, { limit: 1 });
+    const stats = await resendNotificationEmails(resendEmail, { limit: 1 });
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -201,7 +201,7 @@ describe("resendNotificationEmails", () => {
   });
 
   it("Vérifie qu'on peut renvoyer un email en erreur (retry)", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const yesterday = DateTime.now().minus({ days: 1 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
@@ -229,7 +229,7 @@ describe("resendNotificationEmails", () => {
       ],
     });
 
-    const stats = await resendNotificationEmails(sender, { retry: true });
+    const stats = await resendNotificationEmails(resendEmail, { retry: true });
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

@@ -6,7 +6,7 @@ const { createTestContext } = require("../utils/testUtils");
 
 describe("resendActivationEmails", () => {
   it("Vérifie qu'on envoie une relance 3 jours après l'envoi initial", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
       statut: "confirmé",
@@ -31,7 +31,7 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    const stats = await resendActivationEmails(sender);
+    const stats = await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -45,7 +45,7 @@ describe("resendActivationEmails", () => {
   });
 
   it("Vérifie qu'on envoie une relance 3 jours après l'envoi initial pour un CFA", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
@@ -59,14 +59,14 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    await resendActivationEmails(sender);
+    await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.deepStrictEqual(sent[0].subject, "[Rappel] Des voeux Affelnet sont téléchargeables");
   });
 
   it("Vérifie qu'on attend 3 jours avant de relancer une deuxième fois", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
       statut: "confirmé",
@@ -80,14 +80,14 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    await resendActivationEmails(sender);
+    await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on attend 3 jours avant de relancer une deuxième fois (CFA)", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
@@ -101,14 +101,14 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    await resendActivationEmails(sender);
+    await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on relance 3 fois maximum", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
     await insertUser({
       statut: "confirmé",
@@ -126,14 +126,14 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    await resendActivationEmails(sender);
+    await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on relance 3 fois maximum (CFA)", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
@@ -151,14 +151,14 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    await resendActivationEmails(sender);
+    await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut modifier le nombre de relance maximal", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       username: "0751234J",
       statut: "confirmé",
@@ -176,14 +176,14 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    await resendActivationEmails(sender, { max: 4 });
+    await resendActivationEmails(resendEmail, { max: 4 });
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
   });
 
   it("Vérifie qu'on peut renvoyer une email en erreur fatale", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       statut: "confirmé",
       email: "test_fatal@apprentissage.beta.gouv.fr",
@@ -213,7 +213,7 @@ describe("resendActivationEmails", () => {
         },
       ],
     });
-    await resendActivationEmails(sender, { retry: true });
+    await resendActivationEmails(resendEmail, { retry: true });
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -221,7 +221,7 @@ describe("resendActivationEmails", () => {
   });
 
   it("Vérifie qu'on envoie pas d'emails aux utilisateurs activé ou désinscrits", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       statut: "activé",
       email: "test_activé@apprentissage.beta.gouv.fr",
@@ -246,14 +246,14 @@ describe("resendActivationEmails", () => {
       ],
     });
 
-    await resendActivationEmails(sender);
+    await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
   });
 
   it("Vérifie qu'on peut forcer le renvoi d'un email pour un utilisateur", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       username: "user1",
       statut: "confirmé",
@@ -270,7 +270,7 @@ describe("resendActivationEmails", () => {
         },
       ],
     });
-    await resendActivationEmails(sender, { username: "user1" });
+    await resendActivationEmails(resendEmail, { username: "user1" });
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

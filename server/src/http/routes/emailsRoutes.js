@@ -7,6 +7,11 @@ const { unsubscribeUser } = require("../../common/actions/unsubscribeUser");
 const { Strategy: LocalAPIKeyStrategy } = require("passport-localapikey");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { sendHTML } = require("../utils/httpUtils");
+const { checkIfEmailExists } = require("../../common/actions/checkIfEmailExists");
+const { markEmailAsOpened } = require("../../common/actions/markEmailAsOpened");
+const { markEmailAsFailed } = require("../../common/actions/markEmailAsFailed");
+const { markEmailAsDelivered } = require("../../common/actions/markEmailAsDelivered");
+const { renderEmail } = require("../../common/actions/renderEmail");
 
 function checkWebhookKey() {
   passport.use(
@@ -23,12 +28,12 @@ function checkWebhookKey() {
   return passport.authenticate("localapikey", { session: false, failWithError: true });
 }
 
-module.exports = ({ sender }) => {
+module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   async function checkEmailToken(req, res, next) {
     let { token } = req.params;
-    if (!(await sender.exists(token))) {
+    if (!(await checkIfEmailExists(token))) {
       return next(Boom.notFound());
     }
 
@@ -41,7 +46,7 @@ module.exports = ({ sender }) => {
     tryCatch(async (req, res) => {
       let { token } = req.params;
 
-      let html = await sender.render(token);
+      let html = await renderEmail(token);
 
       return sendHTML(html, res);
     })
@@ -52,7 +57,7 @@ module.exports = ({ sender }) => {
     tryCatch(async (req, res) => {
       let { token } = req.params;
 
-      sender.markAsOpened(token);
+      markEmailAsOpened(token);
 
       res.writeHead(200, { "Content-Type": "image/gif" });
       res.end(Buffer.from("R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", "base64"), "binary");
@@ -71,9 +76,9 @@ module.exports = ({ sender }) => {
         .validateAsync(req.body, { abortEarly: false });
 
       if (parameters.event === "delivered") {
-        sender.markAsDelivered(parameters["message-id"]);
+        markEmailAsDelivered(parameters["message-id"]);
       } else {
-        sender.markAsFailed(parameters["message-id"], parameters.event);
+        markEmailAsFailed(parameters["message-id"], parameters.event);
       }
 
       return res.json({});

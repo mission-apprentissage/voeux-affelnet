@@ -1,10 +1,10 @@
-const sender = require("../../src/common/emails/sender");
 const uuid = require("uuid");
+const { createMailer } = require("../../src/common/mailer");
 
-function createFakeSender(options = {}) {
+function stubbedTransporter(options = {}) {
   const calls = options.calls || [];
 
-  const transporter = {
+  return {
     sendMail: (...args) => {
       if (options.fail) {
         throw new Error("Unable to send email");
@@ -14,8 +14,11 @@ function createFakeSender(options = {}) {
       return Promise.resolve({ messageId: uuid.v4() });
     },
   };
-
-  return sender({ transporter });
 }
 
-module.exports = { createFakeSender };
+module.exports = {
+  createFakeMailer: (options) => {
+    const transporter = stubbedTransporter(options);
+    return createMailer(transporter);
+  },
+};

@@ -3,7 +3,7 @@ const logger = require("../common/logger");
 const config = require("../config");
 const { Cfa } = require("../common/model");
 
-async function resendConfirmationEmails(sender, options = {}) {
+async function resendConfirmationEmails(resendEmail, options = {}) {
   let stats = { total: 0, sent: 0, failed: 0 };
   let maxNbEmailsSent = options.max || 2;
   let query = {
@@ -53,7 +53,7 @@ async function resendConfirmationEmails(sender, options = {}) {
 
       try {
         logger.info(`Resending ${templateName} to CFA ${cfa.username}...`);
-        await sender.resend(previous.token, { retry: options.retry, newTemplateName: templateName });
+        await resendEmail(previous.token, { retry: options.retry, newTemplateName: templateName });
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent email to ${cfa.username}`, e);

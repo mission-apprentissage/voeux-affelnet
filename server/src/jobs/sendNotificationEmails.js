@@ -11,7 +11,7 @@ function allFilesAsAlreadyBeenDownloaded(cfa) {
   });
 }
 
-async function sendNotificationEmails(sender, options = {}) {
+async function sendNotificationEmails(sendEmail, options = {}) {
   let stats = { total: 0, sent: 0, failed: 0 };
   let templateName = "notification";
   let limit = options.limit || Number.MAX_SAFE_INTEGER;
@@ -34,7 +34,7 @@ async function sendNotificationEmails(sender, options = {}) {
         stats.total++;
         if (limit > stats.sent) {
           logger.info(`Sending ${templateName} to user ${cfa.username}...`);
-          await sender.send(cfa, templateName);
+          await sendEmail(cfa, templateName);
           stats.sent++;
         }
       } catch (e) {

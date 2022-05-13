@@ -1,20 +1,20 @@
 const { program: cli } = require("commander");
-const { runScript } = require("../utils/jobWrapper");
+const { runScript } = require("../utils/runScript");
 const migrate = require("./migrate");
-const injectDataset = require("./injectDataset");
+const { injectDataset } = require("./injectDataset");
 
 cli
   .command("injectDataset")
   .option("--limit <limit>", "Nombre de voeux")
   .action((options) => {
-    runScript(({ emails }) => {
-      return injectDataset(emails, options);
+    runScript(({ sendEmail }) => {
+      return injectDataset(sendEmail, options);
     });
   });
 
 cli.command("migrate").action(() => {
-  runScript((components) => {
-    return migrate(components);
+  runScript(() => {
+    return migrate();
   });
 });
 

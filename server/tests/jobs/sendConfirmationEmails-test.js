@@ -5,7 +5,7 @@ const { createTestContext } = require("../utils/testUtils");
 
 describe("sendConfirmationEmails", () => {
   it("Vérifie qu'on peut envoyer des emails de confirmation", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertCfa({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
     await insertCfa({
       email: "test1@apprentissage.beta.gouv.fr",
@@ -18,7 +18,7 @@ describe("sendConfirmationEmails", () => {
       ],
     });
 
-    const stats = await sendConfirmationEmails(sender);
+    const stats = await sendConfirmationEmails(sendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 2);
@@ -38,7 +38,7 @@ describe("sendConfirmationEmails", () => {
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
       emails: [
@@ -50,7 +50,7 @@ describe("sendConfirmationEmails", () => {
       ],
     });
 
-    const stats = await sendConfirmationEmails(sender);
+    const stats = await sendConfirmationEmails(sendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -62,13 +62,13 @@ describe("sendConfirmationEmails", () => {
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
       unsubscribe: true,
     });
 
-    const stats = await sendConfirmationEmails(sender);
+    const stats = await sendConfirmationEmails(sendEmail);
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);

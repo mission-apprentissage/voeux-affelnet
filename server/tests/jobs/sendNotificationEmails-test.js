@@ -6,7 +6,7 @@ const { createTestContext } = require("../utils/testUtils");
 
 describe(__filename, () => {
   it("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux voeux", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
     await insertCfa({
@@ -22,7 +22,7 @@ describe(__filename, () => {
       ],
     });
 
-    let stats = await sendNotificationEmails(sender);
+    let stats = await sendNotificationEmails(sendEmail);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
@@ -37,7 +37,7 @@ describe(__filename, () => {
   });
 
   it("Vérifie qu'on n'envoie pas de notification si l'email a déjà été envoyé", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
     await insertCfa({
@@ -59,7 +59,7 @@ describe(__filename, () => {
       ],
     });
 
-    let stats = await sendNotificationEmails(sender);
+    let stats = await sendNotificationEmails(sendEmail);
 
     let sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
@@ -71,7 +71,7 @@ describe(__filename, () => {
   });
 
   it("Vérifie qu'on peut limiter les envois", async () => {
-    const { sender, getEmailsSent } = createTestContext();
+    const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
     await insertCfa({
@@ -95,7 +95,7 @@ describe(__filename, () => {
       ],
     });
 
-    const stats = await sendNotificationEmails(sender, { limit: 1 });
+    const stats = await sendNotificationEmails(sendEmail, { limit: 1 });
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

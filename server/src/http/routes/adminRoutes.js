@@ -17,7 +17,7 @@ const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
 
-module.exports = ({ sender }) => {
+module.exports = ({ resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, checkIsAdmin } = authMiddleware();
 
@@ -91,7 +91,7 @@ module.exports = ({ sender }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      let stats = await resendConfirmationEmails(sender, { siret });
+      let stats = await resendConfirmationEmails(resendEmail, { siret });
 
       return res.json(stats);
     })
@@ -107,7 +107,7 @@ module.exports = ({ sender }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      let stats = await resendActivationEmails(sender, { username: siret });
+      let stats = await resendActivationEmails(resendEmail, { username: siret });
 
       return res.json(stats);
     })
