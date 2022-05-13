@@ -2,7 +2,7 @@ const assert = require("assert");
 
 const { findAcademieByName, findAcademieByUai, findAcademieByCode } = require("../src/common/academies");
 
-describe(__filename, () => {
+describe("academies", () => {
   it("Permet de trouver une académie avec son nom", () => {
     let besancon = {
       code: "03",

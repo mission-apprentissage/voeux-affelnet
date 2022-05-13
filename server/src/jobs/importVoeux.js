@@ -217,7 +217,6 @@ async function importVoeux(voeuxCsvStream, options = {}) {
           "apprenant.ine": data.apprenant.ine,
           "formation.code_affelnet": data.formation.code_affelnet,
         };
-        let selector = `${stats.total}/${Object.values(query).join("/")}`;
         let previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
         let differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
 
@@ -234,7 +233,10 @@ async function importVoeux(voeuxCsvStream, options = {}) {
         );
 
         if (res.upserted && res.upserted.length) {
-          logger.info(`Voeu ${selector} ajouté`);
+          logger.info(`Voeu ajouté`, {
+            query,
+            etablissement_accueil: data.etablissement_accueil.uai,
+          });
           stats.created++;
         }
 

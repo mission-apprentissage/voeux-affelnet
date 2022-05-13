@@ -2,7 +2,7 @@ const assert = require("assert");
 
 const { compare, hash } = require("../src/common/utils/passwordUtils");
 
-describe(__filename, () => {
+describe("passwordUtils", () => {
   const rounds = 1002;
 
   it("Peut hasher une chaine de caractère", () => {

@@ -38,4 +38,4 @@ function fakeCfaCsv(values, options = {}) {
   return oleoduc(source, transformIntoCSV({ separator: ";" }));
 }
 
-module.exports = fakeCfaCsv;
+module.exports = { fakeCfaCsv };

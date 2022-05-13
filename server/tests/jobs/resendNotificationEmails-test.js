@@ -52,7 +52,7 @@ describe("resendNotificationEmails", () => {
       statut: "activé",
       etablissements: [
         { uai: "0751234J", voeux_date: today },
-        { uai: "0751234X", voeux_date: twoWeeksAgo },
+        { uai: "0757890U", voeux_date: twoWeeksAgo },
       ],
       voeux_telechargements: [
         {

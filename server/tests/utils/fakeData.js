@@ -1,6 +1,7 @@
 const faker = require("faker");
 const { merge } = require("lodash");
 const { Cfa, Voeu, User, Mef, Log } = require("../../src/common/model");
+const { createUAI } = require("../../src/common/utils/validationUtils");
 
 module.exports = {
   insertUser: (custom = {}) => {
@@ -65,11 +66,11 @@ module.exports = {
             libelle: "1CAP2  CUISINE",
           },
           etablissement_origine: {
-            uai: "3319338X",
+            uai: createUAI(faker.helpers.replaceSymbols("075####")),
             nom: "LYCEE SAS",
           },
           etablissement_accueil: {
-            uai: "420953X",
+            uai: createUAI(faker.helpers.replaceSymbols("075####")),
           },
           _meta: {
             import_dates: [new Date()],

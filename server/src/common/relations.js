@@ -2,6 +2,8 @@ const { getFromStorage } = require("./utils/ovhUtils");
 const { oleoduc, writeData, accumulateData } = require("oleoduc");
 const { parseCsv } = require("./utils/csvUtils");
 const { Voeu } = require("./model");
+const { isUAIValid } = require("./utils/validationUtils");
+const logger = require("./logger");
 
 async function loadRelations(relationCsv) {
   const stream = relationCsv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv"));
@@ -17,8 +19,12 @@ async function loadRelations(relationCsv) {
           acc[siret] = [];
         }
 
-        if (!acc[siret].includes(data["UAI"])) {
-          acc[siret].push(data["UAI"]);
+        const uai = data["UAI"];
+        if (!isUAIValid(uai)) {
+          isUAIValid(uai);
+          logger.warn(`L'UAI de la relation est invalide ${uai}`);
+        } else if (!acc[siret].includes(uai)) {
+          acc[siret].push(uai);
         }
         return acc;
       },

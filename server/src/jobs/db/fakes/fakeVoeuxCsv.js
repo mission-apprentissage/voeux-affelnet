@@ -81,4 +81,4 @@ function fakeVoeuxCsv(values, options = {}) {
   return oleoduc(source, transformIntoCSV({ separator: ";" }));
 }
 
-module.exports = fakeVoeuxCsv;
+module.exports = { fakeVoeuxCsv };

@@ -3,14 +3,11 @@ const { runScript } = require("../utils/runScript");
 const migrate = require("./migrate");
 const { injectDataset } = require("./injectDataset");
 
-cli
-  .command("injectDataset")
-  .option("--limit <limit>", "Nombre de voeux")
-  .action((options) => {
-    runScript(({ sendEmail }) => {
-      return injectDataset(sendEmail, options);
-    });
+cli.command("injectDataset").action(() => {
+  runScript(({ sendEmail }) => {
+    return injectDataset(sendEmail);
   });
+});
 
 cli.command("migrate").action(() => {
   runScript(() => {

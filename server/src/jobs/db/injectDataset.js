@@ -1,20 +1,22 @@
 const faker = require("faker/locale/fr");
 const { Mef, JobEvent } = require("../../common/model");
-const fakeVoeuxCsv = require("./fakes/fakeVoeuxCsv");
-const fakeCfaCsv = require("./fakes/fakeCfaCsv");
-const importMefs = require("../importMefs");
+const { fakeVoeuxCsv } = require("./fakes/fakeVoeuxCsv");
+const { fakeRelationsCsv } = require("./fakes/fakeRelationsCsv");
+const { fakeCfaCsv } = require("./fakes/fakeCfaCsv");
 const importCfas = require("../importCfas");
 const importVoeux = require("../importVoeux");
 const createUser = require("../createUser");
 const sendConfirmationEmails = require("../sendConfirmationEmails");
 const sendActivationEmails = require("../sendActivationEmails");
 const FakeReferentielApi = require("../../../tests/utils/FakeReferentielApi");
-const { createStream } = require("../../../tests/utils/testUtils");
+const { createUAI } = require("../../common/utils/validationUtils");
+const importMefs = require("../importMefs");
 
-async function generateCfa(uaiEtablissement, values = {}) {
+async function generateCfa(uais, values = {}) {
   const siret = faker.helpers.replaceSymbols("#########00015");
+
   const stats = await importCfas(fakeCfaCsv({ siret, ...values }, { limit: 1 }), {
-    relationsCsv: createStream(`UAI;SIRET_UAI_GESTIONNAIRE\n${uaiEtablissement};${siret}`),
+    relationsCsv: fakeRelationsCsv(siret, uais),
     referentielApi: new FakeReferentielApi({
       siret,
       adresse: {
@@ -28,27 +30,24 @@ async function generateCfa(uaiEtablissement, values = {}) {
   await JobEvent.create({ job: "importCfas", stats });
 }
 
-async function generateVoeux(values, options) {
-  const stats = await importVoeux(fakeVoeuxCsv(values, options));
+async function generateVoeux(values) {
+  const stats = await importVoeux(fakeVoeuxCsv(values, { limit: 25 }));
   await JobEvent.create({ job: "importVoeux", stats });
 }
 
-async function injectDataset(sendEmail, options = {}) {
-  const uai = faker.helpers.replaceSymbols("#######?");
+async function injectDataset(sendEmail) {
+  const uais = [createUAI(faker.helpers.replaceSymbols("075####")), createUAI(faker.helpers.replaceSymbols("075####"))];
 
   await importMefs();
 
-  await generateCfa(uai);
+  await generateCfa(uais);
   await sendConfirmationEmails(sendEmail);
 
   const { mef, libelle_long } = await Mef.findOne({ mef: "3112320121" });
-  await generateVoeux(
-    {
-      "Code UAI étab. Accueil": uai,
-      "Code MEF": mef,
-      "Libellé formation": libelle_long,
-    },
-    { limit: options.limit }
+  await Promise.all(
+    uais.map((uai) => {
+      return generateVoeux({ "Code UAI étab. Accueil": uai, "Code MEF": mef, "Libellé formation": libelle_long });
+    })
   );
 
   await createUser(faker.internet.userName(), faker.internet.email(), { admin: true });

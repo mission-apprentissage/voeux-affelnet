@@ -4,7 +4,7 @@ const { Cfa } = require("../../src/common/model");
 const { insertVoeu } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 
-describe(__filename, () => {
+describe("fichierRoutes", () => {
   it("Vérifie qu'un cfa peut accéder à la liste des fichiers en étant authentifié", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", {
@@ -36,6 +36,7 @@ describe(__filename, () => {
     });
     await insertVoeu({
       apprenant: { ine: "ABCDEF" },
+      etablissement_origine: { uai: "0757890U" },
       etablissement_accueil: { uai: "0751234J" },
       formation: { mef: "2472521431", code_formation_diplome: "40025214" },
     });
@@ -50,7 +51,7 @@ describe(__filename, () => {
     assert.strictEqual(
       response.data,
       `"INE_APPRENANT";"NOM_APPRENANT";"PRENOM_APPRENANT";"ADRESSE1_APPR";"ADRESSE2_APPR";"ADRESSE3_APPR";"ADRESSE4_APPR";"CP_APPR";"VILLE_APPR";"ID_PAYS";"TEL1_APPR";"TEL2_APPR";"NOM_REP_LEGAL";"TEL1_REP_LEGAL";"TEL2_REP_LEGAL";"EMAIL1_REP_LEGAL";"EMAIL2_REP_LEGAL";"ID_FORMATION_SOUHAIT1";"LIBELLE_FORMATION_SOUHAIT1";"CODE_MEF_10_FORMATION_SOUHAIT1";"ID_ETABLISSEMENT_ORIGINE";"NOM_ETAB_ORIGINE"
-"ABCDEF";"Dupont";"Robert";"36 rue des lilas";"";"";"";"75019";"Paris";"FRANCE";"0112345678";"0612345678";"Dupont";"0112345678";"";"test1@apprentissage.beta.gouv.fr";"";"40025214";"1CAP2  CUISINE";"2472521431";"3319338X";"LYCEE SAS"
+"ABCDEF";"Dupont";"Robert";"36 rue des lilas";"";"";"";"75019";"Paris";"FRANCE";"0112345678";"0612345678";"Dupont";"0112345678";"";"test1@apprentissage.beta.gouv.fr";"";"40025214";"1CAP2  CUISINE";"2472521431";"0757890U";"LYCEE SAS"
 `
     );
   });
@@ -152,7 +153,7 @@ describe(__filename, () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", { model: Cfa });
 
-    const response = await httpClient.get("/api/fichiers/0751234X.csv", {
+    const response = await httpClient.get("/api/fichiers/0757890U.csv", {
       headers: {
         ...auth,
       },

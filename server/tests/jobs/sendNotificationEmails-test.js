@@ -4,7 +4,7 @@ const { insertCfa } = require("../utils/fakeData");
 const sendNotificationEmails = require("../../src/jobs/sendNotificationEmails");
 const { createTestContext } = require("../utils/testUtils");
 
-describe(__filename, () => {
+describe("sendNotificationEmails", () => {
   it("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux voeux", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
@@ -86,10 +86,10 @@ describe(__filename, () => {
     });
     await insertCfa({
       statut: "activé",
-      etablissements: [{ uai: "0751234X", voeux_date: today }],
+      etablissements: [{ uai: "0757890U", voeux_date: today }],
       voeux_telechargements: [
         {
-          uai: "0751234X",
+          uai: "0757890U",
           date: lastWeek,
         },
       ],

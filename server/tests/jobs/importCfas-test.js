@@ -106,7 +106,7 @@ describe("importCfas", () => {
         referentielApi: fakeReferentielApi,
         relationsCsv: createStream(`UAI;SIRET_UAI_GESTIONNAIRE
 0751234J;11111111100006
-0751234X;11111111100006
+0757890U;11111111100006
 `),
       }
     );
@@ -115,7 +115,7 @@ describe("importCfas", () => {
     assert.strictEqual(found.raison_sociale, "Lycée professionnel 2");
     assert.deepStrictEqual(
       found.etablissements.map((e) => e.uai),
-      ["0751234J", "0751234X"]
+      ["0751234J", "0757890U"]
     );
     assert.deepStrictEqual(stats, { total: 1, created: 0, updated: 1, invalid: 0, failed: 0 });
   });
