@@ -11,7 +11,7 @@
     "start": "nodemon --ignore tests/ src/index.js",
     "debug": "nodemon --inspect=0.0.0.0 --signal SIGINT --ignore tests/ src/index.js",
     "test": "mocha --recursive --exit --timeout 5000 tests/",
-    "coverage": "nyc --temp-dir .coverage/.nyc_output --report-dir .coverage --reporter=lcov --reporter=html yarn tests",
+    "coverage": "nyc --temp-dir .coverage/.nyc_output --report-dir .coverage --reporter=lcov --reporter=html yarn test",
     "cli": "VOEUX_AFFELNET_LOG_DESTINATIONS=stderr node src/cli.js",
     "lint": "eslint src/ tests/"
   },
