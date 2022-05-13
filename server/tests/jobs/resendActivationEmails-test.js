@@ -3,6 +3,9 @@ const { insertUser, insertCfa } = require("../utils/fakeData");
 const resendActivationEmails = require("../../src/jobs/resendActivationEmails");
 const { DateTime } = require("luxon");
 const { createTestContext } = require("../utils/testUtils");
+const emailActions = require("../../src/common/actions/emailActions");
+const { createFakeMailer } = require("../utils/fakeMailer");
+const { User } = require("../../src/common/model");
 
 describe("resendActivationEmails", () => {
   it("Vérifie qu'on envoie une relance 3 jours après l'envoi initial", async () => {
@@ -275,5 +278,33 @@ describe("resendActivationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
+  });
+
+  it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
+    const { resendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
+    await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
+    await insertUser({
+      statut: "confirmé",
+      email: "test1@apprentissage.beta.gouv.fr",
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "activation",
+          sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
+        },
+      ],
+    });
+
+    try {
+      await resendActivationEmails(resendEmail);
+      assert.fail();
+    } catch (e) {
+      const found = await User.findOne({ email: "test1@apprentissage.beta.gouv.fr" }).lean();
+      assert.strictEqual(found.emails.length, 1);
+      assert.deepStrictEqual(found.emails[0].error, {
+        type: "fatal",
+        message: "Unable to send email",
+      });
+    }
   });
 });

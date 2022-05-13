@@ -3,6 +3,8 @@ const { Cfa, User } = require("../../src/common/model");
 const { insertUser, insertCfa } = require("../utils/fakeData");
 const sendActivationEmails = require("../../src/jobs/sendActivationEmails");
 const { createTestContext } = require("../utils/testUtils");
+const emailActions = require("../../src/common/actions/emailActions");
+const { createFakeMailer } = require("../utils/fakeMailer");
 
 describe("sendActivationEmails", () => {
   it("Vérifie qu'on envoie des emails d'activation uniquement aux utilisateurs confirmés", async () => {
@@ -122,5 +124,33 @@ describe("sendActivationEmails", () => {
       sent: 1,
       failed: 0,
     });
+  });
+
+  it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
+    const { sendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
+    await insertUser({
+      statut: "confirmé",
+      email: "test1@apprentissage.beta.gouv.fr",
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "other",
+          sendDates: [new Date()],
+        },
+      ],
+    });
+
+    try {
+      await sendActivationEmails(sendEmail);
+      assert.fail();
+    } catch (e) {
+      const found = await User.findOne({ email: "test1@apprentissage.beta.gouv.fr" }).lean();
+      const activation = found.emails.find((e) => e.templateName === "activation");
+      assert.ok(activation);
+      assert.deepStrictEqual(activation.error, {
+        type: "fatal",
+        message: "Unable to send email",
+      });
+    }
   });
 });

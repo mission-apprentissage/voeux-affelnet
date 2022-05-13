@@ -3,6 +3,9 @@ const { DateTime } = require("luxon");
 const { insertCfa } = require("../utils/fakeData");
 const resendNotificationEmails = require("../../src/jobs/resendNotificationEmails");
 const { createTestContext } = require("../utils/testUtils");
+const emailActions = require("../../src/common/actions/emailActions");
+const { createFakeMailer } = require("../utils/fakeMailer");
+const { User } = require("../../src/common/model");
 
 describe("resendNotificationEmails", () => {
   it("Vérifie qu'on envoie une relance au bout de 7 jours si le fichier n'a pas été téléchargé", async () => {
@@ -240,5 +243,42 @@ describe("resendNotificationEmails", () => {
       sent: 1,
       failed: 0,
     });
+  });
+
+  it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
+    const { resendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
+    const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
+    const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
+    await insertCfa({
+      username: "0751234J",
+      email: "test@apprentissage.beta.gouv.fr",
+      statut: "activé",
+      etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
+      voeux_telechargements: [
+        {
+          uai: "0751234J",
+          date: twoWeeksAgo,
+        },
+      ],
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "notification",
+          sendDates: [eightDaysAgo],
+        },
+      ],
+    });
+
+    try {
+      await resendNotificationEmails(resendEmail);
+      assert.fail();
+    } catch (e) {
+      const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
+      assert.strictEqual(found.emails.length, 1);
+      assert.deepStrictEqual(found.emails[0].error, {
+        type: "fatal",
+        message: "Unable to send email",
+      });
+    }
   });
 });
