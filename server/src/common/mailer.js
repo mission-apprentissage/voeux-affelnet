@@ -16,7 +16,7 @@ function createMailer(transporter = createTransporter(config.smtp)) {
     const { from, subject, data, replyTo } = template;
     const address = from || "voeux-affelnet@apprentissage.beta.gouv.fr";
 
-    const { messageId } = transporter.sendMail({
+    const { messageId } = await transporter.sendMail({
       from: address,
       replyTo: replyTo || address,
       to: process.env.VOEUX_AFFELNET_SMTP_TO || to,
