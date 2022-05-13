@@ -2,12 +2,14 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
+const passport = require("passport");
 
 module.exports = async (actions) => {
   const app = express();
 
   app.use(bodyParser.json());
   app.use(logMiddleware());
+  app.use(passport.initialize());
   app.use(require("./routes/loginRoutes")(actions));
   app.use(require("./routes/activationRoutes")(actions));
   app.use(require("./routes/confirmationRoutes")(actions));

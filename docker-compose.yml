@@ -44,7 +44,7 @@ services:
       - VOEUX_AFFELNET_OUTPUT_DIR=/data
 
   mongodb:
-    image: mongo:4.4.5-bionic
+    image: mongo:5.0.7-focal
     container_name: voeux_affelnet_mongodb
     command: --wiredTigerCacheSizeGB 1 --port 27017
     mem_limit: 1g
