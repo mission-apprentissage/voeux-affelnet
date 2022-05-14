@@ -10,10 +10,10 @@ import CenteredCol from "../../common/components/CenteredCol";
 import SuccessMessage from "../../common/components/SuccessMessage";
 
 function ForgottenPasswordPage() {
-  let [, setAuth] = useAuth();
-  let history = useHistory();
+  const [, setAuth] = useAuth();
+  const history = useHistory();
 
-  let showError = (meta) => {
+  const showError = (meta) => {
     return meta.touched && meta.error
       ? {
           feedback: meta.error,
@@ -22,9 +22,9 @@ function ForgottenPasswordPage() {
       : {};
   };
 
-  let resetPassword = async (values, { setStatus }) => {
+  const resetPassword = async (values, { setStatus }) => {
     try {
-      let { token } = await _post("/api/password/forgotten-password", { ...values });
+      const { token } = await _post("/api/password/forgotten-password", { ...values });
       setAuth(token);
       setStatus({ message: "Un email vous a été envoyé." });
       setTimeout(() => history.push("/"), 1500);

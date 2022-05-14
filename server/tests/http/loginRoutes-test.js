@@ -8,20 +8,20 @@ const { startServer } = require("../utils/testUtils");
 
 describe("loginRoutes", () => {
   it("Vérifie qu'on peut se connecter", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
     });
     await activateUser("user1", "password");
 
-    let response = await httpClient.post("/api/login", {
+    const response = await httpClient.post("/api/login", {
       username: "user1",
       password: "password",
     });
 
     assert.strictEqual(response.status, 200);
-    let decoded = jwt.verify(response.data.token, config.auth.apiToken.jwtSecret);
+    const decoded = jwt.verify(response.data.token, config.auth.apiToken.jwtSecret);
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);
     assert.deepStrictEqual(_.omit(decoded, ["iat", "exp"]), {
@@ -34,14 +34,14 @@ describe("loginRoutes", () => {
   });
 
   it("Vérifie qu'on peut se connecter en lowercase avec un uai", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertUser({
       username: "3319338X",
       email: "user1@apprentissage.beta.gouv.fr",
     });
     await activateUser("3319338X", "password");
 
-    let response = await httpClient.post("/api/login", {
+    const response = await httpClient.post("/api/login", {
       username: "3319338x",
       password: "password",
     });
@@ -50,7 +50,7 @@ describe("loginRoutes", () => {
   });
 
   it("Vérifie qu'un mot de passe invalide est rejeté", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
@@ -58,7 +58,7 @@ describe("loginRoutes", () => {
     });
     await activateUser("user1", "password");
 
-    let response = await httpClient.post("/api/login", {
+    const response = await httpClient.post("/api/login", {
       username: "user1",
       password: "INVALID",
     });
@@ -67,9 +67,9 @@ describe("loginRoutes", () => {
   });
 
   it("Vérifie qu'un login invalide est rejeté", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
 
-    let response = await httpClient.post("/api/login", {
+    const response = await httpClient.post("/api/login", {
       username: "INVALID",
       password: "INVALID",
     });
@@ -78,14 +78,14 @@ describe("loginRoutes", () => {
   });
 
   it("Vérifie qu'un utilisateur en attente est rejeté", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertUser({
       username: "user1",
       statut: "en attente",
       email: "user1@apprentissage.beta.gouv.fr",
     });
 
-    let response = await httpClient.post("/api/login", {
+    const response = await httpClient.post("/api/login", {
       username: "user1",
       password: "password",
     });
@@ -94,14 +94,14 @@ describe("loginRoutes", () => {
   });
 
   it("Vérifie qu'un utilisateur confirmé est rejeté", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertUser({
       username: "user1",
       statut: "confirmé",
       email: "user1@apprentissage.beta.gouv.fr",
     });
 
-    let response = await httpClient.post("/api/login", {
+    const response = await httpClient.post("/api/login", {
       username: "user1",
       password: "password",
     });

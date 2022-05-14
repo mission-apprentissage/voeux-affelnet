@@ -3,18 +3,18 @@ const { startServer } = require("../utils/testUtils");
 
 describe("healthcheckRoutes", () => {
   it("Vérifie que le server fonctionne", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
 
-    let response = await httpClient.get("/api/healthcheck");
+    const response = await httpClient.get("/api/healthcheck");
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.healthcheck, true);
   });
 
   it("Vérifie qu'on peut générer une erreur", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
 
-    let response = await httpClient.get("/api/healthcheck/error");
+    const response = await httpClient.get("/api/healthcheck/error");
 
     assert.strictEqual(response.status, 500);
     assert.deepStrictEqual(response.data, {

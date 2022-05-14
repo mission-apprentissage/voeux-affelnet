@@ -12,10 +12,10 @@ function allFilesAsAlreadyBeenDownloaded(cfa) {
 }
 
 async function sendNotificationEmails(sendEmail, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let templateName = "notification";
-  let limit = options.limit || Number.MAX_SAFE_INTEGER;
-  let query = {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const templateName = "notification";
+  const limit = options.limit || Number.MAX_SAFE_INTEGER;
+  const query = {
     unsubscribe: false,
     statut: "activé",
     "etablissements.voeux_date": { $exists: true },

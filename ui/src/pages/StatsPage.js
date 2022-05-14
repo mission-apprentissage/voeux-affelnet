@@ -44,19 +44,19 @@ const AcademiesWrapper = styled.div`
 `;
 
 function StatsPage() {
-  let [now, loading, , setNow] = useFetch(`/api/stats/computeStats/now?academies=ALL`, null);
-  let [importCfas] = useFetch(`/api/stats/importCfas`, { results: [] });
-  let [importVoeux] = useFetch(`/api/stats/importVoeux`, { results: [] });
+  const [now, loading, , setNow] = useFetch(`/api/stats/computeStats/now?academies=ALL`, null);
+  const [importCfas] = useFetch(`/api/stats/importCfas`, { results: [] });
+  const [importVoeux] = useFetch(`/api/stats/importVoeux`, { results: [] });
 
-  let academies = now ? now._meta.academies : [];
-  let cfas = now ? now.stats.cfas[0].stats : null;
-  let emails = now ? now.stats.emails[0].stats : null;
-  let téléchargements = now ? now.stats.téléchargements[0].stats : null;
-  let voeux = now ? now.stats.voeux[0].stats : null;
+  const academies = now ? now._meta.academies : [];
+  const cfas = now ? now.stats.cfas[0].stats : null;
+  const emails = now ? now.stats.emails[0].stats : null;
+  const téléchargements = now ? now.stats.téléchargements[0].stats : null;
+  const voeux = now ? now.stats.voeux[0].stats : null;
 
   async function fetchAcademieStats(code) {
     try {
-      let data = await _get(`/api/stats/computeStats/now?academies=${code}`);
+      const data = await _get(`/api/stats/computeStats/now?academies=${code}`);
       setNow(data);
     } catch (e) {
       console.error(e);

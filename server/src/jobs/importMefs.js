@@ -5,8 +5,8 @@ const { oleoduc, writeData, transformData } = require("oleoduc");
 const { parseCsv } = require("../common/utils/csvUtils");
 
 async function importMefs(options = {}) {
-  let stats = { total: 0, created: 0, updated: 0, failed: 0, invalid: 0 };
-  let source =
+  const stats = { total: 0, created: 0, updated: 0, failed: 0, invalid: 0 };
+  const source =
     options.csvStream ||
     (await fetchStream("https://infocentre.pleiade.education.fr/bcn/index.php/export/CSV?n=N_MEF&separator=%7C"));
 
@@ -25,7 +25,7 @@ async function importMefs(options = {}) {
       async (data) => {
         try {
           stats.total++;
-          let res = await Mef.updateOne(
+          const res = await Mef.updateOne(
             {
               mef: data.MEF,
             },

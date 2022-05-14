@@ -4,9 +4,9 @@ const config = require("../config");
 const { Cfa } = require("../common/model");
 
 async function resendConfirmationEmails(resendEmail, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let maxNbEmailsSent = options.max || 2;
-  let query = {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const maxNbEmailsSent = options.max || 2;
+  const query = {
     unsubscribe: false,
     statut: "en attente",
     ...(options.siret ? { siret: options.siret } : {}),
@@ -48,8 +48,8 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
     .eachAsync(async (cfa) => {
-      let previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation"));
-      let templateName = cfa.etablissements.find((e) => e.voeux_date) ? "confirmation_voeux" : previous.templateName;
+      const previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation"));
+      const templateName = cfa.etablissements.find((e) => e.voeux_date) ? "confirmation_voeux" : previous.templateName;
 
       try {
         logger.info(`Resending ${templateName} to CFA ${cfa.username}...`);

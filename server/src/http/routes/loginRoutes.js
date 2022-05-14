@@ -11,9 +11,9 @@ module.exports = () => {
     "/api/login",
     checkUsernameAndPassword(),
     tryCatch(async (req, res) => {
-      let user = req.user;
+      const user = req.user;
 
-      let token = createApiToken(user);
+      const token = createApiToken(user);
       return res.json({ token });
     })
   );

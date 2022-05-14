@@ -15,7 +15,7 @@ module.exports = () => {
     "/api/activation/status",
     checkActionToken(),
     tryCatch(async (req, res) => {
-      let user = req.user;
+      const user = req.user;
       if (user.statut !== "confirmé") {
         throw Boom.badRequest(`L'utilisateur ${user.username} est déjà activé`);
       }
@@ -28,8 +28,8 @@ module.exports = () => {
     "/api/activation",
     checkActionToken(),
     tryCatch(async (req, res) => {
-      let user = req.user;
-      let { password } = await Joi.object({
+      const user = req.user;
+      const { password } = await Joi.object({
         actionToken: Joi.string().required(),
         password: validators.password().required(),
       }).validateAsync(req.body, { abortEarly: false });

@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-const { User, Cfa, JobEvent, Voeu } = require("../../common/model");
+const { User, JobEvent } = require("../../common/model");
 const logger = require("../../common/logger");
 const { promiseAllProps } = require("../../common/utils/asyncUtils");
 // eslint-disable-next-line no-unused-vars
@@ -8,7 +8,7 @@ const { raw } = require("../../common/utils/mongooseUtils");
 const VERSION = 25;
 
 async function removeWriteable() {
-  let { result } = await raw(User).updateMany(
+  const { result } = await raw(User).updateMany(
     {},
     {
       $set: {
@@ -21,7 +21,7 @@ async function removeWriteable() {
 }
 
 async function hasAlreadyBeenExecuted() {
-  let count = await JobEvent.countDocuments({ job: "migrate", "stats.version": VERSION });
+  const count = await JobEvent.countDocuments({ job: "migrate", "stats.version": VERSION });
   return count > 0;
 }
 

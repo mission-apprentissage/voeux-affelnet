@@ -13,7 +13,7 @@ import StatsPage from "./pages/StatsPage";
 import AdminPage from "./pages/AdminPage";
 
 function PrivateRoute({ children, ...rest }) {
-  let [auth] = useAuth();
+  const [auth] = useAuth();
 
   return (
     <Layout>
@@ -28,7 +28,7 @@ function PrivateRoute({ children, ...rest }) {
 }
 
 function App() {
-  let [auth] = useAuth();
+  const [auth] = useAuth();
 
   return (
     <div className="App">

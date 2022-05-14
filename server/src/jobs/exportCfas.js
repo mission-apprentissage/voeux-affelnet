@@ -13,7 +13,7 @@ const errorMapper = {
 };
 
 async function exportCfas(output, options = {}) {
-  let columns = options.columns || {};
+  const columns = options.columns || {};
   await oleoduc(
     Cfa.find(options.filter || {}).cursor(),
     transformIntoCSV({
@@ -24,7 +24,7 @@ async function exportCfas(output, options = {}) {
         academie: (data) => data.academie?.nom,
         email: (data) => data.email,
         erreur: (data) => {
-          let error = data.unsubscribe ? "unsubscribe" : data.emails.find((e) => e.error)?.error?.type;
+          const error = data.unsubscribe ? "unsubscribe" : data.emails.find((e) => e.error)?.error?.type;
           return errorMapper[error];
         },
         voeux: (data) => (data.etablissements.find((e) => e.voeux_date) ? "Oui" : "Non"),

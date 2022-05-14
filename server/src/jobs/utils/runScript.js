@@ -51,7 +51,7 @@ async function runScript(job) {
     timer.start();
 
     await connectToMongo();
-    let actions = await createActions();
+    const actions = await createActions();
 
     const results = await job(actions);
 

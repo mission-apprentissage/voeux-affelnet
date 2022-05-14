@@ -2,7 +2,7 @@ const { Schema } = require("mongoose");
 const User = require("./User");
 const { nested } = require("../utils/mongooseUtils");
 
-let schema = new Schema({
+const schema = new Schema({
   siret: {
     type: String,
     required: true,

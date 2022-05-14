@@ -4,7 +4,7 @@ const { findAcademieByName, findAcademieByUai, findAcademieByCode } = require(".
 
 describe("academies", () => {
   it("Permet de trouver une académie avec son nom", () => {
-    let besancon = {
+    const besancon = {
       code: "03",
       nom: "Besançon",
       departements: [

@@ -21,8 +21,8 @@ class HTTPError extends Error {
 
 const emitter = new EventEmitter();
 const handleResponse = async (path, response) => {
-  let statusCode = response.status;
-  let json = await response.json();
+  const statusCode = response.status;
+  const json = await response.json();
 
   if (statusCode >= 400 && statusCode < 600) {
     emitter.emit("http:error", response);
@@ -37,7 +37,7 @@ const handleResponse = async (path, response) => {
 };
 
 const getHeaders = () => {
-  let auth = getAuth();
+  const auth = getAuth();
 
   return {
     Accept: "application/json",
@@ -77,7 +77,7 @@ export const _delete = (path) => {
 };
 
 export const buildLink = (path) => {
-  let auth = getAuth();
+  const auth = getAuth();
   if (auth.sub !== "anonymous") {
     //TODO better handle params
     return `${path}?token=${auth.token}`;

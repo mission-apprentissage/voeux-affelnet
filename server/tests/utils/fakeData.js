@@ -18,7 +18,7 @@ module.exports = {
     );
   },
   insertCfa: (custom = {}) => {
-    let username = custom.username || custom.siret || faker.helpers.replaceSymbols("#########00015");
+    const username = custom.username || custom.siret || faker.helpers.replaceSymbols("#########00015");
 
     return Cfa.create(
       merge(

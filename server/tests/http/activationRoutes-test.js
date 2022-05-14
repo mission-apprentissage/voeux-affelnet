@@ -8,28 +8,28 @@ const { startServer } = require("../utils/testUtils");
 
 describe("activationRoutes", () => {
   it("Vérifie qu'un utilisateur peut vérifier son statut", async () => {
-    let { httpClient } = await startServer();
-    let user = await insertUser({
+    const { httpClient } = await startServer();
+    const user = await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
       statut: "confirmé",
     });
 
-    let response = await httpClient.get(`/api/activation/status?token=${createActionToken(user.username)}`);
+    const response = await httpClient.get(`/api/activation/status?token=${createActionToken(user.username)}`);
 
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {});
   });
 
   it("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus l'activation", async () => {
-    let { httpClient } = await startServer();
-    let user = await insertUser({
+    const { httpClient } = await startServer();
+    const user = await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
       statut: "activé",
     });
 
-    let response = await httpClient.get(`/api/activation/status?token=${createActionToken(user.username)}`);
+    const response = await httpClient.get(`/api/activation/status?token=${createActionToken(user.username)}`);
 
     assert.strictEqual(response.status, 400);
     assert.deepStrictEqual(response.data, {
@@ -40,20 +40,20 @@ describe("activationRoutes", () => {
   });
 
   it("Vérifie qu'un utilisateur peut activer un compte", async () => {
-    let { httpClient } = await startServer();
-    let user = await insertUser({
+    const { httpClient } = await startServer();
+    const user = await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
       isAdmin: true,
     });
 
-    let response = await httpClient.post("/api/activation", {
+    const response = await httpClient.post("/api/activation", {
       actionToken: createActionToken(user.username),
       password: "Password!123456",
     });
 
     assert.strictEqual(response.status, 200);
-    let decoded = jwt.verify(response.data.token, config.auth.apiToken.jwtSecret);
+    const decoded = jwt.verify(response.data.token, config.auth.apiToken.jwtSecret);
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);
     assert.deepStrictEqual(_.omit(decoded, ["iat", "exp"]), {
@@ -66,16 +66,16 @@ describe("activationRoutes", () => {
   });
 
   it("Vérifie qu'un CFA peut activer un compte", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
-    let response = await httpClient.post("/api/activation", {
+    const response = await httpClient.post("/api/activation", {
       actionToken: createActionToken("0751234J"),
       password: "Password!123456",
     });
 
     assert.strictEqual(response.status, 200);
-    let decoded = jwt.verify(response.data.token, config.auth.apiToken.jwtSecret);
+    const decoded = jwt.verify(response.data.token, config.auth.apiToken.jwtSecret);
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);
     assert.deepStrictEqual(_.omit(decoded, ["iat", "exp"]), {
@@ -89,10 +89,10 @@ describe("activationRoutes", () => {
   });
 
   it("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
-    let response = await httpClient.post("/api/activation", {
+    const response = await httpClient.post("/api/activation", {
       actionToken: createActionToken("0751234J"),
       password: "too weak",
     });
@@ -101,9 +101,9 @@ describe("activationRoutes", () => {
   });
 
   it("Vérifie qu'on ne peut pas créer de compte avec un token invalide", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
 
-    let response = await httpClient.post("/api/activation", {
+    const response = await httpClient.post("/api/activation", {
       actionToken: "INVALID",
       password: "Password!123456",
     });
@@ -112,10 +112,10 @@ describe("activationRoutes", () => {
   });
 
   it("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
-    let response = await httpClient.post("/api/activation", {
+    const response = await httpClient.post("/api/activation", {
       actionToken: createActionToken("0751234J", { expiresIn: "1ms" }),
       password: "Password!123456",
     });
@@ -124,7 +124,7 @@ describe("activationRoutes", () => {
   });
 
   it("Vérifie qu'on ne peut pas utiliser plusieurs fois un token", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
     let response = await httpClient.post("/api/activation", {
@@ -142,10 +142,10 @@ describe("activationRoutes", () => {
   });
 
   it("Vérifie qu'on ne peut pas créer de compte avec un token forgé", async () => {
-    let { httpClient } = await startServer();
+    const { httpClient } = await startServer();
     await insertCfa({ username: "0751234J" });
 
-    let response = await httpClient.post("/api/activation", {
+    const response = await httpClient.post("/api/activation", {
       actionToken: createActionToken("0751234J", { secret: "fake-secret" }),
       password: "Password!123456",
     });

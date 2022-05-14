@@ -23,8 +23,8 @@ function trimValues(obj) {
 }
 
 function flattenObject(obj, parent, res = {}) {
-  for (let key in obj) {
-    let propName = parent ? parent + "." + key : key;
+  for (const key in obj) {
+    const propName = parent ? parent + "." + key : key;
     if (
       Object.prototype.hasOwnProperty.call(obj, propName) &&
       typeof obj[key] == "object" &&

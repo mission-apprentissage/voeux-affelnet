@@ -3,7 +3,7 @@ const { compose, transformData } = require("oleoduc");
 const logger = require("../logger").child({ context: "http" });
 
 async function _fetch(url, options = {}) {
-  let { method = "GET", data, ...rest } = options;
+  const { method = "GET", data, ...rest } = options;
   logger.debug(`${method} ${url}...`);
 
   return axios.request({
@@ -15,7 +15,7 @@ async function _fetch(url, options = {}) {
 }
 
 async function fetchStream(url, options = {}) {
-  let response = await _fetch(url, { ...options, responseType: "stream" });
+  const response = await _fetch(url, { ...options, responseType: "stream" });
   return compose(
     response.data,
     transformData((d) => d.toString())
@@ -23,7 +23,7 @@ async function fetchStream(url, options = {}) {
 }
 
 async function fetchJson(url, options = {}) {
-  let response = await _fetch(url, { ...options, responseType: "json" });
+  const response = await _fetch(url, { ...options, responseType: "json" });
   return response.data;
 }
 

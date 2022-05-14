@@ -9,7 +9,7 @@ const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
 const { parseCsv } = require("../common/utils/csvUtils");
 
-let schema = Joi.object({
+const schema = Joi.object({
   academie: Joi.object({
     code: Joi.string().required(),
     nom: Joi.string().required(),
@@ -73,7 +73,7 @@ function fixPhoneNumber(phone) {
 }
 
 async function findFormationDiplome(code) {
-  let mef = (code || "").substring(0, 10);
+  const mef = (code || "").substring(0, 10);
   return Mef.findOne({ mef });
 }
 
@@ -83,13 +83,13 @@ function parseVoeuxCsv(source) {
     parseCsv({
       quote: '"',
       on_record: (record) => {
-        let filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
+        const filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
         return trimValues(filtered);
       },
     }),
     transformData(async (line) => {
-      let { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
-      let academie = findAcademieByName(line["Académie possédant le dossier élève"]);
+      const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
+      const academie = findAcademieByName(line["Académie possédant le dossier élève"]);
 
       return deepOmitEmpty({
         ...(academie
@@ -185,7 +185,7 @@ function updateCfa(uai, importDate) {
 }
 
 async function importVoeux(voeuxCsvStream, options = {}) {
-  let stats = {
+  const stats = {
     total: 0,
     created: 0,
     invalid: 0,
@@ -193,15 +193,15 @@ async function importVoeux(voeuxCsvStream, options = {}) {
     deleted: 0,
     updated: 0,
   };
-  let updatedFields = new Set();
-  let importDate = options.importDate || new Date();
+  const updatedFields = new Set();
+  const importDate = options.importDate || new Date();
 
   await oleoduc(
     parseVoeuxCsv(voeuxCsvStream),
     writeData(async (data) => {
       stats.total++;
 
-      let anomalies = await validate(data);
+      const anomalies = await validate(data);
       if (hasAnomaliesOnMandatoryFields(anomalies)) {
         logger.error(`Voeu invalide`, {
           line: stats.total,
@@ -212,15 +212,15 @@ async function importVoeux(voeuxCsvStream, options = {}) {
       }
 
       try {
-        let query = {
+        const query = {
           "academie.code": data.academie.code,
           "apprenant.ine": data.apprenant.ine,
           "formation.code_affelnet": data.formation.code_affelnet,
         };
-        let previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
-        let differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
+        const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
+        const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
 
-        let res = await Voeu.replaceOne(
+        const res = await Voeu.replaceOne(
           query,
           {
             ...data,
@@ -254,7 +254,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
     })
   );
 
-  let { deletedCount } = await Voeu.deleteMany({ "_meta.import_dates": { $nin: [importDate] } });
+  const { deletedCount } = await Voeu.deleteMany({ "_meta.import_dates": { $nin: [importDate] } });
   stats.deleted = deletedCount;
 
   return {

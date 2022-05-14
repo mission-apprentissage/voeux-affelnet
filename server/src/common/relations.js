@@ -6,7 +6,7 @@ const { isUAIValid } = require("./utils/validationUtils");
 const logger = require("./logger");
 
 async function getDefaultRelations() {
-  let stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv");
+  const stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv");
   return compose(
     stream,
     parseCsv(),

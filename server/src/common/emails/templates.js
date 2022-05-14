@@ -7,7 +7,7 @@ function getTemplateFile(name) {
 
 module.exports = {
   confirmation: (cfa, token, options = {}) => {
-    let prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : ${cfa.siret})`,
       templateFile: getTemplateFile("confirmation"),
@@ -19,7 +19,7 @@ module.exports = {
     };
   },
   confirmation_voeux: (cfa, token, options = {}) => {
-    let prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : ${cfa.siret})`,
       templateFile: getTemplateFile("confirmation_voeux"),
@@ -31,7 +31,7 @@ module.exports = {
     };
   },
   activation: (user, token, options = {}) => {
-    let prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Activation de votre compte`,
       templateFile: getTemplateFile("activation"),
@@ -43,7 +43,7 @@ module.exports = {
     };
   },
   activation_cfa: (user, token, options = {}) => {
-    let prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Des voeux Affelnet sont téléchargeables`,
       templateFile: getTemplateFile("activation_cfa"),

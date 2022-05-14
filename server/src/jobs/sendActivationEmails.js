@@ -2,8 +2,8 @@ const logger = require("../common/logger");
 const { User } = require("../common/model");
 
 async function sendActivationEmails(sendEmail, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let query = {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const query = {
     unsubscribe: false,
     password: { $exists: false },
     statut: "confirmé",

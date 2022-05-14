@@ -11,7 +11,7 @@ const { delay } = require("../../src/common/utils/asyncUtils");
 const assert = require("assert");
 
 async function waitUntil(callback, options = {}) {
-  let { times = 10, timeout = 100 } = options;
+  const { times = 10, timeout = 100 } = options;
 
   let cpt = 0;
   let res;
@@ -27,7 +27,7 @@ async function waitUntil(callback, options = {}) {
 }
 
 function createStream(content) {
-  let stream = new Readable({
+  const stream = new Readable({
     objectMode: true,
     read() {},
   });
@@ -49,14 +49,14 @@ function createTestContext() {
 }
 
 async function startServer(options) {
-  let testContext = createTestContext(options);
+  const testContext = createTestContext(options);
   const app = await server(testContext);
   const httpClient = axiosist(app);
 
   async function createAndLogUser(username, password, options = {}) {
-    let { model, ...rest } = options;
-    let Model = model || User;
-    let insert = Model === Cfa ? insertCfa : insertUser;
+    const { model, ...rest } = options;
+    const Model = model || User;
+    const insert = Model === Cfa ? insertCfa : insertUser;
     await insert({
       username,
       email: `${username}@apprentissage.beta.gouv.fr`,
@@ -64,13 +64,13 @@ async function startServer(options) {
     });
     await activateUser(username, password);
 
-    let auth = await logUser(username, password);
-    let user = await Model.findOne({ username });
+    const auth = await logUser(username, password);
+    const user = await Model.findOne({ username });
     return { auth, user };
   }
 
   async function logUser(username, password) {
-    let response = await httpClient.post("/api/login", {
+    const response = await httpClient.post("/api/login", {
       username,
       password,
     });

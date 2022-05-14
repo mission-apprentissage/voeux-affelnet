@@ -11,7 +11,7 @@ describe("sendNotificationEmails", () => {
   it("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux voeux", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
-    let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
+    const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
     await insertCfa({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
@@ -25,9 +25,9 @@ describe("sendNotificationEmails", () => {
       ],
     });
 
-    let stats = await sendNotificationEmails(sendEmail);
+    const stats = await sendNotificationEmails(sendEmail);
 
-    let sent = getEmailsSent();
+    const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
@@ -42,7 +42,7 @@ describe("sendNotificationEmails", () => {
   it("Vérifie qu'on n'envoie pas de notification si l'email a déjà été envoyé", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
-    let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
+    const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
     await insertCfa({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -62,9 +62,9 @@ describe("sendNotificationEmails", () => {
       ],
     });
 
-    let stats = await sendNotificationEmails(sendEmail);
+    const stats = await sendNotificationEmails(sendEmail);
 
-    let sent = getEmailsSent();
+    const sent = getEmailsSent();
     assert.strictEqual(sent.length, 0);
     assert.deepStrictEqual(stats, {
       total: 0,
@@ -112,7 +112,7 @@ describe("sendNotificationEmails", () => {
   it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     const { sendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
     const today = new Date();
-    let lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
+    const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
     await insertCfa({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",

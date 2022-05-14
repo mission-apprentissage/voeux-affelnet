@@ -22,7 +22,7 @@ module.exports = ({ resendEmail }) => {
   const { checkApiToken, checkIsAdmin } = authMiddleware();
 
   function asCsvResponse(name, res) {
-    let date = DateTime.local().setLocale("fr").toFormat("yyyy-MM-dd");
+    const date = DateTime.local().setLocale("fr").toFormat("yyyy-MM-dd");
     res.setHeader("Content-disposition", `attachment; filename=${name}-${date}.csv`);
     res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
     return res;
@@ -33,13 +33,13 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { text, page, items_par_page } = await Joi.object({
+      const { text, page, items_par_page } = await Joi.object({
         text: Joi.string(),
         page: Joi.number().default(1),
         items_par_page: Joi.number().default(10),
       }).validateAsync(req.query, { abortEarly: false });
 
-      let { find, pagination } = await paginate(
+      const { find, pagination } = await paginate(
         Cfa,
         {
           ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
@@ -51,7 +51,7 @@ module.exports = ({ resendEmail }) => {
         }
       );
 
-      let stream = oleoduc(
+      const stream = oleoduc(
         find.sort({ uai: 1 }).cursor(),
         transformIntoJSON({
           arrayWrapper: {
@@ -70,7 +70,7 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { siret, email } = await Joi.object({
+      const { siret, email } = await Joi.object({
         siret: Joi.string().required(),
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
@@ -86,12 +86,12 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { siret } = await Joi.object({
+      const { siret } = await Joi.object({
         siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      let stats = await resendConfirmationEmails(resendEmail, { siret });
+      const stats = await resendConfirmationEmails(resendEmail, { siret });
 
       return res.json(stats);
     })
@@ -102,12 +102,12 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { siret } = await Joi.object({
+      const { siret } = await Joi.object({
         siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      let stats = await resendActivationEmails(resendEmail, { username: siret });
+      const stats = await resendActivationEmails(resendEmail, { username: siret });
 
       return res.json(stats);
     })
@@ -118,7 +118,7 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai } = await Joi.object({
+      const { uai } = await Joi.object({
         uai: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
@@ -158,7 +158,7 @@ module.exports = ({ resendEmail }) => {
         columns: {
           statut: (data) => data.statut,
           nb_voeux: async (data) => {
-            let count = await Voeu.countDocuments({
+            const count = await Voeu.countDocuments({
               "etablissement_accueil.uai": { $in: data.etablissements.map((e) => e.uai) },
             });
             return count ? count : "0";
@@ -173,7 +173,7 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let results = await Log.aggregate([
+      const results = await Log.aggregate([
         {
           $match: {
             "request.url.path": "/api/stats/computeStats/now",
@@ -190,7 +190,7 @@ module.exports = ({ resendEmail }) => {
 
       res.json(
         sortBy(getAcademies(), (a) => a.nom).map((academie) => {
-          let found = results.find((r) => r._id === academie.code) || {};
+          const found = results.find((r) => r._id === academie.code) || {};
           return {
             code: academie.code,
             nom: academie.nom,

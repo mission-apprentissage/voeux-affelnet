@@ -16,12 +16,12 @@ module.exports = ({ sendEmail }) => {
   router.post(
     "/api/password/forgotten-password",
     tryCatch(async (req, res) => {
-      let { username } = await Joi.object({
+      const { username } = await Joi.object({
         username: Joi.string().required(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      let fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
-      let user = await getUser(fixed);
+      const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
+      const user = await getUser(fixed);
       if (!user || !user.password) {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }
@@ -35,8 +35,8 @@ module.exports = ({ sendEmail }) => {
     "/api/password/reset-password",
     checkResetPasswordToken(),
     tryCatch(async (req, res) => {
-      let user = req.user;
-      let { newPassword } = await Joi.object({
+      const user = req.user;
+      const { newPassword } = await Joi.object({
         resetPasswordToken: Joi.string().required(),
         newPassword: validators.password().required(),
       }).validateAsync(req.body, { abortEarly: false });

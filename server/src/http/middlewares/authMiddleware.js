@@ -18,7 +18,7 @@ module.exports = () => {
           passReqToCallback: true,
         },
         async (req, username, password, done) => {
-          let fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
+          const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
           return getUser(fixed)
             .then((user) => {
               if (!user || !user.password || !sha512Utils.compare(password, user.password)) {

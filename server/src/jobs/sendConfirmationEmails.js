@@ -2,8 +2,8 @@ const logger = require("../common/logger");
 const { Cfa } = require("../common/model");
 
 async function sendConfirmationEmails(sendEmail, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let query = {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const query = {
     unsubscribe: false,
     statut: "en attente",
     emails: { $not: { $elemMatch: { templateName: "confirmation" } } },

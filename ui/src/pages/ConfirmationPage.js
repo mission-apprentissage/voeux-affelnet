@@ -55,13 +55,13 @@ function StatusErrorMessage({ error, uai }) {
 }
 
 function ConfirmationPage() {
-  let location = useLocation();
-  let { actionToken } = queryString.parse(location.search);
-  let uai = decodeJWT(actionToken).sub;
-  let [data, loading, statusError] = useFetch(`/api/confirmation/status?uai=${uai}&token=${actionToken}`);
-  let [message, setMessage] = useState();
+  const location = useLocation();
+  const { actionToken } = queryString.parse(location.search);
+  const uai = decodeJWT(actionToken).sub;
+  const [data, loading, statusError] = useFetch(`/api/confirmation/status?uai=${uai}&token=${actionToken}`);
+  const [message, setMessage] = useState();
 
-  let accept = async (values) => {
+  const accept = async (values) => {
     try {
       await _post("/api/confirmation/accept", { ...values, actionToken });
       setMessage(
@@ -79,7 +79,7 @@ function ConfirmationPage() {
     }
   };
 
-  let showForm = !loading && !message && data;
+  const showForm = !loading && !message && data;
 
   return (
     <Page>

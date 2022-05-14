@@ -4,9 +4,9 @@ const config = require("../config");
 const { User } = require("../common/model");
 
 async function resendActivationEmails(resendEmail, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let maxNbEmailsSent = options.max || 2;
-  let query = {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const maxNbEmailsSent = options.max || 2;
+  const query = {
     unsubscribe: false,
     password: { $exists: false },
     statut: "confirmé",
@@ -49,7 +49,7 @@ async function resendActivationEmails(resendEmail, options = {}) {
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
     .eachAsync(async (user) => {
-      let previous = user.emails.find((e) => e.templateName.startsWith("activation"));
+      const previous = user.emails.find((e) => e.templateName.startsWith("activation"));
 
       try {
         logger.info(`Resending activation to user ${user.username}...`);

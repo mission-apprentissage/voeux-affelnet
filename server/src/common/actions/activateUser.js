@@ -2,7 +2,7 @@ const { User } = require("../model");
 const sha512Utils = require("../utils/passwordUtils");
 
 async function activateUser(username, password, options = {}) {
-  let user = await User.findOneAndUpdate(
+  const user = await User.findOneAndUpdate(
     { username },
     {
       $set: {

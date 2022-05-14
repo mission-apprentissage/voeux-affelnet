@@ -9,7 +9,7 @@ const { Log } = require("./model/index");
 
 function consoleStream(outputName) {
   const { level, format } = config.log;
-  let output = process[outputName];
+  const output = process[outputName];
   let stream = output;
   if (format === "pretty") {
     stream = new PrettyStream();
@@ -63,7 +63,7 @@ function slackStream() {
 }
 
 const createStreams = () => {
-  let availableDestinations = {
+  const availableDestinations = {
     stdout: () => consoleStream("stdout"),
     stderr: () => consoleStream("stderr"),
     mongodb: () => mongoDBStream(),

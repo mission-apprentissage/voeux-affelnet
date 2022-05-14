@@ -1,7 +1,7 @@
 const { lock } = require("proper-lockfile");
 
 async function lockfile(file, callback) {
-  let release = await lock(file, {
+  const release = await lock(file, {
     retries: {
       retries: 5,
       factor: 1,
@@ -10,7 +10,7 @@ async function lockfile(file, callback) {
       randomize: true,
     },
   });
-  let res = await callback(file);
+  const res = await callback(file);
   await release();
   return res;
 }

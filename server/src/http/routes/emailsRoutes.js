@@ -32,7 +32,7 @@ module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   async function checkEmailToken(req, res, next) {
-    let { token } = req.params;
+    const { token } = req.params;
     if (!(await checkIfEmailExists(token))) {
       return next(Boom.notFound());
     }
@@ -44,9 +44,9 @@ module.exports = () => {
     "/api/emails/:token/preview",
     checkEmailToken,
     tryCatch(async (req, res) => {
-      let { token } = req.params;
+      const { token } = req.params;
 
-      let html = await renderEmail(token);
+      const html = await renderEmail(token);
 
       return sendHTML(html, res);
     })
@@ -55,7 +55,7 @@ module.exports = () => {
   router.get(
     "/api/emails/:token/markAsOpened",
     tryCatch(async (req, res) => {
-      let { token } = req.params;
+      const { token } = req.params;
 
       markEmailAsOpened(token);
 
@@ -68,7 +68,7 @@ module.exports = () => {
     "/api/emails/webhook",
     checkWebhookKey(),
     tryCatch(async (req, res) => {
-      let parameters = await Joi.object({
+      const parameters = await Joi.object({
         event: Joi.string().required(), //https://developers.sendinblue.com/docs/transactional-webhooks
         "message-id": Joi.string().required(),
       })
@@ -89,7 +89,7 @@ module.exports = () => {
     "/api/emails/:token/unsubscribe",
     checkEmailToken,
     tryCatch(async (req, res) => {
-      let { token } = req.params;
+      const { token } = req.params;
 
       await unsubscribeUser(token);
 

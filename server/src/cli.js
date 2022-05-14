@@ -39,7 +39,7 @@ cli
   )
   .action((cfaCsv, options) => {
     runScript(() => {
-      let input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
+      const input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
 
       return importCfas(input, options);
     });
@@ -80,7 +80,7 @@ cli
   .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
   .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
   .option("--importDate <importDate>", "Permet de définir manuellement (ISO 8601) la date d'import", (value) => {
-    let importDate = DateTime.fromISO(value);
+    const importDate = DateTime.fromISO(value);
     if (!importDate.isValid) {
       throw new Error(`Invalid date ${value}`);
     }
@@ -171,7 +171,7 @@ cli
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
-      let output = out || writeToStdout();
+      const output = out || writeToStdout();
 
       return exportCfas(output, { filter });
     });
@@ -182,7 +182,7 @@ cli
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
-      let output = out || writeToStdout();
+      const output = out || writeToStdout();
 
       return exportCfasInconnus(output, { filter });
     });

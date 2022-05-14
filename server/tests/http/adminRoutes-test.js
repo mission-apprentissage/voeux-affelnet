@@ -5,8 +5,8 @@ const { startServer } = require("../utils/testUtils");
 
 describe("adminRoutes", () => {
   it("Vérifie qu'on peut obtenir la liste des cfas", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       username: "11111111100006",
       password: "12345",
@@ -14,7 +14,7 @@ describe("adminRoutes", () => {
       raison_sociale: "Organisme de formation",
     });
 
-    let response = await httpClient.get("/api/admin/cfas", {
+    const response = await httpClient.get("/api/admin/cfas", {
       headers: {
         ...auth,
       },
@@ -43,13 +43,13 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut obtenir la liste paginée des cfas ", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({ username: "11111111100006" });
     await insertCfa({ username: "22222222200006" });
     await insertCfa({ username: "33333333300006" });
 
-    let response = await httpClient.get("/api/admin/cfas?page=2&items_par_page=1", {
+    const response = await httpClient.get("/api/admin/cfas?page=2&items_par_page=1", {
       headers: {
         ...auth,
       },
@@ -61,8 +61,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut filtrer les cfas", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       email: "contact@organisme.fr",
     });
@@ -70,7 +70,7 @@ describe("adminRoutes", () => {
       email: "contact@organisme2.fr",
     });
 
-    let response = await httpClient.get("/api/admin/cfas?text=contact@organisme.fr", {
+    const response = await httpClient.get("/api/admin/cfas?text=contact@organisme.fr", {
       headers: {
         ...auth,
       },
@@ -82,8 +82,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut exporter les cfas injoinables", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
@@ -102,7 +102,7 @@ describe("adminRoutes", () => {
       ],
     });
 
-    let response = await httpClient.get("/api/admin/cfas/injoinables.csv", {
+    const response = await httpClient.get("/api/admin/cfas/injoinables.csv", {
       headers: {
         ...auth,
       },
@@ -118,8 +118,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut exporter les cfas à relancer", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
@@ -133,7 +133,7 @@ describe("adminRoutes", () => {
       },
     });
 
-    let response = await httpClient.get("/api/admin/cfas/relances.csv", {
+    const response = await httpClient.get("/api/admin/cfas/relances.csv", {
       headers: {
         ...auth,
       },
@@ -149,8 +149,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut exporter les cfas inconnus", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertVoeu({
       etablissement_accueil: {
         uai: "0751234J",
@@ -159,7 +159,7 @@ describe("adminRoutes", () => {
       },
     });
 
-    let response = await httpClient.get("/api/admin/cfas/inconnus.csv", {
+    const response = await httpClient.get("/api/admin/cfas/inconnus.csv", {
       headers: {
         ...auth,
       },
@@ -175,10 +175,10 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'il faut être admin pour exporter", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
-    let response = await httpClient.get("/api/admin/cfas/injoinables.csv", {
+    const response = await httpClient.get("/api/admin/cfas/injoinables.csv", {
       headers: {
         ...auth,
       },
@@ -193,8 +193,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut voir les consultations de la page stats par académie", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertLog({
       request: {
         method: "GET",
@@ -208,7 +208,7 @@ describe("adminRoutes", () => {
       },
     });
 
-    let response = await httpClient.get("/api/admin/academies", {
+    const response = await httpClient.get("/api/admin/academies", {
       headers: {
         ...auth,
       },
@@ -216,7 +216,7 @@ describe("adminRoutes", () => {
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.length, 37);
-    let paris = response.data.find((a) => a.code === "01");
+    const paris = response.data.find((a) => a.code === "01");
     assert.deepStrictEqual(paris, {
       code: "01",
       nbConsultationStats: 1,
@@ -225,8 +225,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut modifier l'adresse email d'un CFA", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       username: "11111111100006",
       email: "x@organisme.com",
@@ -236,7 +236,7 @@ describe("adminRoutes", () => {
       email: "y@organisme.com",
     });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/setEmail",
       {
         email: "robert.hue@organisme.com",
@@ -256,10 +256,10 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'il faut être admin pour changer l'email", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/setEmail",
       {},
       {
@@ -278,8 +278,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on ne peut renvoyer un email de confirmation", async () => {
-    let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       siret: "11111111100006",
       statut: "en attente",
@@ -304,7 +304,7 @@ describe("adminRoutes", () => {
       ],
     });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/resendConfirmationEmail",
       {},
       {
@@ -314,7 +314,7 @@ describe("adminRoutes", () => {
       }
     );
 
-    let sent = getEmailsSent();
+    const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
@@ -330,10 +330,10 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'il faut être admin pour changer renvoyer un email de confirmation", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/resendConfirmationEmail",
       {},
       {
@@ -352,8 +352,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut renvoyer un email d'activation", async () => {
-    let { httpClient, createAndLogUser, getEmailsSent } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       siret: "11111111100006",
       statut: "confirmé",
@@ -378,7 +378,7 @@ describe("adminRoutes", () => {
       ],
     });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/resendActivationEmail",
       {},
       {
@@ -388,7 +388,7 @@ describe("adminRoutes", () => {
       }
     );
 
-    let sent = getEmailsSent();
+    const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[0].subject, "[Rappel] Des voeux Affelnet sont téléchargeables");
@@ -401,10 +401,10 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'il faut être admin pour changer renvoyer un email d'activation", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/resendActivationEmail",
       {},
       {
@@ -423,8 +423,8 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'on peut marquer un CFA comme non concerné", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertCfa({
       siret: "11111111100006",
       statut: "confirmé",
@@ -434,7 +434,7 @@ describe("adminRoutes", () => {
       statut: "confirmé",
     });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/markAsNonConcerne",
       {},
       {
@@ -453,10 +453,10 @@ describe("adminRoutes", () => {
   });
 
   it("Vérifie qu'il faut être admin pour le statut d'un CFA", async () => {
-    let { httpClient, createAndLogUser } = await startServer();
-    let { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
-    let response = await httpClient.put(
+    const response = await httpClient.put(
       "/api/admin/cfas/11111111100006/markAsNonConcerne",
       {},
       {
