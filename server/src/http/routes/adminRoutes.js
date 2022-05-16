@@ -52,7 +52,7 @@ module.exports = ({ resendEmail }) => {
       );
 
       const stream = oleoduc(
-        find.sort({ uai: 1 }).cursor(),
+        find.sort({ siret: 1 }).cursor(),
         transformIntoJSON({
           arrayWrapper: {
             pagination,
