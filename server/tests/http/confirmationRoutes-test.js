@@ -90,7 +90,7 @@ describe("confirmationRoutes", () => {
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "11111111100006@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "Des voeux Affelnet sont téléchargeables");
+    assert.strictEqual(emailsSent[0].subject, "Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)");
   });
 
   it("Vérifie qu'une erreur est retourné quand le token est invalide", async () => {

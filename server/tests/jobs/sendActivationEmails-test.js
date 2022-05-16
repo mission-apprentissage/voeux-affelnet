@@ -42,6 +42,7 @@ describe("sendActivationEmails", () => {
   it("Vérifie qu'on envoie des emails d'activation uniquement aux CFA confirmés", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
+      siret: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
@@ -52,7 +53,7 @@ describe("sendActivationEmails", () => {
     const found = await Cfa.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.deepStrictEqual(found.emails[0].templateName, "activation_cfa");
     const sent = getEmailsSent();
-    assert.deepStrictEqual(sent[0].subject, "Des voeux Affelnet sont téléchargeables");
+    assert.deepStrictEqual(sent[0].subject, "Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)");
   });
 
   it("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà activé", async () => {

@@ -50,6 +50,7 @@ describe("resendActivationEmails", () => {
   it("Vérifie qu'on envoie une relance 3 jours après l'envoi initial pour un CFA", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
+      siret: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
@@ -65,7 +66,10 @@ describe("resendActivationEmails", () => {
     await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
-    assert.deepStrictEqual(sent[0].subject, "[Rappel] Des voeux Affelnet sont téléchargeables");
+    assert.deepStrictEqual(
+      sent[0].subject,
+      "[Rappel] Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)"
+    );
   });
 
   it("Vérifie qu'on attend 3 jours avant de relancer une deuxième fois", async () => {

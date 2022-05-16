@@ -42,15 +42,15 @@ module.exports = {
       },
     };
   },
-  activation_cfa: (user, token, options = {}) => {
+  activation_cfa: (cfa, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Des voeux Affelnet sont téléchargeables`,
+      subject: `${prefix}Des voeux Affelnet sont téléchargeables (Siret : ${cfa.siret})`,
       templateFile: getTemplateFile("activation_cfa"),
       data: {
-        user,
+        cfa,
         token,
-        actionToken: createActionToken(user.username),
+        actionToken: createActionToken(cfa.username),
       },
     };
   },

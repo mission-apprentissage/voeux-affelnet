@@ -399,7 +399,10 @@ describe("adminRoutes", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].subject, "[Rappel] Des voeux Affelnet sont téléchargeables");
+    assert.deepStrictEqual(
+      sent[0].subject,
+      "[Rappel] Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)"
+    );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
       total: 1,

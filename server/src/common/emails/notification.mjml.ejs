@@ -12,7 +12,10 @@
                     </mj-text>
 
                     <mj-text>
-                        Vous pouvez dès à présent télécharger les vœux exprimés via le traitement Affelnet.
+                        Les listes de vœux pour votre établissement (Siret : <%= data.cfa.siret %>) et/ou ceux dont vous
+                        êtes
+                        responsable ont été mises à jour. Vous pouvez dès à présent les télécharger en cliquant sur le
+                        bouton ci-dessous.
                     </mj-text>
 
                     <%- include('./common/arrete.ejs'); %>
@@ -22,7 +25,7 @@
                     </mj-button>
 
                     <%- include('./common/procedure.ejs'); %>
-
+                    <%- include('./common/engagement.ejs'); %>
                     <%- include('./common/signature.ejs'); %>
                 </mj-column>
             </mj-section>
