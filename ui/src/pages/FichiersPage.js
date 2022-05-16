@@ -26,7 +26,7 @@ function FichiersPage() {
                   <p>
                     En cas de nouvelle émission de vœux sur votre établissement ou sur les établissements d’accueil dont
                     vous êtes responsable, vous recevrez une notification par email la semaine du 20 juin 2022 puis la
-                    semaine du 4 juilconst 2022. Les nouveaux fichiers mis à votre disposition reprendront alors
+                    semaine du 4 juillet 2022. Les nouveaux fichiers mis à votre disposition reprendront alors
                     l’intégralité des vœux exprimés jusqu’à ces dates.
                   </p>
                   <p>

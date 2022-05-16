@@ -36,14 +36,10 @@ function StatusErrorMessage({ error, username }) {
     } else if (error.statusCode === 400) {
       return (
         <Alert type={"info"}>
-          <p>Une personne de votre structure a déjà confirmé une adresse email.</p>
+          <p>L’adresse courriel a déjà été confirmée pour votre établissement (Siret {username})</p>
+          <p>C’est à cette adresse que les listes de vœux seront transmises, à partir de la semaine du 6 juin.</p>
           <p>
-            Un email vous permettant d'activer votre compte vous sera envoyé à cette adresse à reception de voeux pour
-            votre établissement {username}
-          </p>
-          <p>
-            Pour plus d'informations, merci de prendre contact avec un administrateur en précisant votre SIRET (
-            {username}) via :&nbsp;
+            Si vous pensez qu’il s’agit d’une erreur, veuillez le signaler en envoyant un courriel à :&nbsp;
             <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
           </p>
         </Alert>
@@ -76,7 +72,7 @@ function ConfirmationPage() {
           <p>Le premier courriel invitera à définir un mot de passe pour accès à l’espace de téléchargement.</p>
           <p>
             Si votre établissement est responsable d’autres établissements d’accueil, la connexion au compte permettra
-            de télécharger les listes pour chaque établissement sur lesquels des vœux ont été exprimés.
+            de télécharger les listes pour chaque établissement sur lequel des vœux ont été exprimés.
           </p>
           <p>
             Pour toute question, vous pouvez prendre contact contact avec un administrateur en précisant votre numéro
@@ -124,7 +120,8 @@ function ConfirmationPage() {
                           <Form>
                             <p>
                               Afin d’accéder au téléchargement des vœux en apprentissage exprimés via Affelnet, veuillez
-                              confirmer l’adresse courriel du directeur général de votre établissement ({username})
+                              confirmer l’adresse courriel du directeur général de votre établissement (Siret:{" "}
+                              {username})
                             </p>
                             <p>
                               Cette étape est indispensable pour vous permettre de recevoir les listes de vœux qui
