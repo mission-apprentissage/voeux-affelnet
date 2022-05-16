@@ -66,7 +66,7 @@ function LoginPage() {
                               {({ field, meta }) => {
                                 return (
                                   <TablerForm.Input
-                                    placeholder="Votre identifiant (UAI)..."
+                                    placeholder="Votre identifiant (Siret)..."
                                     {...field}
                                     {...feedback(meta, "Identifiant invalide")}
                                   />
@@ -114,7 +114,7 @@ function LoginPage() {
                     <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">
                       voeux-affelnet@apprentissage.beta.gouv.fr
                     </a>{" "}
-                    en précisant votre UAI ({username})
+                    en précisant votre siret ({username})
                   </p>
                 </Alert>
               </CenteredCol>

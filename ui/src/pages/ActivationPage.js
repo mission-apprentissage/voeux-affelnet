@@ -3,7 +3,7 @@ import queryString from "query-string";
 import * as Yup from "yup";
 import { Alert, Button, Card, Form as TablerForm, Grid, Page } from "tabler-react";
 import { Field, Form, Formik } from "formik";
-import { NavLink, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import useAuth from "../common/hooks/useAuth";
 import { _post } from "../common/httpClient";
 import decodeJWT from "../common/utils/decodeJWT";
@@ -69,8 +69,8 @@ function ActivationPage() {
                   </Card.Header>
                   <Card.Body>
                     <p>
-                      Afin d’accéder au service de téléchargement des voeux en apprentissage exprimés via AFFELNET, nous
-                      vous prions d'activer votre compte en créant un mot de passe.
+                      Afin d’accéder au service de téléchargement des listes de vœux exprimés via Affelnet, nous vous
+                      prions d’activer votre compte en créant un mot de passe.
                     </p>
                     <Formik
                       initialValues={{

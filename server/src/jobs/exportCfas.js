@@ -13,22 +13,21 @@ const errorMapper = {
 };
 
 async function exportCfas(output, options = {}) {
-  let columns = options.columns || {};
+  const columns = options.columns || {};
   await oleoduc(
     Cfa.find(options.filter || {}).cursor(),
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {
-        uai: (data) => data.uai,
         siret: (data) => data.siret,
         raison_sociale: (data) => data.raison_sociale,
         academie: (data) => data.academie?.nom,
         email: (data) => data.email,
         erreur: (data) => {
-          let error = data.unsubscribe ? "unsubscribe" : data.emails.find((e) => e.error)?.error?.type;
+          const error = data.unsubscribe ? "unsubscribe" : data.emails.find((e) => e.error)?.error?.type;
           return errorMapper[error];
         },
-        voeux: (data) => (data.voeux_date ? "Oui" : "Non"),
+        voeux: (data) => (data.etablissements.find((e) => e.voeux_date) ? "Oui" : "Non"),
         ...columns,
       },
     }),

@@ -15,12 +15,12 @@ module.exports = () => {
   router.get(
     "/api/stats/:jobName",
     tryCatch(async (req, res) => {
-      let { jobName } = await Joi.object({
+      const { jobName } = await Joi.object({
         jobName: Joi.string().valid("computeStats", "importCfas", "importVoeux").required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      let stream = oleoduc(
-        JobEvent.find({ job: jobName }, { _id: 0, type: 0 }).sort({ date: -1 }).lean().cursor(),
+      const stream = oleoduc(
+        JobEvent.find({ job: jobName }, { _id: 0 }).sort({ date: -1 }).lean().cursor(),
         transformIntoJSON({
           arrayPropertyName: "results",
         })
@@ -33,12 +33,12 @@ module.exports = () => {
   router.get(
     "/api/stats/:jobName/now",
     tryCatch(async (req, res) => {
-      let { academies } = await Joi.object({
+      const { academies } = await Joi.object({
         jobName: Joi.string().valid("computeStats").required(),
         academies: stringList(),
       }).validateAsync({ ...req.params, ...req.query }, { abortEarly: false });
 
-      let stats = await computeStats(academies ? { academies } : {});
+      const stats = await computeStats(academies ? { academies } : {});
 
       return res.json({
         stats,

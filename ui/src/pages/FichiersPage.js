@@ -6,7 +6,7 @@ import { buildLink } from "../common/httpClient";
 import TablerIcon from "../common/components/TablerIcon";
 
 function FichiersPage() {
-  let [fichiers, loading] = useGet("/api/fichiers", []);
+  const [fichiers, loading] = useGet("/api/fichiers", []);
 
   return (
     <Page>
@@ -19,20 +19,40 @@ function FichiersPage() {
                   <Card.Title>Téléchargement des voeux</Card.Title>
                 </Card.Header>
                 <Card.Body>
-                  <p>En cliquant directement sur le fichier ci-dessous vous pouvez télécharger les voeux.</p>
-                  <p>En cas de nouvelle émission de voeux sur votre UAI, vous recevrez une notification par email.</p>
                   <p>
-                    Si vous utilisez Ymag et que vous souhaitez intégrer les voeux à cet outil, vous trouverez plus
-                    d’informations ici :
-                    <a href="https://learn.ymag.fr/course/view.php?id=44235">
-                      https://learn.ymag.fr/course/view.php?id=44235
-                    </a>
+                    Chaque fichier téléchargeable ci-dessous contient les vœux exprimés sur Affelnet par l'établissement
+                    d'accueil des futurs apprentis.
                   </p>
                   <p>
-                    Si vous utilisez IGesti et que vous souhaitez intégrer les voeux à cet outil, vous trouverez plus
-                    d’informations ici :
-                    <a href="/docs/03bis_Mode_Op_GESTI_Importation.pdf">Mode_Op_GESTI_Importation.pdf</a>
+                    En cas de nouvelle émission de vœux sur votre établissement ou sur les établissements d’accueil dont
+                    vous êtes responsable, vous recevrez une notification par email la semaine du 20 juin 2022 puis la
+                    semaine du 4 juillet 2022. Les nouveaux fichiers mis à votre disposition reprendront alors
+                    l’intégralité des vœux exprimés jusqu’à ces dates.
                   </p>
+                  <p>
+                    Information importante : les établissements d’accueil ne sont pas habilités à accéder à cette page
+                    de téléchargement. Il est du ressort des responsables d’établissements d’accueil de leur transmettre
+                    les listes de vœux.
+                  </p>
+                  <ul>
+                    <li>
+                      Si vous utilisez Ymag, et que vous souhaitez intégrer les vœux à cet outil, vous trouverez plus
+                      d’informations ici :{" "}
+                      <a href="https://learn.ymag.fr/course/view.php?id=44235">
+                        https://learn.ymag.fr/course/view.php?id=44235
+                      </a>
+                    </li>
+                    <li>
+                      Si vous utilisez IGesti, et que vous souhaitez intégrer les vœux à cet outil, vous trouverez plus
+                      d’informations ici :{" "}
+                      <a href="/docs/03bis_Mode_Op_GESTI_Importation.pdf">Mode_Op_GESTI_Importation.pdf</a>
+                    </li>
+                    <li>
+                      Si votre établissement est responsable d’établissements d’accueil, chaque établissement doit
+                      procéder à cette intégration. Nous vous invitons à leur transmettre la notice correspondante s’ils
+                      sont concernés.
+                    </li>
+                  </ul>
                 </Card.Body>
               </Card>
             </Grid.Col>
@@ -53,9 +73,9 @@ function FichiersPage() {
                     </Table.Header>
                     <Table.Body>
                       {fichiers.map(({ name, lastDownloadDate, date }) => {
-                        let link = buildLink(`/api/fichiers/${name}`);
+                        const link = buildLink(`/api/fichiers/${name}`);
 
-                        let downloadDate = DateTime.fromISO(lastDownloadDate)
+                        const downloadDate = DateTime.fromISO(lastDownloadDate)
                           .setLocale("fr")
                           .toFormat("cccc dd LLLL yyyy à HH:mm");
                         return (

@@ -9,10 +9,10 @@ function raw(Model) {
 }
 
 async function paginate(Model, query, options = {}) {
-  let total = await Model.count(query);
-  let page = options.page || 1;
-  let limit = options.items_par_page || 10;
-  let skip = (page - 1) * limit;
+  const total = await Model.count(query);
+  const page = options.page || 1;
+  const limit = options.items_par_page || 10;
+  const skip = (page - 1) * limit;
 
   return {
     find: Model.find(query, options.projection || {})

@@ -1,16 +1,17 @@
+// eslint-disable-next-line node/no-extraneous-require
 const axios = require("axios");
 const config = require("../../config");
-const { fetch } = require("./httpUtils");
+const { fetchStream } = require("./httpUtils");
 
-let getAuth = async (uri) => {
-  let regExp = new RegExp(/^(https:\/\/)(.+):(.+):(.+)@(.*)$/);
+async function authenticate(uri) {
+  const regExp = new RegExp(/^(https:\/\/)(.+):(.+):(.+)@(.*)$/);
 
   if (!regExp.test(uri)) {
     throw new Error("Invalid OVH URI");
   }
 
-  let [, protocol, user, password, tenantId, authUrl] = uri.match(regExp);
-  let response = await axios.post(`${protocol}${authUrl}`, {
+  const [, protocol, user, password, tenantId, authUrl] = uri.match(regExp);
+  const response = await axios.post(`${protocol}${authUrl}`, {
     auth: {
       identity: {
         tenantId,
@@ -28,20 +29,28 @@ let getAuth = async (uri) => {
     },
   });
 
-  let token = response.headers["x-subject-token"];
-  let { endpoints } = response.data.token.catalog.find((c) => c.type === "object-store");
-  let { url } = endpoints.find((s) => s.region === "GRA");
+  const token = response.headers["x-subject-token"];
+  const { endpoints } = response.data.token.catalog.find((c) => c.type === "object-store");
+  const { url: baseUrl } = endpoints.find((s) => s.region === "GRA");
 
-  return { token, baseUrl: url };
-};
+  return { baseUrl, token };
+}
+
+async function requestObjectAccess(path, options = {}) {
+  const storage = options.storage || config.ovh.storage.storageName;
+  const { baseUrl, token } = await authenticate(config.ovh.storage.uri);
+
+  return {
+    url: encodeURI(`${baseUrl}/${storage}${path === "/" ? "" : `/${path}`}`),
+    token,
+  };
+}
 
 module.exports = {
-  getOvhFileAsStream: async (relativePath, options = {}) => {
-    let storage = options.storage || "mna-tables-correspondances";
-    let { token, baseUrl } = await getAuth(config.ovh.storage.uri);
-
-    let fullPath = encodeURI(`${baseUrl}/${storage}/${relativePath}`);
-    return fetch(fullPath, {
+  getFromStorage: async (path, options = {}) => {
+    const { url, token } = await requestObjectAccess(path, options);
+    return fetchStream(url, {
+      method: "GET",
       headers: {
         "X-Auth-Token": token,
         Accept: "application/json",

@@ -3,7 +3,7 @@ import { Card, Grid, Table } from "tabler-react";
 import React from "react";
 
 function Academies() {
-  let [academies, loading] = useGet("/api/admin/academies", []);
+  const [academies, loading] = useGet("/api/admin/academies", []);
 
   return (
     <Grid.Row>

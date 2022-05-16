@@ -10,10 +10,10 @@ import CenteredCol from "../../common/components/CenteredCol";
 import SuccessMessage from "../../common/components/SuccessMessage";
 
 function ForgottenPasswordPage() {
-  let [, setAuth] = useAuth();
-  let history = useHistory();
+  const [, setAuth] = useAuth();
+  const history = useHistory();
 
-  let showError = (meta) => {
+  const showError = (meta) => {
     return meta.touched && meta.error
       ? {
           feedback: meta.error,
@@ -22,9 +22,9 @@ function ForgottenPasswordPage() {
       : {};
   };
 
-  let resetPassword = async (values, { setStatus }) => {
+  const resetPassword = async (values, { setStatus }) => {
     try {
-      let { token } = await _post("/api/password/forgotten-password", { ...values });
+      const { token } = await _post("/api/password/forgotten-password", { ...values });
       setAuth(token);
       setStatus({ message: "Un email vous a été envoyé." });
       setTimeout(() => history.push("/"), 1500);
@@ -57,7 +57,7 @@ function ForgottenPasswordPage() {
                     {({ status = {} }) => {
                       return (
                         <Form>
-                          <TablerForm.Group label="Identifiant (UAI)">
+                          <TablerForm.Group label="Identifiant (siret)">
                             <Field name="username">
                               {({ field, meta }) => {
                                 return (
@@ -87,7 +87,7 @@ function ForgottenPasswordPage() {
           <Grid.Row>
             <CenteredCol>
               <Alert type={"info"}>
-                <p>L'UAI figure dans l'objet du mail que vous avez précédemment reçu.</p>
+                <p>Le siret figure dans l'objet du mail que vous avez précédemment reçu.</p>
               </Alert>
             </CenteredCol>
           </Grid.Row>

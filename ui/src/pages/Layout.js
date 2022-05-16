@@ -4,9 +4,9 @@ import useAuth from "../common/hooks/useAuth";
 import { useHistory } from "react-router-dom";
 
 function Layout(props) {
-  let [auth, setAuth] = useAuth();
-  let history = useHistory();
-  let logout = () => {
+  const [auth, setAuth] = useAuth();
+  const history = useHistory();
+  const logout = () => {
     setAuth(null);
     history.push("/login");
   };

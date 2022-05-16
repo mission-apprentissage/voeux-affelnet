@@ -32,6 +32,24 @@ const User = model(
       email: {
         type: String,
       },
+      anciens_emails: {
+        type: [
+          nested({
+            email: {
+              type: String,
+              required: true,
+            },
+            modification_date: {
+              type: Date,
+              required: true,
+            },
+            auteur: {
+              type: String,
+              required: true,
+            },
+          }),
+        ],
+      },
       emails: {
         type: [
           nested({

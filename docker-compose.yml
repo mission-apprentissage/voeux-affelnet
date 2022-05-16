@@ -6,15 +6,27 @@ services:
     container_name: voeux_affelnet_reverse_proxy
     build:
       context: reverse_proxy
-    mem_limit: 256m
+    mem_limit: 96m
     restart: unless-stopped
     ports:
       - 80:80
+      - 443:443
     networks:
       - voeux_affelnet_network
     depends_on:
       - server
       - ui
+    environment:
+      - PARANOIA=1
+      - ANOMALY_INBOUND=5
+      - ANOMALY_OUTBOUND=4
+      - DNS_SERVER=127.0.0.11
+      - PROXY=1
+      - ACCESSLOG=/data/access.log
+      - ERRORLOG=/data/error.log
+      - LOGLEVEL=warn
+      - NGINX_ALWAYS_TLS_REDIRECT=false
+      - ALLOWED_METHODS=GET HEAD POST OPTIONS PUT DELETE
 
   ui:
     image: voeux_affelnet_ui
@@ -44,7 +56,7 @@ services:
       - VOEUX_AFFELNET_OUTPUT_DIR=/data
 
   mongodb:
-    image: mongo:4.4.5-bionic
+    image: mongo:5.0.7-focal
     container_name: voeux_affelnet_mongodb
     command: --wiredTigerCacheSizeGB 1 --port 27017
     mem_limit: 1g

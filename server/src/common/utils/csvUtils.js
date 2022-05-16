@@ -1,7 +1,7 @@
-const csv = require("csv-parse");
+const { parse } = require("csv-parse");
 
 function parseCsv(options = {}) {
-  return csv({
+  return parse({
     delimiter: ";",
     trim: true,
     columns: true,

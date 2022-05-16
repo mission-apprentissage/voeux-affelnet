@@ -3,7 +3,17 @@ function findAcademieByName(name) {
     return null;
   }
 
-  let found = ACADEMIES.find((academie) => academie.nom === name);
+  const found = ACADEMIES.find((academie) => academie.nom === name);
+
+  return found || null;
+}
+
+function findAcademieByCode(code) {
+  if (!code) {
+    return null;
+  }
+
+  const found = ACADEMIES.find((academie) => academie.code === code);
 
   return found || null;
 }
@@ -13,9 +23,9 @@ function findAcademieByUai(uai) {
     return null;
   }
 
-  let metropole = ["0", "6", "7"].includes(uai.substring(0, 1));
-  let found = ACADEMIES.find((academie) => {
-    let code = metropole ? uai.substring(1, 3) : uai.substring(0, 3);
+  const metropole = ["0", "6", "7"].includes(uai.substring(0, 1));
+  const found = ACADEMIES.find((academie) => {
+    const code = metropole ? uai.substring(1, 3) : uai.substring(0, 3);
     return academie.departements.map((d) => d.code).includes(code);
   });
 
@@ -29,6 +39,7 @@ function getAcademies() {
 module.exports = {
   findAcademieByName,
   findAcademieByUai,
+  findAcademieByCode,
   getAcademies,
 };
 

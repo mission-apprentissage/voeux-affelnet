@@ -4,10 +4,11 @@ const Boom = require("boom");
 const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const { Strategy: LocalStrategy } = require("passport-local");
 const sha512Utils = require("../../common/utils/passwordUtils");
+const { getUser } = require("../../common/actions/getUser");
 
 const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 
-module.exports = (users) => {
+module.exports = () => {
   function checkUsernameAndPassword() {
     passport.use(
       new LocalStrategy(
@@ -17,9 +18,8 @@ module.exports = (users) => {
           passReqToCallback: true,
         },
         async (req, username, password, done) => {
-          let fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
-          return users
-            .getUser(fixed)
+          const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
+          return getUser(fixed)
             .then((user) => {
               if (!user || !user.password || !sha512Utils.compare(password, user.password)) {
                 req.errorMessage = `Echec de l'authentification pour l'utilisateur ${username}`;
@@ -40,8 +40,7 @@ module.exports = (users) => {
     passport.use(
       strategyName,
       new JwtStrategy({ ...jwtStrategyOptions, passReqToCallback: true }, (req, jwt_payload, done) => {
-        return users
-          .getUser(jwt_payload.sub)
+        return getUser(jwt_payload.sub)
           .then((user) => {
             if (!user) {
               req.errorMessage = `Echec de l'authentification via token pour l'utilisateur ${jwt_payload.sub}`;

@@ -2,8 +2,6 @@ const mongoose = require("mongoose");
 const config = require("../config");
 const logger = require("./logger");
 
-mongoose.set("useCreateIndex", true);
-
 module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
   return new Promise((resolve, reject) => {
     logger.debug(`MongoDB: Connection to ${mongoUri}`);
@@ -12,7 +10,6 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
     mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: false,
     });
 
     // Get Mongoose to use the global promise library

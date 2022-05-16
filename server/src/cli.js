@@ -1,9 +1,10 @@
 require("dotenv").config();
 const { program: cli } = require("commander");
-const { writeToStdout, oleoduc, transformIntoCSV } = require("oleoduc");
+const { writeToStdout } = require("oleoduc");
 const { createReadStream, createWriteStream } = require("fs");
-const { runScript } = require("./jobs/utils/jobWrapper");
+const { runScript } = require("./jobs/utils/runScript");
 const logger = require("./common/logger");
+const { confirm } = require("./common/actions/confirm");
 const importMefs = require("./jobs/importMefs");
 const importVoeux = require("./jobs/importVoeux");
 const sendConfirmationEmails = require("./jobs/sendConfirmationEmails");
@@ -12,14 +13,14 @@ const sendActivationEmails = require("./jobs/sendActivationEmails");
 const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
-const initCfaCsv = require("./jobs/initCfaCsv");
 const importCfas = require("./jobs/importCfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
 const exportCfasInconnus = require("./jobs/exportCfasInconnus");
 const createUser = require("./jobs/createUser");
-const createCfa = require("./jobs/createCfa");
 const { DateTime } = require("luxon");
+const migrate = require("./jobs/migrate");
+const { injectDataset } = require("../tests/dataset/injectDataset");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -31,70 +32,6 @@ process.stdout.on("error", function (err) {
 });
 
 cli
-  .command("initCfaCsv")
-  .description(
-    `Génère un fichier qui servira de base à l'import des CFA.
-Ce script identifie les CFA à partir du fichier AFFELNET-LYCEE-20XX-OF_apprentissage.csv et va chercher les adresses email dans le catalogue.
-    `
-  )
-  .arguments("<file>")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action((file, { out }) => {
-    runScript(async () => {
-      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
-      let output = out || writeToStdout();
-
-      return oleoduc(initCfaCsv(input), transformIntoCSV(), output);
-    });
-  });
-
-cli
-  .command("importCfas <cfaCsv>")
-  .description(
-    "Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes :" +
-      "'uai,siret,raison_sociale,email_directeur,email_contact'"
-  )
-  .action((cfaCsv) => {
-    runScript(() => {
-      let input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
-
-      return importCfas(input);
-    });
-  });
-
-cli
-  .command("confirmCfa")
-  .description("Permet de confirmer manuellement un CFA")
-  .arguments("<uai> <email>")
-  .option("--force", "Ecrase les données déjà confirmées")
-  .action((uai, email, { force }) => {
-    runScript(({ cfas }) => {
-      return cfas.confirm(uai, email, { force });
-    });
-  });
-
-cli
-  .command("sendConfirmationEmails")
-  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
-  .action((options) => {
-    runScript(({ emails }) => {
-      return sendConfirmationEmails(emails, options);
-    });
-  });
-
-cli
-  .command("resendConfirmationEmails")
-  .option("--uai <uai>", "Permet d'envoyer l'email à un seul CFA")
-  .option("--retry", "Renvoie les emails en erreur", false)
-  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
-  .option("--max <max>", "Nombre de relances maximum", parseInt)
-  .action((options) => {
-    runScript(({ emails }) => {
-      return resendConfirmationEmails(emails, options);
-    });
-  });
-
-cli
   .command("importMefs")
   .description("Importe les referentiels de données")
   .action(() => {
@@ -104,17 +41,52 @@ cli
   });
 
 cli
+  .command("importCfas <cfaCsv>")
+  .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
+  .option(
+    "--relations <relationsCsv>",
+    "Le csv contenant la liste des uai d'accueil et leur siret gestionnaire :" + "'uai,siret_gestionnaire'",
+    createReadStream
+  )
+  .action((cfaCsv, options) => {
+    runScript(() => {
+      const input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
+
+      return importCfas(input, options);
+    });
+  });
+
+cli
+  .command("sendConfirmationEmails")
+  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .action((options) => {
+    runScript(({ sendEmail }) => {
+      return sendConfirmationEmails(sendEmail, options);
+    });
+  });
+
+cli
+  .command("resendConfirmationEmails")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul CFA")
+  .option("--retry", "Renvoie les emails en erreur", false)
+  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--max <max>", "Nombre de relances maximum", parseInt)
+  .action((options) => {
+    runScript(({ resendEmail }) => {
+      return resendConfirmationEmails(resendEmail, options);
+    });
+  });
+
+cli
   .command("importVoeux")
+  .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
+  .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
   .option("--importDate <importDate>", "Permet de définir manuellement (ISO 8601) la date d'import", (value) => {
-    let importDate = DateTime.fromISO(value);
+    const importDate = DateTime.fromISO(value);
     if (!importDate.isValid) {
       throw new Error(`Invalid date ${value}`);
     }
     return importDate.toJSDate();
-  })
-  .arguments("<file>")
-  .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET", {
-    file: "Le fichier CSV contentant les voeux  (default: stdin)",
   })
   .action((file, options) => {
     runScript(async () => {
@@ -129,8 +101,8 @@ cli
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ emails }) => {
-      return sendActivationEmails(emails, options);
+    runScript(({ sendEmail }) => {
+      return sendActivationEmails(sendEmail, options);
     });
   });
 
@@ -141,8 +113,8 @@ cli
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--max <max>", "Nombre de relances maximum", parseInt)
   .action((options) => {
-    runScript(({ emails }) => {
-      return resendActivationEmails(emails, options);
+    runScript(({ resendEmail }) => {
+      return resendActivationEmails(resendEmail, options);
     });
   });
 
@@ -150,8 +122,8 @@ cli
   .command("sendNotificationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ emails }) => {
-      return sendNotificationEmails(emails, options);
+    runScript(({ sendEmail }) => {
+      return sendNotificationEmails(sendEmail, options);
     });
   });
 
@@ -159,8 +131,8 @@ cli
   .command("resendNotificationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ emails }) => {
-      return resendNotificationEmails(emails, options);
+    runScript(({ resendEmail }) => {
+      return resendNotificationEmails(resendEmail, options);
     });
   });
 
@@ -175,16 +147,13 @@ cli
   });
 
 cli
-  .command("createCfa")
-  .arguments("<username> <email>")
-  .description("Permet de créer un CFA sans passer par l'import des CFA")
-  .requiredOption("--academie <academie>")
-  .option("--raison_sociale <raison_sociale>")
-  .option("--siret <siret>")
-  .action((username, email, options) => {
+  .command("confirmCfa")
+  .description("Permet de confirmer manuellement un CFA")
+  .arguments("<siret> <email>")
+  .option("--force", "Ecrase les données déjà confirmées")
+  .action((siret, email, { force }) => {
     runScript(() => {
-      let { academie, ...rest } = options;
-      return createCfa(username, email, academie, rest);
+      return confirm(siret, email, { force });
     });
   });
 
@@ -204,7 +173,7 @@ cli
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
-      let output = out || writeToStdout();
+      const output = out || writeToStdout();
 
       return exportCfas(output, { filter });
     });
@@ -215,7 +184,7 @@ cli
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
-      let output = out || writeToStdout();
+      const output = out || writeToStdout();
 
       return exportCfasInconnus(output, { filter });
     });
@@ -227,6 +196,20 @@ cli.command("computeStats").action(() => {
   });
 });
 
-cli.command("db", "Commande pour manipuler la base de données", { executableFile: "jobs/db/dbCli.js" });
+cli.command("migrate").action(() => {
+  runScript(() => {
+    return migrate();
+  });
+});
+
+cli
+  .command("injectDataset")
+  .option("--mef", "Import les mefs")
+  .option("--resend <type>", "Génère des comptes CFA à relance")
+  .action((options) => {
+    runScript((actions) => {
+      return injectDataset(actions, options);
+    });
+  });
 
 cli.parse(process.argv);

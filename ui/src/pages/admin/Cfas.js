@@ -20,9 +20,8 @@ function showError(meta, options = {}) {
 }
 
 function Email({ cfa }) {
-  let { uai, email, statut, voeux_date } = cfa;
-  let [edit, setEdit] = useState(false);
-  let [message, setMessage] = useState();
+  const [edit, setEdit] = useState(false);
+  const [message, setMessage] = useState();
 
   useEffect(() => {
     if (message) {
@@ -32,7 +31,7 @@ function Email({ cfa }) {
 
   async function setEmail(values, actions) {
     try {
-      await _put(`/api/admin/cfas/${uai}/setEmail`, { email: values.email });
+      await _put(`/api/admin/cfas/${cfa.siret}/setEmail`, { email: values.email });
       setEdit(false);
     } catch (e) {
       console.error(e);
@@ -42,7 +41,7 @@ function Email({ cfa }) {
 
   async function resendConfirmationEmail() {
     try {
-      let { sent } = await _put(`/api/admin/cfas/${uai}/resendConfirmationEmail`);
+      const { sent } = await _put(`/api/admin/cfas/${cfa.siret}/resendConfirmationEmail`);
       setMessage(
         sent > 0 ? (
           <SuccessMessage>Email envoyé</SuccessMessage>
@@ -58,7 +57,7 @@ function Email({ cfa }) {
 
   async function resendActivationEmail() {
     try {
-      let { sent } = await _put(`/api/admin/cfas/${uai}/resendActivationEmail`);
+      const { sent } = await _put(`/api/admin/cfas/${cfa.siret}/resendActivationEmail`);
       setMessage(
         sent > 0 ? (
           <SuccessMessage>Email envoyé</SuccessMessage>
@@ -71,13 +70,13 @@ function Email({ cfa }) {
     }
   }
 
-  let items = [
+  const items = [
     {
       icon: "edit",
       value: "Modifier l'email",
       onClick: () => setEdit(true),
     },
-    ...(statut === "en attente"
+    ...(cfa.statut === "en attente"
       ? [
           {
             icon: "send",
@@ -86,7 +85,7 @@ function Email({ cfa }) {
           },
         ]
       : []),
-    ...(statut === "confirmé" && voeux_date
+    ...(cfa.statut === "confirmé" && cfa.etablissements.find((e) => e.voeux_date)
       ? [
           {
             icon: "send",
@@ -100,7 +99,7 @@ function Email({ cfa }) {
   return (
     <Formik
       initialValues={{
-        email,
+        email: cfa.email,
       }}
       validationSchema={Yup.object().shape({
         email: Yup.string().email(),
@@ -143,9 +142,8 @@ function Email({ cfa }) {
 }
 
 function Statut({ cfa }) {
-  let { uai } = cfa;
-  let [statut, setStatut] = useState(cfa.statut);
-  let [message, setMessage] = useState();
+  const [statut, setStatut] = useState(cfa.statut);
+  const [message, setMessage] = useState();
 
   useEffect(() => {
     if (message) {
@@ -155,7 +153,7 @@ function Statut({ cfa }) {
 
   async function markAsNonConcerné() {
     try {
-      let { statut } = await _put(`/api/admin/cfas/${uai}/markAsNonConcerne`);
+      const { statut } = await _put(`/api/admin/cfas/${cfa.siret}/markAsNonConcerne`);
       setMessage(<SuccessMessage>L'établissement est désormais non concerné</SuccessMessage>);
       setStatut(statut);
     } catch (e) {
@@ -164,7 +162,7 @@ function Statut({ cfa }) {
     }
   }
 
-  let items =
+  const items =
     statut !== "non concerné"
       ? [
           {
@@ -193,10 +191,10 @@ function Statut({ cfa }) {
 }
 
 function Cfas() {
-  let [error, setError] = useState();
-  let [loading, setLoading] = useState();
-  let [query, setQuery] = useState();
-  let [data, setData] = useState({
+  const [error, setError] = useState();
+  const [loading, setLoading] = useState();
+  const [query, setQuery] = useState();
+  const [data, setData] = useState({
     cfas: [],
     pagination: {
       page: 0,
@@ -209,8 +207,8 @@ function Cfas() {
   async function search(values) {
     try {
       setQuery(values);
-      let params = queryString.stringify(values, { skipNull: true, skipEmptyString: true });
-      let data = await _get(`/api/admin/cfas${params ? `?${params}` : ""}`);
+      const params = queryString.stringify(values, { skipNull: true, skipEmptyString: true });
+      const data = await _get(`/api/admin/cfas${params ? `?${params}` : ""}`);
       setLoading(false);
       setData(data);
     } catch (e) {
@@ -258,7 +256,7 @@ function Cfas() {
                         {({ field, meta }) => {
                           return (
                             <TablerForm.Input
-                              placeholder={"Rechercher un uai, siret, raison sociale, académie, email, statut"}
+                              placeholder={"Rechercher un siret, raison sociale, académie, email, statut"}
                               {...field}
                               {...showError(meta)}
                             />
@@ -276,10 +274,12 @@ function Cfas() {
             <Table style={{ marginTop: "15px" }}>
               <Table.Header>
                 <Table.Row>
-                  <Table.ColHeader>UAI</Table.ColHeader>
+                  <Table.ColHeader>Siret</Table.ColHeader>
                   <Table.ColHeader>Statut</Table.ColHeader>
                   <Table.ColHeader>Email</Table.ColHeader>
                   <Table.ColHeader>Voeux</Table.ColHeader>
+                  <Table.ColHeader>Etablissements</Table.ColHeader>
+                  <Table.ColHeader>Emails</Table.ColHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -290,8 +290,8 @@ function Cfas() {
                 ) : (
                   data.cfas.map((cfa) => {
                     return (
-                      <Table.Row key={cfa.uai}>
-                        <Table.Col>{cfa.uai}</Table.Col>
+                      <Table.Row key={cfa.siret}>
+                        <Table.Col>{cfa.siret}</Table.Col>
                         <Table.Col>
                           <Statut cfa={cfa} />
                         </Table.Col>
@@ -299,12 +299,14 @@ function Cfas() {
                           <Email cfa={cfa} />
                         </Table.Col>
                         <Table.Col>
-                          {cfa.voeux_date
+                          {cfa.etablissements.find((e) => e.voeux_date)
                             ? cfa.voeux_telechargements[0]
                               ? "Voeux téléchargés"
                               : "Pas encore téléchargé"
                             : "Pas de voeux"}
                         </Table.Col>
+                        <Table.Col>{cfa.etablissements.map((e) => e.uai).join(", ")}</Table.Col>
+                        <Table.Col>{cfa.anciens_emails.join(", ")}</Table.Col>
                       </Table.Row>
                     );
                   })

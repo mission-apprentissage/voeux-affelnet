@@ -2,32 +2,30 @@ const { oleoduc, filterData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
-const { findAcademieByUai } = require("../common/academies");
-const { Cfa, Voeu } = require("../common/model");
+const { findAcademieByCode } = require("../common/academies");
+const { Cfa } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
+const ReferentielApi = require("../common/api/ReferentielApi");
+const { loadRelations, getEtablissements } = require("../common/relations");
 
-let schema = Joi.object({
-  uai: Joi.string()
-    .pattern(/^[0-9]{7}[A-Z]{1}$/)
-    .required(),
+const schema = Joi.object({
   siret: Joi.string()
     .pattern(/^[0-9]{14}$/)
-    .optional(),
-  raison_sociale: Joi.string().optional(),
-  email_directeur: Joi.string().email().optional(),
-  email_contact: Joi.string().email().optional(),
-})
-  .or("email_directeur", "email_contact")
-  .unknown();
+    .required(),
+  email: Joi.string().email().required(),
+}).unknown();
 
-async function importCfas(cfaCsv) {
-  let stats = {
+async function importCfas(cfaCsv, options = {}) {
+  const referentielApi = options.referentielApi || new ReferentielApi();
+  const stats = {
     total: 0,
     created: 0,
     updated: 0,
     invalid: 0,
     failed: 0,
   };
+
+  const relations = await loadRelations(options.relationsCsv);
 
   await oleoduc(
     cfaCsv,
@@ -36,50 +34,60 @@ async function importCfas(cfaCsv) {
     }),
     filterData(async (json) => {
       stats.total++;
-      let { error } = schema.validate(json, { abortEarly: false });
+      const { error } = schema.validate(json, { abortEarly: false });
       if (!error) {
         return true;
       }
 
       stats.invalid++;
-      logger.warn(`Le cfa ${json.uai} est invalide`, error);
+      logger.warn(`Le cfa ${json.siret} est invalide`, error);
       return false;
     }),
     writeData(
-      async (data) => {
-        let uai = data.uai;
-
+      async ({ siret, email }) => {
         try {
-          let voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
-          let res = await Cfa.updateOne(
-            { uai },
+          const etablissements = await getEtablissements(siret, relations);
+          const organisme = await referentielApi.getOrganisme(siret);
+
+          if (!organisme.adresse) {
+            logger.warn(`Le CFA ${siret} n'a pas d'académie`);
+          }
+
+          if (etablissements.length === 0) {
+            stats.failed++;
+            logger.error(`Le CFA ${siret} n'a aucun établissement`);
+            return;
+          }
+
+          const res = await Cfa.updateOne(
+            { siret },
             {
               $setOnInsert: {
-                uai,
-                academie: findAcademieByUai(uai),
-                username: uai,
-                email: data.email_directeur || data.email_contact,
-                email_source: data.email_directeur ? "directeur" : "contact",
+                siret,
+                username: siret,
+                email,
               },
               $set: {
-                ...(data.siret ? { siret: data.siret } : {}),
-                ...(data.raison_sociale ? { raison_sociale: data.raison_sociale } : {}),
-                ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
+                etablissements,
+                raison_sociale: organisme.raison_sociale,
+                academie: findAcademieByCode(organisme.adresse?.academie.code),
               },
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
-          if (res.upserted && res.upserted.length) {
+          if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Cfa ${uai} created`);
-          } else if (res.nModified) {
+            logger.info(`Cfa ${siret} created`);
+          } else if (res.modifiedCount) {
             stats.updated++;
-            logger.info(`Cfa ${uai} updated`);
+            logger.info(`Cfa ${siret} updated`);
+          } else {
+            logger.trace(`Cfa ${siret} déjà à jour`);
           }
         } catch (e) {
           stats.failed++;
-          logger.error(`Impossible de traiter le cfa ${uai}`, e);
+          logger.error(`Impossible de traiter le cfa ${siret}`, e);
         }
       },
       { parallel: 10 }

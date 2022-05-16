@@ -3,10 +3,10 @@ const jwt = require("jsonwebtoken");
 const config = require("../../config");
 
 function createToken(type, subject, options = {}) {
-  let defaults = config.auth[type];
-  let secret = options.secret || defaults.jwtSecret;
-  let expiresIn = options.expiresIn || defaults.expiresIn;
-  let payload = options.payload || {};
+  const defaults = config.auth[type];
+  const secret = options.secret || defaults.jwtSecret;
+  const expiresIn = options.expiresIn || defaults.expiresIn;
+  const payload = options.payload || {};
 
   return jwt.sign(payload, secret, {
     issuer: "voeux-affelnet",

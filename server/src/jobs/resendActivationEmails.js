@@ -2,10 +2,10 @@ const { DateTime } = require("luxon");
 const logger = require("../common/logger");
 const { User } = require("../common/model");
 
-async function resendActivationEmails(emails, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let maxNbEmailsSent = options.max || 2;
-  let query = {
+async function resendActivationEmails(resendEmail, options = {}) {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const maxNbEmailsSent = options.max || 2;
+  const query = {
     unsubscribe: false,
     password: { $exists: false },
     statut: "confirmé",
@@ -14,7 +14,7 @@ async function resendActivationEmails(emails, options = {}) {
       ? {
           emails: {
             $elemMatch: {
-              templateName: "activation",
+              templateName: /^activation.*/,
               "error.type": "fatal",
             },
           },
@@ -22,7 +22,7 @@ async function resendActivationEmails(emails, options = {}) {
       : {
           emails: {
             $elemMatch: {
-              templateName: "activation",
+              templateName: /^activation.*/,
               ...(options.username
                 ? {}
                 : {
@@ -44,11 +44,11 @@ async function resendActivationEmails(emails, options = {}) {
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
     .eachAsync(async (user) => {
-      let previous = user.emails.find((e) => e.templateName === "activation");
+      const previous = user.emails.find((e) => e.templateName.startsWith("activation_"));
 
       try {
         logger.info(`Resending activation to user ${user.username}...`);
-        await emails.resend(previous.token);
+        await resendEmail(previous.token);
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent email to ${user.username}`, e);

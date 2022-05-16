@@ -2,18 +2,18 @@ const { DateTime } = require("luxon");
 const logger = require("../common/logger");
 const { Cfa } = require("../common/model");
 
-async function resendConfirmationEmails(emails, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let maxNbEmailsSent = options.max || 2;
-  let query = {
+async function resendConfirmationEmails(resendEmail, options = {}) {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const maxNbEmailsSent = options.max || 2;
+  const query = {
     unsubscribe: false,
     statut: "en attente",
-    ...(options.uai ? { uai: options.uai } : {}),
+    ...(options.username ? { username: options.username } : {}),
     ...(options.retry
       ? {
           emails: {
             $elemMatch: {
-              templateName: /^confirmation_.*/,
+              templateName: /^confirmation.*/,
               "error.type": "fatal",
             },
           },
@@ -21,8 +21,8 @@ async function resendConfirmationEmails(emails, options = {}) {
       : {
           emails: {
             $elemMatch: {
-              templateName: /^confirmation_.*/,
-              ...(options.uai
+              templateName: /^confirmation.*/,
+              ...(options.siret
                 ? {}
                 : {
                     error: { $exists: false },
@@ -43,15 +43,14 @@ async function resendConfirmationEmails(emails, options = {}) {
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
     .eachAsync(async (cfa) => {
-      let previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation_"));
-      let templateName = cfa.voeux_date ? "confirmation_voeux" : previous.templateName;
+      const previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation"));
 
       try {
-        logger.info(`Resending ${templateName} to CFA ${cfa.uai}...`);
-        await emails.resend(previous.token, { retry: options.retry, newTemplateName: templateName });
+        logger.info(`Resending ${previous.templateName} to CFA ${cfa.username}...`);
+        await resendEmail(previous.token, { retry: options.retry });
         stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent email to ${cfa.uai}`, e);
+        logger.error(`Unable to sent email to ${cfa.username}`, e);
         stats.failed++;
       }
     });

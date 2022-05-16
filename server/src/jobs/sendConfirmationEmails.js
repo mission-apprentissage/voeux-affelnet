@@ -1,12 +1,12 @@
 const logger = require("../common/logger");
 const { Cfa } = require("../common/model");
 
-async function sendConfirmationEmails(emails, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let query = {
+async function sendConfirmationEmails(sendEmail, options = {}) {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const query = {
     unsubscribe: false,
     statut: "en attente",
-    emails: { $not: { $elemMatch: { templateName: /^confirmation_.*/ } } },
+    emails: { $not: { $elemMatch: { templateName: "confirmation" } } },
   };
 
   stats.total = await Cfa.countDocuments(query);
@@ -17,9 +17,8 @@ async function sendConfirmationEmails(emails, options = {}) {
     .cursor()
     .eachAsync(async (cfa) => {
       try {
-        let templateName = cfa.email_source === "directeur" ? "confirmation_directeur" : "confirmation_contact";
-        logger.info(`Sending ${templateName} to cfa ${cfa.username}...`);
-        await emails.send(cfa, templateName);
+        logger.info(`Sending confirmation to cfa ${cfa.username}...`);
+        await sendEmail(cfa, "confirmation");
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent email to ${cfa.username}`, e);

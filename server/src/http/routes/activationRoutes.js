@@ -5,16 +5,17 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const validators = require("../utils/validators");
+const { activateUser } = require("../../common/actions/activateUser");
 
-module.exports = ({ users }) => {
+module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkActionToken } = authMiddleware(users);
+  const { checkActionToken } = authMiddleware();
 
   router.get(
     "/api/activation/status",
     checkActionToken(),
     tryCatch(async (req, res) => {
-      let user = req.user;
+      const user = req.user;
       if (user.statut !== "confirmé") {
         throw Boom.badRequest(`L'utilisateur ${user.username} est déjà activé`);
       }
@@ -27,8 +28,8 @@ module.exports = ({ users }) => {
     "/api/activation",
     checkActionToken(),
     tryCatch(async (req, res) => {
-      let user = req.user;
-      let { password } = await Joi.object({
+      const user = req.user;
+      const { password } = await Joi.object({
         actionToken: Joi.string().required(),
         password: validators.password().required(),
       }).validateAsync(req.body, { abortEarly: false });
@@ -37,7 +38,7 @@ module.exports = ({ users }) => {
         throw Boom.badRequest(`L'utilisateur ${user.username} a déjà été créé.`);
       }
 
-      await users.activate(user.username, password);
+      await activateUser(user.username, password);
 
       return res.json({ token: createApiToken(user) });
     })

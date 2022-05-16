@@ -1,20 +1,25 @@
 const logger = require("../common/logger");
 const { DateTime } = require("luxon");
 const { Cfa } = require("../common/model");
+const { every } = require("lodash");
 
-function isAlreadyDownloaded(cfa) {
+function allFilesAsAlreadyBeenDownloaded(cfa) {
   return !!cfa.voeux_telechargements.find((download) => {
-    return download.date > cfa.voeux_date;
+    return every(
+      cfa.etablissements.map((e) => e.voeux_date),
+      (date) => download.date > date
+    );
   });
 }
 
-async function resendNotificationEmails(emails, options = {}) {
-  let stats = { total: 0, sent: 0, failed: 0 };
-  let limit = options.limit || Number.MAX_SAFE_INTEGER;
-  let query = {
+async function resendNotificationEmails(resendEmail, options = {}) {
+  const stats = { total: 0, sent: 0, failed: 0 };
+  const limit = options.limit || Number.MAX_SAFE_INTEGER;
+  const query = {
     unsubscribe: false,
     statut: "activé",
-    voeux_date: { $exists: true },
+    "etablissements.voeux_date": { $exists: true },
+    ...(options.username ? { username: options.username } : {}),
     ...(options.retry
       ? {
           emails: {
@@ -42,17 +47,17 @@ async function resendNotificationEmails(emails, options = {}) {
     .lean()
     .cursor()
     .eachAsync(async (cfa) => {
-      if (isAlreadyDownloaded(cfa)) {
+      if (allFilesAsAlreadyBeenDownloaded(cfa)) {
         return;
       }
 
-      let previous = cfa.emails.find((e) => e.templateName === "notification");
+      const previous = cfa.emails.find((e) => e.templateName === "notification");
 
       try {
         stats.total++;
         if (limit > stats.sent) {
           logger.info(`Resending notification to cfa ${cfa.username}...`);
-          await emails.resend(previous.token);
+          await resendEmail(previous.token);
           stats.sent++;
         }
       } catch (e) {

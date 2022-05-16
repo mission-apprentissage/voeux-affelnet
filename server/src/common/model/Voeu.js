@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 
-let schema = new Schema({
+const schema = new Schema({
   __v: { type: Number, select: false },
   academie: {
     required: true,

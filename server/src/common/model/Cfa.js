@@ -2,16 +2,12 @@ const { Schema } = require("mongoose");
 const User = require("./User");
 const { nested } = require("../utils/mongooseUtils");
 
-let schema = new Schema({
-  uai: {
+const schema = new Schema({
+  siret: {
     type: String,
     required: true,
     index: true,
     unique: true,
-  },
-  siret: {
-    type: String,
-    index: true,
   },
   raison_sociale: {
     type: String,
@@ -32,23 +28,30 @@ let schema = new Schema({
       { _id: false }
     ),
   },
-  email_source: {
-    type: String,
-    enum: ["contact", "directeur"],
-    default: "contact",
-  },
-  contacts: {
-    type: [String],
+  etablissements: {
     required: true,
     default: [],
-  },
-  voeux_date: {
-    type: Date,
+    type: [
+      nested({
+        uai: {
+          type: String,
+          required: true,
+          index: true,
+        },
+        voeux_date: {
+          type: Date,
+        },
+      }),
+    ],
   },
   voeux_telechargements: {
     default: [],
     type: [
       nested({
+        uai: {
+          type: String,
+          required: true,
+        },
         date: {
           type: Date,
           required: true,
@@ -60,7 +63,14 @@ let schema = new Schema({
 });
 
 schema.index(
-  { uai: "text", siret: "text", raison_sociale: "text", "academie.nom": "text", email: "text", statut: "text" },
+  {
+    siret: "text",
+    raison_sociale: "text",
+    "academie.nom": "text",
+    email: "text",
+    statut: "text",
+    "etablissements.uai": "text",
+  },
   { default_language: "french" }
 );
 

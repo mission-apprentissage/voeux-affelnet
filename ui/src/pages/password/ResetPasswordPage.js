@@ -11,13 +11,13 @@ import ErrorMessage from "../../common/components/ErrorMessage";
 import CenteredCol from "../../common/components/CenteredCol";
 
 function ResetPasswordPage() {
-  let [, setAuth] = useAuth();
-  let history = useHistory();
-  let location = useLocation();
-  let { resetPasswordToken } = queryString.parse(location.search);
-  let uai = decodeJWT(resetPasswordToken).sub;
+  const [, setAuth] = useAuth();
+  const history = useHistory();
+  const location = useLocation();
+  const { resetPasswordToken } = queryString.parse(location.search);
+  const username = decodeJWT(resetPasswordToken).sub;
 
-  let showError = (meta) => {
+  const showError = (meta) => {
     return meta.touched && meta.error
       ? {
           feedback: meta.error,
@@ -26,9 +26,9 @@ function ResetPasswordPage() {
       : {};
   };
 
-  let changePassword = async (values, { setStatus }) => {
+  const changePassword = async (values, { setStatus }) => {
     try {
-      let { token } = await _post("/api/password/reset-password", { ...values, resetPasswordToken });
+      const { token } = await _post("/api/password/reset-password", { ...values, resetPasswordToken });
       setAuth(token);
       history.push("/");
     } catch (e) {
@@ -37,7 +37,7 @@ function ResetPasswordPage() {
         error: (
           <span>
             Le lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre adresse
-            mail de réception des voeux ou votre numéro UAI via :
+            mail de réception des voeux ou votre siret via :
             <br />
             <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
           </span>
@@ -54,7 +54,7 @@ function ResetPasswordPage() {
             <CenteredCol>
               <Card>
                 <Card.Header>
-                  <Card.Title>Changement du mot de passe pour le CFA {uai}</Card.Title>
+                  <Card.Title>Changement du mot de passe pour le CFA {username}</Card.Title>
                 </Card.Header>
                 <Card.Body>
                   <Formik

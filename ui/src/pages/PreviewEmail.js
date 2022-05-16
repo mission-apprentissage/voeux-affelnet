@@ -9,7 +9,7 @@ const Preview = styled.iframe`
 `;
 
 function PreviewEmail() {
-  let { token } = useParams();
+  const { token } = useParams();
 
   return (
     <Centered>

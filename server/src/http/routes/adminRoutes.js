@@ -13,13 +13,16 @@ const exportCfas = require("../../jobs/exportCfas");
 const exportCfasInconnus = require("../../jobs/exportCfasInconnus");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
+const { changeEmail } = require("../../common/actions/changeEmail");
+const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
+const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
 
-module.exports = ({ users, cfas, emails }) => {
+module.exports = ({ resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkApiToken, checkIsAdmin } = authMiddleware(users);
+  const { checkApiToken, checkIsAdmin } = authMiddleware();
 
   function asCsvResponse(name, res) {
-    let date = DateTime.local().setLocale("fr").toFormat("yyyy-MM-dd");
+    const date = DateTime.local().setLocale("fr").toFormat("yyyy-MM-dd");
     res.setHeader("Content-disposition", `attachment; filename=${name}-${date}.csv`);
     res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
     return res;
@@ -30,13 +33,13 @@ module.exports = ({ users, cfas, emails }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { text, page, items_par_page } = await Joi.object({
+      const { text, page, items_par_page } = await Joi.object({
         text: Joi.string(),
         page: Joi.number().default(1),
         items_par_page: Joi.number().default(10),
       }).validateAsync(req.query, { abortEarly: false });
 
-      let { find, pagination } = await paginate(
+      const { find, pagination } = await paginate(
         Cfa,
         {
           ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
@@ -48,7 +51,7 @@ module.exports = ({ users, cfas, emails }) => {
         }
       );
 
-      let stream = oleoduc(
+      const stream = oleoduc(
         find.sort({ uai: 1 }).cursor(),
         transformIntoJSON({
           arrayWrapper: {
@@ -63,48 +66,48 @@ module.exports = ({ users, cfas, emails }) => {
   );
 
   router.put(
-    "/api/admin/cfas/:uai/setEmail",
+    "/api/admin/cfas/:siret/setEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai, email } = await Joi.object({
-        uai: Joi.string().required(),
+      const { siret, email } = await Joi.object({
+        siret: Joi.string().required(),
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
-      await cfas.changeEmail(uai, email);
+      await changeEmail(siret, email, { auteur: req.user.username });
 
       return res.json({});
     })
   );
 
   router.put(
-    "/api/admin/cfas/:uai/resendConfirmationEmail",
+    "/api/admin/cfas/:siret/resendConfirmationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai } = await Joi.object({
-        uai: Joi.string().required(),
+      const { siret } = await Joi.object({
+        siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.cancelUnsubscription(uai);
-      let stats = await resendConfirmationEmails(emails, { uai });
+      await cancelUnsubscription(siret);
+      const stats = await resendConfirmationEmails(resendEmail, { username: siret });
 
       return res.json(stats);
     })
   );
 
   router.put(
-    "/api/admin/cfas/:uai/resendActivationEmail",
+    "/api/admin/cfas/:siret/resendActivationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai } = await Joi.object({
-        uai: Joi.string().required(),
+      const { siret } = await Joi.object({
+        siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.cancelUnsubscription(uai);
-      let stats = await resendActivationEmails(emails, { username: uai });
+      await cancelUnsubscription(siret);
+      const stats = await resendActivationEmails(resendEmail, { username: siret });
 
       return res.json(stats);
     })
@@ -115,11 +118,11 @@ module.exports = ({ users, cfas, emails }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let { uai } = await Joi.object({
+      const { uai } = await Joi.object({
         uai: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cfas.markAsNonConcerne(uai);
+      await markAsNonConcerne(uai);
 
       return res.json({ statut: "non concerné" });
     })
@@ -151,11 +154,13 @@ module.exports = ({ users, cfas, emails }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       exportCfas(asCsvResponse("cfas-relances", res), {
-        filter: { statut: { $in: ["en attente", "confirmé"] }, voeux_date: { $exists: true } },
+        filter: { statut: { $in: ["en attente", "confirmé"] }, "etablissements.voeux_date": { $exists: true } },
         columns: {
           statut: (data) => data.statut,
           nb_voeux: async (data) => {
-            let count = await Voeu.countDocuments({ "etablissement_accueil.uai": data.uai });
+            const count = await Voeu.countDocuments({
+              "etablissement_accueil.uai": { $in: data.etablissements.map((e) => e.uai) },
+            });
             return count ? count : "0";
           },
         },
@@ -168,7 +173,7 @@ module.exports = ({ users, cfas, emails }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      let results = await Log.aggregate([
+      const results = await Log.aggregate([
         {
           $match: {
             "request.url.path": "/api/stats/computeStats/now",
@@ -185,7 +190,7 @@ module.exports = ({ users, cfas, emails }) => {
 
       res.json(
         sortBy(getAcademies(), (a) => a.nom).map((academie) => {
-          let found = results.find((r) => r._id === academie.code) || {};
+          const found = results.find((r) => r._id === academie.code) || {};
           return {
             code: academie.code,
             nom: academie.nom,
