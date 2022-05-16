@@ -44,11 +44,10 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
     .cursor()
     .eachAsync(async (cfa) => {
       const previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation"));
-      const templateName = cfa.etablissements.find((e) => e.voeux_date) ? "confirmation_voeux" : previous.templateName;
 
       try {
-        logger.info(`Resending ${templateName} to CFA ${cfa.username}...`);
-        await resendEmail(previous.token, { retry: options.retry, newTemplateName: templateName });
+        logger.info(`Resending ${previous.templateName} to CFA ${cfa.username}...`);
+        await resendEmail(previous.token, { retry: options.retry });
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent email to ${cfa.username}`, e);
