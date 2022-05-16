@@ -7,6 +7,7 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
     unsubscribe: false,
     statut: "en attente",
     emails: { $not: { $elemMatch: { templateName: "confirmation" } } },
+    ...(options.username ? { username: options.username } : {}),
   };
 
   stats.total = await Cfa.countDocuments(query);

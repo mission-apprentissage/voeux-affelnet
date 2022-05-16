@@ -109,4 +109,23 @@ describe("sendConfirmationEmails", () => {
       });
     }
   });
+
+  it("Vérifie qu'on peut envoyer un email à un CFA", async () => {
+    const { sendEmail, getEmailsSent } = createTestContext();
+    await insertCfa({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
+    await insertCfa({
+      email: "test1@apprentissage.beta.gouv.fr",
+    });
+
+    const stats = await sendConfirmationEmails(sendEmail, { username: "11111111100006" });
+
+    const sent = getEmailsSent();
+    assert.strictEqual(sent.length, 1);
+    assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
+    assert.deepStrictEqual(stats, {
+      total: 1,
+      sent: 1,
+      failed: 0,
+    });
+  });
 });

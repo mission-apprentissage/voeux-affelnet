@@ -288,6 +288,7 @@ describe("resendNotificationEmails", () => {
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
       username: "11111111100006",
+      email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
       voeux_telechargements: [
@@ -325,6 +326,7 @@ describe("resendNotificationEmails", () => {
     const stats = await resendNotificationEmails(resendEmail, { username: "11111111100006" });
 
     const sent = getEmailsSent();
+    assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(stats, {
       total: 1,

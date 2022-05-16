@@ -280,6 +280,7 @@ describe("resendConfirmationEmails", () => {
     const stats = await resendConfirmationEmails(resendEmail, { username: "11111111100006" });
 
     const sent = getEmailsSent();
+    assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(stats, {
       total: 1,

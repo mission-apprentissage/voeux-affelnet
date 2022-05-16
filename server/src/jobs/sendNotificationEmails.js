@@ -20,6 +20,7 @@ async function sendNotificationEmails(sendEmail, options = {}) {
     statut: "activé",
     "etablissements.voeux_date": { $exists: true },
     "emails.templateName": { $ne: templateName },
+    ...(options.username ? { username: options.username } : {}),
   };
 
   await Cfa.find(query)

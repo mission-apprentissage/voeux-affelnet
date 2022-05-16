@@ -139,4 +139,43 @@ describe("sendNotificationEmails", () => {
       });
     }
   });
+
+  it("Vérifie qu'on peut renvoyer un email à un CFA", async () => {
+    const { sendEmail, getEmailsSent } = createTestContext();
+    const today = new Date();
+    const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
+    await insertCfa({
+      username: "11111111100006",
+      email: "test@apprentissage.beta.gouv.fr",
+      statut: "activé",
+      etablissements: [{ uai: "0751234J", voeux_date: today }],
+      voeux_telechargements: [
+        {
+          uai: "0751234J",
+          date: lastWeek,
+        },
+      ],
+    });
+    await insertCfa({
+      statut: "activé",
+      etablissements: [{ uai: "0751234J", voeux_date: today }],
+      voeux_telechargements: [
+        {
+          uai: "0751234J",
+          date: lastWeek,
+        },
+      ],
+    });
+
+    const stats = await sendNotificationEmails(sendEmail, { username: "11111111100006" });
+
+    const sent = getEmailsSent();
+    assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
+    assert.strictEqual(sent.length, 1);
+    assert.deepStrictEqual(stats, {
+      total: 1,
+      sent: 1,
+      failed: 0,
+    });
+  });
 });
