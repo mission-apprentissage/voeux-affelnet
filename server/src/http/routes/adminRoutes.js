@@ -75,7 +75,7 @@ module.exports = ({ resendEmail }) => {
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
-      await changeEmail(siret, email);
+      await changeEmail(siret, email, { auteur: req.user.username });
 
       return res.json({});
     })

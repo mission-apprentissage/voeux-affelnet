@@ -36,6 +36,7 @@ const schema = new Schema({
         uai: {
           type: String,
           required: true,
+          index: true,
         },
         voeux_date: {
           type: Date,
@@ -72,8 +73,6 @@ schema.index(
   },
   { default_language: "french" }
 );
-
-schema.index({ "etablissements.uai": 1 });
 
 const Cfa = User.discriminator("Cfa", schema);
 

@@ -34,6 +34,7 @@ describe("importCfas", () => {
       username: "11111111100006",
       siret: "11111111100006",
       email: "contact@lycee.fr",
+      anciens_emails: [],
       academie: { nom: "Toulouse", code: "16" },
       raison_sociale: "Lycée professionnel",
       emails: [],

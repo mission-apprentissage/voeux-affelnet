@@ -70,6 +70,7 @@ describe("confirmationRoutes", () => {
     const found = await Cfa.findOne({ username: "11111111100006" }, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "confirmé");
     assert.strictEqual(found.email, "user2@apprentissage.beta.gouv.fr");
+    assert.strictEqual(found.anciens_emails[0].email, "11111111100006@apprentissage.beta.gouv.fr");
   });
 
   it("Vérifie qu'on envoie l'email d'activation après la confirmation", async () => {

@@ -279,6 +279,7 @@ function Cfas() {
                   <Table.ColHeader>Email</Table.ColHeader>
                   <Table.ColHeader>Voeux</Table.ColHeader>
                   <Table.ColHeader>Etablissements</Table.ColHeader>
+                  <Table.ColHeader>Emails</Table.ColHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -305,6 +306,7 @@ function Cfas() {
                             : "Pas de voeux"}
                         </Table.Col>
                         <Table.Col>{cfa.etablissements.map((e) => e.uai).join(", ")}</Table.Col>
+                        <Table.Col>{cfa.anciens_emails.join(", ")}</Table.Col>
                       </Table.Row>
                     );
                   })

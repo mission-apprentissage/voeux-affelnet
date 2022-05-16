@@ -2,6 +2,7 @@ const assert = require("assert");
 const { Cfa } = require("../../src/common/model");
 const { insertCfa, insertVoeu, insertLog } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
+const { omit } = require("lodash");
 
 describe("adminRoutes", () => {
   it("Vérifie qu'on peut obtenir la liste des cfas", async () => {
@@ -35,6 +36,7 @@ describe("adminRoutes", () => {
           email: "contact@organisme.com",
           etablissements: [],
           emails: [],
+          anciens_emails: [],
           voeux_telechargements: [],
         },
       ],
@@ -249,9 +251,15 @@ describe("adminRoutes", () => {
     );
 
     assert.strictEqual(response.status, 200);
-    let found = await Cfa.findOne({ username: "11111111100006" });
+    let found = await Cfa.findOne({ username: "11111111100006" }).lean();
     assert.deepStrictEqual(found.email, "robert.hue@organisme.com");
-    found = await Cfa.findOne({ username: "22222222200006" });
+    const ancien = found.anciens_emails[0];
+    assert.deepStrictEqual(omit(ancien, ["modification_date"]), {
+      email: "x@organisme.com",
+      auteur: "admin",
+    });
+    assert.ok(ancien.modification_date);
+    found = await Cfa.findOne({ username: "22222222200006" }).lean();
     assert.deepStrictEqual(found.email, "y@organisme.com");
   });
 
