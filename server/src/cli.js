@@ -60,8 +60,8 @@ cli
   .command("sendConfirmationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ sender }) => {
-      return sendConfirmationEmails(sender, options);
+    runScript(({ sendEmail }) => {
+      return sendConfirmationEmails(sendEmail, options);
     });
   });
 
@@ -72,8 +72,8 @@ cli
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--max <max>", "Nombre de relances maximum", parseInt)
   .action((options) => {
-    runScript(({ sender }) => {
-      return resendConfirmationEmails(sender, options);
+    runScript(({ resendEmail }) => {
+      return resendConfirmationEmails(resendEmail, options);
     });
   });
 
@@ -101,8 +101,8 @@ cli
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ sender }) => {
-      return sendActivationEmails(sender, options);
+    runScript(({ sendEmail }) => {
+      return sendActivationEmails(sendEmail, options);
     });
   });
 
@@ -113,8 +113,8 @@ cli
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--max <max>", "Nombre de relances maximum", parseInt)
   .action((options) => {
-    runScript(({ sender }) => {
-      return resendActivationEmails(sender, options);
+    runScript(({ resendEmail }) => {
+      return resendActivationEmails(resendEmail, options);
     });
   });
 
@@ -122,8 +122,8 @@ cli
   .command("sendNotificationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ sender }) => {
-      return sendNotificationEmails(sender, options);
+    runScript(({ sendEmail }) => {
+      return sendNotificationEmails(sendEmail, options);
     });
   });
 
@@ -131,8 +131,8 @@ cli
   .command("resendNotificationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ sender }) => {
-      return resendNotificationEmails(sender, options);
+    runScript(({ resendEmail }) => {
+      return resendNotificationEmails(resendEmail, options);
     });
   });
 
