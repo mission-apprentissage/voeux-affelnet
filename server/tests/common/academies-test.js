@@ -1,6 +1,6 @@
 const assert = require("assert");
 
-const { findAcademieByName, findAcademieByUai, findAcademieByCode } = require("../src/common/academies");
+const { findAcademieByName, findAcademieByUai, findAcademieByCode } = require("../../src/common/academies");
 
 describe("academies", () => {
   it("Permet de trouver une académie avec son nom", () => {

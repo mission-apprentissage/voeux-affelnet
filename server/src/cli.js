@@ -19,6 +19,8 @@ const exportCfas = require("./jobs/exportCfas");
 const exportCfasInconnus = require("./jobs/exportCfasInconnus");
 const createUser = require("./jobs/createUser");
 const { DateTime } = require("luxon");
+const migrate = require("./jobs/migrate");
+const { injectDataset } = require("../tests/dataset/injectDataset");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -194,6 +196,20 @@ cli.command("computeStats").action(() => {
   });
 });
 
-cli.command("db", "Commande pour manipuler la base de données", { executableFile: "jobs/db/dbCli.js" });
+cli.command("migrate").action(() => {
+  runScript(() => {
+    return migrate();
+  });
+});
+
+cli
+  .command("injectDataset")
+  .option("--mef", "Import les mefs")
+  .option("--resend <type>", "Génère des comptes CFA à relance")
+  .action((options) => {
+    runScript((actions) => {
+      return injectDataset(actions, options);
+    });
+  });
 
 cli.parse(process.argv);

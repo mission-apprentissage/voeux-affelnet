@@ -1,8 +1,8 @@
 const assert = require("assert");
-const { insertUser } = require("../utils/fakeData");
-const { User } = require("../../src/common/model");
-const { activateUser } = require("../../src/common/actions/activateUser");
-const { changePassword } = require("../../src/common/actions/changePassword");
+const { insertUser } = require("../../utils/fakeData");
+const { User } = require("../../../src/common/model");
+const { activateUser } = require("../../../src/common/actions/activateUser");
+const { changePassword } = require("../../../src/common/actions/changePassword");
 
 describe("changePassword", () => {
   it("Vérifie qu'on peut changer le mot de passe d'un utilisateur", async () => {

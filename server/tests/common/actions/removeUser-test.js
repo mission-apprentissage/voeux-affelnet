@@ -1,7 +1,7 @@
 const assert = require("assert");
-const { insertUser } = require("../utils/fakeData");
-const { User } = require("../../src/common/model");
-const { removeUser } = require("../../src/common/actions/removeUser");
+const { insertUser } = require("../../utils/fakeData");
+const { User } = require("../../../src/common/model");
+const { removeUser } = require("../../../src/common/actions/removeUser");
 
 describe("removeUser", () => {
   it("Vérifie qu'on peut supprimer un utilisateur", async () => {

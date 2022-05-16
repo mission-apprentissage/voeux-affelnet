@@ -1,6 +1,6 @@
 const assert = require("assert");
 
-const { compare, hash } = require("../src/common/utils/passwordUtils");
+const { compare, hash } = require("../../src/common/utils/passwordUtils");
 
 describe("passwordUtils", () => {
   const rounds = 1002;

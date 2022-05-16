@@ -1,7 +1,7 @@
 const assert = require("assert");
-const { insertUser } = require("../utils/fakeData");
-const { User } = require("../../src/common/model");
-const { unsubscribeUser } = require("../../src/common/actions/unsubscribeUser");
+const { insertUser } = require("../../utils/fakeData");
+const { User } = require("../../../src/common/model");
+const { unsubscribeUser } = require("../../../src/common/actions/unsubscribeUser");
 
 describe("unsubscribeUser", () => {
   it("Vérifie qu'on peut désinscrire un utilisateur avec son username", async () => {

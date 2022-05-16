@@ -1,9 +1,9 @@
 // eslint-disable-next-line no-unused-vars
-const { User, JobEvent } = require("../../common/model");
-const logger = require("../../common/logger");
-const { promiseAllProps } = require("../../common/utils/asyncUtils");
+const { User, JobEvent } = require("../common/model");
+const logger = require("../common/logger");
+const { promiseAllProps } = require("../common/utils/asyncUtils");
 // eslint-disable-next-line no-unused-vars
-const { raw } = require("../../common/utils/mongooseUtils");
+const { raw } = require("../common/utils/mongooseUtils");
 
 const VERSION = 25;
 

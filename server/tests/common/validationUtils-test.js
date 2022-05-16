@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { isUAIValid, isSiretValid, createUAI } = require("../src/common/utils/validationUtils");
+const { isUAIValid, isSiretValid, createUAI } = require("../../src/common/utils/validationUtils");
 
 describe("validationUtils", () => {
   it("permet de valider une UAI", () => {

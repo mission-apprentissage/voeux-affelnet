@@ -43,7 +43,7 @@ module.exports = {
           statut: "valide",
           academie: { code: "11", nom: "Île-de-France" },
           apprenant: {
-            ine: "111111111HA",
+            ine: faker.helpers.replaceSymbols("#########??"),
             nom: "Dupont",
             prenom: "Robert",
             telephone_personnel: "0112345678",

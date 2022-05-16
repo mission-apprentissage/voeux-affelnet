@@ -1,7 +1,7 @@
 const assert = require("assert");
-const { insertUser } = require("../utils/fakeData");
-const { User } = require("../../src/common/model");
-const { activateUser } = require("../../src/common/actions/activateUser");
+const { insertUser } = require("../../utils/fakeData");
+const { User } = require("../../../src/common/model");
+const { activateUser } = require("../../../src/common/actions/activateUser");
 
 describe("activateUser", () => {
   it("Vérifie qu'on peut activer un utilisateur", async () => {

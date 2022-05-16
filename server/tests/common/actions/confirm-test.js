@@ -1,7 +1,7 @@
 const assert = require("assert");
-const { insertCfa } = require("../utils/fakeData");
-const { Cfa } = require("../../src/common/model");
-const { confirm } = require("../../src/common/actions/confirm");
+const { insertCfa } = require("../../utils/fakeData");
+const { Cfa } = require("../../../src/common/model");
+const { confirm } = require("../../../src/common/actions/confirm");
 
 describe("confirm", () => {
   it("Vérifie qu'on peut confirmer un cfa", async () => {

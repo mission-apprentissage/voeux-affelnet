@@ -1,9 +1,9 @@
 const assert = require("assert");
-const { insertUser, insertCfa } = require("../utils/fakeData");
-const { createFakeMailer } = require("../utils/fakeMailer");
-const { User } = require("../../src/common/model");
-const emailActions = require("../../src/common/actions/emailActions");
-const { createTestContext } = require("../utils/testUtils");
+const { insertUser, insertCfa } = require("../../utils/fakeData");
+const { createFakeMailer } = require("../../utils/fakeMailer");
+const { User } = require("../../../src/common/model");
+const emailActions = require("../../../src/common/actions/emailActions");
+const { createTestContext } = require("../../utils/testUtils");
 
 describe("emails", () => {
   it("Vérifie qu'on peut envoyer un email", async () => {
