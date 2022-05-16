@@ -13,6 +13,9 @@
                         Nous avons enregistré cette adresse email comme adresse de contact pour votre organisme de
                         formation en apprentissage.
                     </mj-text>
+
+                    <%- include('./common/arrete.ejs'); %>
+
                     <mj-text>
                         Les vœux exprimés via le service en ligne Affelnet pour des formations en apprentissage dans
                         votre établissement (Siret : <%= data.cfa.siret %>) et/ou pour les établissements dont vous êtes
@@ -33,8 +36,6 @@
                             </li>
                         </ul>
                     </mj-text>
-
-                    <%- include('./common/arrete.ejs'); %>
 
                     <mj-button
                             href="<%= utils.getPublicUrl(`/confirmation?actionToken=${data.actionToken}`) %>"
