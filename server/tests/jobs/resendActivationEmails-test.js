@@ -277,6 +277,21 @@ describe("resendActivationEmails", () => {
         },
       ],
     });
+    await insertUser({
+      statut: "confirmé",
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "activation_user",
+          sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
+          error: {
+            type: "soft_bounce",
+            message: "Impossible d'envoyer l'email",
+          },
+        },
+      ],
+    });
+
     await resendActivationEmails(resendEmail, { username: "user1" });
 
     const sent = getEmailsSent();

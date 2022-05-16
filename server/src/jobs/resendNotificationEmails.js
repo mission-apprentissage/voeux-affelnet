@@ -19,6 +19,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
     unsubscribe: false,
     statut: "activé",
     "etablissements.voeux_date": { $exists: true },
+    ...(options.username ? { username: options.username } : {}),
     ...(options.retry
       ? {
           emails: {

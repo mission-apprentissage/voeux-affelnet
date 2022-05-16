@@ -253,7 +253,7 @@ describe("resendConfirmationEmails", () => {
     });
   });
 
-  it("Vérifie qu'on peut forcer le renvoi d'un email pour un CFA", async () => {
+  it("Vérifie qu'on peut renvoyer un email à un CFA", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       username: "11111111100006",
@@ -263,14 +263,21 @@ describe("resendConfirmationEmails", () => {
           token: "TOKEN",
           templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
-          error: {
-            type: "hard_bounce",
-          },
+        },
+      ],
+    });
+    await insertCfa({
+      email: "test1@apprentissage.beta.gouv.fr",
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "confirmation",
+          sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
         },
       ],
     });
 
-    const stats = await resendConfirmationEmails(resendEmail, { siret: "11111111100006" });
+    const stats = await resendConfirmationEmails(resendEmail, { username: "11111111100006" });
 
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

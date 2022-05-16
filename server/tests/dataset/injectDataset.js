@@ -42,7 +42,10 @@ async function generateCfaAndVoeux(cfa) {
   const siret = faker.helpers.replaceSymbols("#########00015");
   const uais = range(0, 2).map(() => createUAI(faker.helpers.replaceSymbols("075####")));
 
-  await generateCfa(uais, cfa);
+  await generateCfa(uais, {
+    ...cfa,
+    siret,
+  });
   await generateVoeux(uais);
 
   return { siret, uais };

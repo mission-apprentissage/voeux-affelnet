@@ -13,7 +13,7 @@ describe("resendNotificationEmails", () => {
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
@@ -50,7 +50,7 @@ describe("resendNotificationEmails", () => {
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [
@@ -123,7 +123,7 @@ describe("resendNotificationEmails", () => {
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
@@ -209,7 +209,7 @@ describe("resendNotificationEmails", () => {
     const yesterday = DateTime.now().minus({ days: 1 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: today }],
@@ -250,7 +250,7 @@ describe("resendNotificationEmails", () => {
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({
-      username: "0751234J",
+      username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
@@ -280,5 +280,56 @@ describe("resendNotificationEmails", () => {
         message: "Unable to send email",
       });
     }
+  });
+
+  it("Vérifie qu'on peut renvoyer un email à un CFA", async () => {
+    const { resendEmail, getEmailsSent } = createTestContext();
+    const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
+    const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
+    await insertCfa({
+      username: "11111111100006",
+      statut: "activé",
+      etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
+      voeux_telechargements: [
+        {
+          uai: "0751234J",
+          date: twoWeeksAgo,
+        },
+      ],
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "notification",
+          sendDates: [eightDaysAgo],
+        },
+      ],
+    });
+    await insertCfa({
+      statut: "activé",
+      etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
+      voeux_telechargements: [
+        {
+          uai: "0751234J",
+          date: twoWeeksAgo,
+        },
+      ],
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "notification",
+          sendDates: [eightDaysAgo],
+        },
+      ],
+    });
+
+    const stats = await resendNotificationEmails(resendEmail, { username: "11111111100006" });
+
+    const sent = getEmailsSent();
+    assert.strictEqual(sent.length, 1);
+    assert.deepStrictEqual(stats, {
+      total: 1,
+      sent: 1,
+      failed: 0,
+    });
   });
 });
