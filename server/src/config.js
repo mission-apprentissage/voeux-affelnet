@@ -29,6 +29,12 @@ module.exports = {
     format: env.get("VOEUX_AFFELNET_LOG_FORMAT").default("pretty").asString(),
     destinations: env.get("VOEUX_AFFELNET_LOG_DESTINATIONS").default("stdout").asString(),
   },
+  catalog: {
+    endpoint: env
+      .get("VOEUX_AFFELNET_CATALOG_ENDPOINT")
+      .default("https://catalogue.apprentissage.beta.gouv.fr")
+      .asString(),
+  },
   slackWebhookUrl: env.get("VOEUX_AFFELNET_SLACK_WEBHOOK_URL").asString(),
   outputDir: env.get("VOEUX_AFFELNET_OUTPUT_DIR").default(".local/output").asString(),
   smtp: {
@@ -39,13 +45,6 @@ module.exports = {
     auth: {
       user: env.get("VOEUX_AFFELNET_SMTP_AUTH_USER").asString(),
       pass: env.get("VOEUX_AFFELNET_SMTP_AUTH_PASS").asString(),
-    },
-  },
-  emails: {
-    relances: {
-      confirmation: env.get("VOEUX_AFFELNET_EMAIL_RELANCES_CONFIRMATION").default(7).asInt(),
-      activation: env.get("VOEUX_AFFELNET_EMAIL_RELANCES_ACTIVATION").default(3).asInt(),
-      notification: env.get("VOEUX_AFFELNET_EMAIL_RELANCES_NOTIFICATION").default(7).asInt(),
     },
   },
   sentry: {
