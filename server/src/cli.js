@@ -205,7 +205,7 @@ cli.command("migrate").action(() => {
 cli
   .command("injectDataset")
   .option("--mef", "Import les mefs")
-  .option("--resend <type>", "Génère des comptes CFA à relance")
+  .option("--admin", "Ajout un administrateur")
   .action((options) => {
     runScript((actions) => {
       return injectDataset(actions, options);

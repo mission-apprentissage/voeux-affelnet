@@ -2,15 +2,11 @@ const faker = require("faker/locale/fr");
 const { Mef, JobEvent } = require("../../src/common/model");
 const createUser = require("../../src/jobs/createUser");
 const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");
-const resendConfirmationEmails = require("../../src/jobs/resendConfirmationEmails");
 const sendActivationEmails = require("../../src/jobs/sendActivationEmails");
-const resendActivationEmails = require("../../src/jobs/resendActivationEmails");
-const resendNotificationEmails = require("../../src/jobs/resendNotificationEmails");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 const importMefs = require("../../src/jobs/importMefs");
 const { insertCfa, insertVoeu } = require("../utils/fakeData");
 const { range } = require("lodash");
-const { DateTime } = require("luxon");
 
 async function generateCfa(uais, custom = {}) {
   const stats = await insertCfa({
@@ -51,77 +47,24 @@ async function generateCfaAndVoeux(cfa) {
   return { siret, uais };
 }
 
-async function generateUser(sendEmail) {
+async function generateAdmin(sendEmail) {
   await createUser(faker.internet.userName(), faker.internet.email(), { admin: true });
   await sendActivationEmails(sendEmail);
 }
 
 async function injectDataset(actions, options = {}) {
-  let { sendEmail, resendEmail } = actions;
+  let { sendEmail } = actions;
 
   if (options.mef) {
     await importMefs();
   }
 
-  if (options.resend === "confirmation") {
-    let { siret } = await generateCfaAndVoeux({
-      emails: [
-        {
-          token: "TOKEN",
-          templateName: "confirmation",
-          sendDates: [DateTime.now().minus({ days: 15 }).toJSDate()],
-        },
-      ],
-    });
-    await resendConfirmationEmails(resendEmail, { username: siret });
-  } else if (options.resend === "activation") {
-    let { siret } = await generateCfaAndVoeux({
-      statut: "confirmé",
-      emails: [
-        {
-          token: "TOKEN-1",
-          templateName: "confirmation",
-          sendDates: [DateTime.now().minus({ days: 20 }).toJSDate()],
-          messageIds: ["messageId"],
-        },
-        {
-          token: "TOKEN-2",
-          templateName: "activation_cfa",
-          sendDates: [DateTime.now().minus({ days: 15 }).toJSDate()],
-        },
-      ],
-    });
-    await resendActivationEmails(resendEmail, { username: siret });
-  } else if (options.resend === "notification") {
-    let { siret } = await generateCfaAndVoeux({
-      statut: "activé",
-      password: "fake",
-      emails: [
-        {
-          token: "TOKEN-1",
-          templateName: "confirmation",
-          sendDates: [DateTime.now().minus({ days: 30 }).toJSDate()],
-          messageIds: ["messageId"],
-        },
-        {
-          token: "TOKEN-2",
-          templateName: "activation_cfa",
-          sendDates: [DateTime.now().minus({ days: 20 }).toJSDate()],
-        },
-        {
-          token: "TOKEN-2",
-          templateName: "notification",
-          sendDates: [DateTime.now().minus({ days: 10 }).toJSDate()],
-        },
-      ],
-    });
-    await resendNotificationEmails(resendEmail, { username: siret });
-  } else {
-    await generateCfaAndVoeux();
-    await sendConfirmationEmails(sendEmail);
-
-    await generateUser(sendEmail);
+  if (options.admin) {
+    await generateAdmin(sendEmail);
   }
+
+  await generateCfaAndVoeux();
+  await sendConfirmationEmails(sendEmail);
 }
 
 module.exports = { injectDataset };
