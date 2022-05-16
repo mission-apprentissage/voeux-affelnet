@@ -278,6 +278,7 @@ function Cfas() {
                   <Table.ColHeader>Statut</Table.ColHeader>
                   <Table.ColHeader>Email</Table.ColHeader>
                   <Table.ColHeader>Voeux</Table.ColHeader>
+                  <Table.ColHeader>Etablissements</Table.ColHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -303,6 +304,7 @@ function Cfas() {
                               : "Pas encore téléchargé"
                             : "Pas de voeux"}
                         </Table.Col>
+                        <Table.Col>{cfa.etablissements.map((e) => e.uai).join(", ")}</Table.Col>
                       </Table.Row>
                     );
                   })

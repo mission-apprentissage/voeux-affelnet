@@ -38,7 +38,7 @@ async function generateVoeux(uais) {
 }
 
 async function generateCfaAndVoeux(cfa) {
-  const uais = [createUAI(faker.helpers.replaceSymbols("075####")), createUAI(faker.helpers.replaceSymbols("075####"))];
+  const uais = range(0, 2).map(() => createUAI(faker.helpers.replaceSymbols("075####")));
   await generateCfa(uais, cfa);
   await generateVoeux(uais);
 }

@@ -62,9 +62,18 @@ const schema = new Schema({
 });
 
 schema.index(
-  { siret: "text", raison_sociale: "text", "academie.nom": "text", email: "text", statut: "text" },
+  {
+    siret: "text",
+    raison_sociale: "text",
+    "academie.nom": "text",
+    email: "text",
+    statut: "text",
+    "etablissements.uai": "text",
+  },
   { default_language: "french" }
 );
+
+schema.index({ "etablissements.uai": 1 });
 
 const Cfa = User.discriminator("Cfa", schema);
 
