@@ -10,7 +10,7 @@ describe("emails", () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248W" });
 
-    await sendEmail(user, "activation");
+    await sendEmail(user, "activation_user");
 
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
@@ -24,7 +24,7 @@ describe("emails", () => {
     assert.strictEqual(found.emails[0].messageIds.length, 1);
     assert.ok(found.emails[0].messageIds[0].indexOf("-") !== -1);
     assert.ok(found.emails[0].token);
-    assert.strictEqual(found.emails[0].templateName, "activation");
+    assert.strictEqual(found.emails[0].templateName, "activation_user");
   });
 
   it("Vérifie qu'on peut renvoyer un email", async () => {
@@ -35,7 +35,7 @@ describe("emails", () => {
       emails: [
         {
           token: "TOKEN1",
-          templateName: "activation",
+          templateName: "activation_user",
           to: "test@apprentissage.beta.gouv.fr",
           sendDates: [new Date()],
         },
@@ -59,8 +59,8 @@ describe("emails", () => {
     const user1 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
     const user2 = await insertCfa({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
 
-    await sendEmail(user1, "activation");
-    await sendEmail(user2, "activation");
+    await sendEmail(user1, "activation_user");
+    await sendEmail(user2, "activation_user");
 
     const results = await User.find({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.strictEqual(results.length, 2);
@@ -73,7 +73,7 @@ describe("emails", () => {
     const { sendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
 
     try {
-      await sendEmail(user, "activation");
+      await sendEmail(user, "activation_user");
       assert.fail();
     } catch (e) {
       const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
@@ -93,7 +93,7 @@ describe("emails", () => {
       emails: [
         {
           token: "TOKEN1",
-          templateName: "activation",
+          templateName: "activation_user",
           to: "test@apprentissage.beta.gouv.fr",
           sendDates: [new Date()],
           error: {

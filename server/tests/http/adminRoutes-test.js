@@ -91,7 +91,7 @@ describe("adminRoutes", () => {
       emails: [
         {
           token: "TOKEN1",
-          templateName: "activation",
+          templateName: "activation_user",
           to: "test@apprentissage.beta.gouv.fr",
           sendDates: [new Date()],
           error: {

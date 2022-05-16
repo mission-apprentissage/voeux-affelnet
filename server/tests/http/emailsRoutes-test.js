@@ -7,7 +7,7 @@ describe("emailsRoute", () => {
   it("Vérifie qu'on peut prévisualier un email", async () => {
     const { httpClient, sendEmail } = await startServer();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await sendEmail(user, "activation");
+    const token = await sendEmail(user, "activation_user");
 
     const response = await httpClient.get(`/api/emails/${token}/preview`);
 
@@ -26,7 +26,7 @@ describe("emailsRoute", () => {
   it("Vérifie qu'on peut marquer un email comme ouvert", async () => {
     const { httpClient, sendEmail } = await startServer();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await sendEmail(user, "activation");
+    const token = await sendEmail(user, "activation_user");
 
     const response = await httpClient.get(`/api/emails/${token}/markAsOpened`);
 
@@ -37,7 +37,7 @@ describe("emailsRoute", () => {
   it("Vérifie qu'un utilisateur peut se désinscrire du service", async () => {
     const { httpClient, sendEmail } = await startServer();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
-    const token = await sendEmail(user, "activation");
+    const token = await sendEmail(user, "activation_user");
 
     const response = await httpClient.get(`/api/emails/${token}/unsubscribe`);
 
@@ -62,7 +62,7 @@ describe("emailsRoute", () => {
       emails: [
         {
           token: "TOKEN1",
-          templateName: "activation",
+          templateName: "activation_user",
           to: "test@apprentissage.beta.gouv.fr",
           sendDates: [new Date()],
           messageIds: ["60ae479632bd2611ce1bfd54@domain.com"],
@@ -103,7 +103,7 @@ describe("emailsRoute", () => {
       emails: [
         {
           token: "TOKEN1",
-          templateName: "activation",
+          templateName: "activation_user",
           to: "test@apprentissage.beta.gouv.fr",
           sendDates: [new Date()],
           messageIds: ["60ae479632bd2611ce1bfd54@domain.com"],

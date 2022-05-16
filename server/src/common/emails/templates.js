@@ -30,11 +30,11 @@ module.exports = {
       },
     };
   },
-  activation: (user, token, options = {}) => {
+  activation_user: (user, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Activation de votre compte`,
-      templateFile: getTemplateFile("activation"),
+      templateFile: getTemplateFile("activation_user"),
       data: {
         user,
         token,

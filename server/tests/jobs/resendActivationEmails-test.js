@@ -17,7 +17,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
         },
       ],
@@ -28,7 +28,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [DateTime.now().minus({ days: 2 }).toJSDate()],
         },
       ],
@@ -77,7 +77,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [DateTime.now().minus({ days: 4 }).toJSDate(), DateTime.now().minus({ days: 1 }).toJSDate()],
         },
       ],
@@ -119,7 +119,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [
             DateTime.now().minus({ days: 10 }).toJSDate(),
             DateTime.now().minus({ days: 9 }).toJSDate(),
@@ -169,7 +169,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [
             DateTime.now().minus({ days: 10 }).toJSDate(),
             DateTime.now().minus({ days: 9 }).toJSDate(),
@@ -193,7 +193,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [new Date()],
           error: {
             type: "fatal",
@@ -208,7 +208,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [new Date()],
           error: {
             type: "hard_bounce",
@@ -231,7 +231,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
         },
       ],
@@ -243,7 +243,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
         },
       ],
@@ -264,7 +264,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
           error: {
             type: "soft_bounce",
@@ -289,7 +289,7 @@ describe("resendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
         },
       ],

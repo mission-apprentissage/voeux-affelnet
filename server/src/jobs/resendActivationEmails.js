@@ -49,7 +49,7 @@ async function resendActivationEmails(resendEmail, options = {}) {
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
     .eachAsync(async (user) => {
-      const previous = user.emails.find((e) => e.templateName.startsWith("activation"));
+      const previous = user.emails.find((e) => e.templateName.startsWith("activation_"));
 
       try {
         logger.info(`Resending activation to user ${user.username}...`);

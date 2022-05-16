@@ -7,7 +7,7 @@ async function sendActivationEmails(sendEmail, options = {}) {
     unsubscribe: false,
     password: { $exists: false },
     statut: "confirmé",
-    "emails.templateName": { $nin: ["activation", "activation_cfa"] },
+    "emails.templateName": { $nin: ["activation_user", "activation_cfa"] },
     $or: [{ type: "Cfa", "etablissements.voeux_date": { $exists: true } }, { type: { $exists: false } }],
     ...(options.username ? { username: options.username } : {}),
   };
@@ -20,7 +20,7 @@ async function sendActivationEmails(sendEmail, options = {}) {
     .cursor()
     .eachAsync(async (user) => {
       try {
-        const templateName = user.type === "Cfa" ? "activation_cfa" : "activation";
+        const templateName = user.type === "Cfa" ? "activation_cfa" : "activation_user";
         logger.info(`Sending ${templateName} to user ${user.username}...`);
         await sendEmail(user, templateName);
         stats.sent++;

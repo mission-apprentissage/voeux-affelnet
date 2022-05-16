@@ -25,7 +25,7 @@ describe("sendActivationEmails", () => {
     const stats = await sendActivationEmails(sendEmail);
 
     const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
-    assert.deepStrictEqual(found.emails[0].templateName, "activation");
+    assert.deepStrictEqual(found.emails[0].templateName, "activation_user");
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 2);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
@@ -90,7 +90,7 @@ describe("sendActivationEmails", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation",
+          templateName: "activation_user",
           sendDates: [new Date()],
         },
       ],
@@ -145,7 +145,7 @@ describe("sendActivationEmails", () => {
       assert.fail();
     } catch (e) {
       const found = await User.findOne({ email: "test1@apprentissage.beta.gouv.fr" }).lean();
-      const activation = found.emails.find((e) => e.templateName === "activation");
+      const activation = found.emails.find((e) => e.templateName === "activation_user");
       assert.ok(activation);
       assert.deepStrictEqual(activation.error, {
         type: "fatal",
