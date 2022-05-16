@@ -8,7 +8,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
   const query = {
     unsubscribe: false,
     statut: "en attente",
-    ...(options.siret ? { siret: options.siret } : {}),
+    ...(options.username ? { username: options.username } : {}),
     ...(options.retry
       ? {
           emails: {

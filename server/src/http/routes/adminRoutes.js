@@ -91,7 +91,7 @@ module.exports = ({ resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      const stats = await resendConfirmationEmails(resendEmail, { siret });
+      const stats = await resendConfirmationEmails(resendEmail, { username: siret });
 
       return res.json(stats);
     })

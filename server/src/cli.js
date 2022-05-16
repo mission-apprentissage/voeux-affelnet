@@ -32,6 +32,15 @@ process.stdout.on("error", function (err) {
 });
 
 cli
+  .command("importMefs")
+  .description("Importe les referentiels de données")
+  .action(() => {
+    runScript(() => {
+      return importMefs();
+    });
+  });
+
+cli
   .command("importCfas <cfaCsv>")
   .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
   .option(
@@ -58,22 +67,13 @@ cli
 
 cli
   .command("resendConfirmationEmails")
-  .option("--uai <uai>", "Permet d'envoyer l'email à un seul CFA")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul CFA")
   .option("--retry", "Renvoie les emails en erreur", false)
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--max <max>", "Nombre de relances maximum", parseInt)
   .action((options) => {
     runScript(({ sender }) => {
       return resendConfirmationEmails(sender, options);
-    });
-  });
-
-cli
-  .command("importMefs")
-  .description("Importe les referentiels de données")
-  .action(() => {
-    runScript(() => {
-      return importMefs();
     });
   });
 
