@@ -69,8 +69,8 @@ function ActivationPage() {
                   </Card.Header>
                   <Card.Body>
                     <p>
-                      Afin d’accéder au service de téléchargement des voeux en apprentissage exprimés via AFFELNET, nous
-                      vous prions d'activer votre compte en créant un mot de passe.
+                      Afin d’accéder au service de téléchargement des listes de vœux exprimés via Affelnet, nous vous
+                      prions d’activer votre compte en créant un mot de passe.
                     </p>
                     <Formik
                       initialValues={{

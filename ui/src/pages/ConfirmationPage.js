@@ -14,21 +14,21 @@ import { asTablerInputError } from "../common/utils/tablerReactUtils";
 function ServerErrorMessage() {
   return (
     <Alert type="danger">
-      Une erreur est survenue, merci de prendre contact avec un administrateur en précisant votre numéro UAI via :
+      Une erreur est survenue, merci de prendre contact avec un administrateur en précisant votre siret via :
       <br />
       <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
     </Alert>
   );
 }
 
-function StatusErrorMessage({ error, uai }) {
+function StatusErrorMessage({ error, username }) {
   if (error) {
     if (error.statusCode === 401) {
       return (
         <Alert type={"danger"}>
           <p>
-            Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur votre numéro UAI ({uai}) via
-            :&nbsp;
+            Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre numéro
+            Siret ({username}) via : :&nbsp;
             <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
           </p>
         </Alert>
@@ -39,11 +39,11 @@ function StatusErrorMessage({ error, uai }) {
           <p>Une personne de votre structure a déjà confirmé une adresse email.</p>
           <p>
             Un email vous permettant d'activer votre compte vous sera envoyé à cette adresse à reception de voeux pour
-            votre établissement {uai}
+            votre établissement {username}
           </p>
           <p>
-            Pour plus d'informations, merci de prendre contact avec un administrateur en précisant votre numéro UAI (
-            {uai}) via :&nbsp;
+            Pour plus d'informations, merci de prendre contact avec un administrateur en précisant votre SIRET (
+            {username}) via :&nbsp;
             <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
           </p>
         </Alert>
@@ -57,8 +57,8 @@ function StatusErrorMessage({ error, uai }) {
 function ConfirmationPage() {
   const location = useLocation();
   const { actionToken } = queryString.parse(location.search);
-  const uai = decodeJWT(actionToken).sub;
-  const [data, loading, statusError] = useFetch(`/api/confirmation/status?uai=${uai}&token=${actionToken}`);
+  const username = decodeJWT(actionToken).sub;
+  const [data, loading, statusError] = useFetch(`/api/confirmation/status?username=${username}&token=${actionToken}`);
   const [message, setMessage] = useState();
 
   const accept = async (values) => {
@@ -68,8 +68,20 @@ function ConfirmationPage() {
         <Alert type="info">
           <p>Merci, nous avons pris en compte votre confirmation</p>
           <p>
-            Un email vous permettant d'activer votre compte vous sera envoyé à cette adresse à reception de voeux pour
-            votre établissement {uai}
+            La transmission de listes de vœux s’effectuera en 3 temps : dans la semaine du 6 juin, dans la semaine du 20
+            juin et dans la semaine du 4 juillet. Des courriels seront envoyés à chacune de ces dates à l’adresse
+            indiquée, uniquement si des vœux sont exprimés sur votre établissement et/ou l’un des établissements dont
+            vous avez la charge.
+          </p>
+          <p>Le premier courriel invitera à définir un mot de passe pour accès à l’espace de téléchargement.</p>
+          <p>
+            Si votre établissement est responsable d’autres établissements d’accueil, la connexion au compte permettra
+            de télécharger les listes pour chaque établissement sur lesquels des vœux ont été exprimés.
+          </p>
+          <p>
+            Pour toute question, vous pouvez prendre contact contact avec un administrateur en précisant votre numéro
+            Siret ({username}) via :
+            <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
           </p>
         </Alert>
       );
@@ -87,14 +99,14 @@ function ConfirmationPage() {
         <Page.Content title="Voeux Affelnet">
           <Grid.Row>
             <MiddleCenteredCol>
-              <StatusErrorMessage error={statusError} uai={uai} />
+              <StatusErrorMessage error={statusError} username={username} />
               {message}
               {loading && <div>En cours de chargement...</div>}
               {showForm && (
                 <Card>
                   <Card.Header>
                     <Card.Title>
-                      Confirmation de l'email pour le compte <strong>{uai}</strong>
+                      Confirmation de l'email pour le compte <strong>{username}</strong>
                     </Card.Title>
                   </Card.Header>
                   <Card.Body>
@@ -111,10 +123,12 @@ function ConfirmationPage() {
                         return (
                           <Form>
                             <p>
-                              Afin d’accéder au service de téléchargement des voeux en apprentissage exprimés via
-                              AFFELNET, merci de confirmer l’adresse email qui correspond à la
-                              <strong> direction</strong> de votre établissement à laquelle les vœux formulés pourront
-                              être transmis
+                              Afin d’accéder au téléchargement des vœux en apprentissage exprimés via Affelnet, veuillez
+                              confirmer l’adresse courriel du directeur général de votre établissement ({username})
+                            </p>
+                            <p>
+                              Cette étape est indispensable pour vous permettre de recevoir les listes de vœux qui
+                              seront diffusées à partir de la semaine du 6 juin.
                             </p>
                             <TablerForm.Group label="Email">
                               <Field name="email">
@@ -131,8 +145,19 @@ function ConfirmationPage() {
                               </Field>
                             </TablerForm.Group>
                             <Button color="primary" className="text-left" type={"submit"}>
-                              Confirmer l'email pour l'établissement {uai}
+                              Confirmer l'email pour l'établissement {username}
                             </Button>
+                            <p className={"mt-4"}>
+                              <i>
+                                L’
+                                <a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000035274717/2020-11-09/">
+                                  arrêté du 17 juillet 2017
+                                </a>
+                                , au 7e alinéa de l’article 4, précise que seuls les directeurs des centres de formation
+                                d'apprentis sont habilités à recevoir les données transmises mentionnées à l’article 3
+                                de ce même arrêté.
+                              </i>
+                            </p>
                             {status.error && <ErrorMessage>{status.error}</ErrorMessage>}
                           </Form>
                         );

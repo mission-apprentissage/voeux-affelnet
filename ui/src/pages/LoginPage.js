@@ -66,7 +66,7 @@ function LoginPage() {
                               {({ field, meta }) => {
                                 return (
                                   <TablerForm.Input
-                                    placeholder="Votre identifiant (UAI)..."
+                                    placeholder="Votre identifiant (Siret)..."
                                     {...field}
                                     {...feedback(meta, "Identifiant invalide")}
                                   />

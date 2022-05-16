@@ -57,7 +57,7 @@ function ForgottenPasswordPage() {
                     {({ status = {} }) => {
                       return (
                         <Form>
-                          <TablerForm.Group label="Identifiant (UAI)">
+                          <TablerForm.Group label="Identifiant (siret)">
                             <Field name="username">
                               {({ field, meta }) => {
                                 return (
@@ -87,7 +87,7 @@ function ForgottenPasswordPage() {
           <Grid.Row>
             <CenteredCol>
               <Alert type={"info"}>
-                <p>L'UAI figure dans l'objet du mail que vous avez précédemment reçu.</p>
+                <p>Le siret figure dans l'objet du mail que vous avez précédemment reçu.</p>
               </Alert>
             </CenteredCol>
           </Grid.Row>
