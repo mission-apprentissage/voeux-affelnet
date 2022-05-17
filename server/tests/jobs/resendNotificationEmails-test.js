@@ -3,7 +3,7 @@ const { DateTime } = require("luxon");
 const { insertCfa } = require("../utils/fakeData");
 const resendNotificationEmails = require("../../src/jobs/resendNotificationEmails");
 const { createTestContext } = require("../utils/testUtils");
-const emailActions = require("../../src/common/actions/emailActions");
+const createEmailActions = require("../../src/common/actions/createEmailActions");
 const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../src/common/model");
 
@@ -246,7 +246,7 @@ describe("resendNotificationEmails", () => {
   });
 
   it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
-    const { resendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
+    const { resendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
     await insertCfa({

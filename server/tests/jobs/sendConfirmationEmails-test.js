@@ -2,7 +2,7 @@ const assert = require("assert");
 const { insertCfa } = require("../utils/fakeData");
 const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");
 const { createTestContext } = require("../utils/testUtils");
-const emailActions = require("../../src/common/actions/emailActions");
+const createEmailActions = require("../../src/common/actions/createEmailActions");
 const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../src/common/model");
 
@@ -83,7 +83,7 @@ describe("sendConfirmationEmails", () => {
   });
 
   it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
-    const { sendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
+    const { sendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
     await insertCfa({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
     await insertCfa({
       email: "test1@apprentissage.beta.gouv.fr",

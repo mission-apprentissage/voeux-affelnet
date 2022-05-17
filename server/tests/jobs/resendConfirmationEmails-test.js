@@ -3,7 +3,7 @@ const { insertCfa } = require("../utils/fakeData");
 const { DateTime } = require("luxon");
 const resendConfirmationEmails = require("../../src/jobs/resendConfirmationEmails");
 const { createTestContext } = require("../utils/testUtils");
-const emailActions = require("../../src/common/actions/emailActions");
+const createEmailActions = require("../../src/common/actions/createEmailActions");
 const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../src/common/model");
 
@@ -290,7 +290,7 @@ describe("resendConfirmationEmails", () => {
   });
 
   it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
-    const { resendEmail } = emailActions({ mailer: createFakeMailer({ fail: true }) });
+    const { resendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
     await insertCfa({
       siret: "11111111100006",
       statut: "en attente",

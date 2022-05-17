@@ -1,7 +1,7 @@
-const emailActions = require("./common/actions/emailActions");
+const createEmailActions = require("./common/actions/createEmailActions");
 
 module.exports = async (options = {}) => {
   return {
-    ...emailActions(options),
+    ...createEmailActions(options),
   };
 };

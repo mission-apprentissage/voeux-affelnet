@@ -2,7 +2,7 @@ const server = require("../../src/http/server");
 // eslint-disable-next-line node/no-unpublished-require
 const axiosist = require("axiosist");
 const { createFakeMailer } = require("./fakeMailer");
-const emailActions = require("../../src/common/actions/emailActions");
+const createEmailActions = require("../../src/common/actions/createEmailActions");
 const { User, Cfa } = require("../../src/common/model");
 const { insertCfa, insertUser } = require("./fakeData");
 const { activateUser } = require("../../src/common/actions/activateUser");
@@ -43,7 +43,7 @@ function createTestContext() {
   const mailer = createFakeMailer({ calls: emailsSents });
 
   return {
-    ...emailActions({ mailer }),
+    ...createEmailActions({ mailer }),
     getEmailsSent: () => emailsSents,
   };
 }
