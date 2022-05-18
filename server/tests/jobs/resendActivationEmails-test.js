@@ -299,6 +299,32 @@ describe("resendActivationEmails", () => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
   });
 
+  it("Vérifie qu'on peut forcer le renvoi d'un email pour un utilisateur sans tenir compte de la dernière relance", async () => {
+    const { resendEmail, getEmailsSent } = createTestContext();
+    await insertUser({
+      username: "user1",
+      statut: "confirmé",
+      email: "test1@apprentissage.beta.gouv.fr",
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "activation_user",
+          sendDates: [DateTime.now().minus({ days: 1 }).toJSDate()],
+          error: {
+            type: "soft_bounce",
+            message: "Impossible d'envoyer l'email",
+          },
+        },
+      ],
+    });
+
+    await resendActivationEmails(resendEmail, { username: "user1" });
+
+    const sent = getEmailsSent();
+    assert.strictEqual(sent.length, 1);
+    assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
+  });
+
   it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     const { resendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
     await insertUser({ email: "test0@apprentissage.beta.gouv.fr", statut: "confirmé" });
