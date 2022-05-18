@@ -30,6 +30,15 @@ module.exports = {
       },
     };
   },
+  confirmation_accepted: (cfa) => {
+    return {
+      subject: `Vœux Affelnet : l'adresse du directeur de l'établissement a bien été enregistrée`,
+      templateFile: getTemplateFile("confirmation_accepted"),
+      data: {
+        cfa,
+      },
+    };
+  },
   activation_user: (user, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
