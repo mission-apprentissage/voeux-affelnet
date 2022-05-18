@@ -40,38 +40,6 @@ describe("resendConfirmationEmails", () => {
     });
   });
 
-  it("Vérifie qu'on envoie une relance spécifique quand le cfa a des voeux", async () => {
-    const { resendEmail, getEmailsSent } = createTestContext();
-    await insertCfa({
-      siret: "11111111100006",
-      statut: "en attente",
-      etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
-      email: "test1@apprentissage.beta.gouv.fr",
-      emails: [
-        {
-          token: "TOKEN",
-          templateName: "confirmation",
-          sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
-        },
-      ],
-    });
-
-    const stats = await resendConfirmationEmails(resendEmail);
-
-    const sent = getEmailsSent();
-    assert.strictEqual(sent.length, 1);
-    assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(
-      sent[0].subject,
-      "[Rappel] Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
-    );
-    assert.deepStrictEqual(stats, {
-      total: 1,
-      sent: 1,
-      failed: 0,
-    });
-  });
-
   it("Vérifie qu'on ne renvoie pas d'email en erreur", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
@@ -273,6 +241,32 @@ describe("resendConfirmationEmails", () => {
           token: "TOKEN",
           templateName: "confirmation",
           sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
+        },
+      ],
+    });
+
+    const stats = await resendConfirmationEmails(resendEmail, { username: "11111111100006" });
+
+    const sent = getEmailsSent();
+    assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
+    assert.strictEqual(sent.length, 1);
+    assert.deepStrictEqual(stats, {
+      total: 1,
+      sent: 1,
+      failed: 0,
+    });
+  });
+
+  it("Vérifie qu'on peut renvoyer un email à un CFA sans tenir compte de la dernière relance", async () => {
+    const { resendEmail, getEmailsSent } = createTestContext();
+    await insertCfa({
+      username: "11111111100006",
+      email: "test1@apprentissage.beta.gouv.fr",
+      emails: [
+        {
+          token: "TOKEN",
+          templateName: "confirmation",
+          sendDates: [DateTime.now().minus({ days: 1 }).toJSDate()],
         },
       ],
     });

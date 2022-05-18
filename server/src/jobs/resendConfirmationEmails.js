@@ -22,7 +22,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
           emails: {
             $elemMatch: {
               templateName: /^confirmation.*/,
-              ...(options.siret
+              ...(options.username
                 ? {}
                 : {
                     error: { $exists: false },
