@@ -88,6 +88,15 @@ const User = model(
           }),
         ],
       },
+      _meta: {
+        default: {},
+        type: nested({
+          countConfirmationLinkClick: {
+            type: Number,
+            // default: 0,
+          },
+        }),
+      },
     },
     { discriminatorKey: "type" }
   ),

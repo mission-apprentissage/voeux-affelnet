@@ -88,9 +88,15 @@ describe("confirmationRoutes", () => {
 
     assert.strictEqual(response.status, 200);
     const emailsSent = getEmailsSent();
-    assert.strictEqual(emailsSent.length, 1);
+    assert.strictEqual(emailsSent.length, 2);
     assert.strictEqual(emailsSent[0].to, "11111111100006@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)");
+    assert.strictEqual(
+      emailsSent[0].subject,
+      "Vœux Affelnet : l'adresse du directeur de l'établissement a bien été enregistrée"
+    );
+
+    assert.strictEqual(emailsSent[1].to, "11111111100006@apprentissage.beta.gouv.fr");
+    assert.strictEqual(emailsSent[1].subject, "Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)");
   });
 
   it("Vérifie qu'une erreur est retourné quand le token est invalide", async () => {
