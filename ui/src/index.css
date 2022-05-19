@@ -40,3 +40,11 @@ code {
   /* Fix tabler-react padding on first table column */
   padding-left: 11px;
 }
+
+
+.popup-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+[data-popup='tooltip'].popup-overlay {
+  background: transparent;
+}
