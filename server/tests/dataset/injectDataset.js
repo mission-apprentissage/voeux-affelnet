@@ -48,8 +48,10 @@ async function generateCfaAndVoeux(cfa) {
 }
 
 async function generateAdmin(sendEmail) {
-  await createUser(faker.internet.userName(), faker.internet.email(), { admin: true });
-  await sendActivationEmails(sendEmail);
+  const username = faker.internet.userName();
+
+  await createUser(username, faker.internet.email(), { admin: true });
+  await sendActivationEmails(sendEmail, { username });
 }
 
 async function injectDataset(actions, options = {}) {
@@ -63,8 +65,8 @@ async function injectDataset(actions, options = {}) {
     await generateAdmin(sendEmail);
   }
 
-  await generateCfaAndVoeux();
-  await sendConfirmationEmails(sendEmail);
+  let { siret } = await generateCfaAndVoeux();
+  await sendConfirmationEmails(sendEmail, { username: siret });
 }
 
 module.exports = { injectDataset };
