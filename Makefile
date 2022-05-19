@@ -12,7 +12,7 @@ clean:
 	docker-compose down
 
 dataset:
-	docker exec voeux_affelnet_server yarn --silent --cwd server cli db	injectDataset
+	docker exec voeux_affelnet_server yarn --silent --cwd server cli injectDataset
 
 hooks:
 	git config core.hooksPath misc/git-hooks

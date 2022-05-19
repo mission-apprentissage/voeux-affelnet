@@ -43,6 +43,7 @@ describe("importCfas", () => {
       isAdmin: false,
       statut: "en attente",
       unsubscribe: false,
+      _meta: {},
     });
     assert.deepStrictEqual(stats, { total: 1, created: 1, updated: 0, invalid: 0, failed: 0 });
   });

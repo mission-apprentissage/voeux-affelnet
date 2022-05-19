@@ -1,0 +1,34 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text> Madame, Monsieur, </mj-text>
+
+          Madame, Monsieur,
+
+          <mj-text>
+            L'adresse courriel pour la réception des listes de vœux a bien été confirmée suite à une action de votre
+            part, nous vous en remercions.
+          </mj-text>
+          <mj-text> Email confirmé : <%= data.cfa.email %> </mj-text>
+          <mj-text>
+            C’est à cette adresse que les listes de vœux seront transmises, à partir de la semaine du 6 juin.
+          </mj-text>
+
+          <mj-text font-size="12px" font-style="italic">
+            Nous vous rappelons que l’arrêté du 17 juillet 2017, au 7e alinéa de l’article 4, précise que seuls les
+            directeurs des centres de formation d'apprentis sont habilités à recevoir les données transmises mentionnées
+            à l’article 3 de ce même arrêté.
+          </mj-text>
+
+          <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>
