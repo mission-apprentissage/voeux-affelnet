@@ -9,7 +9,7 @@ const PaginationPosition = styled.span`
   padding-right: 0.5rem;
 `;
 
-function Pagination({ pagination, onClick = noop }) {
+export function Pagination({ pagination, onClick = noop }) {
   return (
     <Button.List>
       <Button size="sm" onClick={() => onClick(pagination.page - 1)} disabled={pagination.page === 1}>
