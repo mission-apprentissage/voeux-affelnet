@@ -223,7 +223,7 @@ cli
       let output = out || writeToStdout();
       let catalogueApi = new CatalogueApi();
 
-      const getEmailFormateurFromUai = async (uai) => {
+      const getEmailsFormateurFromUai = async (uai) => {
         const result = await catalogueApi.getFormations(
           {
             published: true,
@@ -247,7 +247,7 @@ cli
       return await oleoduc(
         Cfa.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
         transformData((etablissement) => etablissement.uai),
-        transformData(async (uai) => await getEmailFormateurFromUai(uai)),
+        transformData(async (uai) => await getEmailsFormateurFromUai(uai)),
         flattenArray(),
         filterData((email) => !!email && email.length),
         transformData(
