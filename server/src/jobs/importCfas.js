@@ -25,7 +25,7 @@ async function importCfas(cfaCsv, options = {}) {
     failed: 0,
   };
 
-  const relations = await loadRelations(options.relationsCsv);
+  const relations = await loadRelations(options.relations);
 
   await oleoduc(
     cfaCsv,
