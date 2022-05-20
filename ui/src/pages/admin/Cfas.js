@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Button, Dropdown, Card, Form as TablerForm, Grid, Table, Icon } from "tabler-react";
-import Pagination from "../../common/components/Pagination";
+import { Pagination } from "../../common/components/Pagination";
 import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 import SuccessMessage from "../../common/components/SuccessMessage";
 import ErrorMessage from "../../common/components/ErrorMessage";
 import { _get, _put } from "../../common/httpClient";
 import * as queryString from "query-string";
+import Popup from "reactjs-popup";
 
 function showError(meta, options = {}) {
   if (!meta.touched || !meta.error) {
@@ -190,6 +191,38 @@ function Statut({ cfa }) {
   );
 }
 
+function Cfa({ cfa }) {
+  return (
+    <Card title={`CFA ${cfa.siret}`}>
+      <ul style={{ margin: "16px", listStyle: "none", paddingInlineStart: 0, maxWidth: "80vw" }}>
+        <li>
+          <b>Siret: </b> {cfa.siret}
+        </li>
+        <li>
+          <b>Statut: </b> {cfa.statut}
+        </li>
+        <li>
+          <b>Email: </b> {cfa.email}
+        </li>
+        <li>
+          <b>Voeux: </b>{" "}
+          {cfa.etablissements?.find((e) => e.voeux_date)
+            ? cfa.voeux_telechargements[0]
+              ? "Voeux téléchargés"
+              : "Pas encore téléchargé"
+            : "Pas de voeux"}
+        </li>
+        <li>
+          <b>Anciens emails: </b> {cfa.anciens_emails?.map((ancien_email) => ancien_email.email).join(", ")}
+        </li>
+        <li>
+          <b>Etablissements: </b> {cfa.etablissements?.map((e) => e.uai).join(", ")}
+        </li>
+      </ul>
+    </Card>
+  );
+}
+
 function Cfas() {
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
@@ -278,8 +311,7 @@ function Cfas() {
                   <Table.ColHeader>Statut</Table.ColHeader>
                   <Table.ColHeader>Email</Table.ColHeader>
                   <Table.ColHeader>Voeux</Table.ColHeader>
-                  <Table.ColHeader>Etablissements</Table.ColHeader>
-                  <Table.ColHeader>Emails</Table.ColHeader>
+                  <Table.ColHeader></Table.ColHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -305,8 +337,11 @@ function Cfas() {
                               : "Pas encore téléchargé"
                             : "Pas de voeux"}
                         </Table.Col>
-                        <Table.Col>{cfa.etablissements.map((e) => e.uai).join(", ")}</Table.Col>
-                        <Table.Col>{cfa.anciens_emails.join(", ")}</Table.Col>
+                        <Table.Col>
+                          <Popup trigger={<Button size="sm">Voir le détail</Button>} modal nested>
+                            <Cfa cfa={cfa} />
+                          </Popup>
+                        </Table.Col>
                       </Table.Row>
                     );
                   })
