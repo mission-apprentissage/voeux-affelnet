@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { program: cli } = require("commander");
-const { writeToStdout } = require("oleoduc");
+const { oleoduc, transformData, filterData, transformIntoCSV, writeToStdout, flattenArray } = require("oleoduc");
+const { Readable } = require("stream");
 const { createReadStream, createWriteStream } = require("fs");
 const { runScript } = require("./jobs/utils/runScript");
 const logger = require("./common/logger");
@@ -21,6 +22,8 @@ const createUser = require("./jobs/createUser");
 const { DateTime } = require("luxon");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
+const Cfa = require("./common/model/Cfa");
+const CatalogueApi = require("./common/api/CatalogueApi");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -209,6 +212,84 @@ cli
   .action((options) => {
     runScript((actions) => {
       return injectDataset(actions, options);
+    });
+  });
+
+cli
+  .command("getFormateurEmails")
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action(({ out }) => {
+    runScript(async () => {
+      let output = out || writeToStdout();
+      let catalogueApi = new CatalogueApi();
+
+      const getEmailFormateurFromUai = async (uai) => {
+        const result = await catalogueApi.getFormations(
+          {
+            published: true,
+            etablissement_formateur_uai: uai,
+          },
+          {
+            limit: 250,
+            select: {
+              etablissement_formateur_courriel: 1,
+            },
+          }
+        );
+
+        return [
+          ...new Set(
+            result.formations?.flatMap((formation) => formation.etablissement_formateur_courriel?.split("##"))
+          ),
+        ].filter((courriel) => !!courriel);
+      };
+
+      return await oleoduc(
+        Cfa.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
+        transformData((etablissement) => etablissement.uai),
+        transformData(async (uai) => await getEmailFormateurFromUai(uai)),
+        flattenArray(),
+        filterData((email) => !!email && email.length),
+        transformData(
+          async (email) => {
+            return {
+              email,
+            };
+          },
+          { parallel: 10 }
+        ),
+        transformIntoCSV(),
+        output
+      );
+    });
+  });
+
+cli
+  .command("getGestionnaireEmails")
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action(({ out }) => {
+    runScript(async () => {
+      let output = out || writeToStdout();
+
+      // Récupération des adresses emails des CFAs gestionnaires
+      const etablissement_gestionnaire_emails = await Cfa.distinct("email");
+
+      const source = Readable.from(etablissement_gestionnaire_emails);
+
+      return oleoduc(
+        source,
+
+        transformData(
+          async (email) => {
+            return {
+              email,
+            };
+          },
+          { parallel: 10 }
+        ),
+        transformIntoCSV(),
+        output
+      );
     });
   });
 
