@@ -44,7 +44,7 @@ cli
   .command("importCfas <cfaCsv>")
   .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
   .option(
-    "--relations <relationsCsv>",
+    "--relations <csv>",
     "Le csv contenant la liste des uai d'accueil et leur siret gestionnaire :" + "'uai,siret_gestionnaire'",
     createReadStream
   )
