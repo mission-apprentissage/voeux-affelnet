@@ -11,6 +11,7 @@ import PreviewEmail from "./pages/PreviewEmail";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import StatsPage from "./pages/StatsPage";
 import AdminPage from "./pages/AdminPage";
+import RelationPage from "./pages/RelationPage";
 
 function PrivateRoute({ children, ...rest }) {
   const [auth] = useAuth();
@@ -44,6 +45,7 @@ function App() {
           <Route exact path="/activation" component={ActivationPage} />
           <Route exact path="/confirmation" component={ConfirmationPage} />
           <Route exact path="/stats" component={StatsPage} />
+          <Route exact path="/reception-voeux" component={RelationPage} />
           <Route exact path="/reset-password" component={ResetPasswordPage} />
           <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
           <Route exact path="/emails/:token/preview" component={PreviewEmail} />
