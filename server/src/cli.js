@@ -15,6 +15,7 @@ const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
 const importCfas = require("./jobs/importCfas");
+const importUfas = require("./jobs/importUfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
 const exportCfasInconnus = require("./jobs/exportCfasInconnus");
@@ -56,6 +57,17 @@ cli
       const input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
 
       return importCfas(input, options);
+    });
+  });
+
+cli
+  .command("importUfas [<ufaCsv>]")
+  .description("Importe les UFA depuis le fichier transmis par Affelnet")
+  .action((ufaCsv) => {
+    runScript(() => {
+      const input = ufaCsv ? createReadStream(ufaCsv) : null;
+
+      return importUfas(input);
     });
   });
 
