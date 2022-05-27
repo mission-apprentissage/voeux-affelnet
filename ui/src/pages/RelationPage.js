@@ -130,13 +130,9 @@ function RelationPage() {
                       </React.Fragment>
                     ))}
 
-                  {/*
-
-  Et une fois le siret entré on restitue les UAI établissements d'accueil avec les informations suivantes :
-  LIBELLE_TYPE_ETABLISSEMENT|	LIBELLE_ETABLISSEMENT	| ADRESSE |	CP |	COMMUNE
-
-  Si Siret non trouvé :
-  [message à rédiger + tard] */}
+                  {/* TODO :
+                    Si Siret non trouvé :
+                    [message à rédiger + tard] */}
                 </Card.Body>
               </Card>
             </Grid.Col>
@@ -226,19 +222,14 @@ function RelationPage() {
                       </React.Fragment>
                     ))}
 
-                  {/*
+                  {/* TODO :
+                    Si on pouvait avoir un second encart dans lequel on indique à ce moment-là et selon le cas :
 
-Et une fois l’UAI ou libellé saisi on restitue le siret du responsable avec les informations suivantes :
-SIRET | UAI | RAISON SOCIALE | ENSEIGNE | ADRESSE | CP |	COMMUNE | MAIL |STATUT
-
-Si on pouvait avoir un second encart dans lequel on indique à ce moment-là et selon le cas :
-
-
-1/ Cet UAI n’est pas référencé sur le service en ligne Affelnet pour la campagne 2022, n’hésitez pas à vous rapprocher de votre Carif-Oref pour déclarer votre offre de formation
-2/ À ce stade aucun vœu n’a été exprimé pour cet établissement d'accueil. La transmission de listes de vœux s’effectuera en 3 temps : dans la semaine du 6 juin, dans la semaine du 20 juin et dans la semaine du 4 juillet. M, merci pour votre patience
-3/ Des vœux ont été téléchargés pour votre UAI établissement d'accueil par l’organisme  responsable (Siret : {Siret}), le {JJ/MM/AAAA}.
-C’est l’établissement responsable qui est chargé de vous transmettre la liste correspondant à votre établissement. Vous pouvez vous rapprocher de votre établissement responsable pour vous assurer que la liste vous sera bien transmise dans les meilleurs délais. nous vous invitons à le contacter afin que cette liste puisse vous être transmise
-4/ Des vœux sont disponibles pour téléchargement par l’établissement responsable (Siret : {Siret}), depuis le JJ/MM/AAAA. Vous pouvez vous rapprocher de votre établissement responsable pour vous assurer que la liste vous sera bien transmise dans les meilleurs délaisun délai raisonnable., nous vous invitons à le contacter afin qu’il puisse entamer les démarches nécessaires (confirmation mail et activation de compte) et que cette liste puisse vous être transmise */}
+                    1/ Cet UAI n’est pas référencé sur le service en ligne Affelnet pour la campagne 2022, n’hésitez pas à vous rapprocher de votre Carif-Oref pour déclarer votre offre de formation
+                    2/ À ce stade aucun vœu n’a été exprimé pour cet établissement d'accueil. La transmission de listes de vœux s’effectuera en 3 temps : dans la semaine du 6 juin, dans la semaine du 20 juin et dans la semaine du 4 juillet. M, merci pour votre patience
+                    3/ Des vœux ont été téléchargés pour votre UAI établissement d'accueil par l’organisme  responsable (Siret : {Siret}), le {JJ/MM/AAAA}.
+                    C’est l’établissement responsable qui est chargé de vous transmettre la liste correspondant à votre établissement. Vous pouvez vous rapprocher de votre établissement responsable pour vous assurer que la liste vous sera bien transmise dans les meilleurs délais. nous vous invitons à le contacter afin que cette liste puisse vous être transmise
+                    4/ Des vœux sont disponibles pour téléchargement par l’établissement responsable (Siret : {Siret}), depuis le JJ/MM/AAAA. Vous pouvez vous rapprocher de votre établissement responsable pour vous assurer que la liste vous sera bien transmise dans les meilleurs délaisun délai raisonnable., nous vous invitons à le contacter afin qu’il puisse entamer les démarches nécessaires (confirmation mail et activation de compte) et que cette liste puisse vous être transmise */}
                 </Card.Body>
               </Card>
             </Grid.Col>
