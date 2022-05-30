@@ -373,7 +373,7 @@ describe("adminRoutes", () => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      "[Rappel] Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
+      "[Rappel] Affelnet apprentissage – Information requise pour la transmission des vœux 2022 (Siret : 11111111100006)"
     );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
@@ -445,10 +445,7 @@ describe("adminRoutes", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(
-      sent[0].subject,
-      "[Rappel] Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)"
-    );
+    assert.deepStrictEqual(sent[0].subject, "[Rappel] Des vœux Affelnet sont téléchargeables (Siret : 11111111100006)");
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
       total: 1,

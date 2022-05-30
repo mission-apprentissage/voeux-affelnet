@@ -31,7 +31,7 @@ describe("sendConfirmationEmails", () => {
     assert.ok(sent[1].html.indexOf("Madame, Monsieur,") !== -1);
     assert.strictEqual(
       sent[0].subject,
-      "Affelnet apprentissage – Information requise pour la transmission des voeux 2022 (Siret : 11111111100006)"
+      "Affelnet apprentissage – Information requise pour la transmission des vœux 2022 (Siret : 11111111100006)"
     );
     assert.deepStrictEqual(stats, {
       total: 2,

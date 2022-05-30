@@ -96,7 +96,7 @@ describe("confirmationRoutes", () => {
     );
 
     assert.strictEqual(emailsSent[1].to, "11111111100006@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[1].subject, "Des voeux Affelnet sont téléchargeables (Siret : 11111111100006)");
+    assert.strictEqual(emailsSent[1].subject, "Des vœux Affelnet sont téléchargeables (Siret : 11111111100006)");
   });
 
   it("Vérifie qu'une erreur est retourné quand le token est invalide", async () => {
