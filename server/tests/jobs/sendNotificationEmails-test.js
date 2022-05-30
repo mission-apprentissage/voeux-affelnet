@@ -8,7 +8,7 @@ const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../src/common/model");
 
 describe("sendNotificationEmails", () => {
-  it("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux voeux", async () => {
+  it("Vérifie qu'on envoie un email de notifications quand il y a de nouveaux vœux", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
@@ -31,7 +31,7 @@ describe("sendNotificationEmails", () => {
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].subject, "De nouveaux voeux Affelnet sont téléchargeables");
+    assert.deepStrictEqual(sent[0].subject, "De nouveaux vœux Affelnet sont téléchargeables");
     assert.deepStrictEqual(stats, {
       total: 1,
       sent: 1,

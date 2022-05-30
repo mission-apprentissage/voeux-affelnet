@@ -237,7 +237,7 @@ describe("resendNotificationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].subject, "De nouveaux voeux Affelnet sont téléchargeables");
+    assert.deepStrictEqual(sent[0].subject, "De nouveaux vœux Affelnet sont téléchargeables");
     assert.deepStrictEqual(stats, {
       total: 1,
       sent: 1,
