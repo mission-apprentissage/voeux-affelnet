@@ -74,7 +74,11 @@ function RelationPage() {
                                 return (
                                   <TablerForm.Input
                                     type={"text"}
+<<<<<<< HEAD
                                     placeholder="Rechercher un siret, une raison sociale du responsable"
+=======
+                                    placeholder="Rechercher un siret, une raison sociale, un UAI du responsable"
+>>>>>>> 627720d975506d6139a82dc8c0633c19d2cb252b
                                     {...field}
                                     {...asTablerInputError(meta)}
                                   />

@@ -21,7 +21,7 @@ const fakeReferentielApi = new FakeReferentielApi([
 describe("importCfas", () => {
   it("Vérifie qu'on peut importer un cfa", async () => {
     const cfaCsv = createStream(`siret;email\n11111111100006;contact@lycee.fr`);
-    const relations = createStream(`uai_etablissement_accueil;siret_gestionnaire\n0751234J;11111111100006`);
+    const relations = createStream(`uai;siret_uai_gestionnaire\n0751234J;11111111100006`);
 
     const stats = await importCfas(cfaCsv, {
       relations,
@@ -50,7 +50,7 @@ describe("importCfas", () => {
 
   it("Vérifie si le cfa a des voeux", async () => {
     const cfaCsv = createStream(`siret;email\n11111111100006;contact@lycee.fr`);
-    const relations = createStream(`uai_etablissement_accueil;siret_gestionnaire\n0751234J;11111111100006`);
+    const relations = createStream(`uai;siret_uai_gestionnaire\n0751234J;11111111100006`);
     const date = new Date();
     await insertVoeu({
       etablissement_accueil: {
@@ -72,7 +72,7 @@ describe("importCfas", () => {
 
   it("Vérifie qu'on peut ignorer les cfas invalides (pas d'emails)", async () => {
     const cfaCsv = createStream(`siret;email\n11111111100006;`);
-    const relations = createStream(`uai_etablissement_accueil;siret_gestionnaire\n0751234J;11111111100006`);
+    const relations = createStream(`uai;siret_uai_gestionnaire\n0751234J;11111111100006`);
 
     const stats = await importCfas(cfaCsv, {
       relations,
@@ -86,7 +86,7 @@ describe("importCfas", () => {
 
   it("Vérifie qu'on peut mettre à jour uniquement certaines des informations", async () => {
     await importCfas(createStream(`siret;email\n11111111100006;contact@lycee.fr`), {
-      relations: createStream(`uai_etablissement_accueil;siret_gestionnaire\n0751234J;11111111100006`),
+      relations: createStream(`uai;siret_uai_gestionnaire\n0751234J;11111111100006`),
       referentielApi: fakeReferentielApi,
     });
 
@@ -103,7 +103,7 @@ describe("importCfas", () => {
           },
         },
       ]),
-      relations: createStream(`uai_etablissement_accueil;siret_gestionnaire
+      relations: createStream(`uai;siret_uai_gestionnaire
 0751234J;11111111100006
 0757890U;11111111100006
 `),
@@ -121,7 +121,7 @@ describe("importCfas", () => {
 
   it("Vérifie qu'on gère les relations dupliquées", async () => {
     const cfaCsv = createStream(`siret;email\n11111111100006;contact@lycee.fr`);
-    const relations = createStream(`uai_etablissement_accueil;siret_gestionnaire
+    const relations = createStream(`uai;siret_uai_gestionnaire
 0751234J;11111111100006
 0751234J;11111111100006
 `);
@@ -143,7 +143,7 @@ describe("importCfas", () => {
           throw new Error("Erreur durant l'import");
         },
       },
-      relations: createStream(`uai_etablissement_accueil;siret_gestionnaire\n0751234J;11111111100006`),
+      relations: createStream(`uai;siret_uai_gestionnaire\n0751234J;11111111100006`),
     };
 
     const stats = await importCfas(cfaCsv, options);
@@ -155,7 +155,7 @@ describe("importCfas", () => {
 
   it("Vérifie qu'on rejete un CFA sans établissements", async () => {
     const cfaCsv = createStream(`siret;email\n11111111100006;contact@lycee.fr`);
-    const relations = createStream(`uai_etablissement_accueil;siret_gestionnaire`);
+    const relations = createStream(`uai;siret_uai_gestionnaire`);
 
     const stats = await importCfas(cfaCsv, {
       relations,

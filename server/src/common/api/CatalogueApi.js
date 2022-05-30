@@ -49,6 +49,14 @@ class CatalogueApi extends RateLimitedApi {
       return fetchJson(`${CatalogueApi.baseApiUrl}/entity/etablissements?${params}`);
     });
   }
+
+  async getEtablissement(query, options) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching etablissement...`, query);
+      const params = convertQueryIntoParams(query, options);
+      return fetchJson(`${CatalogueApi.baseApiUrl}/entity/etablissement?${params}`);
+    });
+  }
 }
 
 module.exports = CatalogueApi;
