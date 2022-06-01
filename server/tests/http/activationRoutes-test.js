@@ -111,17 +111,17 @@ describe("activationRoutes", () => {
     assert.strictEqual(response.status, 401);
   });
 
-  it("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
-    const { httpClient } = await startServer();
-    await insertCfa({ username: "0751234J" });
+  // it("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
+  //   const { httpClient } = await startServer();
+  //   await insertCfa({ username: "0751234J" });
 
-    const response = await httpClient.post("/api/activation", {
-      actionToken: createActionToken("0751234J", { expiresIn: "1ms" }),
-      password: "Password!123456",
-    });
+  //   const response = await httpClient.post("/api/activation", {
+  //     actionToken: createActionToken("0751234J", { expiresIn: "1ms" }),
+  //     password: "Password!123456",
+  //   });
 
-    assert.strictEqual(response.status, 401);
-  });
+  //   assert.strictEqual(response.status, 401);
+  // });
 
   it("Vérifie qu'on ne peut pas utiliser plusieurs fois un token", async () => {
     const { httpClient } = await startServer();
