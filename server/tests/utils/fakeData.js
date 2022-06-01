@@ -1,6 +1,6 @@
 const faker = require("faker");
 const { merge } = require("lodash");
-const { Cfa, Voeu, User, Mef, Log } = require("../../src/common/model");
+const { Cfa, Ufa, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 
 module.exports = {
@@ -30,6 +30,22 @@ module.exports = {
           emails: [],
           raison_sociale: faker.company.companyName(),
           academie: { code: "11", nom: "Île-de-France" },
+        },
+        custom
+      )
+    );
+  },
+  insertUfa: (custom = {}) => {
+    return Ufa.create(
+      merge(
+        {},
+        {
+          uai: custom.uai,
+          libelle_type_etablissement: faker.company.companySuffix(),
+          libelle_etablissement: faker.company.companyName(),
+          adresse: faker.address.streetName(),
+          cp: faker.address.zipCode(),
+          commune: faker.address.cityName(),
         },
         custom
       )

@@ -7,6 +7,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { validate } = require("../utils/validators");
 const { markVoeuxAsDownloaded } = require("../../common/actions/markVoeuxAsDownloaded");
 const { voeuxCsvStream } = require("../../common/voeuxCsvStream");
+const { Ufa } = require("../../common/model");
 
 module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -24,20 +25,25 @@ module.exports = ({ users }) => {
       }
 
       res.json(
-        cfa.etablissements.map((etablissement) => {
-          const telechargements = cfa.voeux_telechargements
-            .filter((t) => t.uai === etablissement.uai && t.date >= etablissement.voeux_date)
-            .sort((a, b) => {
-              return a - b;
-            });
+        await Promise.all(
+          cfa.etablissements.map(async (etablissement) => {
+            const telechargements = cfa.voeux_telechargements
+              .filter((t) => t.uai === etablissement.uai && t.date >= etablissement.voeux_date)
+              .sort((a, b) => {
+                return a - b;
+              });
 
-          return {
-            //voeux
-            name: `${etablissement.uai}.csv`,
-            date: etablissement.voeux_date,
-            lastDownloadDate: telechargements[0]?.date || null,
-          };
-        })
+            const ufa = await Ufa.findOne({ uai: etablissement.uai });
+
+            return {
+              //voeux
+              name: `${etablissement.uai}.csv`,
+              date: etablissement.voeux_date,
+              etablissement: ufa,
+              lastDownloadDate: telechargements[0]?.date || null,
+            };
+          })
+        )
       );
     })
   );

@@ -5,8 +5,13 @@ const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");
 const sendActivationEmails = require("../../src/jobs/sendActivationEmails");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 const importMefs = require("../../src/jobs/importMefs");
-const { insertCfa, insertVoeu } = require("../utils/fakeData");
+const { insertCfa, insertUfa, insertVoeu } = require("../utils/fakeData");
 const { range } = require("lodash");
+
+async function generateUfas(uais) {
+  const stats = uais.map(async (uai) => await insertUfa({ uai }));
+  await JobEvent.create({ job: "importUfas", stats });
+}
 
 async function generateCfa(uais, custom = {}) {
   const stats = await insertCfa({
@@ -42,6 +47,7 @@ async function generateCfaAndVoeux(cfa) {
     ...cfa,
     siret,
   });
+  await generateUfas(uais);
   await generateVoeux(uais);
 
   return { siret, uais };
