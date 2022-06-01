@@ -24,15 +24,15 @@ function FichiersPage() {
                     d'accueil des futurs apprentis.
                   </p>
                   <p>
-                    En cas de nouvelle émission de vœux sur votre établissement ou sur les établissements d’accueil dont
+                    En cas de nouvelle transmission de vœux sur votre organisme ou sur les établissements d'accueil dont
                     vous êtes responsable, vous recevrez une notification par email la semaine du 20 juin 2022 puis la
                     semaine du 4 juillet 2022. Les nouveaux fichiers mis à votre disposition reprendront alors
                     l’intégralité des vœux exprimés jusqu’à ces dates.
                   </p>
                   <p>
                     Information importante : les établissements d’accueil ne sont pas habilités à accéder à cette page
-                    de téléchargement. Il est du ressort des responsables d’établissements d’accueil de leur transmettre
-                    les listes de vœux.
+                    de téléchargement. Il est du ressort des organismes responsable de transmettre la liste des vœux à
+                    leurs établissements d'accueil.
                   </p>
                   <ul>
                     <li>
@@ -48,9 +48,10 @@ function FichiersPage() {
                       <a href="/docs/03bis_Mode_Op_GESTI_Importation.pdf">Mode_Op_GESTI_Importation.pdf</a>
                     </li>
                     <li>
-                      Si votre établissement est responsable d’établissements d’accueil, chaque établissement doit
-                      procéder à cette intégration. Nous vous invitons à leur transmettre la notice correspondante s’ils
-                      sont concernés.
+                      Si votre organisme est responsable d'un ou plusieurs établissements d'accueil, nous vous suggérons
+                      le téléchargement et la transmission de cette notice en même temps que les vœux afin que les deux
+                      puissent être transmises aux établissements d'accueil concernés et qu'ils puissent réaliser cette
+                      intégration dans leur système d'information.
                     </li>
                   </ul>
                 </Card.Body>
