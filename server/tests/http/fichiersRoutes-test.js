@@ -23,6 +23,7 @@ describe("fichierRoutes", () => {
       {
         name: "0751234J.csv",
         date: "2021-06-02T14:00:00.000Z",
+        etablissement: null,
         lastDownloadDate: null,
       },
     ]);
@@ -102,6 +103,7 @@ describe("fichierRoutes", () => {
       {
         name: "0751234J.csv",
         date: "2021-06-02T14:00:00.000Z",
+        etablissement: null,
         lastDownloadDate: null,
       },
     ]);
@@ -131,6 +133,7 @@ describe("fichierRoutes", () => {
       {
         name: "0751234J.csv",
         date: "2021-06-02T14:00:00.000Z",
+        etablissement: null,
         lastDownloadDate: "2021-06-03T14:00:00.000Z",
       },
     ]);
