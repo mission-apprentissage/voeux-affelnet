@@ -67,25 +67,27 @@ function FichiersPage() {
                   {loading && <div>En cours de chargement...</div>}
                   <Table cards={true} striped={true} responsive={true} className="table-vcenter">
                     <Table.Header>
-                      <Table.ColHeader>Nom</Table.ColHeader>
+                      <Table.ColHeader>Nom du fichier</Table.ColHeader>
+                      <Table.ColHeader>Raison sociale de l'établissement</Table.ColHeader>
                       <Table.ColHeader>Date de mise à jour</Table.ColHeader>
                       <Table.ColHeader>Informations</Table.ColHeader>
                     </Table.Header>
                     <Table.Body>
-                      {fichiers.map(({ name, lastDownloadDate, date }) => {
+                      {fichiers.map(({ name, lastDownloadDate, date, etablissement }, index) => {
                         const link = buildLink(`/api/fichiers/${name}`);
 
                         const downloadDate = DateTime.fromISO(lastDownloadDate)
                           .setLocale("fr")
                           .toFormat("cccc dd LLLL yyyy à HH:mm");
                         return (
-                          <Table.Row key={name}>
+                          <Table.Row key={index}>
                             <Table.Col>
                               <a target={"_blank"} rel={"noopener noreferrer"} href={link}>
                                 <TablerIcon name="download" />
                                 <span>{name}</span>
                               </a>
                             </Table.Col>
+                            <Table.Col>{etablissement?.libelle_etablissement}</Table.Col>
                             <Table.Col>
                               <div>{DateTime.fromISO(date).setLocale("fr").toFormat("cccc dd LLLL yyyy à HH:mm")}</div>
                             </Table.Col>

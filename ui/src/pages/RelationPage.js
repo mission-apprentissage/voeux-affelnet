@@ -96,7 +96,7 @@ function RelationPage() {
                           </div>
                           {gestionnaireError && (
                             <ErrorMessage>
-                              L'établissement n'a pas été trouvé. Vous pouvez relancer un nouvelle recherche avec un
+                              L'établissement n'a pas été trouvé. Vous pouvez relancer une nouvelle recherche avec un
                               autre paramètre.
                             </ErrorMessage>
                           )}
@@ -202,7 +202,7 @@ function RelationPage() {
 
                           {formateurError && (
                             <ErrorMessage>
-                              L'établissement n'a pas été trouvé. Vous pouvez relancer un nouvelle recherche avec un
+                              L'établissement n'a pas été trouvé. Vous pouvez relancer une nouvelle recherche avec un
                               autre paramètre.
                             </ErrorMessage>
                           )}
