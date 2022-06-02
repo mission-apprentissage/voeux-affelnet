@@ -7,6 +7,7 @@ describe("academies", () => {
     const besancon = {
       code: "03",
       nom: "Besançon",
+      alias: "Besancon",
       departements: [
         {
           code: "70",
@@ -29,6 +30,10 @@ describe("academies", () => {
 
     assert.deepStrictEqual(findAcademieByName("Besançon"), besancon);
     assert.deepStrictEqual(findAcademieByName("UNKNOWN"), null);
+  });
+
+  it("Permet de trouver une académie avec son alias", () => {
+    assert.strictEqual(findAcademieByName("Caen (Normandie)").code, "70");
   });
 
   it("Permet de trouver une académie avec son code", () => {

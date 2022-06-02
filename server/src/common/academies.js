@@ -3,7 +3,7 @@ function findAcademieByName(name) {
     return null;
   }
 
-  const found = ACADEMIES.find((academie) => academie.nom === name);
+  const found = ACADEMIES.find((academie) => academie.nom === name || academie.alias === name);
 
   return found || null;
 }
@@ -59,6 +59,7 @@ const ACADEMIES = [
   {
     code: "03",
     nom: "Besançon",
+    alias: "Besancon",
     departements: [
       { code: "70", nom: "Haute-Saône" },
       { code: "90", nom: "Territoire de Belfort" },
@@ -139,6 +140,7 @@ const ACADEMIES = [
   {
     code: "12",
     nom: "Nancy-Metz",
+    alias: "Nancy",
     departements: [
       { code: "88", nom: "Vosges" },
       { code: "54", nom: "Meurthe-et-Moselle" },
@@ -202,6 +204,7 @@ const ACADEMIES = [
   {
     code: "18",
     nom: "Orléans-Tours",
+    alias: "Orleans",
     departements: [
       { code: "28", nom: "Eure-et-Loir" },
       { code: "36", nom: "Indre" },
@@ -250,6 +253,7 @@ const ACADEMIES = [
   {
     code: "24",
     nom: "Créteil",
+    alias: "Creteil",
     departements: [
       { code: "77", nom: "Seine-et-Marne" },
       { code: "93", nom: "Seine-Saint-Denis" },
@@ -275,7 +279,7 @@ const ACADEMIES = [
       { code: "2B", nom: "Haute-Corse" },
     ],
   },
-  { code: "28", nom: "La Réunion", departements: [{ code: "974", nom: "La Réunion" }] },
+  { code: "28", nom: "La Réunion", alias: "Reunion", departements: [{ code: "974", nom: "La Réunion" }] },
   { code: "31", nom: "Martinique", departements: [{ code: "972", nom: "Martinique" }] },
   { code: "32", nom: "Guadeloupe", departements: [{ code: "971", nom: "Guadeloupe" }] },
   { code: "33", nom: "Guyane", departements: [{ code: "973", nom: "Guyane" }] },
@@ -294,6 +298,7 @@ const ACADEMIES = [
   {
     code: "70",
     nom: "Normandie",
+    alias: "Caen (Normandie)",
     departements: [
       { code: "76", nom: "Seine-Maritime" },
       { code: "27", nom: "Eure" },
