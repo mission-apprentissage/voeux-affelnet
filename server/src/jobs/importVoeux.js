@@ -129,12 +129,12 @@ function parseVoeuxCsv(source) {
           libelle: line["Libellé formation"],
         },
         etablissement_origine: {
-          uai: line["Code UAI étab. origine"],
+          uai: line["Code UAI étab. origine"]?.toUpperCase(),
           nom: `${line["Type étab. origine"] || ""} ${line["Libellé étab. origine"] || ""}`.trim(),
           ville: line["Ville étab. origine"],
         },
         etablissement_accueil: {
-          uai: line["Code UAI étab. Accueil"],
+          uai: line["Code UAI étab. Accueil"]?.toUpperCase(),
           nom: `${line["Type étab. Accueil"] || ""} ${line["Libellé établissement Accueil"] || ""}`.trim(),
           ville: line["Ville étab. Accueil"],
         },
@@ -172,8 +172,8 @@ function hasAnomaliesOnMandatoryFields(anomalies) {
   );
 }
 
-function updateCfa(uai, importDate) {
-  return Cfa.updateOne(
+async function updateCfa(uai, importDate) {
+  const { matchedCount } = await Cfa.updateOne(
     { "etablissements.uai": uai },
     {
       $set: {
@@ -182,6 +182,12 @@ function updateCfa(uai, importDate) {
     },
     { runValidators: true }
   );
+
+  if (matchedCount === 0) {
+    logger.warn(`L'établissement d'accueil n'est pas connu dans la base des CFA ${uai}`);
+    return false;
+  }
+  return true;
 }
 
 async function importVoeux(voeuxCsvStream, options = {}) {
@@ -193,69 +199,87 @@ async function importVoeux(voeuxCsvStream, options = {}) {
     deleted: 0,
     updated: 0,
   };
+  const manquantes = [];
   const updatedFields = new Set();
   const importDate = options.importDate || new Date();
 
   await oleoduc(
     parseVoeuxCsv(voeuxCsvStream),
-    writeData(async (data) => {
-      stats.total++;
-
-      const anomalies = await validate(data);
-      if (hasAnomaliesOnMandatoryFields(anomalies)) {
-        logger.error(`Voeu invalide`, {
-          line: stats.total,
-          anomalies,
-        });
-        stats.invalid++;
-        return;
-      }
-
-      try {
-        const query = {
-          "academie.code": data.academie.code,
-          "apprenant.ine": data.apprenant.ine,
-          "formation.code_affelnet": data.formation.code_affelnet,
-        };
-        const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
-        const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
-
-        const res = await Voeu.replaceOne(
-          query,
-          {
-            ...data,
-            _meta: {
-              anomalies: anomalies,
-              import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
-            },
-          },
-          { upsert: true }
-        );
-
-        if (res.upsertedCount) {
-          logger.info(`Voeu ajouté`, {
-            query,
-            etablissement_accueil: data.etablissement_accueil.uai,
-          });
-          stats.created++;
-        }
-
-        if (!isEmpty(differences)) {
-          if (res.modifiedCount) {
-            stats.updated++;
-            Object.keys(differences).forEach((key) => updatedFields.add(key));
+    writeData(
+      async (data) => {
+        stats.total++;
+        try {
+          const anomalies = await validate(data);
+          if (hasAnomaliesOnMandatoryFields(anomalies)) {
+            logger.error(`Voeu invalide`, {
+              line: stats.total,
+              "apprenant.ine": data.apprenant?.ine,
+              "formation.code_affelnet": data.formation?.code_affelnet,
+              anomalies,
+            });
+            stats.invalid++;
+            return;
           }
-          await updateCfa(data.etablissement_accueil.uai, importDate);
+
+          const query = {
+            "academie.code": data.academie.code,
+            "apprenant.ine": data.apprenant.ine,
+            "formation.code_affelnet": data.formation.code_affelnet,
+          };
+          const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
+          const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
+          const etablissementAccueilUAI = data.etablissement_accueil.uai;
+
+          const res = await Voeu.replaceOne(
+            query,
+            {
+              ...data,
+              _meta: {
+                anomalies: anomalies,
+                import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
+              },
+            },
+            { upsert: true }
+          );
+
+          if (res.upsertedCount) {
+            logger.info(`Voeu ajouté`, {
+              query,
+              etablissement_accueil: etablissementAccueilUAI,
+            });
+            stats.created++;
+          }
+
+          if (!isEmpty(differences)) {
+            if (res.modifiedCount) {
+              stats.updated++;
+              Object.keys(differences).forEach((key) => updatedFields.add(key));
+            }
+
+            const exists = await updateCfa(etablissementAccueilUAI, importDate, stats);
+            if (!exists && !manquantes.find((m) => m.uai === etablissementAccueilUAI)) {
+              manquantes.push({ uai: etablissementAccueilUAI, academie: data.academie.nom });
+            }
+          }
+        } catch (e) {
+          logger.error(`Import du voeu impossible`, stats.total, e);
+          stats.failed++;
         }
-      } catch (e) {
-        logger.error(`Import du voeu impossible`, stats.total, e);
-        stats.failed++;
-      }
-    })
+      },
+      { parallel: 10 }
+    )
   );
 
   const { deletedCount } = await Voeu.deleteMany({ "_meta.import_dates": { $nin: [importDate] } });
   stats.deleted = deletedCount;
+
+  if (manquantes.length > 0) {
+    logger.warn(
+      `Certains établissements d'accueil des voeux ne sont pas présents dans la base CFA ${JSON.stringify(
+        uniqBy(manquantes, (m) => m.uai)
+      )}`
+    );
+  }
 
   return {
     ...stats,

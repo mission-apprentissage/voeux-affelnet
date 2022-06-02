@@ -119,9 +119,4 @@ schema.index(
   { name: "voeu_unique_identifier", unique: true }
 );
 
-schema.index(
-  { "apprenant.ine": 1, "etablissement_accueil.uai": 1, "formation.code_formation_diplome": 1 },
-  { name: "croisement_tdb", unique: true }
-);
-
 module.exports = model("Voeu", schema, "voeux");
