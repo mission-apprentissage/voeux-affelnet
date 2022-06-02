@@ -172,7 +172,7 @@ function hasAnomaliesOnMandatoryFields(anomalies) {
   );
 }
 
-async function updateCfa(uai, importDate, stats) {
+async function updateCfa(uai, importDate) {
   const { matchedCount } = await Cfa.updateOne(
     { "etablissements.uai": uai },
     {
@@ -185,8 +185,9 @@ async function updateCfa(uai, importDate, stats) {
 
   if (matchedCount === 0) {
     logger.warn(`L'établissement d'accueil n'est pas connu dans la base des CFA ${uai}`);
-    stats.orphans++;
+    return false;
   }
+  return true;
 }
 
 async function importVoeux(voeuxCsvStream, options = {}) {
@@ -197,8 +198,8 @@ async function importVoeux(voeuxCsvStream, options = {}) {
     failed: 0,
     deleted: 0,
     updated: 0,
-    orphans: 0,
   };
+  const manquantes = [];
   const updatedFields = new Set();
   const importDate = options.importDate || new Date();
 
@@ -227,6 +228,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
           };
           const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
           const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
+          const etablissementAccueilUAI = data.etablissement_accueil.uai;
 
           const res = await Voeu.replaceOne(
             query,
@@ -243,7 +245,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
           if (res.upsertedCount) {
             logger.info(`Voeu ajouté`, {
               query,
-              etablissement_accueil: data.etablissement_accueil.uai,
+              etablissement_accueil: etablissementAccueilUAI,
             });
             stats.created++;
           }
@@ -253,7 +255,11 @@ async function importVoeux(voeuxCsvStream, options = {}) {
               stats.updated++;
               Object.keys(differences).forEach((key) => updatedFields.add(key));
             }
-            await updateCfa(data.etablissement_accueil.uai, importDate, stats);
+
+            const exists = await updateCfa(etablissementAccueilUAI, importDate, stats);
+            if (!exists && !manquantes.find((m) => m.uai === etablissementAccueilUAI)) {
+              manquantes.push({ uai: etablissementAccueilUAI, academie: data.academie.nom });
+            }
           }
         } catch (e) {
           logger.error(`Import du voeu impossible`, stats.total, e);
@@ -266,6 +272,14 @@ async function importVoeux(voeuxCsvStream, options = {}) {
 
   const { deletedCount } = await Voeu.deleteMany({ "_meta.import_dates": { $nin: [importDate] } });
   stats.deleted = deletedCount;
+
+  if (manquantes.length > 0) {
+    logger.warn(
+      `Certains établissements d'accueil des voeux ne sont pas présents dans la base CFA ${JSON.stringify(
+        uniqBy(manquantes, (m) => m.uai)
+      )}`
+    );
+  }
 
   return {
     ...stats,

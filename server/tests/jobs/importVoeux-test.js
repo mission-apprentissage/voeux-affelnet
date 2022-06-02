@@ -71,7 +71,6 @@ describe("importVoeux", () => {
       invalid: 0,
       deleted: 0,
       failed: 0,
-      orphans: 2,
     });
   });
 
@@ -154,7 +153,6 @@ describe("importVoeux", () => {
       invalid: 0,
       deleted: 0,
       failed: 0,
-      orphans: 0,
     });
   });
 
@@ -214,7 +212,6 @@ describe("importVoeux", () => {
       invalid: 0,
       deleted: 1,
       failed: 0,
-      orphans: 0,
     });
   });
 
@@ -237,7 +234,6 @@ describe("importVoeux", () => {
       invalid: 1,
       deleted: 0,
       failed: 0,
-      orphans: 0,
     });
   });
 
@@ -260,7 +256,6 @@ describe("importVoeux", () => {
       invalid: 1,
       deleted: 0,
       failed: 0,
-      orphans: 0,
     });
   });
 
