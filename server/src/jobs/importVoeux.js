@@ -172,8 +172,8 @@ function hasAnomaliesOnMandatoryFields(anomalies) {
   );
 }
 
-function updateCfa(uai, importDate) {
-  return Cfa.updateOne(
+async function updateCfa(uai, importDate, stats) {
+  const { matchedCount } = await Cfa.updateOne(
     { "etablissements.uai": uai },
     {
       $set: {
@@ -182,6 +182,11 @@ function updateCfa(uai, importDate) {
     },
     { runValidators: true }
   );
+
+  if (matchedCount === 0) {
+    logger.warn(`L'établissement d'accueil n'est pas connu dans la base des CFA ${uai}`);
+    stats.orphans++;
+  }
 }
 
 async function importVoeux(voeuxCsvStream, options = {}) {
@@ -192,6 +197,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
     failed: 0,
     deleted: 0,
     updated: 0,
+    orphans: 0,
   };
   const updatedFields = new Set();
   const importDate = options.importDate || new Date();
@@ -200,18 +206,17 @@ async function importVoeux(voeuxCsvStream, options = {}) {
     parseVoeuxCsv(voeuxCsvStream),
     writeData(async (data) => {
       stats.total++;
-
-      const anomalies = await validate(data);
-      if (hasAnomaliesOnMandatoryFields(anomalies)) {
-        logger.error(`Voeu invalide`, {
-          line: stats.total,
-          anomalies,
-        });
-        stats.invalid++;
-        return;
-      }
-
       try {
+        const anomalies = await validate(data);
+        if (hasAnomaliesOnMandatoryFields(anomalies)) {
+          logger.error(`Voeu invalide`, {
+            line: stats.total,
+            anomalies,
+          });
+          stats.invalid++;
+          return;
+        }
+
         const query = {
           "academie.code": data.academie.code,
           "apprenant.ine": data.apprenant.ine,
@@ -245,7 +250,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
             stats.updated++;
             Object.keys(differences).forEach((key) => updatedFields.add(key));
           }
-          await updateCfa(data.etablissement_accueil.uai, importDate);
+          await updateCfa(data.etablissement_accueil.uai, importDate, stats);
         }
       } catch (e) {
         logger.error(`Import du voeu impossible`, stats.total, e);
