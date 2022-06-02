@@ -212,6 +212,8 @@ async function importVoeux(voeuxCsvStream, options = {}) {
           if (hasAnomaliesOnMandatoryFields(anomalies)) {
             logger.error(`Voeu invalide`, {
               line: stats.total,
+              "apprenant.ine": data.apprenant?.ine,
+              "formation.code_affelnet": data.formation?.code_affelnet,
               anomalies,
             });
             stats.invalid++;
