@@ -27,7 +27,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
                 : {
                     error: { $exists: false },
                     $and: [
-                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 7 }).toJSDate() } } },
+                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 3 }).toJSDate() } } },
                       { [`sendDates.${maxNbEmailsSent}`]: { $exists: false } },
                     ],
                   }),
