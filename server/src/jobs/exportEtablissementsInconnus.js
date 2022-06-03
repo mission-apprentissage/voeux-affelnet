@@ -41,16 +41,20 @@ async function exportEtablissementsInconnus(output, options = {}) {
       },
     ]).cursor(),
     transformData((data) => {
+      const isPresent = Object.values(relations)
+        .flatMap((v) => v)
+        .includes(data.uai);
+
+      const siretGestionnaire = Object.keys(relations).find((siret) => {
+        return relations[siret].find((uai) => uai === data.uai);
+      });
+
       return {
         ...data,
         ...(options.relations
           ? {
-              "Présents dans l'offre de formation AFFELNET": ouiNon(
-                Object.values(relations)
-                  .flatMap((v) => v)
-                  .includes(data.uai)
-              ),
-              "Siret gestionnaire inconnu dans l'offre de formation AFFELNET": ouiNon(relations[""].includes(data.uai)),
+              "Présents dans l'offre de formation AFFELNET": ouiNon(isPresent),
+              "Siret du gestionnaire dans l'offre de formation AFFELNET": siretGestionnaire,
             }
           : {}),
       };

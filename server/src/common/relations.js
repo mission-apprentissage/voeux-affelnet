@@ -4,6 +4,7 @@ const { parseCsv } = require("./utils/csvUtils");
 const { Voeu } = require("./model");
 const { isUAIValid } = require("./utils/validationUtils");
 const logger = require("./logger");
+const { isSiretValid } = require("./utils/validationUtils.js");
 
 const transformUfaStream = (data) => {
   return {
@@ -52,7 +53,7 @@ const transformUfaStream = (data) => {
 };
 
 async function getDefaultUfaStream() {
-  const stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-08-04-2022.csv");
+  const stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-02-05-2022.csv");
 
   return compose(stream, parseCsv(), transformData(transformUfaStream));
 }
@@ -65,7 +66,9 @@ async function loadRelations(csv) {
     stream,
     accumulateData(
       (acc, data) => {
-        const siret = data.siret_uai_gestionnaire;
+        let siret = data.siret_uai_gestionnaire;
+        siret = isSiretValid(siret) ? siret : "INCONNU";
+
         if (!acc[siret]) {
           acc[siret] = [];
         }
@@ -94,7 +97,7 @@ async function getEtablissements(siret, relations) {
 
   return Promise.all(
     uais.map(async (uai) => {
-      const voeu = await Voeu.findOne({ "etablissement_accueil.uai": { $in: uais } });
+      const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
       return {
         uai,
         ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
