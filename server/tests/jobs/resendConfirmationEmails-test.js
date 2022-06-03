@@ -8,7 +8,7 @@ const { createFakeMailer } = require("../utils/fakeMailer");
 const { User } = require("../../src/common/model");
 
 describe("resendConfirmationEmails", () => {
-  it("Vérifie qu'on envoie une relance 7 jours après le premier envoi", async () => {
+  it("Vérifie qu'on envoie une relance 3 jours après le premier envoi", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       siret: "11111111100006",
@@ -18,7 +18,7 @@ describe("resendConfirmationEmails", () => {
         {
           token: "TOKEN",
           templateName: "confirmation",
-          sendDates: [DateTime.now().minus({ days: 8 }).toJSDate()],
+          sendDates: [DateTime.now().minus({ days: 4 }).toJSDate()],
         },
       ],
     });
@@ -69,7 +69,7 @@ describe("resendConfirmationEmails", () => {
     });
   });
 
-  it("Vérifie qu'on attend avant 7 jours avant d'envoyer une nouvelle relance", async () => {
+  it("Vérifie qu'on attend avant 3 jours avant d'envoyer une nouvelle relance", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     await insertCfa({
       username: "11111111100006",
@@ -78,7 +78,7 @@ describe("resendConfirmationEmails", () => {
         {
           token: "TOKEN",
           templateName: "confirmation",
-          sendDates: [DateTime.now().minus({ days: 10 }).toJSDate(), DateTime.now().minus({ days: 3 }).toJSDate()],
+          sendDates: [DateTime.now().minus({ days: 4 }).toJSDate(), DateTime.now().minus({ days: 2 }).toJSDate()],
         },
       ],
     });

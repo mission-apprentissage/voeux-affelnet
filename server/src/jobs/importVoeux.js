@@ -256,10 +256,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
               Object.keys(differences).forEach((key) => updatedFields.add(key));
             }
 
-            const exists = await updateCfa(etablissementAccueilUAI, importDate, stats);
-            if (!exists && !manquantes.find((m) => m.uai === etablissementAccueilUAI)) {
-              manquantes.push({ uai: etablissementAccueilUAI, academie: data.academie.nom });
-            }
+            await updateCfa(etablissementAccueilUAI, importDate, stats);
           }
         } catch (e) {
           logger.error(`Import du voeu impossible`, stats.total, e);
