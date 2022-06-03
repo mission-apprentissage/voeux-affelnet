@@ -196,7 +196,7 @@ describe("adminRoutes", () => {
     );
   });
 
-  it("Vérifie qu'on peut exporter les établissements inconnus", async () => {
+  it.skip("Vérifie qu'on peut exporter les établissements inconnus", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertVoeu({
