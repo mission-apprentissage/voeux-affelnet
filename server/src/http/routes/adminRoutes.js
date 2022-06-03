@@ -10,7 +10,10 @@ const { getAcademies } = require("../../common/academies");
 const { paginate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
 const exportCfas = require("../../jobs/exportCfas");
-const exportEtablissementsInconnus = require("../../jobs/exportEtablissementsInconnus.js");
+const {
+  // exportEtablissementsInconnus,
+  exportEtablissementsInconnusWithCatalogueInfos,
+} = require("../../jobs/exportEtablissementsInconnus.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { changeEmail } = require("../../common/actions/changeEmail");
@@ -169,7 +172,9 @@ module.exports = ({ resendEmail }) => {
         token: Joi.string(),
       }).validateAsync(req.query, { abortEarly: false });
 
-      return exportEtablissementsInconnus(asCsvResponse("etablissements-inconnus", res), { relations });
+      return exportEtablissementsInconnusWithCatalogueInfos(asCsvResponse("etablissements-inconnus", res), {
+        relations,
+      });
     })
   );
 
