@@ -70,6 +70,7 @@ module.exports = () => {
     checkActionToken: () => {
       return jwtStrategy("passeport-jwt-action", {
         secretOrKey: config.auth.actionToken.jwtSecret,
+        ignoreExpiration: true, // Allow expired token to work.
         jwtFromRequest: ExtractJwt.fromExtractors([
           ExtractJwt.fromUrlQueryParameter("token"),
           ExtractJwt.fromBodyField("actionToken"),
