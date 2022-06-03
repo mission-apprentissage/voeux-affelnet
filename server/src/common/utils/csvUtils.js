@@ -9,6 +9,11 @@ function parseCsv(options = {}) {
   });
 }
 
+function ouiNon(v) {
+  return v ? "Oui" : "Non";
+}
+
 module.exports = {
   parseCsv,
+  ouiNon,
 };

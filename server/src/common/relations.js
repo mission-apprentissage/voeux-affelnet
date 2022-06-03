@@ -6,7 +6,6 @@ const { isUAIValid } = require("./utils/validationUtils");
 const logger = require("./logger");
 
 const transformUfaStream = (data) => {
-  console.log(data);
   return {
     uai: data["UAI"],
 

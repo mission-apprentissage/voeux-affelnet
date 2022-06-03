@@ -10,7 +10,7 @@ const { getAcademies } = require("../../common/academies");
 const { paginate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
 const exportCfas = require("../../jobs/exportCfas");
-const exportCfasInconnus = require("../../jobs/exportCfasInconnus");
+const exportEtablissementsInconnus = require("../../jobs/exportEtablissementsInconnus.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { changeEmail } = require("../../common/actions/changeEmail");
@@ -133,18 +133,9 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      exportCfas(asCsvResponse("cfas-injoinables", res), {
+      return exportCfas(asCsvResponse("cfas-injoinables", res), {
         filter: { $or: [{ "emails.error": { $exists: true } }, { unsubscribe: true }] },
       });
-    })
-  );
-
-  router.get(
-    "/api/admin/cfas/inconnus.csv",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      exportCfasInconnus(asCsvResponse("cfas-inconnus", res));
     })
   );
 
@@ -153,7 +144,7 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      exportCfas(asCsvResponse("cfas-relances", res), {
+      return exportCfas(asCsvResponse("cfas-relances", res), {
         filter: { statut: { $in: ["en attente", "confirmé"] }, "etablissements.voeux_date": { $exists: true } },
         columns: {
           statut: (data) => data.statut,
@@ -165,6 +156,20 @@ module.exports = ({ resendEmail }) => {
           },
         },
       });
+    })
+  );
+
+  router.get(
+    "/api/admin/etablissements/inconnus.csv",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { relations } = await Joi.object({
+        relations: Joi.boolean().default(true),
+        token: Joi.string(),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      return exportEtablissementsInconnus(asCsvResponse("etablissements-inconnus", res), { relations });
     })
   );
 
