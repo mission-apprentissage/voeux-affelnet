@@ -26,23 +26,25 @@ module.exports = ({ users }) => {
 
       res.json(
         await Promise.all(
-          cfa.etablissements.map(async (etablissement) => {
-            const telechargements = cfa.voeux_telechargements
-              .filter((t) => t.uai === etablissement.uai && t.date >= etablissement.voeux_date)
-              .sort((a, b) => {
-                return a - b;
-              });
+          cfa.etablissements
+            .filter((etablissement) => !!etablissement.voeux_date)
+            .map(async (etablissement) => {
+              const telechargements = cfa.voeux_telechargements
+                .filter((t) => t.uai === etablissement.uai && t.date >= etablissement.voeux_date)
+                .sort((a, b) => {
+                  return a - b;
+                });
 
-            const ufa = await Ufa.findOne({ uai: etablissement.uai });
+              const ufa = await Ufa.findOne({ uai: etablissement.uai });
 
-            return {
-              //voeux
-              name: `${etablissement.uai}.csv`,
-              date: etablissement.voeux_date,
-              etablissement: ufa,
-              lastDownloadDate: telechargements[0]?.date || null,
-            };
-          })
+              return {
+                //voeux
+                name: `${etablissement.uai}.csv`,
+                date: etablissement.voeux_date,
+                etablissement: ufa,
+                lastDownloadDate: telechargements[0]?.date || null,
+              };
+            })
         )
       );
     })
