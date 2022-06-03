@@ -34,8 +34,11 @@ function Exports() {
             <Table cards={true} striped={true} responsive={true} className="table-vcenter">
               <Table.Body>
                 <File name="CFA injoignables (csv)" link={buildLink(`/api/admin/cfas/injoinables.csv`)} />
-                <File name="CFA inconnus (csv)" link={buildLink(`/api/admin/cfas/inconnus.csv`)} />
                 <File name="CFA à relancer (csv)" link={buildLink(`/api/admin/cfas/relances.csv`)} />
+                <File
+                  name="Etablissements d'accueil inconnus (csv)"
+                  link={buildLink(`/api/admin/etablissements/inconnus.csv`)}
+                />
               </Table.Body>
             </Table>
           </Card.Body>
