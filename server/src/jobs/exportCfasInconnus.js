@@ -18,7 +18,7 @@ async function exportCfasInconnus(output) {
         $lookup: {
           from: "users",
           localField: "_id",
-          foreignField: "uai",
+          foreignField: "etablissements.uai",
           as: "cfas",
         },
       },
