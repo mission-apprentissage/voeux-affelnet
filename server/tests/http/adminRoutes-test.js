@@ -196,7 +196,7 @@ describe("adminRoutes", () => {
     );
   });
 
-  it("Vérifie qu'on peut exporter les cfas inconnus", async () => {
+  it("Vérifie qu'on peut exporter les établissements inconnus", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertVoeu({
@@ -207,7 +207,7 @@ describe("adminRoutes", () => {
       },
     });
 
-    const response = await httpClient.get("/api/admin/cfas/inconnus.csv", {
+    const response = await httpClient.get("/api/admin/etablissements/inconnus.csv?relations=false", {
       headers: {
         ...auth,
       },

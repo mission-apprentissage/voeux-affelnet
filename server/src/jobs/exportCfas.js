@@ -1,6 +1,7 @@
 const { Cfa } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
+const { ouiNon } = require("../common/utils/csvUtils.js");
 
 const errorMapper = {
   blocked: "Spam",
@@ -27,7 +28,7 @@ async function exportCfas(output, options = {}) {
           const error = data.unsubscribe ? "unsubscribe" : data.emails.find((e) => e.error)?.error?.type;
           return errorMapper[error];
         },
-        voeux: (data) => (data.etablissements.find((e) => e.voeux_date) ? "Oui" : "Non"),
+        voeux: (data) => ouiNon(data.etablissements.find((e) => e.voeux_date)),
         ...columns,
       },
     }),

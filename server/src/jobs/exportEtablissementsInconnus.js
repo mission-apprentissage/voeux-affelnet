@@ -1,8 +1,12 @@
 const { Voeu } = require("../common/model");
-const { oleoduc, transformIntoCSV } = require("oleoduc");
+const { oleoduc, transformIntoCSV, transformData } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
+const { loadRelations } = require("../common/relations.js");
+const { ouiNon } = require("../common/utils/csvUtils.js");
 
-async function exportCfasInconnus(output) {
+async function exportEtablissementsInconnus(output, options = {}) {
+  const relations = options.relations ? await loadRelations() : [];
+
   await oleoduc(
     Voeu.aggregate([
       {
@@ -36,6 +40,21 @@ async function exportCfasInconnus(output) {
         },
       },
     ]).cursor(),
+    transformData((data) => {
+      return {
+        ...data,
+        ...(options.relations
+          ? {
+              "Présents dans l'offre de formation AFFELNET": ouiNon(
+                Object.values(relations)
+                  .flatMap((v) => v)
+                  .includes(data.uai)
+              ),
+              "Siret gestionnaire inconnu dans l'offre de formation AFFELNET": ouiNon(relations[""].includes(data.uai)),
+            }
+          : {}),
+      };
+    }),
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
     }),
@@ -44,4 +63,4 @@ async function exportCfasInconnus(output) {
   );
 }
 
-module.exports = exportCfasInconnus;
+module.exports = exportEtablissementsInconnus;
