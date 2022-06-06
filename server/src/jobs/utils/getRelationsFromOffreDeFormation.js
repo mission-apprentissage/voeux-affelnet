@@ -2,7 +2,7 @@ const CatalogueApi = require("../../common/api/CatalogueApi.js");
 const ReferentielApi = require("../../common/api/ReferentielApi.js");
 const logger = require("../../common/logger.js");
 const { uniq } = require("lodash");
-const { compose, transformData } = require("oleoduc");
+const { compose, transformData, filterData } = require("oleoduc");
 const { Cfa } = require("../../common/model/index.js");
 const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
@@ -98,10 +98,32 @@ function catalogue() {
     },
   };
 }
+function filterConflicts(onConflict = () => ({})) {
+  const memo = [];
 
-async function parseOffreDeFormation(options = {}) {
+  return filterData((relation) => {
+    const { uai_etablissement, siret_gestionnaire, alternatives } = relation;
+    const hasConflicts = !siret_gestionnaire || alternatives?.sirets?.length > 1 || alternatives?.emails?.length > 1;
+    if (!hasConflicts) {
+      return true;
+    }
+
+    if (!memo.includes(uai_etablissement)) {
+      memo.push(uai_etablissement);
+      onConflict({
+        uai: uai_etablissement,
+        sirets: alternatives.sirets.join(","),
+        emails: alternatives.emails.join(","),
+      });
+    }
+    return false;
+  });
+}
+
+async function getRelationsFromOffreDeFormation(options = {}) {
   const { findEmailReferentiel, findSiretResponsableReferentiel } = referentiel();
   const { findFormations } = catalogue();
+  const { onConflict = () => ({}) } = options;
 
   async function searchSiretAndEmail(uai, cleMinistereEducation, siretGestionnaire) {
     const { formations, alternatives } = await findFormations(uai, cleMinistereEducation, siretGestionnaire);
@@ -161,8 +183,9 @@ async function parseOffreDeFormation(options = {}) {
         }
       },
       { parallel: 5 }
-    )
+    ),
+    filterConflicts(onConflict)
   );
 }
 
-module.exports = { parseOffreDeFormation };
+module.exports = { getRelationsFromOffreDeFormation };

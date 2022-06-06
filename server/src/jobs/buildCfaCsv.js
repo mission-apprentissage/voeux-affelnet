@@ -1,41 +1,21 @@
-const logger = require("../common/logger");
-const {
-  compose,
-  transformIntoCSV,
-  oleoduc,
-  accumulateData,
-  flattenArray,
-  mergeStreams,
-  filterData,
-} = require("oleoduc");
+const { compose, transformIntoCSV, oleoduc, accumulateData, flattenArray, mergeStreams } = require("oleoduc");
 const { uniq } = require("lodash");
-const { parseOffreDeFormation } = require("./parsers/parseOffreDeFormation.js");
+const { getRelationsFromOffreDeFormation } = require("./utils/getRelationsFromOffreDeFormation.js");
 const { parseCsv } = require("../common/utils/csvUtils.js");
+const { Cfa } = require("../common/model/index.js");
 
 function parseRelationsCsv(relationsCsv) {
   return compose(relationsCsv, parseCsv());
 }
 
-function filterConflicts(onConflict = () => ({})) {
-  const memo = [];
+async function getCfaStatut(siret, uai) {
+  const found = await Cfa.findOne({ siret });
 
-  return filterData((relation) => {
-    const { uai_etablissement, siret_gestionnaire, alternatives } = relation;
-    const hasConflicts = !siret_gestionnaire || alternatives?.sirets?.length > 1 || alternatives?.emails?.length > 1;
-    if (!hasConflicts) {
-      return true;
-    }
+  if (!found) {
+    return "absent";
+  }
 
-    if (!memo.includes(uai_etablissement)) {
-      memo.push(uai_etablissement);
-      onConflict({
-        uai: uai_etablissement,
-        sirets: alternatives.sirets.join(","),
-        emails: alternatives.emails.join(","),
-      });
-    }
-    return false;
-  });
+  return found.etablissements.find((e) => e.uai === uai) ? "présent" : "maj";
 }
 
 async function buildCfaCsv(output, options = {}) {
@@ -48,13 +28,13 @@ async function buildCfaCsv(output, options = {}) {
   };
 
   const streams = [
-    compose(
-      await parseOffreDeFormation(options),
-      filterConflicts((c) => {
+    await getRelationsFromOffreDeFormation({
+      ...options,
+      onConflict: (c) => {
         stats.conflicts++;
         return conflicts.push(c);
-      })
-    ),
+      },
+    }),
   ];
 
   if (options.relationsCsv) {
@@ -63,26 +43,25 @@ async function buildCfaCsv(output, options = {}) {
 
   await oleoduc(
     mergeStreams(...streams),
-    filterData(({ uai_etablissement, siret_gestionnaire, email_gestionnaire }) => {
-      if (!uai_etablissement || !siret_gestionnaire || !email_gestionnaire) {
-        stats.invalid++;
-        return false;
-      }
-      return true;
-    }),
     accumulateData(
-      (cfas, relation) => {
-        const { uai_etablissement, siret_gestionnaire, email_gestionnaire } = relation;
-        const index = cfas.findIndex((item) => item.siret === siret_gestionnaire);
+      async (cfas, relation) => {
+        if (!relation.uai_etablissement || !relation.siret_gestionnaire || !relation.email_gestionnaire) {
+          stats.invalid++;
+          return cfas;
+        }
+
+        const index = cfas.findIndex((item) => item.siret === relation.siret_gestionnaire);
 
         if (index === -1) {
-          if (!email_gestionnaire) {
-            logger.warn(`Email manquant pour le CFA ${siret_gestionnaire}`);
-          }
           stats.valid++;
-          cfas.push({ siret: siret_gestionnaire, email: email_gestionnaire, etablissements: [uai_etablissement] });
+          cfas.push({
+            siret: relation.siret_gestionnaire,
+            email: relation.email_gestionnaire,
+            etablissements: [relation.uai_etablissement],
+            statut: await getCfaStatut(relation.siret_gestionnaire, relation.uai_etablissement),
+          });
         } else {
-          cfas[index].etablissements = uniq([...cfas[index].etablissements, uai_etablissement]);
+          cfas[index].etablissements = uniq([...cfas[index].etablissements, relation.uai_etablissement]);
         }
         return cfas;
       },

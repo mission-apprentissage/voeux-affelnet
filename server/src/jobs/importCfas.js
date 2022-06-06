@@ -93,12 +93,12 @@ async function importCfas(cfaCsv, options = {}) {
 
           if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Le CFA ${siret} ajouté`);
+            logger.info(`CFA ${siret} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
-            logger.info(`Le CFA ${siret} mis à jour`);
+            logger.info(`CFA ${siret} mis à jour`);
           } else {
-            logger.trace(`Le CFA ${siret} déjà à jour`);
+            logger.trace(`CFA ${siret} déjà à jour`);
           }
         } catch (e) {
           stats.failed++;
