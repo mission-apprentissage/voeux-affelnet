@@ -1,7 +1,6 @@
 const { getFromStorage } = require("./utils/ovhUtils");
 const { oleoduc, writeData, accumulateData, compose, transformData } = require("oleoduc");
 const { parseCsv } = require("./utils/csvUtils");
-const { Voeu } = require("./model");
 const { isUAIValid } = require("./utils/validationUtils");
 const logger = require("./logger");
 const { isSiretValid } = require("./utils/validationUtils.js");
@@ -9,7 +8,6 @@ const { isSiretValid } = require("./utils/validationUtils.js");
 const transformUfaStream = (data) => {
   return {
     uai: data["UAI"],
-
     libelle_type_etablissement: data["LIBELLE_TYPE_ETABLISSEMENT"],
     libelle_etablissement: data["LIBELLE_ETABLISSEMENT"],
     adresse: data["ADRESSE"],
@@ -92,18 +90,4 @@ async function loadRelations(csv) {
   return relations;
 }
 
-async function getEtablissements(siret, relations) {
-  const uais = relations[siret] || [];
-
-  return Promise.all(
-    uais.map(async (uai) => {
-      const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
-      return {
-        uai,
-        ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
-      };
-    })
-  );
-}
-
-module.exports = { getEtablissements, loadRelations, transformUfaStream, getDefaultUfaStream };
+module.exports = { loadRelations, transformUfaStream, getDefaultUfaStream };

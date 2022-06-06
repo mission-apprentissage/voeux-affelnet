@@ -18,6 +18,7 @@ const importCfas = require("./jobs/importCfas");
 const importUfas = require("./jobs/importUfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
+const buildCfaCsv = require("./jobs/buildCfaCsv");
 const {
   exportEtablissementsInconnus,
   exportEtablissementsInconnusWithCatalogueInfos,
@@ -44,6 +45,24 @@ cli
   .action(() => {
     runScript(() => {
       return importMefs();
+    });
+  });
+
+cli
+  .command("buildCfaCsv")
+  .description("Permet de créer le fichier des CFA à partir de l'offre de formation d'Affelnet")
+  .option(
+    "--offreDeFormationCsv <offreDeFormationCsv>",
+    "Le fichier CSV contentant l'offre de formation Affelnet",
+    createReadStream
+  )
+  .option("--relationsCsv <relationsCsv>", "Le fichier CSV contentant les relations complémentaires", createReadStream)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action(({ out, ...rest }) => {
+    runScript(() => {
+      const output = out || writeToStdout();
+
+      return buildCfaCsv(output, rest);
     });
   });
 

@@ -1,19 +1,34 @@
-const { oleoduc, filterData, writeData } = require("oleoduc");
-const Joi = require("@hapi/joi");
+const { oleoduc, transformData, writeData } = require("oleoduc");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
 const { findAcademieByCode } = require("../common/academies");
 const { Cfa } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 const ReferentielApi = require("../common/api/ReferentielApi");
-const { loadRelations, getEtablissements } = require("../common/relations");
+const { Voeu } = require("../common/model/index.js");
+const Joi = require("@hapi/joi");
+const { arrayOf } = require("../common/validators.js");
+const { uniq } = require("lodash");
 
 const schema = Joi.object({
   siret: Joi.string()
     .pattern(/^[0-9]{14}$/)
     .required(),
   email: Joi.string().email().required(),
-}).unknown();
+  etablissements: arrayOf().required(),
+});
+
+async function getEtablissements(uais) {
+  return Promise.all(
+    uniq(uais).map(async (uai) => {
+      const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
+      return {
+        uai,
+        ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
+      };
+    })
+  );
+}
 
 async function importCfas(cfaCsv, options = {}) {
   const referentielApi = options.referentielApi || new ReferentielApi();
@@ -25,28 +40,28 @@ async function importCfas(cfaCsv, options = {}) {
     failed: 0,
   };
 
-  const relations = await loadRelations(options.relations);
-
   await oleoduc(
     cfaCsv,
     parseCsv({
       on_record: (record) => omitEmpty(record),
     }),
-    filterData(async (json) => {
+    transformData(async (json) => {
       stats.total++;
-      const { error } = schema.validate(json, { abortEarly: false });
+      const { error, value } = schema.validate(json, { abortEarly: false });
       if (!error) {
-        return true;
+        return value;
       }
 
       stats.invalid++;
       logger.warn(`Le cfa ${json.siret} est invalide`, error);
-      return false;
+      return null;
     }),
     writeData(
-      async ({ siret, email }) => {
+      async (data) => {
+        const { siret, email } = data;
+
         try {
-          const etablissements = await getEtablissements(siret, relations);
+          const etablissements = await getEtablissements(data.etablissements);
           const organisme = await referentielApi.getOrganisme(siret);
 
           if (!organisme.adresse) {

@@ -6,7 +6,7 @@ const { oleoduc, transformIntoJSON } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { JobEvent } = require("../../common/model");
 const { sendJsonStream } = require("../utils/httpUtils");
-const { stringList } = require("../utils/validators");
+const { arrayOf } = require("../../common/validators.js");
 const computeStats = require("../../jobs/computeStats");
 
 module.exports = () => {
@@ -35,7 +35,7 @@ module.exports = () => {
     tryCatch(async (req, res) => {
       const { academies } = await Joi.object({
         jobName: Joi.string().valid("computeStats").required(),
-        academies: stringList(),
+        academies: arrayOf(),
       }).validateAsync({ ...req.params, ...req.query }, { abortEarly: false });
 
       const stats = await computeStats(academies ? { academies } : {});
