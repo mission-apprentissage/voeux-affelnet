@@ -74,11 +74,7 @@ async function exportEtablissementsInconnusWithCatalogueInfos(output, options = 
               result.formations?.flatMap((formation) => formation.etablissement_gestionnaire_courriel?.split("##"))
             ),
           ],
-          sirets: [
-            ...new Set(
-              result.formations?.flatMap((formation) => formation.etablissement_gestionnaire_siret?.split("##"))
-            ),
-          ],
+          sirets: [...new Set(result.formations?.flatMap((formation) => formation.etablissement_gestionnaire_siret))],
         };
       };
 
