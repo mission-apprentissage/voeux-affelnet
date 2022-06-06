@@ -7,8 +7,8 @@ const { Cfa } = require("../../common/model/index.js");
 const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
 
-async function getOffreDeFormationCsv(offreDeFormationCsv) {
-  const stream = offreDeFormationCsv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-02-05-2022.csv"));
+async function getOffreDeFormationCsv(csv) {
+  const stream = csv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-02-05-2022.csv"));
 
   return compose(
     stream,
@@ -145,7 +145,7 @@ async function getRelationsFromOffreDeFormation(options = {}) {
 
   let currentLine = 1;
   return compose(
-    await getOffreDeFormationCsv(options.offreDeFormationCsv),
+    await getOffreDeFormationCsv(options.affelnet),
     transformData(
       async (data) => {
         try {

@@ -4,18 +4,18 @@ const { getRelationsFromOffreDeFormation } = require("./utils/getRelationsFromOf
 const { parseCsv } = require("../common/utils/csvUtils.js");
 const { Cfa } = require("../common/model/index.js");
 
-function parseRelationsCsv(relationsCsv) {
-  return compose(relationsCsv, parseCsv());
+function parseRelationsCsv(csv) {
+  return compose(csv, parseCsv());
 }
 
 async function getCfaStatut(siret, uai) {
   const found = await Cfa.findOne({ siret });
 
   if (!found) {
-    return "absent";
+    return "nouveau";
   }
 
-  return found.etablissements.find((e) => e.uai === uai) ? "présent" : "maj";
+  return found.etablissements.find((e) => e.uai === uai) ? "importé" : "maj nécessaire";
 }
 
 async function buildCfaCsv(output, options = {}) {
@@ -37,8 +37,8 @@ async function buildCfaCsv(output, options = {}) {
     }),
   ];
 
-  if (options.relationsCsv) {
-    streams.push(parseRelationsCsv(options.relationsCsv));
+  if (options.relations) {
+    streams.push(parseRelationsCsv(options.relations));
   }
 
   await oleoduc(

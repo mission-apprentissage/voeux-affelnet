@@ -46,13 +46,9 @@ cli
 
 cli
   .command("buildCfaCsv")
-  .description("Permet de créer le fichier des CFA à partir de l'offre de formation d'Affelnet")
-  .option(
-    "--offreDeFormationCsv <offreDeFormationCsv>",
-    "Le fichier CSV contentant l'offre de formation Affelnet",
-    createReadStream
-  )
-  .option("--relationsCsv <relationsCsv>", "Le fichier CSV contentant les relations complémentaires", createReadStream)
+  .description("Permet de créer le fichier des CFA")
+  .option("--affelnet <affelnet>", "Le fichier CSV contentant l'offre de formation Affelnet", createReadStream)
+  .option("--relations <relations>", "Le fichier CSV contenant les relations complémentaires", createReadStream)
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, ...rest }) => {
     runScript(() => {
