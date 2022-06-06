@@ -10,10 +10,7 @@ const { getAcademies } = require("../../common/academies");
 const { paginate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
 const exportCfas = require("../../jobs/exportCfas");
-const {
-  // exportEtablissementsInconnus,
-  exportEtablissementsInconnusWithCatalogueInfos,
-} = require("../../jobs/exportEtablissementsInconnus.js");
+const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissementsInconnus.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { changeEmail } = require("../../common/actions/changeEmail");
@@ -167,14 +164,7 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { relations } = await Joi.object({
-        relations: Joi.boolean().default(true),
-        token: Joi.string(),
-      }).validateAsync(req.query, { abortEarly: false });
-
-      return exportEtablissementsInconnusWithCatalogueInfos(asCsvResponse("etablissements-inconnus", res), {
-        relations,
-      });
+      return exportEtablissementsInconnus(asCsvResponse("etablissements-inconnus", res));
     })
   );
 

@@ -19,10 +19,6 @@ const importUfas = require("./jobs/importUfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
 const buildCfaCsv = require("./jobs/buildCfaCsv");
-const {
-  exportEtablissementsInconnus,
-  exportEtablissementsInconnusWithCatalogueInfos,
-} = require("./jobs/exportEtablissementsInconnus.js");
 const createUser = require("./jobs/createUser");
 const { DateTime } = require("luxon");
 const migrate = require("./jobs/migrate");
@@ -213,28 +209,6 @@ cli
       const output = out || writeToStdout();
 
       return exportCfas(output, { filter });
-    });
-  });
-
-cli
-  .command("exportEtablissementsInconnus")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action(({ out, filter }) => {
-    runScript(() => {
-      const output = out || writeToStdout();
-
-      return exportEtablissementsInconnus(output, { filter });
-    });
-  });
-
-cli
-  .command("exportEtablissementsInconnusWithCatalogueInfos")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action(({ out, filter }) => {
-    runScript(() => {
-      const output = out || writeToStdout();
-
-      return exportEtablissementsInconnusWithCatalogueInfos(output, { filter });
     });
   });
 
