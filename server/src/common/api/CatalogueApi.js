@@ -6,7 +6,7 @@ const logger = require("../logger");
 function convertQueryIntoParams(query, options = {}) {
   return queryString.stringify(
     {
-      query: JSON.stringify(query),
+      query: JSON.stringify(query).replaceAll("#", "%23"),
       ...Object.keys(options).reduce((acc, key) => {
         return {
           ...acc,
