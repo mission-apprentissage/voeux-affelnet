@@ -3,11 +3,12 @@ const Joi = require("@hapi/joi");
 const { pickBy, isEmpty, uniqBy } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
-const { Voeu, Cfa, Mef } = require("../common/model");
+const { Voeu, Mef } = require("../common/model");
 const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
 const { parseCsv } = require("../common/utils/csvUtils");
+const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 
 const schema = Joi.object({
   academie: Joi.object({
@@ -172,24 +173,6 @@ function hasAnomaliesOnMandatoryFields(anomalies) {
   );
 }
 
-async function updateCfa(uai, importDate) {
-  const { matchedCount } = await Cfa.updateOne(
-    { "etablissements.uai": uai },
-    {
-      $set: {
-        "etablissements.$.voeux_date": importDate,
-      },
-    },
-    { runValidators: true }
-  );
-
-  if (matchedCount === 0) {
-    logger.warn(`L'établissement d'accueil n'est pas connu dans la base des CFA ${uai}`);
-    return false;
-  }
-  return true;
-}
-
 async function importVoeux(voeuxCsvStream, options = {}) {
   const stats = {
     total: 0,
@@ -256,7 +239,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
               Object.keys(differences).forEach((key) => updatedFields.add(key));
             }
 
-            await updateCfa(etablissementAccueilUAI, importDate, stats);
+            await markVoeuxAsAvailable(etablissementAccueilUAI, importDate);
           }
         } catch (e) {
           logger.error(`Import du voeu impossible`, stats.total, e);
