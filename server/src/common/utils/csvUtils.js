@@ -1,4 +1,5 @@
 const { parse } = require("csv-parse");
+const { DateTime } = require("luxon");
 
 function parseCsv(options = {}) {
   return parse({
@@ -9,6 +10,10 @@ function parseCsv(options = {}) {
   });
 }
 
+function date(v) {
+  return v ? DateTime.fromJSDate(v).toLocaleString() : "";
+}
+
 function ouiNon(v) {
   return v ? "Oui" : "Non";
 }
@@ -16,4 +21,5 @@ function ouiNon(v) {
 module.exports = {
   parseCsv,
   ouiNon,
+  date,
 };
