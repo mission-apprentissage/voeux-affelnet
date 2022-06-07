@@ -4,3 +4,4 @@ node_modules/
 *.log
 .local/*
 !.local/.keep
+.nyc_output/

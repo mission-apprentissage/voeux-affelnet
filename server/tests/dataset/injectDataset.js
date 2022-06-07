@@ -1,4 +1,4 @@
-const faker = require("faker/locale/fr");
+const faker = require("@faker-js/faker/locale/fr").faker;
 const { Mef, JobEvent } = require("../../src/common/model");
 const createUser = require("../../src/jobs/createUser");
 const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");

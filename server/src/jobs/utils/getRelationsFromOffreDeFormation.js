@@ -123,7 +123,7 @@ function filterConflicts(onConflict = () => ({})) {
 async function getRelationsFromOffreDeFormation(options = {}) {
   const { findEmailReferentiel, findSiretResponsableReferentiel } = referentiel();
   const { findFormations } = catalogue();
-  const { onConflict = () => ({}) } = options;
+  const { onConflict = () => ({}), affelnet } = options;
 
   async function searchSiretAndEmail(uai, cleMinistereEducation, siretGestionnaire) {
     const { formations, alternatives } = await findFormations(uai, cleMinistereEducation, siretGestionnaire);
@@ -145,7 +145,7 @@ async function getRelationsFromOffreDeFormation(options = {}) {
 
   let currentLine = 1;
   return compose(
-    await getOffreDeFormationCsv(options.affelnet),
+    await getOffreDeFormationCsv(affelnet),
     transformData(
       async (data) => {
         try {

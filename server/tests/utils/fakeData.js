@@ -1,4 +1,4 @@
-const faker = require("faker");
+const faker = require("@faker-js/faker").faker;
 const { merge } = require("lodash");
 const { Cfa, Ufa, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
