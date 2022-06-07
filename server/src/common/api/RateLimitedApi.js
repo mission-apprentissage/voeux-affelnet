@@ -17,12 +17,10 @@ class RateLimitedApi {
     });
   }
 
-  execute(callback) {
-    try {
-      return this.rateLimiter.execute(callback);
-    } catch (e) {
+  async execute(callback) {
+    return this.rateLimiter.execute(callback).catch((e) => {
       throw new ApiError(this.name, e.message, e.code || e.response?.status, { cause: e });
-    }
+    });
   }
 }
 

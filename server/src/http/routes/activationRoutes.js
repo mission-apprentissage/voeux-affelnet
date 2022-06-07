@@ -4,7 +4,7 @@ const Joi = require("@hapi/joi");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
-const validators = require("../utils/validators");
+const validators = require("../../common/validators.js");
 const { activateUser } = require("../../common/actions/activateUser");
 
 module.exports = () => {

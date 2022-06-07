@@ -19,6 +19,14 @@ class ReferentielApi extends RateLimitedApi {
       return fetchJson(url);
     });
   }
+
+  async searchOrganismes(siret, params = {}) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Searching organismes ${siret}...`);
+      const url = `${ReferentielApi.baseApiUrl}/organismes?${queryString.stringify(params)}`;
+      return fetchJson(url);
+    });
+  }
 }
 
 module.exports = ReferentielApi;
