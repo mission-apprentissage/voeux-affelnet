@@ -18,7 +18,7 @@ const schema = Joi.object({
   etablissements: arrayOf().required(),
 }).unknown();
 
-async function getEtablissements(uais) {
+async function buildEtablissements(uais) {
   return Promise.all(
     uniq(uais).map(async (uai) => {
       const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
@@ -61,7 +61,7 @@ async function importCfas(cfaCsv, options = {}) {
         const { siret, email } = data;
 
         try {
-          const etablissements = await getEtablissements(data.etablissements);
+          const etablissements = await buildEtablissements(data.etablissements);
           const organisme = await referentielApi.getOrganisme(siret);
 
           if (!organisme.adresse) {
