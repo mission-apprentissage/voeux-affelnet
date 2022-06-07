@@ -154,6 +154,7 @@ cli
 cli
   .command("resendNotificationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--retry", "Renvoie les emails en erreur", false)
   .action((options) => {
     runScript(({ resendEmail }) => {
       return resendNotificationEmails(resendEmail, options);
