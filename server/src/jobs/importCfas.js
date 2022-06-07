@@ -16,7 +16,7 @@ const schema = Joi.object({
     .required(),
   email: Joi.string().email().required(),
   etablissements: arrayOf().required(),
-});
+}).unknown();
 
 async function getEtablissements(uais) {
   return Promise.all(
