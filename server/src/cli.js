@@ -19,6 +19,7 @@ const importUfas = require("./jobs/importUfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
 const buildCfaCsv = require("./jobs/buildCfaCsv");
+const { exportStatutVoeux } = require("./jobs/exportStatutVoeux");
 const createUser = require("./jobs/createUser");
 const { DateTime } = require("luxon");
 const migrate = require("./jobs/migrate");
@@ -201,6 +202,18 @@ cli
       const output = out || writeToStdout();
 
       return exportCfas(output, { filter });
+    });
+  });
+
+cli
+  .command("exportStatutVoeux")
+  .option("--filter <filter>", "Filtre au format json", JSON.parse)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action(({ out, filter }) => {
+    runScript(() => {
+      const output = out || writeToStdout();
+
+      return exportStatutVoeux(output, { filter });
     });
   });
 
