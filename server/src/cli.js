@@ -1,8 +1,8 @@
 require("dotenv").config();
 const { program: cli } = require("commander");
 const { oleoduc, transformData, filterData, transformIntoCSV, writeToStdout, flattenArray } = require("oleoduc");
-const { Readable } = require("stream");
 const { createReadStream, createWriteStream } = require("fs");
+const { Readable } = require("stream");
 const { runScript } = require("./jobs/utils/runScript");
 const logger = require("./common/logger");
 const { confirm } = require("./common/actions/confirm");
@@ -24,8 +24,12 @@ const createUser = require("./jobs/createUser");
 const { DateTime } = require("luxon");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
-const Cfa = require("./common/model/Cfa");
-const CatalogueApi = require("./common/api/CatalogueApi");
+const TableauDeBordApi = require("./common/api/TableauDeBordApi");
+const { Cfa } = require("./common/model");
+const { uniq } = require("lodash");
+const ReferentielApi = require("./common/api/ReferentielApi.js");
+const CatalogueApi = require("./common/api/CatalogueApi.js");
+const mongoose = require("mongoose");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -308,6 +312,216 @@ cli
             return {
               email,
             };
+          },
+          { parallel: 10 }
+        ),
+        transformIntoCSV(),
+        output
+      );
+    });
+  });
+
+cli
+  .command("croisementVoeuxTdb")
+  .option("--legacy", "Utilise le format des CFA de 2021", false)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action((options) => {
+    runScript(async () => {
+      const tableauDeBordApi = new TableauDeBordApi();
+      const output = options.out || writeToStdout();
+      const db = mongoose.connection;
+      const uaiMapper = {
+        //CDVL
+        "0451694X": ["0451246K"],
+        "0410036S": ["0451708M"],
+        "0371211R": ["0451708M"],
+        "0180571Y": ["0180571Y"],
+        "0371711J": ["0371409F"],
+        "0410854F": ["0280944Z"],
+        "0410855G": ["0280944Z"],
+        "0360686A": ["0280944Z"],
+        "0280946B": ["0280944Z"],
+        "0280947C": ["0280944Z"],
+        "0280942X": ["0280944Z"],
+        "0180758B": ["0280944Z"],
+        "0411045N": ["0410018X"],
+        "0180847Y": ["0180847Y"],
+        //H2F
+        "0601162M": ["0597090L"],
+        "0595846J": ["0595846J"],
+        "0602183X": ["0602183X"],
+        "0602182W": ["0602182W"],
+        "0590189K": ["0596792M"],
+        "0590187H": ["0596792M"],
+        "0597058B": ["0596792M"],
+        "0620011A": ["0624250H", "0596792M"],
+        "0622099V": ["0596792M"],
+        "0623105N": ["0623105N"],
+        "0620131F": ["0596792M"],
+        "0620018H": ["0596792M"],
+        "0622807P": ["0623465E", "0596792M"],
+        "0620192X": ["0596792M"],
+        "0622801H": ["0624092L", "0596792M"],
+        "0133535X": ["0601613C"],
+        "0400786M": ["0601613C"],
+        "0942024P": ["0601613C"],
+        "0501793C": ["0601613C"],
+        "0601575L": ["0595689N"],
+        "0711439D": ["0595689N"],
+        "0595124Z": ["0595689N"],
+        "0593257V": ["0595689N"],
+        "0596322B": [],
+        "0595689N": ["0595689N"],
+        "0595119U": [],
+        "0595121W": ["0595121W"],
+        "0623276Z": ["0595689N"],
+        "0623280D": ["0595689N"],
+        "0624473A": ["0593321P"],
+        "0021502X": ["0596997K"],
+        "0595821G": ["0596997K"],
+        "0624373S": [],
+        "0624412J": [],
+        "0624100V": [],
+        "0623631K": ["0596997K"],
+        "0623801V": [],
+        "0595778K": ["0595778K"],
+        "0596791L": ["0596791L"],
+        "0597237W": ["0597237W"],
+        "0021740F": ["0601500E"],
+        "0021796S": ["0601500E"],
+        "0601484M": ["0601500E"],
+        "0596406T": ["0596406T"],
+        "0021923E": [],
+        "0022041H": ["0022041H"],
+        "0801999N": ["0801999N"],
+        "0801997L": ["0801328J"],
+        "0596318X": ["0602089V"],
+        "0596316V": ["0596316V"],
+        "0596328H": ["0596328H"],
+        "0596315U": ["0602089V"],
+        "0595820F": ["0595771C"],
+        "0624184L": [],
+        "0624499D": ["0624499D"],
+        "0772824B": ["0772824B"],
+      };
+
+      const { cfas } = await tableauDeBordApi.getCfas({}, { limit: 10000 });
+      const tdb = uniq([...cfas.map((l) => l.uai)]);
+      function existsInTableauDeBord(uai) {
+        let uais = [uai, ...(uaiMapper[uai] || [])];
+        return uais.find((u) => tdb.includes(u));
+      }
+
+      const res = await Promise.all([
+        db.collection("users").find({ type: "Cfa" }).stream(), //legacy
+        Cfa.aggregate([
+          { $unwind: "$etablissements" },
+          { $project: { uai: "$etablissements.uai", academie: "$academie" } },
+        ]).cursor(),
+      ]);
+
+      return oleoduc(
+        options.legacy ? res[0] : res[1],
+        transformData(({ uai, academie }) => {
+          return {
+            uai,
+            Académie: academie.nom,
+            "Présent de le tableau de bord": existsInTableauDeBord(uai) ? "Oui" : "Non",
+          };
+        }),
+        transformIntoCSV(),
+        output
+      );
+    });
+  });
+
+cli
+  .command("croisementTdbReferentiel")
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action((options) => {
+    runScript(async () => {
+      const api = new TableauDeBordApi();
+      const referentielApi = new ReferentielApi();
+      const output = options.out || writeToStdout();
+
+      function getValidation(organisme) {
+        if (!organisme) {
+          return "inconnu";
+        }
+
+        if (!organisme.uai) {
+          return "non validé";
+        }
+
+        return organisme.uai;
+      }
+
+      const { cfas } = await api.getCfas({}, { limit: 10000 });
+      const tdb = cfas.reduce((acc, cfa) => {
+        return [
+          ...acc,
+          ...cfa.sirets.map((siret) => {
+            return { uai: cfa.uai, siret };
+          }),
+        ];
+      }, []);
+
+      return oleoduc(
+        Readable.from(tdb),
+        transformData(
+          async ({ uai, siret }) => {
+            let organisme = await referentielApi.getOrganisme(siret).catch((e) => {
+              logger.error(e, `Impossible de touver le CFA ${siret} dans le référentiel`);
+              return null;
+            });
+
+            return {
+              uai,
+              siret,
+              Académie: organisme?.adresse?.academie.nom,
+              "UAI dans le référentiel": getValidation(organisme),
+            };
+          },
+          { parallel: 5 }
+        ),
+        transformIntoCSV(),
+        output
+      );
+    });
+  });
+
+cli
+  .command("croisementVoeuxReferentiel")
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action((options) => {
+    runScript(async () => {
+      const referentielApi = new ReferentielApi();
+      const output = options.out || writeToStdout();
+
+      return oleoduc(
+        await Cfa.find().cursor(),
+        transformData(
+          async ({ siret, academie }) => {
+            try {
+              const organisme = await referentielApi.getOrganisme(siret);
+              return {
+                siret,
+                academie: academie.nom,
+                "Présent dans le référentiel": "Oui",
+                "UAI validée": organisme.uai ? "Oui" : "Non",
+              };
+            } catch (e) {
+              if (e.response?.status === 404) {
+                return {
+                  siret,
+                  academie: academie.nom,
+                  "Présent dans le référentiel": "Non",
+                  "UAI validée": "Non",
+                };
+              } else {
+                logger.error(e, `Une erreur est survenue lors du traitement du siret ${siret}`);
+              }
+            }
           },
           { parallel: 10 }
         ),
