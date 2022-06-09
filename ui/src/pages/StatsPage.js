@@ -25,6 +25,7 @@ export const StatsCard = styled(({ children, ...rest }) => {
     .details {
       font-size: 0.9rem;
       font-weight: 400;
+      text-align: center;
     }
   }
 `;
@@ -104,7 +105,7 @@ function StatsPage() {
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Nombre voeux téléchargés</div>
+                    <div>Nombre vœux téléchargés</div>
                     <div className="value">{voeux.nbVoeuxDiffusés}</div>
                     {!!voeux.nbVoeuxDiffusés && (
                       <div className="details">(soit {Math.round((voeux.nbVoeuxDiffusés * 100) / voeux.total)}%)</div>
@@ -125,6 +126,7 @@ function StatsPage() {
                   <StatsCard>
                     <div>Cfas activés</div>
                     <div className="value">{cfas.activés}</div>
+                    <div className="details">({cfas.téléchargésVoeux} ont téléchargé des vœux)</div>
                   </StatsCard>
                 </Grid.Col>
                 <Grid.Col width={3}>

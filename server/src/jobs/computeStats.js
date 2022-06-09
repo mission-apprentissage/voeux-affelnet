@@ -17,6 +17,10 @@ function computeCfasStats(filter = {}) {
       statut: "confirmé",
       "etablissements.voeux_date": { $exists: true },
     }),
+    téléchargésVoeux: Cfa.countDocuments({
+      ...filter,
+      voeux_telechargements: { $exists: true, $not: { $size: 0 } },
+    }),
     désinscrits: Cfa.countDocuments({
       ...filter,
       statut: { $ne: "non concerné" },

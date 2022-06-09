@@ -48,7 +48,7 @@ module.exports = ({ resendEmail }) => {
         {
           page,
           items_par_page,
-          projection: { _id: 0, password: 0 },
+          select: { _id: 0, password: 0 },
         }
       );
 

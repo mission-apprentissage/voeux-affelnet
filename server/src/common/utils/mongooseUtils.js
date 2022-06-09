@@ -15,7 +15,7 @@ async function paginate(Model, query, options = {}) {
   const skip = (page - 1) * limit;
 
   return {
-    find: Model.find(query, options.projection || {})
+    find: Model.find(query, options.select || {})
       .skip(skip)
       .limit(limit)
       .lean(),
