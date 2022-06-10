@@ -27,9 +27,10 @@ const { injectDataset } = require("../tests/dataset/injectDataset");
 const TableauDeBordApi = require("./common/api/TableauDeBordApi");
 const { Cfa } = require("./common/model");
 const { uniq } = require("lodash");
-const ReferentielApi = require("./common/api/ReferentielApi.js");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const mongoose = require("mongoose");
+const importDossiers = require("./jobs/importDossiers.js");
+const exportCroisement = require("./jobs/exportCroisement.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -436,98 +437,24 @@ cli
   });
 
 cli
-  .command("croisementTdbReferentiel")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action((options) => {
-    runScript(async () => {
-      const api = new TableauDeBordApi();
-      const referentielApi = new ReferentielApi();
-      const output = options.out || writeToStdout();
+  .command("importDossiers")
+  .argument("<file>", "L'export du tdb")
+  .description("Importe les dossiers du tableau de bord")
+  .action((file) => {
+    runScript(() => {
+      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
 
-      function getValidation(organisme) {
-        if (!organisme) {
-          return "inconnu";
-        }
-
-        if (!organisme.uai) {
-          return "non validé";
-        }
-
-        return organisme.uai;
-      }
-
-      const { cfas } = await api.getCfas({}, { limit: 10000 });
-      const tdb = cfas.reduce((acc, cfa) => {
-        return [
-          ...acc,
-          ...cfa.sirets.map((siret) => {
-            return { uai: cfa.uai, siret };
-          }),
-        ];
-      }, []);
-
-      return oleoduc(
-        Readable.from(tdb),
-        transformData(
-          async ({ uai, siret }) => {
-            let organisme = await referentielApi.getOrganisme(siret).catch((e) => {
-              logger.error(e, `Impossible de touver le CFA ${siret} dans le référentiel`);
-              return null;
-            });
-
-            return {
-              uai,
-              siret,
-              Académie: organisme?.adresse?.academie.nom,
-              "UAI dans le référentiel": getValidation(organisme),
-            };
-          },
-          { parallel: 5 }
-        ),
-        transformIntoCSV(),
-        output
-      );
+      return importDossiers(input);
     });
   });
 
 cli
-  .command("croisementVoeuxReferentiel")
+  .command("exportCroisement")
+  .option("--mapping <mapping>", "Le fichier contenant le mapping entre UAI et UAI gestionnaire", createReadStream)
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action((options) => {
+  .action(({ out = writeToStdout(), ...rest }) => {
     runScript(async () => {
-      const referentielApi = new ReferentielApi();
-      const output = options.out || writeToStdout();
-
-      return oleoduc(
-        await Cfa.find().cursor(),
-        transformData(
-          async ({ siret, academie }) => {
-            try {
-              const organisme = await referentielApi.getOrganisme(siret);
-              return {
-                siret,
-                academie: academie.nom,
-                "Présent dans le référentiel": "Oui",
-                "UAI validée": organisme.uai ? "Oui" : "Non",
-              };
-            } catch (e) {
-              if (e.response?.status === 404) {
-                return {
-                  siret,
-                  academie: academie.nom,
-                  "Présent dans le référentiel": "Non",
-                  "UAI validée": "Non",
-                };
-              } else {
-                logger.error(e, `Une erreur est survenue lors du traitement du siret ${siret}`);
-              }
-            }
-          },
-          { parallel: 10 }
-        ),
-        transformIntoCSV(),
-        output
-      );
+      return exportCroisement(out, rest);
     });
   });
 

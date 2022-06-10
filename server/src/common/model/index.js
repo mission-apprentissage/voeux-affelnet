@@ -5,5 +5,6 @@ module.exports = {
   Voeu: require("./Voeu"),
   Mef: require("./Mef"),
   Log: require("./Log"),
+  Dossier: require("./Dossier"),
   ...require("./events"),
 };

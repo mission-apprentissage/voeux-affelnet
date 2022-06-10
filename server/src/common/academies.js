@@ -32,6 +32,22 @@ function findAcademieByUai(uai) {
   return found || null;
 }
 
+function findAcademieByDepartement(code) {
+  if (!code) {
+    return null;
+  }
+
+  return ACADEMIES.find((academie) => academie.departements.find((d) => d.code === code)) || null;
+}
+
+function findAcademieByCodeInsee(code) {
+  if (!code) {
+    return null;
+  }
+
+  return ACADEMIES.find((academie) => academie.departements.find((d) => code.startsWith(d.code))) || null;
+}
+
 function getAcademies() {
   return ACADEMIES;
 }
@@ -40,6 +56,8 @@ module.exports = {
   findAcademieByName,
   findAcademieByUai,
   findAcademieByCode,
+  findAcademieByDepartement,
+  findAcademieByCodeInsee,
   getAcademies,
 };
 
