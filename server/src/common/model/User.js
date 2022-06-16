@@ -45,7 +45,6 @@ const User = model(
             },
             auteur: {
               type: String,
-              required: true,
             },
           }),
         ],

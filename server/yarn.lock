@@ -215,6 +215,11 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
+"@faker-js/faker@7.2.0":
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-7.2.0.tgz#c5fe4c34f3a3664ac64fe1a21bac2004ea5faa22"
+  integrity sha512-dzjQ0LFT+bPLWg0yyV3MpxaLJp/+VW4a0SnjNSWJ4YpJ928LXDOZAN+kB2/JPPisI3Ra0w2BxbD4M9J7o0jcpw==
+
 "@hapi/address@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@hapi/address/-/address-4.0.1.tgz#267301ddf7bc453718377a6fb3832a2f04a721dd"
@@ -1739,11 +1744,6 @@ extsprintf@^1.2.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
-
-faker@5.5.3:
-  version "5.5.3"
-  resolved "https://registry.yarnpkg.com/faker/-/faker-5.5.3.tgz#c57974ee484431b25205c2c8dc09fda861e51e0e"
-  integrity sha512-wLTv2a28wjUyWkbnX7u/ABZBkUkIF2fCd73V6P2oFqEGEktDfzWx4UxrSqtPRw0xPRAcjeAOIiJWqZm3pP4u3g==
 
 fast-deep-equal@^3.1.1:
   version "3.1.1"

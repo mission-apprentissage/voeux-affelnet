@@ -159,8 +159,8 @@ describe("adminRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"siret";"raison_sociale";"academie";"email";"erreur";"voeux"
-"11111111100015";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
+      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux"
+"11111111100015";"";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
 `
     );
   });
@@ -190,13 +190,13 @@ describe("adminRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"siret";"raison_sociale";"academie";"email";"erreur";"voeux";"statut";"nb_voeux"
-"11111111100015";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"1"
+      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"statut";"nb_voeux"
+"11111111100015";"0751234J";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"1"
 `
     );
   });
 
-  it.skip("Vérifie qu'on peut exporter les établissements inconnus", async () => {
+  it("Vérifie qu'on peut exporter les établissements inconnus", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertVoeu({
@@ -207,7 +207,7 @@ describe("adminRoutes", () => {
       },
     });
 
-    const response = await httpClient.get("/api/admin/etablissements/inconnus.csv?relations=false", {
+    const response = await httpClient.get("/api/admin/etablissements/inconnus.csv", {
       headers: {
         ...auth,
       },

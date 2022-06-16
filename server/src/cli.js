@@ -18,10 +18,8 @@ const importCfas = require("./jobs/importCfas");
 const importUfas = require("./jobs/importUfas");
 const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
-const {
-  exportEtablissementsInconnus,
-  exportEtablissementsInconnusWithCatalogueInfos,
-} = require("./jobs/exportEtablissementsInconnus.js");
+const buildCfaCsv = require("./jobs/buildCfaCsv");
+const { exportStatutVoeux } = require("./jobs/exportStatutVoeux");
 const createUser = require("./jobs/createUser");
 const { DateTime } = require("luxon");
 const migrate = require("./jobs/migrate");
@@ -48,18 +46,27 @@ cli
   });
 
 cli
+  .command("buildCfaCsv")
+  .description("Permet de créer le fichier des CFA")
+  .option("--affelnet <affelnet>", "Le fichier CSV contentant l'offre de formation Affelnet", createReadStream)
+  .option("--relations <relations>", "Le fichier CSV contenant les relations complémentaires", createReadStream)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .action(({ out, ...rest }) => {
+    runScript(() => {
+      const output = out || writeToStdout();
+
+      return buildCfaCsv(output, rest);
+    });
+  });
+
+cli
   .command("importCfas <cfaCsv>")
   .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
-  .option(
-    "--relations <csv>",
-    "Le csv contenant la liste des uai d'accueil et leur siret gestionnaire :" + "'uai,siret_gestionnaire'",
-    createReadStream
-  )
-  .action((cfaCsv, options) => {
+  .action((cfaCsv) => {
     runScript(() => {
       const input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
 
-      return importCfas(input, options);
+      return importCfas(input);
     });
   });
 
@@ -148,6 +155,7 @@ cli
 cli
   .command("resendNotificationEmails")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--retry", "Renvoie les emails en erreur", false)
   .action((options) => {
     runScript(({ resendEmail }) => {
       return resendNotificationEmails(resendEmail, options);
@@ -198,24 +206,14 @@ cli
   });
 
 cli
-  .command("exportEtablissementsInconnus")
+  .command("exportStatutVoeux")
+  .option("--filter <filter>", "Filtre au format json", JSON.parse)
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
       const output = out || writeToStdout();
 
-      return exportEtablissementsInconnus(output, { filter });
-    });
-  });
-
-cli
-  .command("exportEtablissementsInconnusWithCatalogueInfos")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action(({ out, filter }) => {
-    runScript(() => {
-      const output = out || writeToStdout();
-
-      return exportEtablissementsInconnusWithCatalogueInfos(output, { filter });
+      return exportStatutVoeux(output, { filter });
     });
   });
 

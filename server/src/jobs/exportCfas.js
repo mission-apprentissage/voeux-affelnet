@@ -21,6 +21,7 @@ async function exportCfas(output, options = {}) {
       mapper: (v) => `"${v || ""}"`,
       columns: {
         siret: (data) => data.siret,
+        etablissements: (data) => data.etablissements.map((etablissement) => etablissement.uai).join(", "),
         raison_sociale: (data) => data.raison_sociale,
         academie: (data) => data.academie?.nom,
         email: (data) => data.email,
