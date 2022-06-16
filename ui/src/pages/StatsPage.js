@@ -1,5 +1,5 @@
-import React from "react";
-import { Card, Form, Grid, Page, Table } from "tabler-react";
+import React, { useState } from "react";
+import { Alert, Button, Card, Form, Grid, Page, Table } from "tabler-react";
 import { useFetch } from "../common/hooks/useFetch";
 import { DateTime } from "luxon";
 import styled from "styled-components";
@@ -13,15 +13,18 @@ export const StatsCard = styled(({ children, ...rest }) => {
   );
 })`
   height: 75%;
+
   .stats {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+
     .value {
       font-size: 1.5rem;
       font-weight: 600;
     }
+
     .details {
       font-size: 0.9rem;
       font-weight: 400;
@@ -35,10 +38,12 @@ const AcademiesWrapper = styled.div`
   border-radius: 3px;
   padding: 1rem;
   margin-bottom: 2rem;
+
   .row,
   h4 {
     padding-left: 0.5rem;
   }
+
   select {
     width: 25%;
   }
@@ -48,6 +53,7 @@ function StatsPage() {
   const [now, loading, , setNow] = useFetch(`/api/stats/computeStats/now?academies=ALL`, null);
   const [importCfas] = useFetch(`/api/stats/importCfas`, { results: [] });
   const [importVoeux] = useFetch(`/api/stats/importVoeux`, { results: [] });
+  const [showRapport, setShowRapport] = useState(false);
 
   const academies = now ? now._meta.academies : [];
   const cfas = now ? now.stats.cfas[0].stats : null;
@@ -68,6 +74,51 @@ function StatsPage() {
     <Page>
       <Page.Main>
         <Page.Content title={<div>Voeux Affelnet - Statistiques</div>}>
+          <Grid.Row>
+            <Grid.Col width={12}>
+              <div style={{ marginBottom: "16px" }}>
+                <Button color="secondary" onClick={() => setShowRapport(!showRapport)}>
+                  <span>{showRapport ? "-" : "+"}</span> Rapport d'incident du 16/06/2022
+                </Button>
+              </div>
+              {showRapport && (
+                <Alert type={"info"}>
+                  <div>
+                    <p>
+                      Nous avons rencontré un problème technique lors du chargement des listes de vœux (mise à jour 2/3
+                      du 16/06). Le service ne permettait pas de faire de téléchargement de listes de vœux entre 14:30
+                      et 15:00, puis a été coupé entre 15:00 et 15:35.
+                    </p>
+                    <p>
+                      Une restauration des données précédemment enregistrée (à 4:00 ce jour) a été effectuée, le service
+                      était rétabli et opérationnel à 15:35.
+                    </p>
+                  </div>
+                  <div>
+                    L’origine de problème est identifiée. Actions corrective :
+                    <ul>
+                      <li>processus de backup systématique avant import des fichiers Affelnet</li>
+                      <li>modification du script d’import pour contrôler la structure du fichier</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p>
+                      Certaine actions effectuées entre 4:00 et 15:35 par une dizaine d’utilisateurs sont en cours de
+                      restauration : activations de compte, changements de mots de passe, statut de téléchargement des
+                      vœux.
+                    </p>
+
+                    <p>
+                      Le fichier de vœux transmis ce jour par Affelnet sera chargé demain matin après cette
+                      restauration, puis les emails de notification de nouveaux vœux disponibles seront diffusés aux
+                      CFA.
+                    </p>
+                  </div>
+                </Alert>
+              )}
+            </Grid.Col>
+          </Grid.Row>
+
           {loading && <div>En cours de chargement...</div>}
           {!loading && now && (
             <AcademiesWrapper>
