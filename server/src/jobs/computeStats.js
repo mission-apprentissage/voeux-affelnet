@@ -98,27 +98,22 @@ async function computeVoeuxStats(filter = {}) {
         },
       },
       {
-        $unwind: "$etablissements",
-      },
-      {
-        $group: {
-          _id: null,
-          uais: {
-            $push: "$etablissements.uai",
-          },
-        },
+        $unwind: "$voeux_telechargements",
       },
       {
         $lookup: {
           from: "voeux",
           let: {
-            uais: "$uais",
+            voeux_telechargements: "$voeux_telechargements",
           },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $in: ["$etablissement_accueil.uai", "$$uais"],
+                  $and: [
+                    { $eq: ["$etablissement_accueil.uai", "$$voeux_telechargements.uai"] },
+                    { $gt: ["$$voeux_telechargements.date", { $last: "$_meta.import_dates" }] },
+                  ],
                 },
               },
             },
