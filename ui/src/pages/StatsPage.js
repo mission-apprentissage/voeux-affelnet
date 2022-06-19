@@ -103,7 +103,7 @@ function StatsPage() {
                   </div>
                   <div>
                     <p>
-                      Certaine actions effectuées entre 4:00 et 15:35 par une dizaine d’utilisateurs sont en cours de
+                      Certaines actions effectuées entre 4:00 et 15:35 par une dizaine d’utilisateurs sont en cours de
                       restauration : activations de compte, changements de mots de passe, statut de téléchargement des
                       vœux.
                     </p>
