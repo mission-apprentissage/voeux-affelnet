@@ -4,6 +4,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { User } = require("../../common/model");
+const { sanitize } = require("../utils/sanitizeUtils");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -23,7 +24,8 @@ module.exports = () => {
   router.post(
     "/api/login/test-username",
     tryCatch(async (req, res) => {
-      const existingUsername = !!(await User.countDocuments({ username: req.body.username }));
+      const payload = sanitize(req.body);
+      const existingUsername = !!(await User.countDocuments({ username: payload.username }));
       if (!existingUsername) {
         throw Boom.badRequest("L'identifiant n'existe pas");
       }
