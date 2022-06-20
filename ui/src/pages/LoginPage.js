@@ -9,6 +9,25 @@ import { _post } from "../common/httpClient";
 import CenteredCol from "../common/components/CenteredCol";
 import ErrorMessage from "../common/components/ErrorMessage";
 
+const checkUsername = async (value, { path, createError }) => {
+  try {
+    await _post("/api/login/test-username", { username: value });
+    return true;
+  } catch (err) {
+    if (!value?.match(/^[0-9]{14}$/)) {
+      return createError({
+        path,
+        message: "Vous devez indiquer un numéro de Siret valide",
+      });
+    } else {
+      return createError({
+        path,
+        message: "L'utilisateur est introuvable",
+      });
+    }
+  }
+};
+
 function LoginPage() {
   const [, setAuth] = useAuth();
   const history = useHistory();
@@ -19,7 +38,7 @@ function LoginPage() {
   const feedback = (meta, message) => {
     return meta.touched && meta.error
       ? {
-          feedback: message,
+          feedback: meta.error || message,
           invalid: true,
         }
       : {};
@@ -53,7 +72,7 @@ function LoginPage() {
                       password: "",
                     }}
                     validationSchema={Yup.object().shape({
-                      username: Yup.string().required("Requis"),
+                      username: Yup.string().required("Requis").test("Username valide", checkUsername),
                       password: Yup.string().required("Requis"),
                     })}
                     onSubmit={login}
