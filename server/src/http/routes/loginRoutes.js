@@ -23,9 +23,7 @@ module.exports = () => {
   router.post(
     "/api/login/test-username",
     tryCatch(async (req, res) => {
-      console.log(req.body.username);
       const existingUsername = !!(await User.countDocuments({ username: req.body.username }));
-      console.log(await User.countDocuments({ username: req.body.username }));
       if (!existingUsername) {
         throw Boom.badRequest("L'identifiant n'existe pas");
       }
