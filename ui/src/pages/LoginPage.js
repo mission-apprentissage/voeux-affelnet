@@ -9,6 +9,8 @@ import { _post } from "../common/httpClient";
 import CenteredCol from "../common/components/CenteredCol";
 import ErrorMessage from "../common/components/ErrorMessage";
 
+const mailVoeux = "voeux-affelnet@apprentissage.beta.gouv.fr";
+
 const checkUsername = async (value, { path, createError }) => {
   try {
     await _post("/api/login/test-username", { username: value });
@@ -20,9 +22,16 @@ const checkUsername = async (value, { path, createError }) => {
         message: "Vous devez indiquer un numéro de Siret valide",
       });
     } else {
+      const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (SIRET ${value})`;
       return createError({
         path,
-        message: "L'utilisateur est introuvable",
+        message: (
+          <>
+            Ce numéro de Siret ne correspond pas à un organisme responsable enregistré comme tel dans Affelnet. Veuillez
+            utiliser le numéro de Siret figurant dans nos précédent emails. En cas de difficulté, veuillez contacter le
+            service support en indiquant votre Siret : <a href={mailTo}>{mailVoeux}</a>
+          </>
+        ),
       });
     }
   }
