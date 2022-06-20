@@ -218,11 +218,13 @@ describe("computeStats", () => {
         stats: [
           {
             import_date: secondImport.toJSDate(),
-            total: 1,
+            nbCfas: 1,
+            nbVoeux: 1,
           },
           {
             import_date: firstImport.toJSDate(),
-            total: 1,
+            nbCfas: 1,
+            nbVoeux: 1,
           },
         ],
       }
@@ -234,11 +236,13 @@ describe("computeStats", () => {
         stats: [
           {
             import_date: secondImport.toJSDate(),
-            total: 0,
+            nbCfas: 0,
+            nbVoeux: 0,
           },
           {
             import_date: firstImport.toJSDate(),
-            total: 0,
+            nbCfas: 0,
+            nbVoeux: 0,
           },
         ],
       }
@@ -250,11 +254,13 @@ describe("computeStats", () => {
         stats: [
           {
             import_date: secondImport.toJSDate(),
-            total: 1,
+            nbCfas: 1,
+            nbVoeux: 1,
           },
           {
             import_date: firstImport.toJSDate(),
-            total: 1,
+            nbCfas: 1,
+            nbVoeux: 1,
           },
         ],
       }

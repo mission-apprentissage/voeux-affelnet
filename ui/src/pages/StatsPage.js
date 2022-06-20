@@ -217,7 +217,8 @@ function StatsPage() {
                     <Table>
                       <Table.Header>
                         <Table.ColHeader>Extraction</Table.ColHeader>
-                        <Table.ColHeader>Téléchargés</Table.ColHeader>
+                        <Table.ColHeader>Nombre de CFA ayant téléchargés les voeux</Table.ColHeader>
+                        <Table.ColHeader>Nombre de voeux téléchargés</Table.ColHeader>
                       </Table.Header>
                       <Table.Body>
                         {téléchargements.map((stats, index) => {
@@ -226,7 +227,8 @@ function StatsPage() {
                               <Table.Col>
                                 {DateTime.fromISO(stats.import_date).setLocale("fr").toFormat("yyyy-MM-dd")}
                               </Table.Col>
-                              <Table.Col>{stats.total}</Table.Col>
+                              <Table.Col>{stats.nbCfas}</Table.Col>
+                              <Table.Col>{stats.nbVoeux}</Table.Col>
                             </Table.Row>
                           );
                         })}

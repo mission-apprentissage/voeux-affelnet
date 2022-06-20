@@ -2,6 +2,54 @@ const { Cfa, Voeu } = require("../common/model");
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
 
+function countVoeux(query) {
+  return Cfa.aggregate([
+    { $match: query },
+    {
+      $unwind: "$voeux_telechargements",
+    },
+    {
+      $group: {
+        _id: null,
+        uais: {
+          $push: "$voeux_telechargements.uai",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "voeux",
+        let: {
+          uais: "$uais",
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $in: ["$etablissement_accueil.uai", "$$uais"],
+              },
+            },
+          },
+          {
+            $count: "nbVoeux",
+          },
+        ],
+        as: "res",
+      },
+    },
+    {
+      $unwind: "$res",
+    },
+    {
+      $group: {
+        _id: null,
+        total: {
+          $sum: "$res.nbVoeux",
+        },
+      },
+    },
+  ]).then((res) => (res.length > 0 ? res[0].total : 0));
+}
 function computeCfasStats(filter = {}) {
   return promiseAllProps({
     total: Cfa.countDocuments(filter),
@@ -90,58 +138,7 @@ async function computeVoeuxStats(filter = {}) {
         $count: "total",
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
-    nbVoeuxDiffusés: Cfa.aggregate([
-      {
-        $match: {
-          ...filter,
-          statut: "activé",
-        },
-      },
-      {
-        $unwind: "$voeux_telechargements",
-      },
-      {
-        $lookup: {
-          from: "voeux",
-          let: {
-            voeux_telechargements: "$voeux_telechargements",
-          },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$etablissement_accueil.uai", "$$voeux_telechargements.uai"] },
-                    { $gt: ["$$voeux_telechargements.date", { $last: "$_meta.import_dates" }] },
-                  ],
-                },
-              },
-            },
-            {
-              $count: "nbVoeux",
-            },
-          ],
-          as: "res",
-        },
-      },
-      {
-        $unwind: "$res",
-      },
-      {
-        $project: {
-          statut: 1,
-          nbVoeux: "$res.nbVoeux",
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: {
-            $sum: "$nbVoeux",
-          },
-        },
-      },
-    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+    nbVoeuxDiffusés: countVoeux({ ...filter, statut: "activé" }),
   });
 }
 
@@ -211,7 +208,8 @@ async function computeDownloadStats(filter = {}) {
 
       return promiseAllProps({
         import_date: importDate,
-        total: Cfa.countDocuments({ ...filter, voeux_telechargements: { $elemMatch: { ...dateFilter } } }),
+        nbCfas: Cfa.countDocuments({ ...filter, voeux_telechargements: { $elemMatch: { ...dateFilter } } }),
+        nbVoeux: countVoeux({ ...filter, "voeux_telechargements.date": { $gt: importDate } }),
       });
     })
   );
