@@ -9,6 +9,34 @@ import { _post } from "../common/httpClient";
 import CenteredCol from "../common/components/CenteredCol";
 import ErrorMessage from "../common/components/ErrorMessage";
 
+const mailVoeux = "voeux-affelnet@apprentissage.beta.gouv.fr";
+
+const checkUsername = async (value, { path, createError }) => {
+  try {
+    await _post("/api/login/test-username", { username: value });
+    return true;
+  } catch (err) {
+    if (!value?.match(/^[0-9]{14}$/)) {
+      return createError({
+        path,
+        message: "Vous devez indiquer un numéro de Siret valide",
+      });
+    } else {
+      const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (SIRET ${value})`;
+      return createError({
+        path,
+        message: (
+          <>
+            Ce numéro de Siret ne correspond pas à un organisme responsable enregistré comme tel dans Affelnet. Veuillez
+            utiliser le numéro de Siret figurant dans nos précédent emails. En cas de difficulté, veuillez contacter le
+            service support en indiquant votre Siret : <a href={mailTo}>{mailVoeux}</a>
+          </>
+        ),
+      });
+    }
+  }
+};
+
 function LoginPage() {
   const [, setAuth] = useAuth();
   const history = useHistory();
@@ -19,7 +47,7 @@ function LoginPage() {
   const feedback = (meta, message) => {
     return meta.touched && meta.error
       ? {
-          feedback: message,
+          feedback: meta.error || message,
           invalid: true,
         }
       : {};
@@ -53,7 +81,7 @@ function LoginPage() {
                       password: "",
                     }}
                     validationSchema={Yup.object().shape({
-                      username: Yup.string().required("Requis"),
+                      username: Yup.string().required("Requis").test("Username valide", checkUsername),
                       password: Yup.string().required("Requis"),
                     })}
                     onSubmit={login}
