@@ -20,7 +20,7 @@ const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
 const buildCfaCsv = require("./jobs/buildCfaCsv");
 const { exportStatutVoeux } = require("./jobs/exportStatutVoeux");
-const createUser = require("./jobs/createUser");
+const { createAdmin } = require("./jobs/createAdmin.js");
 const { DateTime } = require("luxon");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
@@ -28,6 +28,7 @@ const { Cfa } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const importDossiers = require("./jobs/importDossiers.js");
 const exportCroisement = require("./jobs/exportCroisement.js");
+const { createCsaio } = require("./jobs/createCsaio.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -165,15 +166,22 @@ cli
   });
 
 cli
-  .command("createUser")
+  .command("createAdmin")
   .arguments("<username> <email>")
-  .option("--admin")
-  .action((username, email, options) => {
+  .action((username, email) => {
     runScript(() => {
-      return createUser(username, email, options);
+      return createAdmin(username, email);
     });
   });
 
+cli
+  .command("createCsaio")
+  .arguments("<username> <email> <region>")
+  .action((username, email, region) => {
+    runScript(() => {
+      return createCsaio(username, email, region);
+    });
+  });
 cli
   .command("confirmCfa")
   .description("Permet de confirmer manuellement un CFA")

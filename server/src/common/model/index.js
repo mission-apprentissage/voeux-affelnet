@@ -1,6 +1,7 @@
 module.exports = {
   User: require("./User"),
   Cfa: require("./Cfa"),
+  Csaio: require("./Csaio"),
   Ufa: require("./Ufa"),
   Voeu: require("./Voeu"),
   Mef: require("./Mef"),
