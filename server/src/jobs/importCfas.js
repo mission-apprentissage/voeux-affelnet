@@ -8,7 +8,7 @@ const ReferentielApi = require("../common/api/ReferentielApi");
 const { Voeu } = require("../common/model/index.js");
 const Joi = require("@hapi/joi");
 const { arrayOf } = require("../common/validators.js");
-const { uniq } = require("lodash");
+const { uniq, pick } = require("lodash");
 
 const schema = Joi.object({
   siret: Joi.string()
@@ -63,6 +63,7 @@ async function importCfas(cfaCsv, options = {}) {
         try {
           const etablissements = await buildEtablissements(data.etablissements);
           const organisme = await referentielApi.getOrganisme(siret);
+          const found = await Cfa.findOne({ siret }).lean();
 
           if (!organisme.adresse) {
             logger.warn(`Le CFA ${siret} n'a pas d'académie`);
@@ -74,6 +75,12 @@ async function importCfas(cfaCsv, options = {}) {
             return;
           }
 
+          const updates = {
+            etablissements,
+            raison_sociale: organisme.raison_sociale,
+            academie: pick(findAcademieByCode(organisme.adresse?.academie.code), ["code", "nom"]),
+          };
+
           const res = await Cfa.updateOne(
             { siret },
             {
@@ -82,11 +89,7 @@ async function importCfas(cfaCsv, options = {}) {
                 username: siret,
                 email,
               },
-              $set: {
-                etablissements,
-                raison_sociale: organisme.raison_sociale,
-                academie: findAcademieByCode(organisme.adresse?.academie.code),
-              },
+              $set: updates,
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
@@ -96,7 +99,17 @@ async function importCfas(cfaCsv, options = {}) {
             logger.info(`CFA ${siret} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
-            logger.info(`CFA ${siret} mis à jour`);
+
+            logger.info(
+              `CFA ${siret} mis à jour \n${JSON.stringify(
+                {
+                  previous: pick(found, ["etablissements", "raison_sociale", "academie"]),
+                  updates,
+                },
+                null,
+                2
+              )}`
+            );
           } else {
             logger.trace(`CFA ${siret} déjà à jour`);
           }
