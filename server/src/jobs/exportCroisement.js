@@ -43,6 +43,45 @@ function buildStats() {
   }, Promise.resolve([]));
 }
 
+function getWidgetLBAUrl(formation) {
+  const cle = formation.cle_ministere_educatif?.replace(/#/g, "%23");
+  if (!cle) {
+    return "";
+  }
+
+  return `https://labonnealternance.pole-emploi.fr/recherche-apprentissage?&display=list&page=fiche&type=training&itemId=${cle}`;
+}
+
+function getDidaskModules() {
+  const baseUrl = `https://dinum-beta.didask.com/courses/demonstration`;
+  return {
+    "Didask - Prendre contact avec un CFA": `${baseUrl}/60abc18c075edf000065c987`,
+    "Didask - Chercher un employeur": `${baseUrl}/60d21bf5be76560000ae916e`,
+    "Didask - Préparer un entretien avec un employeur": `${baseUrl}/60d1adbb877dae00003f0eac`,
+    "Didask - S'intégrer dans l'entreprise": `${baseUrl}/6283bd5ad9c7ae00003ede91`,
+  };
+}
+
+function findDossier(voeu, uaiMapping) {
+  const uai = voeu.etablissement_accueil.uai;
+  const responsable = voeu.responsable;
+  const uais = uaiMapping[uai] ? [uai, uaiMapping[uai]] : [uai];
+
+  return Dossier.findOne({
+    uai_etablissement: { $in: uais },
+    formation_cfd: voeu.formation.code_formation_diplome,
+    annee_formation: 1,
+    $or: [
+      { ine_apprenant: voeu.apprenant.ine },
+      {
+        "_meta.nom_complet": removeDiacritics(`${voeu.apprenant.prenom} ${voeu.apprenant.nom}`),
+      },
+      ...(responsable?.email_1 ? [{ email_contact: responsable.email_1 }] : []),
+      ...(responsable?.email_2 ? [{ email_contact: responsable.email_2 }] : []),
+    ],
+  });
+}
+
 async function exportCroisement(output, options = {}) {
   const uaiMapping = options.mapping ? await loadMapping(options.mapping) : {};
   const stats = await buildStats(uaiMapping);
@@ -51,37 +90,32 @@ async function exportCroisement(output, options = {}) {
     Voeu.find().lean().cursor(),
     transformData(
       async (voeu) => {
-        const responsable = voeu.responsable;
         const uai = voeu.etablissement_accueil.uai;
-        const cfd = voeu.formation.code_formation_diplome;
+        const formation = voeu.formation;
         const ine = voeu.apprenant.ine;
         const academie = voeu.academie.nom;
-        const uais = uaiMapping[uai] ? [uai, uaiMapping[uai]] : [uai];
 
-        const dossier = await Dossier.findOne({
-          uai_etablissement: { $in: uais },
-          formation_cfd: cfd,
-          annee_formation: 1,
-          $or: [
-            { ine_apprenant: ine },
-            {
-              "_meta.nom_complet": removeDiacritics(`${voeu.apprenant.prenom} ${voeu.apprenant.nom}`),
-            },
-            ...(responsable?.email_1 ? [{ email_contact: responsable.email_1 }] : []),
-            ...(responsable?.email_2 ? [{ email_contact: responsable.email_2 }] : []),
-          ],
-        });
+        const dossier = await findDossier(voeu, uaiMapping);
 
         if (dossier) {
           stats.find((s) => s.nom === academie).voeux["Dossiers trouvés dans le tdb"]++;
         }
 
+        const statut = dossier?.statut || "Non trouvé";
+        const generateLinks = !["apprenti", "inscrit"].includes(statut);
+
         return {
           INE: ine,
           UAI: uai,
-          CFD: cfd,
-          academie: academie,
-          "Statut dans le tableau de bord": dossier?.statut || "absent",
+          CFD: formation.code_formation_diplome,
+          Académie: academie,
+          "Statut dans le tableau de bord": statut,
+          ...(generateLinks
+            ? {
+                "La Bonne Alternance": getWidgetLBAUrl(formation),
+                ...getDidaskModules(),
+              }
+            : {}),
         };
       },
       { parallel: 10 }
