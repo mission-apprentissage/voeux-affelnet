@@ -12,7 +12,7 @@ describe("fichierRoutes", () => {
       etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
     });
 
-    const response = await httpClient.get("/api/fichiers", {
+    const response = await httpClient.get("/api/cfa/fichiers", {
       headers: {
         ...auth,
       },
@@ -42,7 +42,7 @@ describe("fichierRoutes", () => {
       formation: { mef: "2472521431", code_formation_diplome: "40025214" },
     });
 
-    const response = await httpClient.get("/api/fichiers/0751234J.csv", {
+    const response = await httpClient.get("/api/cfa/fichiers/0751234J.csv", {
       headers: {
         ...auth,
       },
@@ -67,7 +67,7 @@ describe("fichierRoutes", () => {
       etablissement_accueil: { uai: "0751234J" },
     });
 
-    const response = await httpClient.get("/api/fichiers/0751234J.csv", {
+    const response = await httpClient.get("/api/cfa/fichiers/0751234J.csv", {
       headers: {
         ...auth,
       },
@@ -92,7 +92,7 @@ describe("fichierRoutes", () => {
       ],
     });
 
-    const response = await httpClient.get("/api/fichiers", {
+    const response = await httpClient.get("/api/cfa/fichiers", {
       headers: {
         ...auth,
       },
@@ -122,7 +122,7 @@ describe("fichierRoutes", () => {
       ],
     });
 
-    const response = await httpClient.get("/api/fichiers", {
+    const response = await httpClient.get("/api/cfa/fichiers", {
       headers: {
         ...auth,
       },
@@ -143,7 +143,7 @@ describe("fichierRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("user1", "password");
 
-    const response = await httpClient.get("/api/fichiers/unknown.csv", {
+    const response = await httpClient.get("/api/cfa/fichiers/unknown.csv", {
       headers: {
         ...auth,
       },
@@ -156,7 +156,7 @@ describe("fichierRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", { model: Cfa });
 
-    const response = await httpClient.get("/api/fichiers/0757890U.csv", {
+    const response = await httpClient.get("/api/cfa/fichiers/0757890U.csv", {
       headers: {
         ...auth,
       },
@@ -169,7 +169,7 @@ describe("fichierRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", { model: Cfa });
 
-    const response = await httpClient.get("/api/fichiers/invalide.csv", {
+    const response = await httpClient.get("/api/cfa/fichiers/invalide.csv", {
       headers: {
         ...auth,
       },
@@ -181,7 +181,7 @@ describe("fichierRoutes", () => {
   it("Doit rejeter une requete sans authentification", async () => {
     const { httpClient } = await startServer();
 
-    const response = await httpClient.get("/api/fichiers");
+    const response = await httpClient.get("/api/cfa/fichiers");
 
     assert.strictEqual(response.status, 401);
   });

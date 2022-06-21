@@ -6,7 +6,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { validate } = require("../../common/validators.js");
 const { markVoeuxAsDownloaded } = require("../../common/actions/markVoeuxAsDownloaded");
-const { voeuxCsvStream } = require("../../common/voeuxCsvStream");
+const { getVoeuxCsvStream } = require("../../common/actions/getVoeuxCsvStream.js");
 const { Ufa } = require("../../common/model");
 
 module.exports = ({ users }) => {
@@ -14,7 +14,7 @@ module.exports = ({ users }) => {
   const { checkApiToken, checkIsCfa } = authMiddleware(users);
 
   router.get(
-    "/api/fichiers",
+    "/api/cfa/fichiers",
     checkApiToken(),
     checkIsCfa(),
     tryCatch(async (req, res) => {
@@ -51,7 +51,7 @@ module.exports = ({ users }) => {
   );
 
   router.get(
-    "/api/fichiers/:file",
+    "/api/cfa/fichiers/:file",
     checkApiToken(),
     checkIsCfa(),
     tryCatch(async (req, res) => {
@@ -71,7 +71,7 @@ module.exports = ({ users }) => {
       await markVoeuxAsDownloaded(siret, uai);
       res.setHeader("Content-disposition", `attachment; filename=${uai}.csv`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-      return compose(voeuxCsvStream(uai), res);
+      return compose(getVoeuxCsvStream(uai), res);
     })
   );
 

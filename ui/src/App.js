@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-d
 import LoginPage from "./pages/LoginPage";
 import Layout from "./pages/Layout";
 import useAuth from "./common/hooks/useAuth";
-import FichiersPage from "./pages/FichiersPage";
+import CfaPage from "./pages/CfaPage.js";
 import ActivationPage from "./pages/ActivationPage";
 import ResetPasswordPage from "./pages/password/ResetPasswordPage";
 import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
@@ -36,10 +36,10 @@ function App() {
       <Router>
         <Switch>
           <PrivateRoute exact path="/">
-            {auth && auth.permissions.isAdmin ? <AdminPage /> : <Redirect to="/fichiers" />}
+            {auth && auth.permissions.isAdmin ? <AdminPage /> : <Redirect to="/cfa" />}
           </PrivateRoute>
-          <PrivateRoute exact path="/fichiers">
-            <FichiersPage />
+          <PrivateRoute exact path="/cfa">
+            <CfaPage />
           </PrivateRoute>
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/activation" component={ActivationPage} />

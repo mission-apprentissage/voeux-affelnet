@@ -5,8 +5,8 @@ import { useGet } from "../common/hooks/httpHooks";
 import { buildLink } from "../common/httpClient";
 import TablerIcon from "../common/components/TablerIcon";
 
-function FichiersPage() {
-  const [fichiers, loading] = useGet("/api/fichiers", []);
+function CfaPage() {
+  const [fichiers, loading] = useGet("/api/cfa/fichiers", []);
 
   return (
     <Page>
@@ -75,7 +75,7 @@ function FichiersPage() {
                     </Table.Header>
                     <Table.Body>
                       {fichiers.map(({ name, lastDownloadDate, date, etablissement }, index) => {
-                        const link = buildLink(`/api/fichiers/${name}`);
+                        const link = buildLink(`/api/cfa/fichiers/${name}`);
 
                         const downloadDate = DateTime.fromISO(lastDownloadDate)
                           .setLocale("fr")
@@ -118,4 +118,4 @@ function FichiersPage() {
   );
 }
 
-export default FichiersPage;
+export default CfaPage;
