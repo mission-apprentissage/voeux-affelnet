@@ -27,7 +27,7 @@ module.exports = () => {
       const payload = sanitize(req.body);
       const existingUsername = !!(await User.countDocuments({ username: payload.username }));
       if (!existingUsername) {
-        throw Boom.badRequest("L'identifiant n'existe pas");
+        throw Boom.notFound(`L'identifiant ${payload.username} n'existe pas`);
       }
       return res.json("L'identifiant existe");
     })
