@@ -19,7 +19,7 @@ module.exports = () => {
         },
         async (req, username, password, done) => {
           const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
-          return getUser(fixed)
+          return getUser(fixed?.replace(/\s/g, "")?.trim())
             .then((user) => {
               if (!user || !user.password || !sha512Utils.compare(password, user.password)) {
                 req.errorMessage = `Echec de l'authentification pour l'utilisateur ${username}`;

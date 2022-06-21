@@ -21,7 +21,7 @@ module.exports = ({ sendEmail }) => {
       }).validateAsync(req.body, { abortEarly: false });
 
       const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
-      const user = await getUser(fixed);
+      const user = await getUser(fixed?.replace(/\s/g, "")?.trim());
       if (!user || !user.password) {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }

@@ -25,7 +25,9 @@ module.exports = () => {
     "/api/login/test-username",
     tryCatch(async (req, res) => {
       const payload = sanitize(req.body);
-      const existingUsername = !!(await User.countDocuments({ username: payload.username }));
+      const existingUsername = !!(await User.countDocuments({
+        username: payload.username?.replace(/\s/g, "")?.trim(),
+      }));
       if (!existingUsername) {
         throw Boom.notFound(`L'identifiant ${payload.username} n'existe pas`);
       }
