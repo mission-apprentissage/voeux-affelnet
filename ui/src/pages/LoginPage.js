@@ -8,21 +8,24 @@ import useAuth from "../common/hooks/useAuth";
 import { _post } from "../common/httpClient";
 import CenteredCol from "../common/components/CenteredCol";
 import ErrorMessage from "../common/components/ErrorMessage";
+import { siretFormat } from "../common/utils/format";
 
 const mailVoeux = "voeux-affelnet@apprentissage.beta.gouv.fr";
 
-const checkUsername = async (value, { path, createError }) => {
+const checkUsername = async (username, { path, createError }) => {
   try {
-    await _post("/api/login/test-username", { username: value });
+    if (username) {
+      await _post("/api/login/test-username", { username });
+    }
     return true;
   } catch (err) {
-    if (!value?.match(/^[0-9]{14}$/)) {
+    if (!username?.match(siretFormat)) {
       return createError({
         path,
         message: "Vous devez indiquer un numéro de Siret valide",
       });
     } else {
-      const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (SIRET ${value})`;
+      const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (SIRET ${username})`;
       return createError({
         path,
         message: (
