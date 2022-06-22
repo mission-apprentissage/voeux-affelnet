@@ -44,7 +44,6 @@ function removeDiacritics(value) {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\u0051/g, "Q")
     .replace(/-/g, " ")
     .replace(/—/g, " ")
     .replace(/—/g, " ")

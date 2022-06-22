@@ -12,18 +12,14 @@ import ConfirmationPage from "./pages/ConfirmationPage";
 import StatsPage from "./pages/StatsPage";
 import AdminPage from "./pages/AdminPage";
 import RelationPage from "./pages/RelationPage";
+import CsaioPage from "./pages/CsaioPage.js";
 
 function PrivateRoute({ children, ...rest }) {
   const [auth] = useAuth();
 
   return (
     <Layout>
-      <Route
-        {...rest}
-        render={() => {
-          return auth.sub !== "anonymous" ? children : <Redirect to="/login" />;
-        }}
-      />
+      <Route {...rest} render={() => (auth.sub !== "anonymous" ? children : <Redirect to="/login" />)} />
     </Layout>
   );
 }
@@ -36,10 +32,13 @@ function App() {
       <Router>
         <Switch>
           <PrivateRoute exact path="/">
-            {auth && auth.permissions.isAdmin ? <AdminPage /> : <Redirect to="/cfa" />}
+            {auth.permissions.isAdmin ? <AdminPage /> : <Redirect to={`/${auth.type?.toLowerCase()}`} />}
           </PrivateRoute>
           <PrivateRoute exact path="/cfa">
             <CfaPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/csaio">
+            <CsaioPage />
           </PrivateRoute>
           <Route exact path="/login" component={LoginPage} />
           <Route exact path="/activation" component={ActivationPage} />

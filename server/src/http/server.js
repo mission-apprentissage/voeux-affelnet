@@ -13,7 +13,8 @@ module.exports = async (actions) => {
   app.use(require("./routes/loginRoutes")(actions));
   app.use(require("./routes/activationRoutes")(actions));
   app.use(require("./routes/confirmationRoutes")(actions));
-  app.use(require("./routes/cfasRoutes.js")(actions));
+  app.use(require("./routes/cfaRoutes.js")(actions));
+  app.use(require("./routes/csaioRoutes.js")(actions));
   app.use(require("./routes/passwordRoutes")(actions));
   app.use(require("./routes/emailsRoutes")(actions));
   app.use(require("./routes/healthcheckRoutes")(actions));

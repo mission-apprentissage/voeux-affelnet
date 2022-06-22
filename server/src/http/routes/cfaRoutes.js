@@ -11,12 +11,12 @@ const { Ufa } = require("../../common/model");
 
 module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkApiToken, checkIsCfa } = authMiddleware(users);
+  const { checkApiToken, ensureIs } = authMiddleware(users);
 
   router.get(
     "/api/cfa/fichiers",
     checkApiToken(),
-    checkIsCfa(),
+    ensureIs("Cfa"),
     tryCatch(async (req, res) => {
       const cfa = req.user;
 
@@ -53,7 +53,7 @@ module.exports = ({ users }) => {
   router.get(
     "/api/cfa/fichiers/:file",
     checkApiToken(),
-    checkIsCfa(),
+    ensureIs("Cfa"),
     tryCatch(async (req, res) => {
       const { siret } = req.user;
       const { file } = await validate(req.params, {

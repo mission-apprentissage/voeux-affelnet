@@ -4,7 +4,7 @@ const { Cfa } = require("../../src/common/model");
 const { insertVoeu } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 
-describe("fichierRoutes", () => {
+describe("cfaRoutes", () => {
   it("Vérifie qu'un cfa peut accéder à la liste des fichiers en étant authentifié", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("11111111100006", "password", {

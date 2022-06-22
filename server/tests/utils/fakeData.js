@@ -2,6 +2,7 @@ const faker = require("@faker-js/faker").faker;
 const { merge } = require("lodash");
 const { Cfa, Ufa, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
+const { Csaio, Dossier } = require("../../src/common/model/index.js");
 
 module.exports = {
   insertUser: (custom = {}) => {
@@ -30,6 +31,20 @@ module.exports = {
           emails: [],
           raison_sociale: faker.company.companyName(),
           academie: { code: "11", nom: "Île-de-France" },
+        },
+        custom
+      )
+    );
+  },
+  insertCsaio: (custom = {}) => {
+    return Csaio.create(
+      merge(
+        {},
+        {
+          username: faker.internet.userName(),
+          email: faker.internet.email(),
+          emails: [],
+          region: { code: "11", nom: "Île-de-France" },
         },
         custom
       )
@@ -119,6 +134,31 @@ module.exports = {
           time: new Date(),
           level: 30,
           msg: "test",
+        },
+        custom
+      )
+    );
+  },
+  insertDossier: (custom = {}) => {
+    const firstName = faker.name.firstName().toUpperCase();
+    const lastName = faker.name.lastName().toUpperCase();
+
+    return Dossier.create(
+      merge(
+        {},
+        {
+          dossier_id: "621d4f652b8e994d7a1794ec",
+          _meta: { nom_complet: `${firstName} ${lastName}` },
+          email_contact: faker.internet.email(),
+          annee_formation: 1,
+          contrat_date_debut: new Date(),
+          contrat_date_fin: new Date(),
+          nom_apprenant: lastName,
+          prenom_apprenant: firstName,
+          statut: "apprenti",
+          formation_cfd: faker.helpers.replaceSymbols("##?####"),
+          uai_etablissement: faker.helpers.replaceSymbols("#######?"),
+          academie: { code: "01", nom: "Paris" },
         },
         custom
       )
