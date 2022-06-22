@@ -27,7 +27,6 @@ const { injectDataset } = require("../tests/dataset/injectDataset");
 const { Cfa } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const importDossiers = require("./jobs/importDossiers.js");
-const exportCroisement = require("./jobs/exportCroisement.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
@@ -336,16 +335,6 @@ cli
       const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
 
       return importDossiers(input);
-    });
-  });
-
-cli
-  .command("exportCroisement")
-  .option("--mapping <mapping>", "Le fichier contenant le mapping entre UAI et UAI gestionnaire", createReadStream)
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action(({ out = writeToStdout(), ...rest }) => {
-    runScript(async () => {
-      return exportCroisement(out, rest);
     });
   });
 
