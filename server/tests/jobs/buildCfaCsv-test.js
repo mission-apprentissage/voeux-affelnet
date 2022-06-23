@@ -33,7 +33,7 @@ describe("buildCfaCsv", () => {
     });
   }
 
-  it("Vérifie qu'on peut trouve les CFA déjà importé", async () => {
+  it("Vérifie qu'on peut trouver les CFA déjà importé", async () => {
     const csvFile = fakeCsvFile();
     const affelnetCsv = createStream(
       `UAI;CLE_MINISTERE_EDUCATIF;SIRET_UAI_GESTIONNAIRE\n0751234J;CLE-ZZZZZ;11111111100006`
@@ -61,7 +61,7 @@ describe("buildCfaCsv", () => {
     });
   });
 
-  it("Vérifie qu'on peut trouve les CFA qui nécessite une mise à jour", async () => {
+  it("Vérifie qu'on peut trouver les CFA qui nécessite une mise à jour", async () => {
     const csvFile = fakeCsvFile();
     const affelnetCsv = createStream(
       `UAI;CLE_MINISTERE_EDUCATIF;SIRET_UAI_GESTIONNAIRE\n0751234J;CLE-YYYYY;11111111100006`
@@ -76,6 +76,32 @@ describe("buildCfaCsv", () => {
     assert.deepStrictEqual(csvFile.content, [
       "siret;email;etablissements;statut\n",
       "11111111100006;test@email.fr;0751234J;maj nécessaire\n",
+    ]);
+    assert.deepStrictEqual(stats, {
+      conflicts: [],
+      stats: {
+        conflicts: 0,
+        invalid: 0,
+        total: 0,
+        valid: 1,
+      },
+    });
+  });
+
+  it("Vérifie qu'on peut ajouter des relations complémentaires", async () => {
+    const csvFile = fakeCsvFile();
+    const affelnetCsv = createStream(`UAI;CLE_MINISTERE_EDUCATIF;SIRET_UAI_GESTIONNAIRE\n`);
+
+    const stats = await buildCfaCsv(csvFile, {
+      affelnet: affelnetCsv,
+      relations: createStream(
+        `siret_gestionnaire;email_gestionnaire;uai_etablissement\n11111111100006;test@email.fr;0751234J,0751234X`
+      ),
+    });
+
+    assert.deepStrictEqual(csvFile.content, [
+      "siret;email;etablissements;statut\n",
+      "11111111100006;test@email.fr;0751234J,0751234X;nouveau\n",
     ]);
     assert.deepStrictEqual(stats, {
       conflicts: [],

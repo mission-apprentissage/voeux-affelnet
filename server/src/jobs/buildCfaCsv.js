@@ -57,7 +57,7 @@ async function buildCfaCsv(output, options = {}) {
           cfas.push({
             siret: relation.siret_gestionnaire,
             email: relation.email_gestionnaire,
-            etablissements: [relation.uai_etablissement],
+            etablissements: relation.uai_etablissement.split(","),
             statut: await getCfaStatut(relation.siret_gestionnaire, relation.uai_etablissement),
           });
         } else {
