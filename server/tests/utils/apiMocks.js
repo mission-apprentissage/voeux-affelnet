@@ -1,6 +1,6 @@
 const nock = require("nock"); // eslint-disable-line node/no-unpublished-require
 const { merge } = require("lodash");
-const faker = require("@faker-js/faker").faker;
+const faker = require("@faker-js/faker/locale/fr").faker;
 const CatalogueApi = require("../../src/common/api/CatalogueApi.js");
 const ReferentielApi = require("../../src/common/api/ReferentielApi.js");
 const { createUAI } = require("../../src/common/utils/validationUtils.js");

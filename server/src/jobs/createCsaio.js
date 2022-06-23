@@ -14,7 +14,6 @@ async function createCsaio(username, email, regionCode) {
     username,
     email,
     region: pick(region, ["code", "nom"]),
-    isAdmin: false,
     statut: "confirmé",
   });
 }

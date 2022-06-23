@@ -7,15 +7,18 @@ const { validate } = require("../../common/validators.js");
 const { getVoeuxCroisementCsvStream } = require("../../common/actions/getVoeuxCroisementCsvStream.js");
 const { findRegionByCode } = require("../../common/regions.js");
 const { Voeu } = require("../../common/model/index.js");
-const { DateTime } = require("luxon");
+const { getApprenantsCsvStream } = require("../../common/actions/getApprenantsCsvStream.js");
+const Boom = require("boom");
+const { dateAsString } = require("../../common/utils/objectUtils.js");
 
 const fichiers = [
   {
-    name: "croisement",
+    name: "voeux-affelnet-croisement",
     stream: getVoeuxCroisementCsvStream,
   },
   {
-    name: "aggregation",
+    name: "voeux-affelnet-synthese",
+    stream: getApprenantsCsvStream,
   },
 ];
 
@@ -52,24 +55,29 @@ module.exports = ({ users }) => {
   );
 
   router.get(
-    "/api/csaio/fichiers/:file.:ext",
+    "/api/csaio/fichiers/:filename.:ext",
     checkApiToken(),
     ensureIs("Csaio"),
     tryCatch(async (req, res) => {
-      const academies = findRegionByCode(req.user.region.code).academies.map((a) => a.code);
-      const { file, ext } = await validate(req.params, {
-        file: Joi.string().valid("croisement", "aggregation").required(),
+      const { filename, ext } = await validate(req.params, {
+        filename: Joi.string().valid("voeux-affelnet-croisement", "voeux-affelnet-synthese").required(),
         ext: Joi.string().valid("csv").required(),
       });
 
+      const academies = findRegionByCode(req.user.region.code).academies.map((a) => a.code);
       const latestImportDate = await getLatestImportDate();
+      const fichier = fichiers.find((f) => f.name === filename);
 
-      const { stream } = fichiers.find((f) => f.name === file);
-      const filename = `${file}-${DateTime.fromJSDate(latestImportDate).setLocale("fr").toFormat("yyyy-MM-dd")}.${ext}`;
+      if (!fichier) {
+        throw Boom.badRequest("Nom de fichier invalide");
+      }
 
-      res.setHeader("Content-disposition", `attachment; filename=${filename}`);
+      res.setHeader(
+        "Content-disposition",
+        `attachment; filename=${fichier.name}-${dateAsString(latestImportDate)}.csv`
+      );
       res.setHeader("Content-Type", `text/${ext}; charset=UTF-8`);
-      return compose(await stream({ academies }), res);
+      return compose(await fichier.stream({ academies }), res);
     })
   );
 

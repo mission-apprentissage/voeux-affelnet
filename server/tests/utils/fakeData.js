@@ -1,4 +1,4 @@
-const faker = require("@faker-js/faker").faker;
+const faker = require("@faker-js/faker/locale/fr").faker;
 const { merge } = require("lodash");
 const { Cfa, Ufa, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
@@ -30,7 +30,7 @@ module.exports = {
           email: faker.internet.email(),
           emails: [],
           raison_sociale: faker.company.companyName(),
-          academie: { code: "11", nom: "Île-de-France" },
+          academie: { code: "01", nom: "Paris" },
         },
         custom
       )
@@ -58,7 +58,7 @@ module.exports = {
           uai: custom.uai,
           libelle_type_etablissement: faker.company.companySuffix(),
           libelle_etablissement: faker.company.companyName(),
-          adresse: faker.address.streetName(),
+          adresse: faker.address.street(),
           cp: faker.address.zipCode(),
           commune: faker.address.cityName(),
         },
@@ -72,11 +72,11 @@ module.exports = {
         {},
         {
           statut: "valide",
-          academie: { code: "11", nom: "Île-de-France" },
+          academie: { code: "01", nom: "Paris" },
           apprenant: {
             ine: faker.helpers.replaceSymbols("#########??"),
-            nom: "Dupont",
-            prenom: "Robert",
+            nom: faker.name.lastName(),
+            prenom: faker.name.firstName(),
             telephone_personnel: "0112345678",
             telephone_portable: "0612345678",
             adresse: {

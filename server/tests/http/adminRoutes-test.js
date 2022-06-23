@@ -32,7 +32,7 @@ describe("adminRoutes", () => {
           username: "11111111100006",
           siret: "11111111100006",
           raison_sociale: "Organisme de formation",
-          academie: { code: "11", nom: "Île-de-France" },
+          academie: { code: "01", nom: "Paris" },
           email: "contact@organisme.com",
           etablissements: [],
           emails: [],
@@ -160,7 +160,7 @@ describe("adminRoutes", () => {
     assert.strictEqual(
       response.data,
       `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux"
-"11111111100015";"";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
+"11111111100015";"";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
 `
     );
   });
@@ -191,7 +191,7 @@ describe("adminRoutes", () => {
     assert.strictEqual(
       response.data,
       `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"statut";"nb_voeux"
-"11111111100015";"0751234J";"Organisme de formation";"Île-de-France";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"1"
+"11111111100015";"0751234J";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"1"
 `
     );
   });
@@ -217,7 +217,7 @@ describe("adminRoutes", () => {
     assert.strictEqual(
       response.data,
       `"uai";"nom";"ville";"academie"
-"0751234J";"Organisme de formation";"Paris";"Île-de-France"
+"0751234J";"Organisme de formation";"Paris";"Paris"
 `
     );
   });

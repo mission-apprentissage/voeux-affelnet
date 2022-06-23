@@ -36,7 +36,7 @@ describe("cfaRoutes", () => {
       etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
     });
     await insertVoeu({
-      apprenant: { ine: "ABCDEF" },
+      apprenant: { ine: "ABCDEF", nom: "Dupont", prenom: "Robert" },
       etablissement_origine: { uai: "0757890U" },
       etablissement_accueil: { uai: "0751234J" },
       formation: { mef: "2472521431", code_formation_diplome: "40025214" },

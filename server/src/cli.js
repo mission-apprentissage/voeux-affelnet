@@ -26,7 +26,7 @@ const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
 const { Cfa } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
-const importDossiers = require("./jobs/importDossiers.js");
+const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
@@ -240,8 +240,9 @@ cli.command("migrate").action(() => {
 
 cli
   .command("injectDataset")
-  .option("--mef", "Import les mefs")
-  .option("--admin", "Ajout un administrateur")
+  .option("--mef", "Importe les mefs")
+  .option("--admin", "Ajoute un administrateur")
+  .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
   .action((options) => {
     runScript((actions) => {
       return injectDataset(actions, options);

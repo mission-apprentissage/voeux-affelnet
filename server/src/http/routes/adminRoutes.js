@@ -1,6 +1,5 @@
 const express = require("express");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
-const { DateTime } = require("luxon");
 const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
 const { sendJsonStream } = require("../utils/httpUtils");
@@ -17,14 +16,15 @@ const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
+const { dateAsString } = require("../../common/utils/objectUtils.js");
 
 module.exports = ({ resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, checkIsAdmin } = authMiddleware();
 
   function asCsvResponse(name, res) {
-    const date = DateTime.local().setLocale("fr").toFormat("yyyy-MM-dd");
-    res.setHeader("Content-disposition", `attachment; filename=${name}-${date}.csv`);
+    const now = dateAsString(new Date());
+    res.setHeader("Content-disposition", `attachment; filename=${name}-${now}.csv`);
     res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
     return res;
   }

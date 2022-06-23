@@ -88,4 +88,4 @@ async function importDossiers(jsonStream) {
   return stats;
 }
 
-module.exports = importDossiers;
+module.exports = { importDossiers };

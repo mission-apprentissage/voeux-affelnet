@@ -1,4 +1,5 @@
 const { pickBy, isEmpty, isObject, isNumber } = require("lodash");
+const { DateTime } = require("luxon");
 
 function omitEmpty(obj) {
   return pickBy(obj, (v) => {
@@ -53,10 +54,15 @@ function removeDiacritics(value) {
     .trim();
 }
 
+function dateAsString(date) {
+  return DateTime.fromJSDate(date).setLocale("fr").toFormat("yyyy-MM-dd");
+}
+
 module.exports = {
   omitEmpty,
   deepOmitEmpty,
   trimValues,
   flattenObject,
   removeDiacritics,
+  dateAsString,
 };
