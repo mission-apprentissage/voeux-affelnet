@@ -64,6 +64,7 @@ describe("importVoeux", () => {
       },
     });
     assert.deepStrictEqual(_meta.anomalies, []);
+    assert.deepStrictEqual(_meta.adresse, "36 rue des lilas 13001 MARSEILLE FRANCE");
     assert.deepStrictEqual(_meta.import_dates[0], importDate);
     assert.deepStrictEqual(stats, {
       total: 2,

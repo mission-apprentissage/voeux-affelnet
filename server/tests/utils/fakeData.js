@@ -105,6 +105,7 @@ module.exports = {
           },
           _meta: {
             import_dates: [new Date()],
+            adresse: "36 rue des lilas 75019 Paris FRANCE",
             anomalies: [],
           },
         },

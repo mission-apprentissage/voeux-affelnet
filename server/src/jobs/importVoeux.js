@@ -80,6 +80,13 @@ async function findFormationDiplome(code) {
   return Mef.findOne({ mef });
 }
 
+function buildAdresseLibelle(adresse) {
+  return `${adresse.ligne_1} ${adresse.ligne_2} ${adresse.ligne_3} ${adresse.ligne_4} ${adresse.code_postal} ${adresse.ville} ${adresse.pays}`
+    .replace(/undefined/g, "")
+    .replace(/\s\s+/g, " ")
+    .trim();
+}
+
 function parseVoeuxCsv(source) {
   return oleoduc(
     source,
@@ -223,6 +230,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
               ...data,
               _meta: {
                 anomalies: anomalies,
+                adresse: buildAdresseLibelle(data.apprenant.adresse),
                 import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
               },
             },

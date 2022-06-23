@@ -98,6 +98,9 @@ const schema = new Schema({
         index: true,
         type: [Date],
       },
+      adresse: {
+        type: String,
+      },
       anomalies: {
         default: [],
         type: [
