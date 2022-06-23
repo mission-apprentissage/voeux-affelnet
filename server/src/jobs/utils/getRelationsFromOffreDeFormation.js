@@ -8,7 +8,7 @@ const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
 
 async function getOffreDeFormationCsv(csv) {
-  const stream = csv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-02-05-2022.csv"));
+  const stream = csv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-07-06-2022.csv"));
 
   return compose(
     stream,
