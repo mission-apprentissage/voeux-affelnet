@@ -4,14 +4,24 @@ const { Cfa, Ufa, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 const { Csaio, Dossier } = require("../../src/common/model/index.js");
 
+function createUsername() {
+  return faker.internet.userName().toLowerCase();
+}
+
+function createEmail() {
+  return faker.internet.email().toLowerCase();
+}
+
 module.exports = {
+  createUsername,
+  createEmail,
   insertUser: (custom = {}) => {
     return User.create(
       merge(
         {},
         {
-          username: faker.internet.userName(),
-          email: faker.internet.email(),
+          username: createUsername(),
+          email: createEmail(),
           emails: [],
         },
         custom
@@ -27,7 +37,7 @@ module.exports = {
         {
           username,
           siret: username,
-          email: faker.internet.email(),
+          email: createEmail(),
           emails: [],
           raison_sociale: faker.company.companyName(),
           academie: { code: "01", nom: "Paris" },
@@ -41,8 +51,8 @@ module.exports = {
       merge(
         {},
         {
-          username: faker.internet.userName(),
-          email: faker.internet.email(),
+          username: createUsername(),
+          email: createEmail(),
           emails: [],
           region: { code: "11", nom: "Île-de-France" },
         },
@@ -150,7 +160,7 @@ module.exports = {
         {
           dossier_id: "621d4f652b8e994d7a1794ec",
           _meta: { nom_complet: `${firstName} ${lastName}` },
-          email_contact: faker.internet.email(),
+          email_contact: createEmail(),
           annee_formation: 1,
           contrat_date_debut: new Date(),
           contrat_date_fin: new Date(),

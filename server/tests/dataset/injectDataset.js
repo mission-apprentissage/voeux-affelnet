@@ -6,31 +6,24 @@ const { createUAI } = require("../../src/common/utils/validationUtils");
 const importMefs = require("../../src/jobs/importMefs");
 const { insertCfa, insertUfa, insertVoeu } = require("../utils/fakeData");
 const { range } = require("lodash");
-const { insertDossier } = require("../utils/fakeData.js");
+const { insertDossier, createUsername, createEmail } = require("../utils/fakeData.js");
 const { createAdmin } = require("../../src/jobs/createAdmin.js");
 const { createCsaio } = require("../../src/jobs/createCsaio.js");
+const logger = require("../../src/common/logger.js");
 
 async function generateUfas(uais) {
   const stats = uais.map(async (uai) => await insertUfa({ uai }));
   await JobEvent.create({ job: "importUfas", stats });
 }
 
-async function generateCfa(uais, custom = {}) {
-  const stats = await insertCfa({
-    etablissements: uais.map((uai) => {
-      return { uai, voeux_date: new Date() };
-    }),
-    ...custom,
-  });
-  await JobEvent.create({ job: "importCfas", stats });
-}
-
 async function generateVoeux(uais, options = {}) {
+  const nbVoeux = 25;
   const { mef, code_formation_diplome, libelle_long } = await Mef.findOne({ mef: "3112320121" });
 
+  logger.info(`Generating ${uais.length * nbVoeux} voeux...`);
   const stats = await Promise.all(
     uais.flatMap((uai) => {
-      return range(0, 25).flatMap(() => {
+      return range(0, nbVoeux).flatMap(() => {
         const ine = faker.helpers.replaceSymbols("#########??");
         return [
           insertVoeu({
@@ -58,36 +51,40 @@ async function generateVoeux(uais, options = {}) {
   await JobEvent.create({ job: "importVoeux", stats });
 }
 
-async function generateCfaAndVoeux(cfa, options) {
+async function generateCfa(sendEmail, uais) {
   const siret = faker.helpers.replaceSymbols("#########00015");
-  const uais = range(0, 2).map(() => createUAI(faker.helpers.replaceSymbols("075####")));
 
-  await generateCfa(uais, {
-    ...cfa,
+  logger.info(`Generating CFA ${siret}...`);
+  const stats = await insertCfa({
     siret,
+    etablissements: uais.map((uai) => {
+      return { uai, voeux_date: new Date() };
+    }),
   });
+  await JobEvent.create({ job: "importCfas", stats });
   await generateUfas(uais);
-  await generateVoeux(uais, options);
+  await sendConfirmationEmails(sendEmail, { username: siret });
 
-  return { siret, uais };
+  return { siret };
 }
 
 async function generateAdmin(sendEmail) {
-  const username = faker.internet.userName();
+  const username = createUsername();
 
-  await createAdmin(username, faker.internet.email());
+  await createAdmin(username, createEmail());
   await sendActivationEmails(sendEmail, { username });
 }
 
 async function generateCsaio(sendEmail) {
-  const username = faker.internet.userName();
+  const username = createUsername();
 
-  await createCsaio(username, faker.internet.email(), "11");
+  await createCsaio(username, createEmail(), "11");
   await sendActivationEmails(sendEmail, { username });
 }
 
 async function injectDataset(actions, options = {}) {
   let { sendEmail } = actions;
+  const uais = range(0, 2).map(() => createUAI(faker.helpers.replaceSymbols("075####")));
 
   if (options.mef) {
     await importMefs();
@@ -101,8 +98,11 @@ async function injectDataset(actions, options = {}) {
     await generateCsaio(sendEmail);
   }
 
-  let { siret } = await generateCfaAndVoeux(options);
-  await sendConfirmationEmails(sendEmail, { username: siret });
+  if (options.cfa) {
+    await generateCfa(sendEmail, uais);
+  }
+
+  await generateVoeux(uais, options);
 }
 
 module.exports = { injectDataset };

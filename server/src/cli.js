@@ -241,6 +241,7 @@ cli.command("migrate").action(() => {
 cli
   .command("injectDataset")
   .option("--mef", "Importe les mefs")
+  .option("--cfa", "Ajoute un cfa")
   .option("--admin", "Ajoute un administrateur")
   .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
   .action((options) => {
