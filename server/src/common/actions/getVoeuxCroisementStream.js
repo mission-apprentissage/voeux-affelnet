@@ -72,6 +72,7 @@ async function getVoeuxCroisementStream(options = {}) {
           "Apprenant Adresse": voeu._meta.adresse,
           "Etablissement Accueil UAI": uai,
           "Etablissement Accueil Nom": voeu.etablissement_accueil.nom,
+          "Etablissement Accueil CIO": voeu.etablissement_accueil.cio,
           "Formation CFD": voeu.formation.code_formation_diplome,
           "Formation MEF": voeu.formation.mef,
           "Formation Libellé": voeu.formation.libelle,
