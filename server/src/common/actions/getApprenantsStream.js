@@ -1,8 +1,8 @@
 const { Voeu } = require("../model/index.js");
-const { compose, transformData, transformIntoCSV } = require("oleoduc");
+const { compose, transformData } = require("oleoduc");
 const { findDossiers } = require("./findDossiers.js");
 
-async function getApprenantsCsvStream(options = {}) {
+async function getApprenantsStream(options = {}) {
   const academies = options.academies;
 
   return compose(
@@ -33,8 +33,7 @@ async function getApprenantsCsvStream(options = {}) {
         };
       },
       { parallel: 10 }
-    ),
-    transformIntoCSV()
+    )
   );
 }
-module.exports = { getApprenantsCsvStream };
+module.exports = { getApprenantsStream };

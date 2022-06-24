@@ -33,7 +33,15 @@ describe("csaioRoutes", () => {
         date: date.toISOString(),
       },
       {
+        name: "voeux-affelnet-croisement.xls",
+        date: date.toISOString(),
+      },
+      {
         name: "voeux-affelnet-synthese.csv",
+        date: date.toISOString(),
+      },
+      {
+        name: "voeux-affelnet-synthese.xls",
         date: date.toISOString(),
       },
     ]);

@@ -1,5 +1,5 @@
 const { Voeu } = require("../model/index.js");
-const { compose, transformData, transformIntoCSV } = require("oleoduc");
+const { compose, transformData } = require("oleoduc");
 const { findDossier } = require("./findDossier.js");
 
 function besoinAide(statut) {
@@ -44,7 +44,7 @@ function getTrajectoiresPro(statut, voeu) {
   return `https://trajectoires-pro.apprentissage.beta.gouv.fr/api/inserjeunes/formations/${uai}-${cfd}.svg`;
 }
 
-async function getVoeuxCroisementCsvStream(options = {}) {
+async function getVoeuxCroisementStream(options = {}) {
   const academies = options.academies;
 
   return compose(
@@ -76,8 +76,7 @@ async function getVoeuxCroisementCsvStream(options = {}) {
         };
       },
       { parallel: 10 }
-    ),
-    transformIntoCSV()
+    )
   );
 }
-module.exports = { getVoeuxCroisementCsvStream };
+module.exports = { getVoeuxCroisementStream };
