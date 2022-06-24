@@ -1,6 +1,7 @@
-const { Voeu } = require("../model/index.js");
+const { Voeu, Cfa } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
 const { findDossier } = require("./findDossier.js");
+const { dateAsString } = require("../utils/objectUtils.js");
 
 function besoinAide(statut) {
   return !["apprenti", "inscrit"].includes(statut);
@@ -53,8 +54,14 @@ async function getVoeuxCroisementStream(options = {}) {
       .cursor(),
     transformData(
       async (voeu) => {
-        const dossier = await findDossier(voeu);
+        const uai = voeu.etablissement_accueil.uai;
+        const [dossier, cfa] = await Promise.all([
+          findDossier(voeu),
+          Cfa.findOne({ "voeux_telechargements.uai": uai }),
+        ]);
+
         const statut = dossier?.statut || "Non trouvé";
+        const downloadDate = cfa?.voeux_telechargements.find((t) => t.uai === uai)?.date;
 
         return {
           "Apprenant INE": voeu.apprenant.ine,
@@ -63,13 +70,14 @@ async function getVoeuxCroisementStream(options = {}) {
           "Apprenant Téléphone Personnel": voeu.apprenant.telephone_personnel,
           "Apprenant Téléphone Portable": voeu.apprenant.telephone_portable,
           "Apprenant Adresse": voeu._meta.adresse,
-          "Etablissement Accueil UAI": voeu.etablissement_accueil.uai,
+          "Etablissement Accueil UAI": uai,
           "Etablissement Accueil Nom": voeu.etablissement_accueil.nom,
           "Formation CFD": voeu.formation.code_formation_diplome,
           "Formation MEF": voeu.formation.mef,
           "Formation Libellé": voeu.formation.libelle,
           Académie: voeu.academie.nom,
           "Statut dans le tableau de bord": statut,
+          "Date de téléchargement du voeu par l'OF": downloadDate ? dateAsString(downloadDate) : "",
           "La Bonne Alternance": getWidgetLBAUrl(statut, voeu),
           InserJeunes: getTrajectoiresPro(statut, voeu),
           ...getDidaskModules(statut),

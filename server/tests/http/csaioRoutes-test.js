@@ -2,7 +2,7 @@ const assert = require("assert");
 const { insertVoeu } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 const { Csaio } = require("../../src/common/model/index.js");
-const { insertDossier } = require("../utils/fakeData.js");
+const { insertDossier, insertCfa } = require("../utils/fakeData.js");
 const { DateTime } = require("luxon");
 
 describe("csaioRoutes", () => {
@@ -88,6 +88,14 @@ describe("csaioRoutes", () => {
           import_dates: [date],
         },
       }),
+      insertCfa({
+        voeux_telechargements: [
+          {
+            uai: "0751234J",
+            date: date,
+          },
+        ],
+      }),
       insertVoeu({
         apprenant: {
           ine: "GHIJKL",
@@ -127,9 +135,9 @@ describe("csaioRoutes", () => {
     );
     assert.strictEqual(
       response.data,
-      `Apprenant INE;Apprenant Nom;Apprenant prénom;Apprenant Téléphone Personnel;Apprenant Téléphone Portable;Apprenant Adresse;Etablissement Accueil UAI;Etablissement Accueil Nom;Formation CFD;Formation MEF;Formation Libellé;Académie;Statut dans le tableau de bord;La Bonne Alternance;InserJeunes;Didask - Prendre contact avec un CFA;Didask - Chercher un employeur;Didask - Préparer un entretien avec un employeur;Didask - S'intégrer dans l'entreprise
-ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;0751234J;Etablissement Accueil;40025214;2472521431;1CAP2  CUISINE;Paris;apprenti;;;;;;
-GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;0751234X;Etablissement Accueil;50025214;2472521431;2CAP2  CUISINE;Paris;Non trouvé;;https://trajectoires-pro.apprentissage.beta.gouv.fr/api/inserjeunes/formations/0751234X-50025214.svg;https://dinum-beta.didask.com/courses/demonstration/60abc18c075edf000065c987;https://dinum-beta.didask.com/courses/demonstration/60d21bf5be76560000ae916e;https://dinum-beta.didask.com/courses/demonstration/60d1adbb877dae00003f0eac;https://dinum-beta.didask.com/courses/demonstration/6283bd5ad9c7ae00003ede91
+      `Apprenant INE;Apprenant Nom;Apprenant prénom;Apprenant Téléphone Personnel;Apprenant Téléphone Portable;Apprenant Adresse;Etablissement Accueil UAI;Etablissement Accueil Nom;Formation CFD;Formation MEF;Formation Libellé;Académie;Statut dans le tableau de bord;Date de téléchargement du voeu par l'OF;La Bonne Alternance;InserJeunes;Didask - Prendre contact avec un CFA;Didask - Chercher un employeur;Didask - Préparer un entretien avec un employeur;Didask - S'intégrer dans l'entreprise
+ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;0751234J;Etablissement Accueil;40025214;2472521431;1CAP2  CUISINE;Paris;apprenti;2022-07-23;;;;;;
+GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;0751234X;Etablissement Accueil;50025214;2472521431;2CAP2  CUISINE;Paris;Non trouvé;;;https://trajectoires-pro.apprentissage.beta.gouv.fr/api/inserjeunes/formations/0751234X-50025214.svg;https://dinum-beta.didask.com/courses/demonstration/60abc18c075edf000065c987;https://dinum-beta.didask.com/courses/demonstration/60d21bf5be76560000ae916e;https://dinum-beta.didask.com/courses/demonstration/60d1adbb877dae00003f0eac;https://dinum-beta.didask.com/courses/demonstration/6283bd5ad9c7ae00003ede91
 `
     );
   });

@@ -51,6 +51,7 @@ const schema = new Schema({
         uai: {
           type: String,
           required: true,
+          index: true,
         },
         date: {
           type: Date,
