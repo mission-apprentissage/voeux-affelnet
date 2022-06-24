@@ -77,6 +77,10 @@ module.exports = {
     );
   },
   insertVoeu: (custom = {}) => {
+    const street = faker.address.streetAddress();
+    const codePostal = faker.address.zipCode();
+    const cityName = faker.address.cityName();
+
     return Voeu.create(
       merge(
         {},
@@ -87,35 +91,41 @@ module.exports = {
             ine: faker.helpers.replaceSymbols("#########??"),
             nom: faker.name.lastName(),
             prenom: faker.name.firstName(),
-            telephone_personnel: "0112345678",
-            telephone_portable: "0612345678",
+            telephone_personnel: faker.helpers.replaceSymbols("##########"),
+            telephone_portable: faker.helpers.replaceSymbols("##########"),
             adresse: {
-              ligne_1: "36 rue des lilas",
-              code_postal: "75019",
-              ville: "Paris",
+              ligne_1: street,
+              code_postal: codePostal,
+              ville: cityName,
               pays: "FRANCE",
             },
           },
           responsable: {
-            telephone_1: "0112345678",
-            email_1: "test1@apprentissage.beta.gouv.fr",
+            telephone_1: faker.helpers.replaceSymbols("##########"),
+            email_1: createEmail(),
           },
           formation: {
             code_affelnet: faker.helpers.replaceSymbols("#?######"),
             code_formation_diplome: faker.helpers.replaceSymbols("#######"),
-            mef: "2472521431",
+            mef: faker.helpers.replaceSymbols("##########"),
             libelle: "1CAP2  CUISINE",
+            cle_ministere_educatif: faker.helpers
+              .replaceSymbols("######?################################-#####_L##")
+              .replace(/_/g, "#"),
           },
           etablissement_origine: {
             uai: createUAI(faker.helpers.replaceSymbols("075####")),
-            nom: "LYCEE SAS",
+            nom: faker.company.companyName(),
+            ville: faker.address.cityName(),
           },
           etablissement_accueil: {
             uai: createUAI(faker.helpers.replaceSymbols("075####")),
+            nom: faker.company.companyName(),
+            ville: faker.address.cityName(),
           },
           _meta: {
             import_dates: [new Date()],
-            adresse: "36 rue des lilas 75019 Paris FRANCE",
+            adresse: `${street} ${codePostal} ${cityName}`,
             anomalies: [],
           },
         },
@@ -128,9 +138,9 @@ module.exports = {
       merge(
         {},
         {
-          mef: "2472521431",
+          mef: faker.helpers.replaceSymbols("#########"),
           libelle_long: "2NDPRO MAINT.VEHIC.OPTA VOIT.PARTICUL.",
-          code_formation_diplome: "40025214",
+          code_formation_diplome: faker.helpers.replaceSymbols("########"),
         },
         custom
       )

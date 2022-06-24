@@ -36,10 +36,32 @@ describe("cfaRoutes", () => {
       etablissements: [{ uai: "0751234J", voeux_date: DateTime.fromISO("2021-06-02T14:00:00.000Z").toJSDate() }],
     });
     await insertVoeu({
-      apprenant: { ine: "ABCDEF", nom: "Dupont", prenom: "Robert" },
-      etablissement_origine: { uai: "0757890U" },
+      apprenant: {
+        ine: "ABCDEF",
+        nom: "Dupont",
+        prenom: "Robert",
+        telephone_personnel: "0112345678",
+        telephone_portable: "0612345678",
+        adresse: {
+          ligne_1: "36 rue des lilas",
+          code_postal: "75019",
+          ville: "Paris",
+          pays: "FRANCE",
+        },
+      },
+      responsable: {
+        telephone_1: "0112345678",
+        email_1: "test1@apprentissage.beta.gouv.fr",
+      },
+      etablissement_origine: { uai: "0757890U", nom: "LYCEE SAS" },
       etablissement_accueil: { uai: "0751234J" },
-      formation: { mef: "2472521431", code_formation_diplome: "40025214" },
+      formation: {
+        mef: "2472521431",
+        code_formation_diplome: "40025214",
+      },
+      _meta: {
+        adresse: "36 rue des lilas 75019 Paris FRANCE",
+      },
     });
 
     const response = await httpClient.get("/api/cfa/fichiers/0751234J.csv", {
