@@ -21,7 +21,7 @@ async function exportStatutVoeux(output, options = {}) {
         download: (data) => ouiNon(data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)),
         download_date: (data) =>
           date(data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)?.date),
-        nouveauVoeux: (data) =>
+        nouveau_voeux: (data) =>
           ouiNon(
             data.etablissement.voeux_date &&
               !(
