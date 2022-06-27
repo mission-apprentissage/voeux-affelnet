@@ -16,24 +16,25 @@ async function exportStatutVoeux(output, options = {}) {
         Académie: (data) => data.cfa?.academie?.nom,
         Siret: (data) => data.cfa?.siret,
         Uai: (data) => data.etablissement?.uai,
-        Vœux: (data) => ouiNon(data.etablissement.voeux_date),
-        "Date des derniers vœux disponibles": (data) => date(data.etablissement.voeux_date),
-        Téléchargement: (data) => ouiNon(data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)),
+        Vœux: (data) => ouiNon(data.etablissement?.voeux_date),
+        "Date des derniers vœux disponibles": (data) => date(data.etablissement?.voeux_date),
+        Téléchargement: (data) =>
+          ouiNon(data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)),
         "Date du dernier téléchargement": (data) =>
-          date(data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)?.date),
+          date(data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date),
         "Vœux à télécharger": (data) =>
           ouiNon(
-            data.etablissement.voeux_date &&
+            data.etablissement?.voeux_date &&
               !(
-                data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)?.date >
-                data.etablissement.voeux_date
+                data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date >
+                data.etablissement?.voeux_date
               )
           ),
         "Nombre de vœux à télécharger": async (data) => {
-          const downloadDate = data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)?.date;
-          console.log(data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)?.date);
+          const downloadDate = data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date;
+          console.log(data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date);
           return `${await Voeu.countDocuments({
-            "etablissement_accueil.uai": data.etablissement.uai,
+            "etablissement_accueil.uai": data.etablissement?.uai,
             ...(downloadDate
               ? {
                   "_meta.import_dates": {
@@ -48,7 +49,7 @@ async function exportStatutVoeux(output, options = {}) {
         },
         "Nombre total de vœux": async (data) =>
           `${await Voeu.countDocuments({
-            "etablissement_accueil.uai": data.etablissement.uai,
+            "etablissement_accueil.uai": data.etablissement?.uai,
           })}`,
         ...columns,
       },
