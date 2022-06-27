@@ -168,6 +168,24 @@ describe("importCfas", () => {
     assert.deepStrictEqual(stats, { total: 1, created: 0, updated: 0, invalid: 0, failed: 1 });
   });
 
+  it("Vérifie qu'on gère les organismes inconnus dans le référentiel", async () => {
+    const cfaCsv = createStream(`siret;email;etablissements\n99999999999999;contact@lycee.fr;0751234J`);
+    const options = {
+      referentielApi: {
+        getOrganisme() {
+          return Promise.reject(new Error("Erreur durant l'import"));
+        },
+      },
+    };
+
+    const stats = await importCfas(cfaCsv, options);
+
+    const found = await Cfa.findOne();
+    assert.strictEqual(found.siret, "99999999999999");
+    assert.strictEqual(found.raison_sociale, "Inconnue");
+    assert.deepStrictEqual(stats, { total: 1, created: 1, updated: 0, invalid: 0, failed: 0 });
+  });
+
   it("Vérifie qu'on rejete un CFA sans établissements", async () => {
     const cfaCsv = createStream(`siret;email;etablissements\n11111111100006;contact@lycee.fr;`);
 

@@ -62,10 +62,13 @@ async function importCfas(cfaCsv, options = {}) {
 
         try {
           const etablissements = await buildEtablissements(data.etablissements);
-          const organisme = await referentielApi.getOrganisme(siret);
           const found = await Cfa.findOne({ siret }).lean();
+          const organisme = await referentielApi.getOrganisme(siret).catch((e) => {
+            logger.warn(e, `Le CFA ${siret} n'est pas dans le référentiel`);
+            return null;
+          });
 
-          if (!organisme.adresse) {
+          if (!organisme?.adresse) {
             logger.warn(`Le CFA ${siret} n'a pas d'académie`);
           }
 
@@ -75,11 +78,11 @@ async function importCfas(cfaCsv, options = {}) {
             return;
           }
 
-          const updates = {
+          const updates = omitEmpty({
             etablissements,
-            raison_sociale: organisme.raison_sociale,
-            academie: pick(findAcademieByCode(organisme.adresse?.academie.code), ["code", "nom"]),
-          };
+            raison_sociale: organisme?.raison_sociale || "Inconnue",
+            academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),
+          });
 
           const res = await Cfa.updateOne(
             { siret },

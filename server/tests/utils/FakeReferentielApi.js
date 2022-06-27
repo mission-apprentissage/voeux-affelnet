@@ -3,7 +3,7 @@ class FakeReferentielApi {
     this.responses = responses;
   }
 
-  getOrganisme(siret) {
+  async getOrganisme(siret) {
     if (Array.isArray(this.responses)) {
       return this.responses.find((r) => r.siret === siret);
     }
