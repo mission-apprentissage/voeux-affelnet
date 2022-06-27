@@ -21,13 +21,13 @@ const exportCfas = require("./jobs/exportCfas");
 const buildCfaCsv = require("./jobs/buildCfaCsv");
 const { exportStatutVoeux } = require("./jobs/exportStatutVoeux");
 const { createAdmin } = require("./jobs/createAdmin.js");
-const { DateTime } = require("luxon");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
 const { Cfa } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
+const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -108,18 +108,17 @@ cli
   .command("importVoeux")
   .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
   .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
-  .option("--importDate <importDate>", "Permet de définir manuellement (ISO 8601) la date d'import", (value) => {
-    const importDate = DateTime.fromISO(value);
-    if (!importDate.isValid) {
-      throw new Error(`Invalid date ${value}`);
-    }
-    return importDate.toJSDate();
-  })
+  .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
   .action((file, options) => {
     runScript(async () => {
       const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
 
-      return importVoeux(input, options);
+      let importDate = new Date();
+      if (options.refresh) {
+        importDate = await getLatestImportDate();
+      }
+
+      return importVoeux(input, { importDate });
     });
   });
 

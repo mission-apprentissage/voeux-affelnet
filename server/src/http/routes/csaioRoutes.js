@@ -6,11 +6,11 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { validate } = require("../../common/validators.js");
 const { getVoeuxCroisementStream } = require("../../common/actions/getVoeuxCroisementStream.js");
 const { findRegionByCode } = require("../../common/regions.js");
-const { Voeu } = require("../../common/model/index.js");
 const { getApprenantsStream } = require("../../common/actions/getApprenantsStream.js");
 const Boom = require("boom");
 const { dateAsString } = require("../../common/utils/objectUtils.js");
 const { encodeStream } = require("iconv-lite");
+const { getLatestImportDate } = require("../../common/actions/getLatestImportDate.js");
 
 const fichiers = [
   {
@@ -39,14 +39,6 @@ const encoders = {
     );
   },
 };
-
-function getLatestImportDate() {
-  return Voeu.aggregate([
-    { $unwind: "$_meta.import_dates" },
-    { $group: { _id: "$_meta.import_dates" } },
-    { $sort: { _id: -1 } },
-  ]).then((agg) => agg[0]?._id);
-}
 
 module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
