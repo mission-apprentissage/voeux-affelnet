@@ -57,7 +57,7 @@ const transformUfaStream = (data) => {
 };
 
 async function getDefaultUfaStream() {
-  const stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-02-05-2022.csv");
+  const stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-07-06-2022.csv");
 
   return compose(stream, parseCsv(), transformData(transformUfaStream));
 }
