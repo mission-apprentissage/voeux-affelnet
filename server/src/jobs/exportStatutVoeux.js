@@ -21,7 +21,7 @@ async function exportStatutVoeux(output, options = {}) {
         Téléchargement: (data) => ouiNon(data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)),
         "Date du dernier téléchargement": (data) =>
           date(data.cfa?.voeux_telechargements.find((v) => data.etablissement.uai === v.uai)?.date),
-        "Voeux à télécharger": (data) =>
+        "Vœux à télécharger": (data) =>
           ouiNon(
             data.etablissement.voeux_date &&
               !(
@@ -46,7 +46,7 @@ async function exportStatutVoeux(output, options = {}) {
               : {}),
           })}`;
         },
-        "Nombre total de voeux": async (data) =>
+        "Nombre total de vœux": async (data) =>
           `${await Voeu.countDocuments({
             "etablissement_accueil.uai": data.etablissement.uai,
           })}`,
