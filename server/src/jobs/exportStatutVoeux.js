@@ -40,7 +40,7 @@ async function exportStatutVoeux(output, options = {}) {
                   "_meta.import_dates": {
                     $elemMatch: {
                       $exists: true,
-                      $gte: new Date(downloadDate),
+                      $gte: downloadDate,
                     },
                   },
                 }
