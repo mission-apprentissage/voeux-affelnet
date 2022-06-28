@@ -1,7 +1,7 @@
 const { Voeu, Cfa } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
 const { findDossier } = require("./findDossier.js");
-const { dateAsString } = require("../utils/objectUtils.js");
+const { dateAsString } = require("../utils/stringUtils.js");
 
 function besoinAide(statut) {
   return !["apprenti", "inscrit"].includes(statut);

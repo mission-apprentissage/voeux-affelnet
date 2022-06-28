@@ -16,7 +16,7 @@ const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
-const { dateAsString } = require("../../common/utils/objectUtils.js");
+const { dateAsString } = require("../../common/utils/stringUtils.js");
 
 module.exports = ({ resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap

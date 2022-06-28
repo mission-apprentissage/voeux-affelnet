@@ -8,7 +8,7 @@ const { getVoeuxCroisementStream } = require("../../common/actions/getVoeuxCrois
 const { findRegionByCode } = require("../../common/regions.js");
 const { getApprenantsStream } = require("../../common/actions/getApprenantsStream.js");
 const Boom = require("boom");
-const { dateAsString } = require("../../common/utils/objectUtils.js");
+const { dateAsString } = require("../../common/utils/stringUtils.js");
 const { encodeStream } = require("iconv-lite");
 const { getLatestImportDate } = require("../../common/actions/getLatestImportDate.js");
 
