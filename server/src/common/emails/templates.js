@@ -63,6 +63,18 @@ module.exports = {
       },
     };
   },
+  activation_csaio: (user, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+    return {
+      subject: `${prefix}Activation de votre compte`,
+      templateFile: getTemplateFile("activation_csaio"),
+      data: {
+        user,
+        token,
+        actionToken: createActionToken(user.username),
+      },
+    };
+  },
   notification: (cfa, token) => {
     return {
       subject: `De nouveaux vœux Affelnet sont téléchargeables`,

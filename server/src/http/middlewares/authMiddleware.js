@@ -92,9 +92,9 @@ module.exports = () => {
         }
       };
     },
-    checkIsCfa: () => {
+    ensureIs: (type) => {
       return (req, res, next) => {
-        if (req.user.type !== "Cfa") {
+        if (req.user.type !== type) {
           next(Boom.forbidden());
         } else {
           next();

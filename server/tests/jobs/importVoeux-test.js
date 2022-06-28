@@ -16,9 +16,9 @@ describe("importVoeux", () => {
 
     const stats = await importVoeux(
       Readable.from([
-        `"Académie possédant le dossier élève";"INE";"Nom de l'élève";"Prénom 1";"Prénom 2";"Prénom 3";"Adresse de l'élève - Ligne 1";"Adresse de l'élève - Ligne 2";"Adresse de l'élève - Ligne 3";"Adresse de l'élève - Ligne 4";"Code postal";"VILLE";"PAYS";"Téléphone personnel";"Téléphone professionnel";"Téléphone portable";"Téléphone responsable 1";"Téléphone responsable 2";"Mail responsable 1";"Mail responsable 2";"Mnémonique MEF origine de l'élève";"Code Spécialité du MEF origine de l'élève";"Libellé formation origine de l'élève";"Code Option 1 d'origine de l'élève";"Libellé  Option 1 d'origine de l'élève";"Code Option 2 d'origine de l'élève";"Libellé Option 2 d'origine de l'élève";"Code LV1 d'origine de l'élève";"Libellé LV1 origine de l'élève";"Code LV2 d'origine de l'élève";"Libellé LV2 origine de l'élève";"Code UAI étab. origine";"Type étab. origine";"Libellé étab. origine";"Ville étab. origine";"Code UAI CIO origine";"Libellé CIO origine";"Rang du vœu";"Code offre de formation (vœu)";"Code MEF";"Avec barème ?";"Mnémonique MEF de l'offre de formation";"Code spécialité de l'offre de formation";"Libellé formation";"Code Enseignement Optionnel";"Libellé Enseignement Optionnel";"Dossier de candidature en internat demandé ?";"Code LV1 demandée";"Libellé  LV1 demandée";"Code LV2 demandée";"Libellé LV2 demandée";"Code UAI étab. Accueil";"Type étab. Accueil";"Libellé établissement Accueil";"Ville étab. Accueil"
-"Aix-Marseille";"111111111HA";"Dupont";"Robert";;;"-";"-";"36 rue des lilas";"-";"13001";"MARSEILLE";"FRANCE";"-";"-";"-";"+33611111111";"+33611111111";"test1@apprentissage.beta.gouv.fr";"test2@apprentissage.beta.gouv.fr";"3EME";;"3EME";"-";"-";"-";"-";"AGL1";"ANGLAIS LV1";"ESP2";"ESPAGNOL LV2";"1111111A";"COLLEGE";"JULES FERRY";"MARSEILLE";"1111111G";"CIO MARSEILLE";"2";"1A111111";"24725214310";"Non";"2NDPRO";"25214";"2NDPRO MAINT.VEHIC.OPTA VOIT.PARTICUL.";"-";"-";"Non";"-";"-";"-";"-";"1111111R";"LP";"LYCEE PRIVAT";"MARSEILLE CEDEX"
-"Aix-Marseille";"111111111Hb";"Dupont";"Robert";;;"-";"-";"36 rue des lilas";"-";"13001";"MARSEILLE";"FRANCE";"-";"-";"-";"+33611111111";"+33611111111";"test1@apprentissage.beta.gouv.fr";"test2@apprentissage.beta.gouv.fr";"3EME";;"3EME";"-";"-";"-";"-";"AGL1";"ANGLAIS LV1";"ESP2";"ESPAGNOL LV2";"1111111A";"COLLEGE";"JULES FERRY";"MARSEILLE";"1111111G";"CIO MARSEILLE";"2";"1A111111";"24725214310";"Non";"2NDPRO";"25214";"2NDPRO MAINT.VEHIC.OPTA VOIT.PARTICUL.";"-";"-";"Non";"-";"-";"-";"-";"1111111R";"LP";"LYCEE PRIVAT";"MARSEILLE CEDEX"
+        `"Académie possédant le dossier élève";"INE";"Nom de l'élève";"Prénom 1";"Prénom 2";"Prénom 3";"Adresse de l'élève - Ligne 1";"Adresse de l'élève - Ligne 2";"Adresse de l'élève - Ligne 3";"Adresse de l'élève - Ligne 4";"Code postal";"VILLE";"PAYS";"Téléphone personnel";"Téléphone professionnel";"Téléphone portable";"Téléphone responsable 1";"Téléphone responsable 2";"Mail responsable 1";"Mail responsable 2";"Mnémonique MEF origine de l'élève";"Code Spécialité du MEF origine de l'élève";"Libellé formation origine de l'élève";"Code Option 1 d'origine de l'élève";"Libellé  Option 1 d'origine de l'élève";"Code Option 2 d'origine de l'élève";"Libellé Option 2 d'origine de l'élève";"Code LV1 d'origine de l'élève";"Libellé LV1 origine de l'élève";"Code LV2 d'origine de l'élève";"Libellé LV2 origine de l'élève";"Code UAI étab. origine";"Type étab. origine";"Libellé étab. origine";"Ville étab. origine";"Code UAI CIO origine";"Libellé CIO origine";"Rang du vœu";"Code offre de formation (vœu)";"Code MEF";"Avec barème ?";"Mnémonique MEF de l'offre de formation";"Code spécialité de l'offre de formation";"Libellé formation";"Code Enseignement Optionnel";"Libellé Enseignement Optionnel";"Dossier de candidature en internat demandé ?";"Code LV1 demandée";"Libellé  LV1 demandée";"Code LV2 demandée";"Libellé LV2 demandée";"Code UAI étab. Accueil";"Type étab. Accueil";"Libellé établissement Accueil";"Ville étab. Accueil";"clé ministère éducatif";"UAI CIO de l'établissement d'accueil"
+"Aix-Marseille";"111111111HA";"Dupont";"Robert";;;"-";"-";"36 rue des lilas";"-";"13001";"MARSEILLE";"FRANCE";"-";"-";"-";"+33611111111";"+33611111111";"test1@apprentissage.beta.gouv.fr";"test2@apprentissage.beta.gouv.fr";"3EME";;"3EME";"-";"-";"-";"-";"AGL1";"ANGLAIS LV1";"ESP2";"ESPAGNOL LV2";"1111111A";"COLLEGE";"JULES FERRY";"MARSEILLE";"1111111G";"CIO MARSEILLE";"2";"1A111111";"24725214310";"Non";"2NDPRO";"25214";"2NDPRO MAINT.VEHIC.OPTA VOIT.PARTICUL.";"-";"-";"Non";"-";"-";"-";"-";"1111111R";"LP";"LYCEE PRIVAT";"MARSEILLE CEDEX";"058562P01311913320630002019130150600017-13077#L01";"0000000C"
+"Aix-Marseille";"111111111Hb";"Dupont";"Robert";;;"-";"-";"36 rue des lilas";"-";"13001";"MARSEILLE";"FRANCE";"-";"-";"-";"+33611111111";"+33611111111";"test1@apprentissage.beta.gouv.fr";"test2@apprentissage.beta.gouv.fr";"3EME";;"3EME";"-";"-";"-";"-";"AGL1";"ANGLAIS LV1";"ESP2";"ESPAGNOL LV2";"1111111A";"COLLEGE";"JULES FERRY";"MARSEILLE";"1111111G";"CIO MARSEILLE";"2";"1A111111";"24725214310";"Non";"2NDPRO";"25214";"2NDPRO MAINT.VEHIC.OPTA VOIT.PARTICUL.";"-";"-";"Non";"-";"-";"-";"-";"1111111R";"LP";"LYCEE PRIVAT";"MARSEILLE CEDEX";"058562P01311913320630002019130150600017-13077#L02";"0000000C"
 `,
       ]),
       { importDate }
@@ -49,6 +49,7 @@ describe("importVoeux", () => {
         code_formation_diplome: "40025214",
         mef: "2472521431",
         libelle: "2NDPRO MAINT.VEHIC.OPTA VOIT.PARTICUL.",
+        cle_ministere_educatif: "058562P01311913320630002019130150600017-13077#L01",
       },
       etablissement_origine: {
         uai: "1111111A",
@@ -59,9 +60,11 @@ describe("importVoeux", () => {
         uai: "1111111R",
         nom: "LP LYCEE PRIVAT",
         ville: "MARSEILLE CEDEX",
+        cio: "0000000C",
       },
     });
     assert.deepStrictEqual(_meta.anomalies, []);
+    assert.deepStrictEqual(_meta.adresse, "36 rue des lilas 13001 MARSEILLE FRANCE");
     assert.deepStrictEqual(_meta.import_dates[0], importDate);
     assert.deepStrictEqual(stats, {
       total: 2,

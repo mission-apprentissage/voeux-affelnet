@@ -3,8 +3,8 @@ const server = require("../../src/http/server");
 const axiosist = require("axiosist");
 const { createFakeMailer } = require("./fakeMailer");
 const createEmailActions = require("../../src/common/actions/createEmailActions");
-const { User, Cfa } = require("../../src/common/model");
-const { insertCfa, insertUser } = require("./fakeData");
+const { User } = require("../../src/common/model");
+const { insertCfa, insertUser, insertCsaio } = require("./fakeData");
 const { activateUser } = require("../../src/common/actions/activateUser");
 const { Readable } = require("stream");
 const { delay } = require("../../src/common/utils/asyncUtils");
@@ -56,12 +56,18 @@ async function startServer(options) {
   async function createAndLogUser(username, password, options = {}) {
     const { model, ...rest } = options;
     const Model = model || User;
-    const insert = Model === Cfa ? insertCfa : insertUser;
-    await insert({
+    const insertMapper = {
+      Cfa: insertCfa,
+      Csaio: insertCsaio,
+      User: insertUser,
+    };
+
+    await insertMapper[Model.modelName]({
       username,
       email: `${username}@apprentissage.beta.gouv.fr`,
       ...(rest || {}),
     });
+
     await activateUser(username, password);
 
     const auth = await logUser(username, password);

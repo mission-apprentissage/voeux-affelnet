@@ -1,8 +1,8 @@
 require("dotenv").config();
 const { program: cli } = require("commander");
 const { oleoduc, transformData, filterData, transformIntoCSV, writeToStdout, flattenArray } = require("oleoduc");
-const { Readable } = require("stream");
 const { createReadStream, createWriteStream } = require("fs");
+const { Readable } = require("stream");
 const { runScript } = require("./jobs/utils/runScript");
 const logger = require("./common/logger");
 const { confirm } = require("./common/actions/confirm");
@@ -20,12 +20,14 @@ const computeStats = require("./jobs/computeStats");
 const exportCfas = require("./jobs/exportCfas");
 const buildCfaCsv = require("./jobs/buildCfaCsv");
 const { exportStatutVoeux } = require("./jobs/exportStatutVoeux");
-const createUser = require("./jobs/createUser");
-const { DateTime } = require("luxon");
+const { createAdmin } = require("./jobs/createAdmin.js");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
-const Cfa = require("./common/model/Cfa");
-const CatalogueApi = require("./common/api/CatalogueApi");
+const { Cfa } = require("./common/model");
+const CatalogueApi = require("./common/api/CatalogueApi.js");
+const { importDossiers } = require("./jobs/importDossiers.js");
+const { createCsaio } = require("./jobs/createCsaio.js");
+const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -106,18 +108,17 @@ cli
   .command("importVoeux")
   .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
   .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
-  .option("--importDate <importDate>", "Permet de définir manuellement (ISO 8601) la date d'import", (value) => {
-    const importDate = DateTime.fromISO(value);
-    if (!importDate.isValid) {
-      throw new Error(`Invalid date ${value}`);
-    }
-    return importDate.toJSDate();
-  })
+  .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
   .action((file, options) => {
     runScript(async () => {
       const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
 
-      return importVoeux(input, options);
+      let importDate = new Date();
+      if (options.refresh) {
+        importDate = await getLatestImportDate();
+      }
+
+      return importVoeux(input, { importDate });
     });
   });
 
@@ -163,15 +164,22 @@ cli
   });
 
 cli
-  .command("createUser")
+  .command("createAdmin")
   .arguments("<username> <email>")
-  .option("--admin")
-  .action((username, email, options) => {
+  .action((username, email) => {
     runScript(() => {
-      return createUser(username, email, options);
+      return createAdmin(username, email);
     });
   });
 
+cli
+  .command("createCsaio")
+  .arguments("<username> <email> <region>")
+  .action((username, email, region) => {
+    runScript(() => {
+      return createCsaio(username, email, region);
+    });
+  });
 cli
   .command("confirmCfa")
   .description("Permet de confirmer manuellement un CFA")
@@ -231,8 +239,10 @@ cli.command("migrate").action(() => {
 
 cli
   .command("injectDataset")
-  .option("--mef", "Import les mefs")
-  .option("--admin", "Ajout un administrateur")
+  .option("--mef", "Importe les mefs")
+  .option("--cfa", "Ajoute un cfa")
+  .option("--admin", "Ajoute un administrateur")
+  .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
   .action((options) => {
     runScript((actions) => {
       return injectDataset(actions, options);
@@ -314,6 +324,18 @@ cli
         transformIntoCSV(),
         output
       );
+    });
+  });
+
+cli
+  .command("importDossiers")
+  .argument("<file>", "L'export du tdb")
+  .description("Importe les dossiers du tableau de bord")
+  .action((file) => {
+    runScript(() => {
+      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+
+      return importDossiers(input);
     });
   });
 

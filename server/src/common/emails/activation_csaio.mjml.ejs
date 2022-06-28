@@ -1,0 +1,79 @@
+<mjml>
+    <%- include('./common/head.ejs'); %>
+
+    <mj-body background-color="#f9fafc">
+        <%- include('./common/header.ejs'); %>
+        <mj-wrapper padding="10px 20px">
+            <mj-section background-color="#ffffff" padding-top="0">
+                <mj-column>
+
+                    <mj-text>
+                        Bonjour,
+                    </mj-text>
+                    <mj-text>
+                        Vous êtes identifié comme CSAIO et vous souhaitez disposer des listes actualisées des jeunes
+                        ayant émis des vœux sur le service en ligne Affelnet enrichies des données transmises par les
+                        CFA au tableau de bord de l’apprentissage.
+                    </mj-text>
+
+                    <mj-button
+                            href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
+                            background-color="#0e4194"
+                            color="white"
+                    >
+                        J'active mon compte
+                    </mj-button>
+
+                    <mj-text>
+                        Nous mettrons à jour tous les 15 jours (le premier et le 16 de chaque mois) ces listes
+                        nominatives.
+                    </mj-text>
+
+
+                    <mj-text>
+                        Le fichier est également complété des infos suivantes :
+
+                        <ul>
+                            <li>OF a téléchargé les voeux à telle date ;</li>
+                            <li>CIO concerné ;</li>
+                            <li>lien vers formation LBA pour faciliter la prise de RdV avec le CFA et accès aux
+                                différents modules didask.
+                            </li>
+                        </ul>
+
+                        La définition des données est disponible en suivant le lien
+                        <a href="https://cfas.apprentissage.beta.gouv.fr/comprendre-les-donnees">suivant</a>.
+                    </mj-text>
+
+
+                    <mj-text>
+                        L'activation de votre compte vous permettra de télécharger deux types de fichier :
+
+                        <ol>
+                            <li>Le fichier "voeux-affelnet-synthese-AAAA-MM-JJ" qui contient une ligne par jeune</li>
+                            <li>Le fichier "voeux-affelnet-croisement-AAAA-MM-JJ" qui contient une ligne par voeu
+                                exprimé lors de la campagne Affelnet.
+                            </li>
+                        </ol>
+
+                        Une page statistique du croisement des voeux et des données du tableau de bord sera développée
+                        dans un second temps.
+                    </mj-text>
+
+                    <mj-text>
+                        Le fichier est transmis sur un serveur sécurisé au CSAIO qui réalise des actions de mobilisation
+                        / contact des jeunes sur la base des informations transmises.
+                    </mj-text>
+
+                    <mj-text>
+                        En cas de difficultés, n'hésitez pas à contacter notre équipe support à l'adresse suivante :
+                        <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
+                    </mj-text>
+
+                    <%- include('./common/signature.ejs'); %>
+                </mj-column>
+            </mj-section>
+        </mj-wrapper>
+        <%- include('./common/footer.ejs'); %>
+    </mj-body>
+</mjml>

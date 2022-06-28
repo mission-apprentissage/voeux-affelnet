@@ -9,12 +9,12 @@ const { User } = require("../../common/model");
 
 module.exports = ({ sendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkActionToken, checkIsCfa } = authMiddleware();
+  const { checkActionToken, ensureIs } = authMiddleware();
 
   router.get(
     "/api/confirmation/status",
     checkActionToken(),
-    checkIsCfa(),
+    ensureIs("Cfa"),
     tryCatch(async (req, res) => {
       const cfa = req.user;
 
@@ -36,7 +36,7 @@ module.exports = ({ sendEmail }) => {
   router.post(
     "/api/confirmation/accept",
     checkActionToken(),
-    checkIsCfa(),
+    ensureIs("Cfa"),
     tryCatch(async (req, res) => {
       const cfa = req.user;
       const { email } = await Joi.object({

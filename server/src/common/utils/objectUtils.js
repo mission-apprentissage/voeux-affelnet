@@ -1,7 +1,9 @@
-const { pickBy, isEmpty, isObject } = require("lodash");
+const { pickBy, isEmpty, isObject, isNumber } = require("lodash");
 
 function omitEmpty(obj) {
-  return pickBy(obj, (v) => !isEmpty(v));
+  return pickBy(obj, (v) => {
+    return isNumber(v) || !isEmpty(v);
+  });
 }
 
 function deepOmitEmpty(obj) {
@@ -38,9 +40,23 @@ function flattenObject(obj, parent, res = {}) {
   return res;
 }
 
+function removeDiacritics(value) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/-/g, " ")
+    .replace(/—/g, " ")
+    .replace(/—/g, " ")
+    .replace(/\s\s+/g, " ")
+    .replace(/\//g, " ")
+    .toUpperCase()
+    .trim();
+}
+
 module.exports = {
   omitEmpty,
   deepOmitEmpty,
   trimValues,
   flattenObject,
+  removeDiacritics,
 };

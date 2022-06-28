@@ -46,6 +46,7 @@ const schema = Joi.object({
     code_formation_diplome: Joi.string().pattern(/^[0-9]{8}$/),
     mef: Joi.string().pattern(/^[0-9]{10}$/),
     libelle: Joi.string(),
+    cle_ministere_educatif: Joi.string(),
   })
     .or("mef", "libelle", "code_formation_diplome")
     .required(),
@@ -62,6 +63,7 @@ const schema = Joi.object({
       .required(),
     nom: Joi.string().required(),
     ville: Joi.string(),
+    cio: Joi.string(),
   }).required(),
 });
 
@@ -76,6 +78,13 @@ function fixPhoneNumber(phone) {
 async function findFormationDiplome(code) {
   const mef = (code || "").substring(0, 10);
   return Mef.findOne({ mef });
+}
+
+function buildAdresseLibelle(adresse) {
+  return `${adresse.ligne_1} ${adresse.ligne_2} ${adresse.ligne_3} ${adresse.ligne_4} ${adresse.code_postal} ${adresse.ville} ${adresse.pays}`
+    .replace(/undefined/g, "")
+    .replace(/\s\s+/g, " ")
+    .trim();
 }
 
 function parseVoeuxCsv(source) {
@@ -128,6 +137,7 @@ function parseVoeuxCsv(source) {
           mef,
           code_formation_diplome,
           libelle: line["Libellé formation"],
+          cle_ministere_educatif: line["clé ministère éducatif"],
         },
         etablissement_origine: {
           uai: line["Code UAI étab. origine"]?.toUpperCase(),
@@ -138,6 +148,7 @@ function parseVoeuxCsv(source) {
           uai: line["Code UAI étab. Accueil"]?.toUpperCase(),
           nom: `${line["Type étab. Accueil"] || ""} ${line["Libellé établissement Accueil"] || ""}`.trim(),
           ville: line["Ville étab. Accueil"],
+          cio: line["UAI CIO de l'établissement d'accueil"],
         },
       });
     }),
@@ -219,6 +230,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
               ...data,
               _meta: {
                 anomalies: anomalies,
+                adresse: buildAdresseLibelle(data.apprenant.adresse),
                 import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
               },
             },

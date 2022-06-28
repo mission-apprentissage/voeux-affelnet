@@ -67,6 +67,7 @@ const schema = new Schema({
       },
       mef: String,
       libelle: String,
+      cle_ministere_educatif: String,
     }),
   },
   etablissement_origine: {
@@ -86,6 +87,7 @@ const schema = new Schema({
       },
       nom: String,
       ville: String,
+      cio: String,
     }),
   },
   _meta: {
@@ -95,6 +97,9 @@ const schema = new Schema({
         required: true,
         index: true,
         type: [Date],
+      },
+      adresse: {
+        type: String,
       },
       anomalies: {
         default: [],
