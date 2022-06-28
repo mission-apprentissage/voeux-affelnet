@@ -32,17 +32,20 @@ async function exportStatutVoeux(output, options = {}) {
           ),
         "Nombre de vœux à télécharger": async (data) => {
           const downloadDate = data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date;
-          console.log(data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date);
+          console.log(downloadDate);
           return `${await Voeu.countDocuments({
             "etablissement_accueil.uai": data.etablissement?.uai,
             ...(downloadDate
               ? {
-                  "_meta.import_dates": {
-                    $elemMatch: {
-                      $exists: true,
-                      $gte: downloadDate,
+                  $nor: [
+                    {
+                      "_meta.import_dates": {
+                        $elemMatch: {
+                          $lte: downloadDate,
+                        },
+                      },
                     },
-                  },
+                  ],
                 }
               : {}),
           })}`;
