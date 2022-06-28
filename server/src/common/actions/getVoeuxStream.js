@@ -1,7 +1,7 @@
-const { Voeu } = require("./model");
-const { compose, transformData, transformIntoCSV } = require("oleoduc");
+const { Voeu } = require("../model/index.js");
+const { compose, transformData } = require("oleoduc");
 
-function voeuxCsvStream(uai) {
+function getVoeuxStream(uai) {
   return compose(
     Voeu.find({ "etablissement_accueil.uai": uai }).lean().cursor(),
     transformData((voeu) => {
@@ -29,8 +29,7 @@ function voeuxCsvStream(uai) {
         ID_ETABLISSEMENT_ORIGINE: voeu.etablissement_origine?.uai,
         NOM_ETAB_ORIGINE: voeu.etablissement_origine?.nom,
       };
-    }),
-    transformIntoCSV({ mapper: (v) => `"${v || ""}"` })
+    })
   );
 }
-module.exports = { voeuxCsvStream };
+module.exports = { getVoeuxStream };

@@ -1,22 +1,22 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
-const { compose } = require("oleoduc");
+const { compose, transformIntoCSV } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { validate } = require("../../common/validators.js");
 const { markVoeuxAsDownloaded } = require("../../common/actions/markVoeuxAsDownloaded");
-const { voeuxCsvStream } = require("../../common/voeuxCsvStream");
+const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Ufa } = require("../../common/model");
 
 module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkApiToken, checkIsCfa } = authMiddleware(users);
+  const { checkApiToken, ensureIs } = authMiddleware(users);
 
   router.get(
-    "/api/fichiers",
+    "/api/cfa/fichiers",
     checkApiToken(),
-    checkIsCfa(),
+    ensureIs("Cfa"),
     tryCatch(async (req, res) => {
       const cfa = req.user;
 
@@ -51,9 +51,9 @@ module.exports = ({ users }) => {
   );
 
   router.get(
-    "/api/fichiers/:file",
+    "/api/cfa/fichiers/:file",
     checkApiToken(),
-    checkIsCfa(),
+    ensureIs("Cfa"),
     tryCatch(async (req, res) => {
       const { siret } = req.user;
       const { file } = await validate(req.params, {
@@ -71,7 +71,7 @@ module.exports = ({ users }) => {
       await markVoeuxAsDownloaded(siret, uai);
       res.setHeader("Content-disposition", `attachment; filename=${uai}.csv`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-      return compose(voeuxCsvStream(uai), res);
+      return compose(getVoeuxStream(uai), transformIntoCSV({ mapper: (v) => `"${v || ""}"` }), res);
     })
   );
 

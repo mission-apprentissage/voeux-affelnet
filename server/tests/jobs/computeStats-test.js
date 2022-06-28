@@ -114,9 +114,9 @@ describe("computeStats", () => {
       }
     );
     assert.deepStrictEqual(
-      stats.cfas.find((c) => c.code === "01"),
+      stats.cfas.find((c) => c.code === "11"),
       {
-        code: "01",
+        code: "11",
         stats: {
           total: 0,
           enAttente: 0,
@@ -133,9 +133,9 @@ describe("computeStats", () => {
       }
     );
     assert.deepStrictEqual(
-      stats.cfas.find((c) => c.code === "11"),
+      stats.cfas.find((c) => c.code === "01"),
       {
-        code: "11",
+        code: "01",
         stats: {
           total: 4,
           enAttente: 2,
@@ -165,9 +165,9 @@ describe("computeStats", () => {
       }
     );
     assert.deepStrictEqual(
-      stats.voeux.find((c) => c.code === "01"),
+      stats.voeux.find((c) => c.code === "11"),
       {
-        code: "01",
+        code: "11",
         stats: {
           total: 0,
           apprenants: 0,
@@ -177,9 +177,9 @@ describe("computeStats", () => {
       }
     );
     assert.deepStrictEqual(
-      stats.voeux.find((c) => c.code === "11"),
+      stats.voeux.find((c) => c.code === "01"),
       {
-        code: "11",
+        code: "01",
         stats: {
           total: 4,
           apprenants: 2,
@@ -200,14 +200,14 @@ describe("computeStats", () => {
       stats.emails.find((c) => c.code === "01"),
       {
         code: "01",
-        stats: [],
+        stats: [{ _id: "confirmation", nbEnvoyés: 3, nbErreurs: 1, nbOuverts: 2, nbRelances: 2 }],
       }
     );
     assert.deepStrictEqual(
       stats.emails.find((c) => c.code === "11"),
       {
         code: "11",
-        stats: [{ _id: "confirmation", nbEnvoyés: 3, nbErreurs: 1, nbOuverts: 2, nbRelances: 2 }],
+        stats: [],
       }
     );
 
@@ -234,11 +234,11 @@ describe("computeStats", () => {
         stats: [
           {
             import_date: secondImport.toJSDate(),
-            total: 0,
+            total: 1,
           },
           {
             import_date: firstImport.toJSDate(),
-            total: 0,
+            total: 1,
           },
         ],
       }
@@ -250,11 +250,11 @@ describe("computeStats", () => {
         stats: [
           {
             import_date: secondImport.toJSDate(),
-            total: 1,
+            total: 0,
           },
           {
             import_date: firstImport.toJSDate(),
-            total: 1,
+            total: 0,
           },
         ],
       }

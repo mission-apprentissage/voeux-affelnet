@@ -33,7 +33,7 @@ L'application est ensuite accessible à l'url [http://localhost](http://localhos
 Il est possible de créer un jeu de données afin de pouvoir tester l'application :
 
 ```sh
-make dataset
+make dataset --cfa --admin --csaio
 ```
 
 Une fois cette commande executée, des emails de création de compte seront disponibles à l'url [http://localhost/smtp](http://localhost/smtp)
