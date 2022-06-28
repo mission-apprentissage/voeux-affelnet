@@ -13,13 +13,26 @@ import StatsPage from "./pages/StatsPage";
 import AdminPage from "./pages/AdminPage";
 import RelationPage from "./pages/RelationPage";
 import CsaioPage from "./pages/CsaioPage.js";
+import { getUserType } from "./common/utils/getUserType.js";
 
-function PrivateRoute({ children, ...rest }) {
+function PrivateRoute({ children, allowed, ...rest }) {
   const [auth] = useAuth();
 
   return (
     <Layout>
-      <Route {...rest} render={() => (auth.sub !== "anonymous" ? children : <Redirect to="/login" />)} />
+      <Route
+        {...rest}
+        render={() => {
+          const type = getUserType(auth);
+          const isNotAllowed = allowed && !allowed.includes(type);
+
+          if (auth.sub === "anonymous" || isNotAllowed) {
+            return <Redirect to="/login" />;
+          }
+
+          return children;
+        }}
+      />
     </Layout>
   );
 }
@@ -32,12 +45,15 @@ function App() {
       <Router>
         <Switch>
           <PrivateRoute exact path="/">
-            {auth.permissions.isAdmin ? <AdminPage /> : <Redirect to={`/${auth.type?.toLowerCase()}`} />}
+            <Redirect to={`/${getUserType(auth)}`} />
           </PrivateRoute>
-          <PrivateRoute exact path="/cfa">
+          <PrivateRoute exact path="/admin" allowed={["admin"]}>
+            <AdminPage />
+          </PrivateRoute>
+          <PrivateRoute exact path="/cfa" allowed={["cfa"]}>
             <CfaPage />
           </PrivateRoute>
-          <PrivateRoute exact path="/csaio">
+          <PrivateRoute exact path="/csaio" allowed={["csaio"]}>
             <CsaioPage />
           </PrivateRoute>
           <Route exact path="/login" component={LoginPage} />
