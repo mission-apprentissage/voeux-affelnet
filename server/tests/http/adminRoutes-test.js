@@ -1,5 +1,7 @@
 const assert = require("assert");
 const { Cfa } = require("../../src/common/model");
+const { date } = require("../../src/common/utils/csvUtils.js");
+
 const { insertCfa, insertVoeu, insertLog } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 const { omit } = require("lodash");
@@ -132,6 +134,7 @@ describe("adminRoutes", () => {
   it("Vérifie qu'on peut exporter les cfas injoinables", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const sendDate = new Date();
     await insertCfa({
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
@@ -141,7 +144,7 @@ describe("adminRoutes", () => {
           token: "TOKEN1",
           templateName: "activation_user",
           to: "test@apprentissage.beta.gouv.fr",
-          sendDates: [new Date()],
+          sendDates: [sendDate],
           error: {
             type: "fatal",
             message: "Impossible d'envoyer l'email",
@@ -159,8 +162,10 @@ describe("adminRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux"
-"11111111100015";"";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
+      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"dernier_email";"dernier_email_date"
+"11111111100015";"";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non";"activation_user";"${date(
+        sendDate
+      )}"
 `
     );
   });
@@ -173,6 +178,18 @@ describe("adminRoutes", () => {
       raison_sociale: "Organisme de formation",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "en attente",
+      emails: [
+        {
+          token: "token1",
+          templateName: "confirmation",
+          sendDates: ["2022-05-13T16:20:39.495Z", "2022-05-14T16:20:39.495Z"],
+        },
+        {
+          token: "token2",
+          templateName: "activation_cfa",
+          sendDates: ["2022-05-16T16:20:39.495Z", "2022-05-18T16:20:39.495Z"],
+        },
+      ],
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
     });
     await insertVoeu({
@@ -190,8 +207,10 @@ describe("adminRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"statut";"nb_voeux"
-"11111111100015";"0751234J";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"1"
+      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"dernier_email";"dernier_email_date";"statut";"nb_voeux"
+"11111111100015";"0751234J";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"";"Oui";"activation_cfa";"${date(
+        new Date("2022-05-18T16:20:39.495Z")
+      )}";"en attente";"1"
 `
     );
   });

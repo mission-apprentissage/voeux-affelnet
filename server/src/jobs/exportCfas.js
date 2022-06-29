@@ -1,7 +1,7 @@
 const { Cfa } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
-const { ouiNon } = require("../common/utils/csvUtils.js");
+const { ouiNon, date } = require("../common/utils/csvUtils.js");
 
 const errorMapper = {
   blocked: "Spam",
@@ -11,6 +11,17 @@ const errorMapper = {
   invalid_email: "Email invalide",
   soft_bounce: "Boîte mail pleine",
   unsubscribe: "Désinscrit",
+};
+
+const lastSentEmail = (data) => {
+  const emails = data.emails
+    ?.map((email) => ({
+      ...email,
+      templateName: email.templateName,
+      lastSentDate: email.sendDates[email.sendDates.length - 1],
+    }))
+    .sort((a, b) => a.lastSentDate - b.lastSentDate);
+  return emails[data.emails.length - 1];
 };
 
 async function exportCfas(output, options = {}) {
@@ -30,6 +41,8 @@ async function exportCfas(output, options = {}) {
           return errorMapper[error];
         },
         voeux: (data) => ouiNon(data.etablissements.find((e) => e.voeux_date)),
+        dernier_email: (data) => lastSentEmail(data)?.templateName,
+        dernier_email_date: (data) => date(lastSentEmail(data)?.lastSentDate),
         ...columns,
       },
     }),
