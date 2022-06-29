@@ -159,8 +159,8 @@ describe("adminRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux"
-"11111111100015";"";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non"
+      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"dernier_email";"dernier_email_date"
+"11111111100015";"";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"Erreur technique ou email invalide";"Non";"activation_user";"29/06/2022"
 `
     );
   });
@@ -173,6 +173,18 @@ describe("adminRoutes", () => {
       raison_sociale: "Organisme de formation",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "en attente",
+      emails: [
+        {
+          token: "token1",
+          templateName: "confirmation",
+          sendDates: ["2022-05-13T16:20:39.495Z", "2022-05-14T16:20:39.495Z"],
+        },
+        {
+          token: "token2",
+          templateName: "activation_cfa",
+          sendDates: ["2022-05-16T16:20:39.495Z", "2022-05-18T16:20:39.495Z"],
+        },
+      ],
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
     });
     await insertVoeu({
@@ -190,8 +202,8 @@ describe("adminRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"statut";"nb_voeux"
-"11111111100015";"0751234J";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"";"Oui";"en attente";"1"
+      `"siret";"etablissements";"raison_sociale";"academie";"email";"erreur";"voeux";"dernier_email";"dernier_email_date";"statut";"nb_voeux"
+"11111111100015";"0751234J";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"";"Oui";"activation_cfa";"18/05/2022";"en attente";"1"
 `
     );
   });
