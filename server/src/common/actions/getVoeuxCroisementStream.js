@@ -1,7 +1,7 @@
 const { Voeu, Cfa } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
 const { findDossier } = require("./findDossier.js");
-const { dateAsString } = require("../utils/stringUtils.js");
+const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 
 function besoinAide(statut) {
   return !["apprenti", "inscrit"].includes(statut);
@@ -60,7 +60,7 @@ async function getVoeuxCroisementStream(options = {}) {
           Cfa.findOne({ "voeux_telechargements.uai": uai }),
         ]);
 
-        const statut = dossier?.statut || "Non trouvé";
+        const statut = dossier?.statut;
         const downloadDate = cfa?.voeux_telechargements.find((t) => t.uai === uai)?.date;
 
         return {
@@ -77,7 +77,7 @@ async function getVoeuxCroisementStream(options = {}) {
           "Formation MEF": voeu.formation.mef,
           "Formation Libellé": voeu.formation.libelle,
           Académie: voeu.academie.nom,
-          "Statut dans le tableau de bord": statut,
+          "Statut dans le tableau de bord": statut ? capitalizeFirstLetter(statut) : "Non trouvé",
           "Date de téléchargement du voeu par l'OF": downloadDate ? dateAsString(downloadDate) : "",
           "La Bonne Alternance": getWidgetLBAUrl(statut, voeu),
           InserJeunes: getTrajectoiresPro(statut, voeu),
