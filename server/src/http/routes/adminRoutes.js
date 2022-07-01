@@ -13,6 +13,7 @@ const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissement
 const { exportStatutVoeux } = require("../../jobs/exportStatutVoeux.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
+const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
@@ -109,6 +110,22 @@ module.exports = ({ resendEmail }) => {
 
       await cancelUnsubscription(siret);
       const stats = await resendActivationEmails(resendEmail, { username: siret });
+
+      return res.json(stats);
+    })
+  );
+
+  router.put(
+    "/api/admin/cfas/:siret/resendNotificationEmail",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { siret } = await Joi.object({
+        siret: Joi.string().required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      await cancelUnsubscription(siret);
+      const stats = await resendNotificationEmails(resendEmail, { username: siret, force: true });
 
       return res.json(stats);
     })

@@ -8,6 +8,7 @@ import ErrorMessage from "../../common/components/ErrorMessage";
 import { _get, _put } from "../../common/httpClient";
 import * as queryString from "query-string";
 import Popup from "reactjs-popup";
+import { toLocaleString, sortDescending } from "../../common/utils/dateUtils";
 
 function showError(meta, options = {}) {
   if (!meta.touched || !meta.error) {
@@ -18,6 +19,44 @@ function showError(meta, options = {}) {
     ...(options.noMessage ? {} : { feedback: meta.error }),
     invalid: true,
   };
+}
+
+function getStatutVoeux(cfa) {
+  let statut;
+
+  switch (true) {
+    case !cfa.etablissements?.find((e) => e.voeux_date):
+      statut = "Pas de voeux";
+      break;
+    case !!cfa.etablissements?.find((e) => e.voeux_date) && !cfa.voeux_telechargements?.length:
+      statut = "Pas encore téléchargés";
+      break;
+
+    case !!cfa.etablissements?.find((e) => e.voeux_date) &&
+      !!cfa.etablissements.find(
+        (etablissement) =>
+          etablissement?.voeux_date &&
+          !cfa?.voeux_telechargements
+            ?.sort((a, b) => sortDescending(a.date, b.date))
+            .find((v) => etablissement?.uai === v.uai && v.date > etablissement?.voeux_date)
+      ):
+      statut = "En partie téléchargés";
+      break;
+    case !!cfa.etablissements?.find((e) => e.voeux_date) &&
+      !cfa.etablissements.find(
+        (etablissement) =>
+          etablissement?.voeux_date &&
+          !cfa?.voeux_telechargements
+            ?.sort((a, b) => sortDescending(a.date, b.date))
+            .find((v) => etablissement?.uai === v.uai && v.date > etablissement?.voeux_date)
+      ):
+      statut = "Téléchargés";
+      break;
+    default:
+      statut = "Inconnu";
+      break;
+  }
+  return statut;
 }
 
 function Email({ cfa }) {
@@ -71,6 +110,21 @@ function Email({ cfa }) {
     }
   }
 
+  async function resendNotificationEmail() {
+    try {
+      const { sent } = await _put(`/api/admin/cfas/${cfa.siret}/resendNotificationEmail`);
+      setMessage(
+        sent > 0 ? (
+          <SuccessMessage>Email envoyé</SuccessMessage>
+        ) : (
+          <ErrorMessage>Impossible d'envoyer le message</ErrorMessage>
+        )
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   const items = [
     {
       icon: "edit",
@@ -92,6 +146,15 @@ function Email({ cfa }) {
             icon: "send",
             value: "Renvoyer l'email d'activation",
             onClick: resendActivationEmail,
+          },
+        ]
+      : []),
+    ...(cfa.statut === "activé" && cfa.etablissements.find((e) => e.voeux_date)
+      ? [
+          {
+            icon: "send",
+            value: "Renvoyer l'email de notification",
+            onClick: resendNotificationEmail,
           },
         ]
       : []),
@@ -205,18 +268,32 @@ function Cfa({ cfa }) {
           <b>Email: </b> {cfa.email}
         </li>
         <li>
-          <b>Voeux: </b>{" "}
-          {cfa.etablissements?.find((e) => e.voeux_date)
-            ? cfa.voeux_telechargements[0]
-              ? "Voeux téléchargés"
-              : "Pas encore téléchargé"
-            : "Pas de voeux"}
+          <b>Vœux: </b> {getStatutVoeux(cfa)}
         </li>
         <li>
           <b>Anciens emails: </b> {cfa.anciens_emails?.map((ancien_email) => ancien_email.email).join(", ")}
         </li>
         <li>
-          <b>Etablissements: </b> {cfa.etablissements?.map((e) => e.uai).join(", ")}
+          <b>Établissement: </b>
+
+          <ul>
+            {cfa.etablissements?.map((e) => (
+              <li>
+                {e.uai}{" "}
+                {e.voeux_date
+                  ? `- Derniers vœux reçus le ${toLocaleString(e.voeux_date)}${
+                      cfa.voeux_telechargements.find((vt) => vt.uai === e.uai)
+                        ? `, téléchargés le ${toLocaleString(
+                            cfa.voeux_telechargements
+                              .sort((a, b) => sortDescending(a.date, b.date))
+                              .find((vt) => vt.uai === e.uai).date
+                          )}`
+                        : ""
+                    }`
+                  : ""}
+              </li>
+            ))}
+          </ul>
         </li>
       </ul>
     </Card>
@@ -330,13 +407,7 @@ function Cfas() {
                         <Table.Col>
                           <Email cfa={cfa} />
                         </Table.Col>
-                        <Table.Col>
-                          {cfa.etablissements.find((e) => e.voeux_date)
-                            ? cfa.voeux_telechargements[0]
-                              ? "Voeux téléchargés"
-                              : "Pas encore téléchargé"
-                            : "Pas de voeux"}
-                        </Table.Col>
+                        <Table.Col>{getStatutVoeux(cfa)}</Table.Col>
                         <Table.Col>
                           <Popup trigger={<Button size="sm">Voir le détail</Button>} modal nested>
                             <Cfa cfa={cfa} />

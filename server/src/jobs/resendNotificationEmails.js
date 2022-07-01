@@ -20,7 +20,9 @@ async function resendNotificationEmails(resendEmail, options = {}) {
     statut: "activé",
     "etablissements.voeux_date": { $exists: true },
     ...(options.username ? { username: options.username } : {}),
-    ...(options.retry
+    ...(options.force
+      ? {}
+      : options.retry
       ? {
           emails: {
             $elemMatch: {
@@ -47,7 +49,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
     .lean()
     .cursor()
     .eachAsync(async (cfa) => {
-      if (allFilesAsAlreadyBeenDownloaded(cfa)) {
+      if (allFilesAsAlreadyBeenDownloaded(cfa) && !options.force) {
         return;
       }
 
