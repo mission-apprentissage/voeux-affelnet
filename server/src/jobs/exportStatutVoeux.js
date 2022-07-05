@@ -1,5 +1,5 @@
 const { Cfa, Voeu } = require("../common/model");
-const { oleoduc, transformIntoCSV, filterData } = require("oleoduc");
+const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date } = require("../common/utils/csvUtils.js");
 const { sortDescending } = require("../common/utils/dateUtils.js");
@@ -25,10 +25,6 @@ async function exportStatutVoeux(output, options = {}) {
       { $unwind: "$etablissements" },
       { $sort: { "academie.code": 1, siret: 1 } },
     ]).cursor(),
-    filterData((data) => {
-      console.log(data);
-      return data;
-    }),
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {
@@ -48,7 +44,7 @@ async function exportStatutVoeux(output, options = {}) {
         },
         "Date du dernier téléchargement": (data) => {
           const lastDownloadDate = getLastDownloadDate(data);
-          console.warn(data.etablissements.uai, lastDownloadDate);
+
           return date(lastDownloadDate);
         },
         "Nombre de vœux téléchargés au moins une fois": async (data) => {
