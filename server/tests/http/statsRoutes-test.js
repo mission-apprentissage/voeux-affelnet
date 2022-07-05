@@ -43,10 +43,10 @@ describe("statsRoutes", () => {
     const response = await httpClient.get("/api/stats/computeStats/now");
 
     assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.stats["cfas"].length, 41);
-    assert.strictEqual(response.data.stats["emails"].length, 41);
-    assert.strictEqual(response.data.stats["téléchargements"].length, 41);
-    assert.strictEqual(response.data._meta.academies.length, 41);
+    assert.strictEqual(response.data.stats["cfas"].length, 39);
+    assert.strictEqual(response.data.stats["emails"].length, 39);
+    assert.strictEqual(response.data.stats["téléchargements"].length, 39);
+    assert.strictEqual(response.data._meta.academies.length, 39);
   });
 
   it("Vérifie qu'on peut obtenir des stats instantanées par académie", async () => {
@@ -65,6 +65,6 @@ describe("statsRoutes", () => {
     assert.strictEqual(response.data.stats["cfas"].length, 1);
     assert.strictEqual(response.data.stats["emails"].length, 1);
     assert.strictEqual(response.data.stats["téléchargements"].length, 1);
-    assert.strictEqual(response.data._meta.academies.length, 41);
+    assert.strictEqual(response.data._meta.academies.length, 39);
   });
 });
