@@ -340,8 +340,12 @@ describe("adminRoutes", () => {
     assert.strictEqual(
       response.data,
       `"Académie";"Siret";"Uai";"Vœux";"Nombre de vœux";"Date du dernier import de vœux";"Téléchargement";"Date du dernier téléchargement";"Nombre de vœux téléchargés au moins une fois";"Nombre de vœux jamais téléchargés";"Nombre de vœux à télécharger (nouveau+maj)"
-"Paris";"11111111100015";"1234567A";"Oui";"3";"15/06/2022";"Oui";"06/06/2022";"2";"1";"2"
-"Paris";"11111111100015";"1234567B";"Oui";"2";"10/06/2022";"Oui";"16/06/2022";"2";"0";"0"
+"Paris";"11111111100015";"1234567A";"Oui";"3";"${date(new Date("2022-06-15T00:00:00.000Z"))}";"Oui";"${date(
+        new Date("2022-06-06T00:00:00.000Z")
+      )}";"2";"1";"2"
+"Paris";"11111111100015";"1234567B";"Oui";"2";"${date(new Date("2022-06-10T00:00:00.000Z"))}";"Oui";"${date(
+        new Date("2022-06-16T00:00:00.000Z")
+      )}";"2";"0";"0"
 "Paris";"11111111100015";"1234567C";"Non";"0";"";"Non";"";"0";"0";"0"
 `
     );
