@@ -1,59 +1,106 @@
 const { Cfa, Voeu } = require("../common/model");
-const { oleoduc, transformIntoCSV, transformData, filterData, flattenArray } = require("oleoduc");
+const { oleoduc, transformIntoCSV, filterData } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date } = require("../common/utils/csvUtils.js");
+const { sortDescending } = require("../common/utils/dateUtils.js");
+
+const getLastDownloadDate = (data) => {
+  const relatedDowloads = data.voeux_telechargements
+    ?.filter((vt) => vt.uai === data.etablissements.uai)
+    .sort((a, b) => sortDescending(a.date, b.date));
+
+  return relatedDowloads[relatedDowloads.length - 1]?.date;
+};
 
 async function exportStatutVoeux(output, options = {}) {
   const columns = options.columns || {};
   await oleoduc(
-    Cfa.aggregate([{ $match: options.filter || {} }, { $sort: { "academie.code": 1, siret: 1 } }]).cursor(),
-    filterData((data) => !!data.etablissements?.length),
-    transformData((cfa) => cfa.etablissements?.flatMap((etablissement) => ({ cfa, etablissement }))),
-    flattenArray(),
+    Cfa.aggregate([
+      {
+        $match: {
+          ...(options.filter || {}),
+          statut: { $ne: "non concerné" },
+        },
+      },
+      { $unwind: "$etablissements" },
+      { $sort: { "academie.code": 1, siret: 1 } },
+    ]).cursor(),
+    filterData((data) => {
+      console.log(data);
+      return data;
+    }),
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {
-        Académie: (data) => data.cfa?.academie?.nom,
-        Siret: (data) => data.cfa?.siret,
-        Uai: (data) => data.etablissement?.uai,
-        Vœux: (data) => ouiNon(data.etablissement?.voeux_date),
-        "Date des derniers vœux disponibles": (data) => date(data.etablissement?.voeux_date),
-        Téléchargement: (data) =>
-          ouiNon(data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)),
-        "Date du dernier téléchargement": (data) =>
-          date(data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date),
-        "Vœux à télécharger": (data) =>
-          ouiNon(
-            data.etablissement?.voeux_date &&
-              !(
-                data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date >
-                data.etablissement?.voeux_date
-              )
-          ),
-        "Nombre de vœux à télécharger": async (data) => {
-          const downloadDate = data.cfa?.voeux_telechargements?.find((v) => data.etablissement?.uai === v.uai)?.date;
-          console.log(downloadDate);
-          return `${await Voeu.countDocuments({
-            "etablissement_accueil.uai": data.etablissement?.uai,
-            ...(downloadDate
-              ? {
+        Académie: (data) => data.academie?.nom,
+        Siret: (data) => data.siret,
+        Uai: (data) => data.etablissements?.uai,
+        Vœux: (data) => ouiNon(data.etablissements?.voeux_date),
+        "Nombre de vœux": async (data) =>
+          `${await Voeu.countDocuments({
+            "etablissement_accueil.uai": data.etablissements.uai,
+          })}`,
+        "Date du dernier import de vœux": (data) => date(data.etablissements?.voeux_date),
+        Téléchargement: (data) => {
+          const lastDownloadDate = getLastDownloadDate(data);
+
+          return ouiNon(!!lastDownloadDate);
+        },
+        "Date du dernier téléchargement": (data) => {
+          const lastDownloadDate = getLastDownloadDate(data);
+          console.warn(data.etablissements.uai, lastDownloadDate);
+          return date(lastDownloadDate);
+        },
+        "Nombre de vœux téléchargés au moins une fois": async (data) => {
+          const lastDownloadDate = getLastDownloadDate(data);
+
+          return `${
+            lastDownloadDate
+              ? await Voeu.countDocuments({
+                  "etablissement_accueil.uai": data.etablissements.uai,
+                  $expr: {
+                    $gt: [lastDownloadDate, { $first: "$_meta.import_dates" }],
+                  },
+                })
+              : 0
+          }`;
+        },
+        "Nombre de vœux jamais téléchargés": async (data) => {
+          const lastDownloadDate = getLastDownloadDate(data);
+
+          return `${
+            lastDownloadDate
+              ? await Voeu.countDocuments({
+                  "etablissement_accueil.uai": data.etablissements.uai,
                   $nor: [
                     {
-                      "_meta.import_dates": {
-                        $elemMatch: {
-                          $lte: downloadDate,
-                        },
+                      $expr: {
+                        $gt: [lastDownloadDate, { $first: "$_meta.import_dates" }],
                       },
                     },
                   ],
-                }
-              : {}),
-          })}`;
+                })
+              : await Voeu.countDocuments({
+                  "etablissement_accueil.uai": data.etablissements.uai,
+                })
+          }`;
         },
-        "Nombre total de vœux": async (data) =>
-          `${await Voeu.countDocuments({
-            "etablissement_accueil.uai": data.etablissement?.uai,
-          })}`,
+        "Nombre de vœux à télécharger (nouveau+maj)": async (data) => {
+          const lastDownloadDate = getLastDownloadDate(data);
+
+          return `${
+            lastDownloadDate
+              ? await Voeu.countDocuments({
+                  "etablissement_accueil.uai": data.etablissements.uai,
+                  $expr: {
+                    $lte: [lastDownloadDate, { $last: "$_meta.import_dates" }],
+                  },
+                })
+              : await Voeu.countDocuments({
+                  "etablissement_accueil.uai": data.etablissements.uai,
+                })
+          }`;
+        },
         ...columns,
       },
     }),
