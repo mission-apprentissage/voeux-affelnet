@@ -221,22 +221,6 @@ async function computeStats(options = {}) {
   const list = [
     { code: "ALL", query: {} },
     { code: "UNKNOWN", query: { "academie.code": { $exists: false } } },
-    {
-      code: "AFFELNET",
-      query: {
-        "academie.code": {
-          $in: ["01", "03", "06", "07", "09", "11", "12", "14", "16", "18", "19", "23", "24", "25", "27", "28", "70"],
-        },
-      },
-    },
-    {
-      code: "SANS_AFFELNET",
-      query: {
-        "academie.code": {
-          $in: ["02", "04", "08", "10", "13", "15", "17", "20", "22", "31", "32", "33", "43"],
-        },
-      },
-    },
     ...getAcademies().map((a) => ({ ...a, query: { "academie.code": a.code } })),
   ];
 

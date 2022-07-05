@@ -46,7 +46,7 @@ describe("importDossiers", () => {
       ine_apprenant: "111111111HA",
       nom_apprenant: "Doe",
       prenom_apprenant: "Robert",
-      statut: "inscrit",
+      statut: "apprenti",
       uai_etablissement: "0751234J",
     });
     assert.deepStrictEqual(stats, {
