@@ -74,7 +74,7 @@ function StatsPage() {
     <Page>
       <Page.Main>
         <Page.Content title={<div>Voeux Affelnet - Statistiques</div>}>
-          <Grid.Row>
+          {/* <Grid.Row>
             <Grid.Col width={12}>
               <div style={{ marginBottom: "16px" }}>
                 <Button color="secondary" onClick={() => setShowRapport(!showRapport)}>
@@ -117,7 +117,7 @@ function StatsPage() {
                 </Alert>
               )}
             </Grid.Col>
-          </Grid.Row>
+          </Grid.Row> */}
 
           {loading && <div>En cours de chargement...</div>}
           {!loading && now && (
