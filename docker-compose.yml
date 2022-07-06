@@ -4,6 +4,7 @@ services:
   reverse_proxy:
     image: voeux_affelnet_reverse_proxy
     container_name: voeux_affelnet_reverse_proxy
+    tty: true
     build:
       context: reverse_proxy
     mem_limit: 96m
@@ -31,6 +32,7 @@ services:
   ui:
     image: voeux_affelnet_ui
     container_name: voeux_affelnet_ui
+    tty: true
     build:
       context: ui
     mem_limit: 256m
@@ -42,6 +44,7 @@ services:
   server:
     image: voeux_affelnet_server
     container_name: voeux_affelnet_server
+    tty: true
     build:
       context: server
     mem_limit: 1g
@@ -58,6 +61,7 @@ services:
   mongodb:
     image: mongo:5.0.7-focal
     container_name: voeux_affelnet_mongodb
+    tty: true
     command: --wiredTigerCacheSizeGB 1 --port 27017
     mem_limit: 1g
     restart: unless-stopped

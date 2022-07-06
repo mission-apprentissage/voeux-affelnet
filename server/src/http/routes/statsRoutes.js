@@ -50,8 +50,6 @@ module.exports = () => {
               (a) => a.nom
             ),
             { code: "UNKNOWN", nom: "Inconnues" },
-            { code: "AFFELNET", nom: "Avec import AFFELNET" },
-            { code: "SANS_AFFELNET", nom: "Sans import AFFELNET" },
           ],
         },
       });

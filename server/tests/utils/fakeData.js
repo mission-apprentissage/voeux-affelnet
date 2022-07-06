@@ -125,7 +125,7 @@ module.exports = {
             cio: createUAI(faker.helpers.replaceSymbols("075####")),
           },
           _meta: {
-            import_dates: [new Date()],
+            import_dates: [...(custom?._meta?.import_dates ?? [new Date()])],
             adresse: `${street} ${codePostal} ${cityName}`,
             anomalies: [],
           },

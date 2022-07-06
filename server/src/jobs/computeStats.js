@@ -94,25 +94,58 @@ async function computeVoeuxStats(filter = {}) {
       {
         $match: {
           ...filter,
-          statut: "activé",
+          statut: { $ne: "non concerné" },
         },
+      },
+      {
+        $match: { "voeux_telechargements.0": { $exists: true } },
       },
       {
         $unwind: "$voeux_telechargements",
       },
       {
+        $unwind: "$etablissements",
+      },
+      {
+        $match: {
+          $expr: {
+            $eq: ["$etablissements.uai", "$voeux_telechargements.uai"],
+          },
+        },
+      },
+      {
+        $sort: {
+          siret: 1,
+          "voeux_telechargements.uai": 1,
+          "voeux_telechargements.date": 1,
+          "etablissements.voeux_date": 1,
+        },
+      },
+      {
+        $group: {
+          _id: { siret: "$siret", uai: "$voeux_telechargements.uai" },
+          siret: { $first: "$siret" },
+          uai: { $first: "$voeux_telechargements.uai" },
+          downloadDates: { $addToSet: "$voeux_telechargements.date" },
+          importDates: { $addToSet: "$etablissements.voeux_date" },
+          downloadDate: { $last: "$voeux_telechargements.date" },
+          importDate: { $first: "$etablissements.voeux_date" },
+        },
+      },
+      {
         $lookup: {
           from: "voeux",
           let: {
-            voeux_telechargements: "$voeux_telechargements",
+            uai: "$uai",
+            downloadDate: "$downloadDate",
           },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$etablissement_accueil.uai", "$$voeux_telechargements.uai"] },
-                    { $gt: ["$$voeux_telechargements.date", { $last: "$_meta.import_dates" }] },
+                    { $eq: ["$etablissement_accueil.uai", "$$uai"] },
+                    { $gt: ["$$downloadDate", { $first: "$_meta.import_dates" }] },
                   ],
                 },
               },
@@ -221,22 +254,6 @@ async function computeStats(options = {}) {
   const list = [
     { code: "ALL", query: {} },
     { code: "UNKNOWN", query: { "academie.code": { $exists: false } } },
-    {
-      code: "AFFELNET",
-      query: {
-        "academie.code": {
-          $in: ["01", "03", "06", "07", "09", "11", "12", "14", "16", "18", "19", "23", "24", "25", "27", "28", "70"],
-        },
-      },
-    },
-    {
-      code: "SANS_AFFELNET",
-      query: {
-        "academie.code": {
-          $in: ["02", "04", "08", "10", "13", "15", "17", "20", "22", "31", "32", "33", "43"],
-        },
-      },
-    },
     ...getAcademies().map((a) => ({ ...a, query: { "academie.code": a.code } })),
   ];
 
