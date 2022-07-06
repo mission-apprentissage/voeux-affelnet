@@ -1,4 +1,5 @@
 const assert = require("assert");
+const { DateTime } = require("luxon");
 const { Cfa } = require("../../src/common/model");
 const { date } = require("../../src/common/utils/csvUtils.js");
 
@@ -257,6 +258,97 @@ describe("adminRoutes", () => {
       message: "Forbidden",
       statusCode: 403,
     });
+  });
+
+  it("Vérifie qu'on peut exporter le statut des téléchargements des voeux", async () => {
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    await insertCfa({
+      siret: "11111111100015",
+      raison_sociale: "Organisme de formation",
+      email: "test@apprentissage.beta.gouv.fr",
+      statut: "activé",
+      etablissements: [
+        { uai: "1234567A", voeux_date: DateTime.fromISO("2022-06-15T00:00:00.000Z") },
+        { uai: "1234567B", voeux_date: DateTime.fromISO("2022-06-10T00:00:00.000Z") },
+        { uai: "1234567C" },
+      ],
+      voeux_telechargements: [
+        {
+          uai: "1234567A",
+          date: DateTime.fromISO("2022-06-05T00:00:00.000Z").plus({ hours: 12 }),
+        },
+        {
+          uai: "1234567A",
+          date: DateTime.fromISO("2022-06-05T00:00:00.000Z").plus({ days: 1 }),
+        },
+        {
+          uai: "1234567B",
+          date: DateTime.fromISO("2022-06-15T00:00:00.000Z").plus({ days: 1 }),
+        },
+      ],
+    });
+    await insertVoeu({
+      etablissement_accueil: {
+        uai: "1234567A",
+      },
+      _meta: {
+        import_dates: [DateTime.fromISO("2022-06-05T00:00:00.000Z"), DateTime.fromISO("2022-06-15T00:00:00.000Z")],
+      },
+    });
+    await insertVoeu({
+      etablissement_accueil: {
+        uai: "1234567A",
+      },
+      _meta: {
+        import_dates: [DateTime.fromISO("2022-06-05T00:00:00.000Z")],
+      },
+    });
+    await insertVoeu({
+      etablissement_accueil: {
+        uai: "1234567A",
+      },
+      _meta: {
+        import_dates: [DateTime.fromISO("2022-06-10T00:00:00.000Z"), DateTime.fromISO("2022-06-15T00:00:00.000Z")],
+      },
+    });
+
+    await insertVoeu({
+      etablissement_accueil: {
+        uai: "1234567B",
+      },
+      _meta: {
+        import_dates: [DateTime.fromISO("2022-06-10T00:00:00.000Z")],
+      },
+    });
+    await insertVoeu({
+      etablissement_accueil: {
+        uai: "1234567B",
+      },
+      _meta: {
+        import_dates: [DateTime.fromISO("2022-06-10T00:00:00.000Z")],
+      },
+    });
+
+    const response = await httpClient.get("/api/admin/etablissements/statut-voeux.csv", {
+      headers: {
+        ...auth,
+      },
+    });
+
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(
+      response.data,
+      `"Académie";"Siret";"Uai";"Vœux";"Nombre de vœux";"Date du dernier import de vœux";"Téléchargement";"Date du dernier téléchargement";"Nombre de vœux téléchargés au moins une fois";"Nombre de vœux jamais téléchargés";"Nombre de vœux à télécharger (nouveau+maj)"
+"Paris";"11111111100015";"1234567A";"Oui";"3";"${date(new Date("2022-06-15T00:00:00.000Z"))}";"Oui";"${date(
+        new Date("2022-06-06T00:00:00.000Z")
+      )}";"2";"1";"2"
+"Paris";"11111111100015";"1234567B";"Oui";"2";"${date(new Date("2022-06-10T00:00:00.000Z"))}";"Oui";"${date(
+        new Date("2022-06-16T00:00:00.000Z")
+      )}";"2";"0";"0"
+"Paris";"11111111100015";"1234567C";"Non";"0";"";"Non";"";"0";"0";"0"
+`
+    );
   });
 
   it("Vérifie qu'on peut voir les consultations de la page stats par académie", async () => {

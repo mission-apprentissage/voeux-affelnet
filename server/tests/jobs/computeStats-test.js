@@ -270,3 +270,87 @@ describe("computeStats", () => {
     assert.strictEqual(stats["téléchargements"].length, 1);
   });
 });
+
+describe("computeVoeuxStats", () => {
+  it("Vérifie que le calcul des voeux est correcte", async () => {
+    const firstImport = DateTime.fromISO("2021-06-02T14:00:00.000Z");
+    const secondImport = DateTime.fromISO("2021-06-15T14:00:00.000Z");
+    const thirdImport = DateTime.fromISO("2021-06-29T14:00:00.000Z");
+
+    await Promise.all([
+      insertCfa({
+        statut: "activé",
+        email: "activéNonTelechargé@apprentissage.beta.gouv.fr",
+        etablissements: [{ uai: "0754560Z", voeux_date: new Date() }],
+        emails: [
+          {
+            token: "TOKEN1",
+            templateName: "notification",
+            to: "activé1@apprentissage.beta.gouv.fr",
+            sendDates: [DateTime.now().minus({ days: 7 }).toJSDate(), DateTime.now().minus({ days: 1 }).toJSDate()],
+            openDate: new Date(),
+          },
+        ],
+        voeux_telechargements: [
+          { uai: "1234567A", date: firstImport.plus({ days: 1 }).toJSDate() },
+          { uai: "0754560Z", date: secondImport.plus({ days: 1 }).toJSDate() },
+        ],
+      }),
+      // voeux diffusé
+      insertVoeu({
+        apprenant: { ine: "ABCDEF" },
+        "etablissement_accueil.uai": "1234567A",
+        _meta: {
+          import_dates: [firstImport.toJSDate()],
+        },
+      }),
+      // voeux diffusé
+      insertVoeu({
+        apprenant: { ine: "ABCDEF" },
+        "etablissement_accueil.uai": "0754560Z",
+        _meta: {
+          import_dates: [firstImport.toJSDate(), thirdImport.toJSDate()],
+        },
+      }),
+      // voeux diffusé
+      insertVoeu({
+        apprenant: { ine: "GHIJKL" },
+        "etablissement_accueil.uai": "0754560Z",
+        _meta: {
+          import_dates: [firstImport.toJSDate(), secondImport.toJSDate(), thirdImport.toJSDate()],
+        },
+      }),
+      // voeux diffusé
+      insertVoeu({
+        apprenant: { ine: "MNOPQR" },
+        "etablissement_accueil.uai": "0754560Z",
+        _meta: {
+          import_dates: [secondImport.toJSDate(), thirdImport.toJSDate()],
+        },
+      }),
+      // voeux non diffusé
+      insertVoeu({
+        apprenant: { ine: "STUVW" },
+        "etablissement_accueil.uai": "0754560Z",
+        _meta: {
+          import_dates: [thirdImport.toJSDate()],
+        },
+      }),
+    ]);
+
+    const stats = await computeStats();
+
+    assert.deepStrictEqual(
+      stats.voeux.find((c) => c.code === "ALL"),
+      {
+        code: "ALL",
+        stats: {
+          total: 5,
+          apprenants: 4,
+          cfasInconnus: 1,
+          nbVoeuxDiffusés: 3,
+        },
+      }
+    );
+  });
+});
