@@ -16,6 +16,7 @@ const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
+const { unmarkVoeuxAsDownloaded } = require("../../common/actions/unmarkVoeuxAsDownloaded");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
 const { dateAsString } = require("../../common/utils/stringUtils.js");
 
@@ -78,6 +79,7 @@ module.exports = ({ resendEmail }) => {
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
       await changeEmail(siret, email, { auteur: req.user.username });
+      await unmarkVoeuxAsDownloaded(siret);
       await resendConfirmationEmails(resendEmail, { username: siret });
 
       return res.json({});
