@@ -78,6 +78,7 @@ module.exports = ({ resendEmail }) => {
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
       await changeEmail(siret, email, { auteur: req.user.username });
+      await resendConfirmationEmails(resendEmail, { username: siret });
 
       return res.json({});
     })

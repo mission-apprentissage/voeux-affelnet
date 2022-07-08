@@ -9,7 +9,9 @@ async function changeEmail(username, newEmail, options = {}) {
     {
       $set: {
         email: newEmail,
+        statut: "en attente",
       },
+      $unset: { password: "" },
       $push: {
         anciens_emails: {
           email: previous.email,
