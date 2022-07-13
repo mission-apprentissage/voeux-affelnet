@@ -56,6 +56,7 @@ const schema = Joi.object({
       .required(),
     nom: Joi.string().required(),
     ville: Joi.string(),
+    cio: Joi.string(),
   }),
   etablissement_accueil: Joi.object({
     uai: Joi.string()
@@ -143,6 +144,7 @@ function parseVoeuxCsv(source) {
           uai: line["Code UAI étab. origine"]?.toUpperCase(),
           nom: `${line["Type étab. origine"] || ""} ${line["Libellé étab. origine"] || ""}`.trim(),
           ville: line["Ville étab. origine"],
+          cio: line["Code UAI CIO origine"],
         },
         etablissement_accueil: {
           uai: line["Code UAI étab. Accueil"]?.toUpperCase(),
