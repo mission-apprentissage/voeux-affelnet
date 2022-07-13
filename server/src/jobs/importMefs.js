@@ -39,8 +39,8 @@ async function importMefs(options = {}) {
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
-          stats.updated += res.nModified || 0;
-          stats.created += (res.upserted && res.upserted.length) || 0;
+          stats.updated += res.modifiedCount || 0;
+          stats.created += res.upsertedCount || 0;
         } catch (e) {
           logger.error(`Impossible d'importer le code mef  ${data.MEF}`);
           stats.failed++;

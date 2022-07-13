@@ -15,7 +15,7 @@ const getCsvAsStream = (content) => {
 
 describe("importMefs", () => {
   it("Vérifie qu'on peut importer les codes MEF", async () => {
-    await importMef({ csvStream: getCsvAsStream() });
+    const stats = await importMef({ csvStream: getCsvAsStream() });
 
     const results = await Mef.find().lean();
     assert.strictEqual(results.length, 1);
@@ -23,6 +23,13 @@ describe("importMefs", () => {
       mef: "3112320121",
       libelle_long: "1BTS2 TRAVAUX PUBLICS",
       code_formation_diplome: "32023201",
+    });
+    assert.deepStrictEqual(stats, {
+      created: 1,
+      failed: 0,
+      invalid: 0,
+      total: 1,
+      updated: 0,
     });
   });
 
