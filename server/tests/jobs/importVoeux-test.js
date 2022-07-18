@@ -55,6 +55,7 @@ describe("importVoeux", () => {
         uai: "1111111A",
         nom: "COLLEGE JULES FERRY",
         ville: "MARSEILLE",
+        cio: "1111111G",
       },
       etablissement_accueil: {
         uai: "1111111R",

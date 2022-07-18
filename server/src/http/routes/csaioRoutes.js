@@ -4,9 +4,9 @@ const { compose, transformIntoCSV } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { validate } = require("../../common/validators.js");
-const { getVoeuxCroisementStream } = require("../../common/actions/getVoeuxCroisementStream.js");
+const { streamCroisementVoeux } = require("../../common/actions/streamCroisementVoeux.js");
 const { findRegionByCode } = require("../../common/regions.js");
-const { getApprenantsStream } = require("../../common/actions/getApprenantsStream.js");
+const { streamSyntheseApprenants } = require("../../common/actions/streamSyntheseApprenants.js");
 const Boom = require("boom");
 const { dateAsString } = require("../../common/utils/stringUtils.js");
 const { encodeStream } = require("iconv-lite");
@@ -15,11 +15,11 @@ const { getLatestImportDate } = require("../../common/actions/getLatestImportDat
 const fichiers = [
   {
     name: "voeux-affelnet-croisement",
-    stream: getVoeuxCroisementStream,
+    stream: streamCroisementVoeux,
   },
   {
     name: "voeux-affelnet-synthese",
-    stream: getApprenantsStream,
+    stream: streamSyntheseApprenants,
   },
 ];
 
