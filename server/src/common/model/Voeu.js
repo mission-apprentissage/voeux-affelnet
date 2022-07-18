@@ -76,6 +76,7 @@ const schema = new Schema({
       uai: String,
       nom: String,
       ville: String,
+      cio: String,
     }),
   },
   etablissement_accueil: {

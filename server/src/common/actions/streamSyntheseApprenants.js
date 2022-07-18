@@ -3,7 +3,7 @@ const { compose, transformData } = require("oleoduc");
 const { findDossiers } = require("./findDossiers.js");
 const { capitalizeFirstLetter } = require("../utils/stringUtils.js");
 
-async function getApprenantsStream(options = {}) {
+async function streamSyntheseApprenants(options = {}) {
   const academies = options.academies;
 
   return compose(
@@ -32,6 +32,9 @@ async function getApprenantsStream(options = {}) {
           "Apprenant Téléphone Personnel": apprenant.telephone_personnel,
           "Apprenant Téléphone Portable": apprenant.telephone_portable,
           "Apprenant Adresse": adresse,
+          "Apprenant Adresse Code Postal": apprenant.adresse.code_postal,
+          "Apprenant Adresse Ville": apprenant.adresse.ville,
+          "Apprenant Adresse Pays": apprenant.adresse.pays,
           "Statut dans le tableau de bord": capitalizeFirstLetter(statut),
         };
       },
@@ -39,4 +42,4 @@ async function getApprenantsStream(options = {}) {
     )
   );
 }
-module.exports = { getApprenantsStream };
+module.exports = { streamSyntheseApprenants };

@@ -45,7 +45,7 @@ function getTrajectoiresPro(statut, voeu) {
   return `https://trajectoires-pro.apprentissage.beta.gouv.fr/api/inserjeunes/formations/${uai}-${cfd}.svg`;
 }
 
-async function getVoeuxCroisementStream(options = {}) {
+async function streamCroisementVoeux(options = {}) {
   const academies = options.academies;
 
   return compose(
@@ -70,6 +70,10 @@ async function getVoeuxCroisementStream(options = {}) {
           "Apprenant Téléphone Personnel": voeu.apprenant.telephone_personnel,
           "Apprenant Téléphone Portable": voeu.apprenant.telephone_portable,
           "Apprenant Adresse": voeu._meta.adresse,
+          "Apprenant Adresse Code Postal": voeu.apprenant.adresse.code_postal,
+          "Apprenant Adresse Ville": voeu.apprenant.adresse.ville,
+          "Apprenant Adresse Pays": voeu.apprenant.adresse.pays,
+          "Etablissement Origine CIO": voeu.etablissement_origine?.cio,
           "Etablissement Accueil UAI": uai,
           "Etablissement Accueil Nom": voeu.etablissement_accueil.nom,
           "Etablissement Accueil CIO": voeu.etablissement_accueil.cio,
@@ -88,4 +92,4 @@ async function getVoeuxCroisementStream(options = {}) {
     )
   );
 }
-module.exports = { getVoeuxCroisementStream };
+module.exports = { streamCroisementVoeux };
