@@ -74,8 +74,8 @@ async function importDossiers(jsonStream) {
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
-          stats.updated += res.nModified || 0;
-          stats.created += (res.upserted && res.upserted.length) || 0;
+          stats.updated += res.modifiedCount || 0;
+          stats.created += res.upsertedCount || 0;
         } catch (e) {
           logger.error(e, `Impossible d'importer le dossier ligne ${stats.total}`);
           stats.failed++;

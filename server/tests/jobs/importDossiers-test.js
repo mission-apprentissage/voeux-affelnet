@@ -8,7 +8,7 @@ const getJsonAsStream = (content) => {
 };
 
 describe("importDossiers", () => {
-  it("Vérifie qu'on peut importer les codes MEF", async () => {
+  it("Vérifie qu'on peut importer les dossiers", async () => {
     let stats = await importDossiers(
       getJsonAsStream({
         dossier_id: "622fd47b84f2eb55806020f8",
@@ -50,7 +50,7 @@ describe("importDossiers", () => {
       uai_etablissement: "0751234J",
     });
     assert.deepStrictEqual(stats, {
-      created: 0,
+      created: 1,
       failed: 0,
       total: 1,
       updated: 0,
