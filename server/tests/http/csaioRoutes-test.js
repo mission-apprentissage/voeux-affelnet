@@ -170,7 +170,7 @@ describe("csaioRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.headers["content-disposition"],
-      "attachment; filename=voeux-affelnet-croisement-2022-07-23.csv"
+      "attachment; filename=voeux-affelnet-croisement-2022-07-27.csv"
     );
     assert.strictEqual(
       response.data,

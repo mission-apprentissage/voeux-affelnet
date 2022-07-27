@@ -5,11 +5,53 @@ import * as Yup from "yup";
 import ErrorMessage from "../common/components/ErrorMessage";
 import { _get } from "../common/httpClient";
 import { asTablerInputError } from "../common/utils/tablerReactUtils";
+import { sortDescending } from "../common/utils/dateUtils";
 
-function RelationPage() {
-  const { gestionnaireOpened, setGestionnaireOpened } = useState(false);
-  const { formateurOpened, setFormateurOpened } = useState(false);
+function getDownloadStatus(gestionnaire, formateur) {
+  let statut;
 
+  console.log({ gestionnaire, formateur });
+
+  if (!gestionnaire || !formateur) {
+    return;
+  }
+
+  const etablissement = gestionnaire.etablissements?.find((e) => e.uai === formateur.uai);
+  const telechargements = gestionnaire.voeux_telechargements
+    ?.sort((a, b) => sortDescending(a.date, b.date))
+    .filter((t) => t.uai === formateur.uai);
+
+  console.log(formateur.uai, {
+    etablissement,
+    telechargements,
+    telecharges: telechargements.find((v) => v.date > etablissement?.voeux_date),
+  });
+
+  switch (true) {
+    case !etablissement.voeux_date:
+      statut = "Pas de voeux";
+      break;
+    case !!etablissement.voeux_date && !telechargements?.length:
+      statut = "Pas encore téléchargés";
+      break;
+    case !!etablissement.voeux_date &&
+      !!telechargements.length &&
+      !telechargements.find((t) => t.date > etablissement?.voeux_date):
+      statut = "En partie téléchargés";
+      break;
+    case !!etablissement.voeux_date &&
+      !!telechargements.length &&
+      !!telechargements.find((t) => t.date > etablissement?.voeux_date):
+      statut = "Téléchargés";
+      break;
+    default:
+      statut = "Inconnu";
+      break;
+  }
+  return statut;
+}
+
+function ReceptionVoeuxPage() {
   const [gestionnaireData, setGestionnaireData] = useState(undefined);
   const [gestionnaireError, setGestionnaireError] = useState(undefined);
   const [formateurData, setFormateurData] = useState(undefined);
@@ -123,6 +165,7 @@ function RelationPage() {
                                 <Table.ColHeader>ADRESSE</Table.ColHeader>
                                 <Table.ColHeader>CP</Table.ColHeader>
                                 <Table.ColHeader>COMMUNE</Table.ColHeader>
+                                <Table.ColHeader>TÉLÉCHARGEMENT DES VŒUX</Table.ColHeader>
                               </Table.Row>
                             </Table.Header>
                             <Table.Body>
@@ -135,6 +178,7 @@ function RelationPage() {
                                     <Table.Col>{formateur.adresse}</Table.Col>
                                     <Table.Col>{formateur.cp}</Table.Col>
                                     <Table.Col>{formateur.commune}</Table.Col>
+                                    <Table.Col>{getDownloadStatus(result.gestionnaire, formateur)}</Table.Col>
                                   </Table.Row>
                                 );
                               })}
@@ -231,6 +275,7 @@ function RelationPage() {
 
                                 <Table.ColHeader>MAIL</Table.ColHeader>
                                 <Table.ColHeader>STATUT</Table.ColHeader>
+                                <Table.ColHeader>TÉLÉCHARGEMENT DES VŒUX</Table.ColHeader>
                               </Table.Row>
                             </Table.Header>
                             <Table.Body>
@@ -242,6 +287,7 @@ function RelationPage() {
 
                                 <Table.Col>{result.gestionnaire.email}</Table.Col>
                                 <Table.Col>{result.gestionnaire.statut}</Table.Col>
+                                <Table.Col>{getDownloadStatus(result.gestionnaire, result.formateur)}</Table.Col>
                               </Table.Row>
                             </Table.Body>
                           </Table>
@@ -267,4 +313,4 @@ function RelationPage() {
   );
 }
 
-export default RelationPage;
+export default ReceptionVoeuxPage;
