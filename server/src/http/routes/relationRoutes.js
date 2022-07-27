@@ -27,7 +27,7 @@ module.exports = () => {
       const results = await Promise.all(
         cfas?.map(async (cfa) => {
           let gestionnaire;
-          const defaultGestionnaire = { siret: cfa.siret, email: cfa.email, statut: cfa.statut };
+          const defaultGestionnaire = cfa; // { siret: cfa.siret, email: cfa.email, statut: cfa.statut };
           try {
             gestionnaire = { ...defaultGestionnaire, ...(await referentielApi.getOrganisme(cfa.siret)) };
           } catch (error) {
@@ -82,7 +82,7 @@ module.exports = () => {
       const results = await Promise.all(
         cfas?.map(async (cfa) => {
           let gestionnaire;
-          const defaultGestionnaire = { siret: cfa.siret, email: cfa.email, statut: cfa.statut };
+          const defaultGestionnaire = cfa; // { siret: cfa.siret, email: cfa.email, statut: cfa.statut };
           try {
             gestionnaire = { ...defaultGestionnaire, ...(await referentielApi.getOrganisme(cfa.siret)) };
           } catch (error) {
