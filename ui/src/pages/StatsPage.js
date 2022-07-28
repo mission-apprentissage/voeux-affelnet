@@ -177,7 +177,15 @@ function StatsPage() {
                   <StatsCard>
                     <div>Cfas activés</div>
                     <div className="value">{cfas.activés}</div>
-                    <div className="details">({cfas.téléchargésVoeux} ont téléchargé des vœux)</div>
+                  </StatsCard>
+                </Grid.Col>
+                <Grid.Col width={3}>
+                  <StatsCard>
+                    <div>Cfas ayant téléchargés des voeux</div>
+                    <div className="value">{cfas.téléchargésVoeux}</div>
+                    <div className="details">
+                      ({cfas.téléchargésVoeuxTotal} totalement, {cfas.téléchargésVoeuxPartiel} partiellement)
+                    </div>
                   </StatsCard>
                 </Grid.Col>
                 <Grid.Col width={3}>
