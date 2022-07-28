@@ -2,6 +2,7 @@ const { Voeu, Cfa } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
 const { findDossier } = require("./findDossier.js");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
+const { sortDescending } = require("../utils/dateUtils.js");
 
 function besoinAide(statut) {
   return !["apprenti", "inscrit"].includes(statut);
@@ -61,7 +62,9 @@ async function streamCroisementVoeux(options = {}) {
         ]);
 
         const statut = dossier?.statut;
-        const downloadDate = cfa?.voeux_telechargements.find((t) => t.uai === uai)?.date;
+        const downloadDate = cfa?.voeux_telechargements
+          .sort((a, b) => sortDescending(a.date, b.date))
+          .find((t) => t.uai === uai)?.date;
 
         return {
           "Apprenant INE": voeu.apprenant.ine,
