@@ -63,6 +63,11 @@ const schema = new Schema({
   _meta: {
     required: true,
     type: nested({
+      import_dates: {
+        required: true,
+        index: true,
+        type: [Date],
+      },
       nom_complet: {
         type: String,
         index: true,

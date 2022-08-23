@@ -11,6 +11,7 @@ const Boom = require("boom");
 const { dateAsString } = require("../../common/utils/stringUtils.js");
 const { encodeStream } = require("iconv-lite");
 const { getLatestImportDate } = require("../../common/actions/getLatestImportDate.js");
+const { Dossier } = require("../../common/model/index.js");
 
 const fichiers = [
   {
@@ -49,7 +50,7 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Csaio"),
     tryCatch(async (req, res) => {
-      const latestImportDate = await getLatestImportDate();
+      const latestImportDate = await getLatestImportDate(Dossier);
 
       if (!latestImportDate) {
         return res.json([]);
@@ -77,7 +78,7 @@ module.exports = ({ users }) => {
       });
 
       const fichier = fichiers.find((f) => f.name === filename);
-      const latestImportDate = await getLatestImportDate();
+      const latestImportDate = await getLatestImportDate(Dossier);
       const academies = findRegionByCode(req.user.region.code).academies.map((a) => a.code);
       if (!fichier) {
         throw Boom.badRequest("Nom de fichier invalide");

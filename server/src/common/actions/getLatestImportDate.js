@@ -1,7 +1,7 @@
 const { Voeu } = require("../model/index.js");
 
-function getLatestImportDate() {
-  return Voeu.aggregate([
+function getLatestImportDate(Collection = Voeu) {
+  return Collection.aggregate([
     { $unwind: "$_meta.import_dates" },
     { $group: { _id: "$_meta.import_dates" } },
     { $sort: { _id: -1 } },

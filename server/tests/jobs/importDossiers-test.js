@@ -2,6 +2,7 @@ const assert = require("assert");
 const { Readable } = require("stream");
 const { importDossiers } = require("../../src/jobs/importDossiers.js");
 const { Dossier } = require("../../src/common/model/index.js");
+const { omit } = require("lodash");
 
 const getJsonAsStream = (content) => {
   return Readable.from(JSON.stringify([content || {}]));
@@ -29,10 +30,7 @@ describe("importDossiers", () => {
     );
 
     const dossier = await Dossier.findOne({}, { _id: 0 }).lean();
-    assert.deepStrictEqual(dossier, {
-      _meta: {
-        nom_complet: "ROBERT DOE",
-      },
+    assert.deepStrictEqual(omit(dossier, ["_meta"]), {
       academie: {
         code: "01",
         nom: "Paris",
@@ -49,6 +47,9 @@ describe("importDossiers", () => {
       statut: "apprenti",
       uai_etablissement: "0751234J",
     });
+
+    assert.deepStrictEqual(dossier._meta.nom_complet, "ROBERT DOE");
+    assert.ok(dossier._meta.import_dates[0]);
     assert.deepStrictEqual(stats, {
       created: 1,
       failed: 0,

@@ -170,7 +170,6 @@ module.exports = {
         {},
         {
           dossier_id: "621d4f652b8e994d7a1794ec",
-          _meta: { nom_complet: `${firstName} ${lastName}` },
           email_contact: createEmail(),
           annee_formation: 1,
           contrat_date_debut: new Date(),
@@ -181,6 +180,10 @@ module.exports = {
           formation_cfd: faker.helpers.replaceSymbols("##?####"),
           uai_etablissement: faker.helpers.replaceSymbols("#######?"),
           academie: { code: "01", nom: "Paris" },
+          _meta: {
+            nom_complet: `${firstName} ${lastName}`,
+            import_dates: [...(custom?._meta?.import_dates ?? [new Date()])],
+          },
         },
         custom
       )
