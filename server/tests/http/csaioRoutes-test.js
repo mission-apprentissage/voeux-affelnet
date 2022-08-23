@@ -71,13 +71,14 @@ describe("csaioRoutes", () => {
       region: { code: "11", nom: "Île-de-France" },
     });
 
-    const date = DateTime.fromISO("2022-07-23T14:00:00.000Z").toJSDate();
+    const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
+
     await Promise.all([
       insertCfa({
         voeux_telechargements: [
           {
             uai: "0751234J",
-            date: date,
+            date: date.toJSDate(),
           },
         ],
       }),
@@ -116,7 +117,7 @@ describe("csaioRoutes", () => {
         academie: { code: "01", nom: "Paris" },
         _meta: {
           adresse: "36 rue des lilas 75019 Paris FRANCE",
-          import_dates: [date],
+          import_dates: [date.toJSDate()],
         },
       }),
       insertVoeu({
@@ -147,7 +148,7 @@ describe("csaioRoutes", () => {
         academie: { code: "01", nom: "Paris" },
         _meta: {
           adresse: "36 rue des lilas 75019 Paris FRANCE",
-          import_dates: [date],
+          import_dates: [date.toJSDate()],
         },
       }),
       insertVoeu({
@@ -170,7 +171,7 @@ describe("csaioRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.headers["content-disposition"],
-      "attachment; filename=voeux-affelnet-croisement-2022-07-23.csv"
+      `attachment; filename=voeux-affelnet-croisement-${DateTime.fromJSDate(new Date()).toISODate()}.csv`
     );
     assert.strictEqual(
       response.data,
@@ -188,7 +189,8 @@ GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;75
       region: { code: "11", nom: "Île-de-France" },
     });
 
-    const date = DateTime.fromISO("2022-07-23T14:00:00.000Z").toJSDate();
+    const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
+
     await Promise.all([
       insertVoeu({
         apprenant: {
@@ -207,7 +209,7 @@ GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;75
         academie: { code: "01", nom: "Paris" },
         _meta: {
           adresse: "36 rue des lilas 75019 Paris FRANCE",
-          import_dates: [date],
+          import_dates: [date.toJSDate()],
         },
       }),
       insertDossier({
@@ -229,7 +231,7 @@ GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;75
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.headers["content-disposition"],
-      "attachment; filename=voeux-affelnet-synthese-2022-07-23.csv"
+      `attachment; filename=voeux-affelnet-synthese-${date.toISODate()}.csv`
     );
     assert.strictEqual(
       response.data,

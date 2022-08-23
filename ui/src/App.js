@@ -11,7 +11,7 @@ import PreviewEmail from "./pages/PreviewEmail";
 import ConfirmationPage from "./pages/ConfirmationPage";
 import StatsPage from "./pages/StatsPage";
 import AdminPage from "./pages/AdminPage";
-import RelationPage from "./pages/RelationPage";
+import ReceptionVoeuxPage from "./pages/ReceptionVoeuxPage";
 import CsaioPage from "./pages/CsaioPage.js";
 import { getUserType } from "./common/utils/getUserType.js";
 
@@ -60,7 +60,7 @@ function App() {
           <Route exact path="/activation" component={ActivationPage} />
           <Route exact path="/confirmation" component={ConfirmationPage} />
           <Route exact path="/stats" component={StatsPage} />
-          <Route exact path="/reception-voeux" component={RelationPage} />
+          <Route exact path="/reception-voeux" component={ReceptionVoeuxPage} />
           <Route exact path="/reset-password" component={ResetPasswordPage} />
           <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
           <Route exact path="/emails/:token/preview" component={PreviewEmail} />
