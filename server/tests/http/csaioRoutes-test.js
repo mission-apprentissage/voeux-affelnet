@@ -13,7 +13,7 @@ describe("csaioRoutes", () => {
       region: { code: "11", nom: "Île-de-France" },
     });
     const date = new Date();
-    await insertVoeu({
+    await insertDossier({
       academie: { code: "01", nom: "Paris" },
       _meta: {
         import_dates: [date],
@@ -117,7 +117,6 @@ describe("csaioRoutes", () => {
         academie: { code: "01", nom: "Paris" },
         _meta: {
           adresse: "36 rue des lilas 75019 Paris FRANCE",
-          import_dates: [date.toJSDate()],
         },
       }),
       insertVoeu({
@@ -148,7 +147,6 @@ describe("csaioRoutes", () => {
         academie: { code: "01", nom: "Paris" },
         _meta: {
           adresse: "36 rue des lilas 75019 Paris FRANCE",
-          import_dates: [date.toJSDate()],
         },
       }),
       insertVoeu({
@@ -159,6 +157,9 @@ describe("csaioRoutes", () => {
         formation_cfd: "40025214",
         uai_etablissement: "0751234J",
         statut: "apprenti",
+        _meta: {
+          import_dates: [date.toJSDate()],
+        },
       }),
     ]);
 
@@ -171,7 +172,7 @@ describe("csaioRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.headers["content-disposition"],
-      `attachment; filename=voeux-affelnet-croisement-${DateTime.fromJSDate(new Date()).toISODate()}.csv`
+      `attachment; filename=voeux-affelnet-croisement-${date.toISODate()}.csv`
     );
     assert.strictEqual(
       response.data,
@@ -209,16 +210,21 @@ GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;75
         academie: { code: "01", nom: "Paris" },
         _meta: {
           adresse: "36 rue des lilas 75019 Paris FRANCE",
-          import_dates: [date.toJSDate()],
         },
       }),
       insertDossier({
         ine_apprenant: "ABCDEF",
         statut: "abandon",
+        _meta: {
+          import_dates: [date.toJSDate()],
+        },
       }),
       insertDossier({
         ine_apprenant: "ABCDEF",
         statut: "apprenti",
+        _meta: {
+          import_dates: [date.toJSDate()],
+        },
       }),
     ]);
 

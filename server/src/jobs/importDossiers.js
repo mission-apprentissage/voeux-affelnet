@@ -53,6 +53,7 @@ async function importDossiers(jsonStream) {
               $set: omitEmpty({
                 annee_formation: data.annee_formation,
                 statut: getStatut(data.historique_statut_apprenant),
+                "_meta.nom_complet": removeDiacritics(`${data.prenom_apprenant} ${data.nom_apprenant}`),
                 academie: academie,
                 ...pick(data, [
                   "dossier_id",
@@ -66,10 +67,10 @@ async function importDossiers(jsonStream) {
                   "contrat_date_fin",
                   "contrat_date_rupture",
                 ]),
-                _meta: {
-                  nom_complet: removeDiacritics(`${data.prenom_apprenant} ${data.nom_apprenant}`),
-                },
               }),
+              $push: {
+                "_meta.import_dates": new Date(),
+              },
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
