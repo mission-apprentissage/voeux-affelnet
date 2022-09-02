@@ -329,13 +329,13 @@ cli
 
 cli
   .command("importDossiers")
-  .argument("<file>", "L'export du tdb")
+  .option("--file <file>", "Fichier json contenant les dossiers du tableau de bord", createReadStream)
   .description("Importe les dossiers du tableau de bord")
-  .action((file) => {
+  .action(({ file }) => {
     runScript(() => {
-      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
 
-      return importDossiers(input);
+      return importDossiers({ input });
     });
   });
 

@@ -1,9 +1,11 @@
+const uuid = require("uuid");
 const nock = require("nock"); // eslint-disable-line node/no-unpublished-require
 const { merge } = require("lodash");
 const faker = require("@faker-js/faker/locale/fr").faker;
 const CatalogueApi = require("../../src/common/api/CatalogueApi.js");
 const ReferentielApi = require("../../src/common/api/ReferentielApi.js");
 const { createUAI } = require("../../src/common/utils/validationUtils.js");
+const TableauDeBordApi = require("../../src/common/api/TableauDeBordApi.js");
 
 function createNock(baseUrl) {
   const client = nock(baseUrl);
@@ -335,6 +337,84 @@ module.exports = {
             total: 1,
           },
         };
+      },
+    });
+  },
+  mockTableauDeBordApi(callback) {
+    const client = createNock(TableauDeBordApi.baseApiUrl);
+    callback(client, {
+      login(custom = {}) {
+        return merge(
+          {},
+          {
+            id: "12345",
+          },
+          custom
+        );
+      },
+      dossiers(array = [{}]) {
+        return array.map((custom) => {
+          return merge(
+            {},
+            {
+              etablissement_nom_academie: null,
+              ine_apprenant: "",
+              etablissement_reseaux: null,
+              etablissement_formateur_code_commune_insee: null,
+              code_commune_insee_apprenant: null,
+              niveau_formation_libelle: "3 (CAP...)",
+              annee_formation: 1,
+              contrat_date_fin: "2022-12-31T00:00:00Z",
+              tel_apprenant: faker.phone.phoneNumber("06########"),
+              prenom_apprenant: faker.name.firstName(),
+              etablissement_num_academie: null,
+              email_contact: faker.internet.email(),
+              contrat_date_rupture: null,
+              etablissement_localite: null,
+              id_erp_apprenant: "123",
+              etablissement_geo_coordonnees: null,
+              siret_etablissement_valid: true,
+              etablissement_num_departement: "77",
+              periode_formation: [2022, 2022],
+              etablissement_formateur_geo_coordonnees: null,
+              nom_etablissement: faker.company.companyName(),
+              etablissement_formateur_siret: null,
+              libelle_court_formation: null,
+              erps: null,
+              date_de_naissance_apprenant: "2000-04-14T00:00:00Z",
+              history_cleaned_date: null,
+              niveau_formation: "3",
+              siret_etablissement: faker.helpers.replaceSymbols("#########00015"),
+              updated_at: "2022-09-01T18:09:43.023Z",
+              etablissement_num_region: "11",
+              formation_rncp: "RNCP8812",
+              match_formation_mnaCatalog_cfd_siret: null,
+              etablissement_adresse: null,
+              historique_statut_apprenant: [
+                {
+                  valeur_statut: 3,
+                  date_statut: "2022-03-14T00:00:00Z",
+                  date_reception: "2022-08-01T20:33:23.15Z",
+                },
+              ],
+              forced_annee_scolaire: null,
+              source: "scform",
+              etablissement_nom_departement: "Seine-et-Marne",
+              etablissement_gestionnaire_siret: null,
+              _id: uuid.v4(),
+              formation_cfd: faker.helpers.replaceSymbols("4#######"),
+              etablissement_code_postal: null,
+              created_at: "2022-07-15T18:20:54.977Z",
+              uai_etablissement: faker.helpers.replaceSymbols("075####"),
+              nom_apprenant: faker.name.lastName(),
+              annee_scolaire: "2022-2022",
+              etablissement_nom_region: "Île-de-France",
+              contrat_date_debut: "2022-03-18T00:00:00Z",
+              libelle_long_formation: "EMPLOYE(E) COMMERCIAL(E) EN MAGASIN (TP)",
+            },
+            custom
+          );
+        });
       },
     });
   },
