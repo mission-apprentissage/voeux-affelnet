@@ -35,9 +35,10 @@ async function exportStatutVoeux(output, options = {}) {
       columns: {
         Académie: (data) => data.academie?.nom,
         "Siret de l’organisme responsable": (data) => data.siret,
+        "Raison sociale de l’organisme responsable": (data) => data.raison_sociale,
         "Email de contact de l’organisme responsable": (data) => data.email,
         Uai: (data) => data.etablissements?.uai,
-        "Raison sociale": async (data) => {
+        "Raison sociale de l’établissement d’accueil": async (data) => {
           try {
             if (etablissements.get(data.etablissements?.uai)) {
               return etablissements.get(data.etablissements?.uai);
