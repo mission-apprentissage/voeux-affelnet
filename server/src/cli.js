@@ -28,6 +28,7 @@ const CatalogueApi = require("./common/api/CatalogueApi.js");
 const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
 const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js");
+const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUniquementEnApprentissage.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -333,9 +334,19 @@ cli
   .description("Importe les dossiers du tableau de bord")
   .action(({ file }) => {
     runScript(() => {
-      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
+      return importDossiers({ input: file });
+    });
+  });
 
-      return importDossiers({ input });
+cli
+  .command("importJeunesUniquementEnApprentissage")
+  .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
+  .description("Ajoute une meta pour les jeunes ayant formulés des voeux uniquementen apprentissage")
+  .action((file) => {
+    runScript(() => {
+      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+
+      return importJeunesUniquementEnApprentissage(input);
     });
   });
 

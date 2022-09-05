@@ -3,6 +3,7 @@ const { compose, transformData } = require("oleoduc");
 const { findDossier } = require("./findDossier.js");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { sortDescending } = require("../utils/dateUtils.js");
+const { ouiNon } = require("../utils/csvUtils.js");
 
 function besoinAide(statut) {
   return !["apprenti", "inscrit"].includes(statut);
@@ -89,6 +90,7 @@ async function streamCroisementVoeux(options = {}) {
           "La Bonne Alternance": getWidgetLBAUrl(statut, voeu),
           InserJeunes: getTrajectoiresPro(statut, voeu),
           ...getDidaskModules(statut),
+          "Jeunes uniquement en apprentissage": ouiNon(voeu._meta.jeune_uniquement_en_apprentissage),
         };
       },
       { parallel: 10 }

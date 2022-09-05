@@ -94,13 +94,15 @@ const schema = new Schema({
   _meta: {
     required: true,
     type: nested({
+      adresse: String,
+      jeune_uniquement_en_apprentissage: {
+        default: false,
+        type: Boolean,
+      },
       import_dates: {
         required: true,
         index: true,
         type: [Date],
-      },
-      adresse: {
-        type: String,
       },
       anomalies: {
         default: [],

@@ -2,6 +2,7 @@ const { Voeu } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
 const { findDossiers } = require("./findDossiers.js");
 const { capitalizeFirstLetter } = require("../utils/stringUtils.js");
+const { ouiNon } = require("../utils/csvUtils.js");
 
 async function streamSyntheseApprenants(options = {}) {
   const academies = options.academies;
@@ -14,12 +15,12 @@ async function streamSyntheseApprenants(options = {}) {
           _id: "$apprenant.ine",
           apprenant: { $first: "$apprenant" },
           responsable: { $first: "$responsable" },
-          adresse: { $first: "$_meta.adresse" },
+          _meta: { $first: "$_meta" },
         },
       },
     ]).cursor(),
     transformData(
-      async ({ apprenant, responsable, adresse }) => {
+      async ({ apprenant, responsable, _meta }) => {
         const dossiers = await findDossiers(apprenant, responsable);
         const statuts = dossiers.map((d) => d.statut);
         const statut =
@@ -31,11 +32,12 @@ async function streamSyntheseApprenants(options = {}) {
           "Apprenant prénom": apprenant.prenom,
           "Apprenant Téléphone Personnel": apprenant.telephone_personnel,
           "Apprenant Téléphone Portable": apprenant.telephone_portable,
-          "Apprenant Adresse": adresse,
+          "Apprenant Adresse": _meta.adresse,
           "Apprenant Adresse Code Postal": apprenant.adresse.code_postal,
           "Apprenant Adresse Ville": apprenant.adresse.ville,
           "Apprenant Adresse Pays": apprenant.adresse.pays,
           "Statut dans le tableau de bord": capitalizeFirstLetter(statut),
+          "Jeunes uniquement en apprentissage": ouiNon(_meta.jeune_uniquement_en_apprentissage),
         };
       },
       { parallel: 10 }
