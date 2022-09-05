@@ -73,8 +73,8 @@ const isTelechargementAucun = (etablissement, voeux_telechargements) => {
  */
 const areTelechargementsTotal = (etablissements, voeux_telechargements) => {
   return (
-    etablissements.filter((etablissement) => isTelechargementTotal(etablissement, voeux_telechargements)).length ===
-    etablissements.length
+    etablissements?.filter((etablissement) => isTelechargementTotal(etablissement, voeux_telechargements)).length ===
+    etablissements?.length
   );
 };
 

@@ -44,7 +44,6 @@ const transformUfaStream = (data) => {
     visible_portail: data["VISIBLE_PORTAIL"],
     libelle_formation: data["LIBELLE_FORMATION"],
     url_onisep_formation: data["URL_ONISEP_FORMATION"],
-    // libelle_etablissement: data["LIBELLE_ETABLISSEMENT"],
     url_onisep_etablissement: data["URL_ONISEP_ETABLISSEMENT"],
     libelle_ville: data["LIBELLE_VILLE"],
     campus_metier: data["CAMPUS_METIER"],

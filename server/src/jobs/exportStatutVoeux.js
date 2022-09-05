@@ -3,6 +3,8 @@ const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date } = require("../common/utils/csvUtils.js");
 const { sortDescending } = require("../common/utils/dateUtils.js");
+const { areTelechargementsTotal } = require("../common/utils/cfaUtils");
+const CatalogueApi = require("../common/api/CatalogueApi");
 
 const getLastDownloadDate = (data) => {
   const relatedDowloads = data.voeux_telechargements
@@ -13,6 +15,9 @@ const getLastDownloadDate = (data) => {
 };
 
 async function exportStatutVoeux(output, options = {}) {
+  const catalogueApi = new CatalogueApi();
+
+  const etablissements = new Map();
   const columns = options.columns || {};
   await oleoduc(
     Cfa.aggregate([
@@ -29,8 +34,24 @@ async function exportStatutVoeux(output, options = {}) {
       mapper: (v) => `"${v || ""}"`,
       columns: {
         Académie: (data) => data.academie?.nom,
-        Siret: (data) => data.siret,
+        "Siret de l’organisme responsable": (data) => data.siret,
+        "Email de contact de l’organisme responsable": (data) => data.email,
         Uai: (data) => data.etablissements?.uai,
+        "Raison sociale": async (data) => {
+          try {
+            if (etablissements.get(data.etablissements?.uai)) {
+              return etablissements.get(data.etablissements?.uai);
+            } else {
+              const etablissement = await catalogueApi.getEtablissement({ uai: data.etablissements?.uai });
+              etablissements.set(data.etablissements?.uai, etablissement.entreprise_raison_sociale);
+              return etablissement.entreprise_raison_sociale;
+            }
+          } catch (e) {
+            return null;
+          }
+        },
+        "Statut ": (data) =>
+          data.statut === "activé" ? "contact responsable confirmé" : "contact responsable non confirmé",
         Vœux: (data) => ouiNon(data.etablissements?.voeux_date),
         "Nombre de vœux": async (data) =>
           `${await Voeu.countDocuments({
@@ -41,6 +62,10 @@ async function exportStatutVoeux(output, options = {}) {
           const lastDownloadDate = getLastDownloadDate(data);
 
           return ouiNon(!!lastDownloadDate);
+        },
+        "Téléchargement effectué pour tous les établissements d’accueil liés ?": async (data) => {
+          const cfa = await Cfa.find({ _id: data._id });
+          return ouiNon(areTelechargementsTotal(cfa.etablissements, data.voeux_telechargements));
         },
         "Date du dernier téléchargement": (data) => {
           const lastDownloadDate = getLastDownloadDate(data);
