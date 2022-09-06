@@ -341,7 +341,7 @@ cli
 cli
   .command("importJeunesUniquementEnApprentissage")
   .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
-  .description("Ajoute une meta pour les jeunes ayant formulés des voeux uniquementen apprentissage")
+  .description("Ajoute une meta pour les jeunes ayant formulés des voeux uniquement en apprentissage")
   .action((file) => {
     runScript(() => {
       const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
