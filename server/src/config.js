@@ -35,6 +35,10 @@ module.exports = {
       .default("https://catalogue.apprentissage.beta.gouv.fr")
       .asString(),
   },
+  tableauDeBord: {
+    username: env.get("VOEUX_AFFELNET_TDB_USERNAME").asString(),
+    password: env.get("VOEUX_AFFELNET_TDB_PASSWORD").asString(),
+  },
   slackWebhookUrl: env.get("VOEUX_AFFELNET_SLACK_WEBHOOK_URL").asString(),
   outputDir: env.get("VOEUX_AFFELNET_OUTPUT_DIR").default(".local/output").asString(),
   smtp: {

@@ -1,19 +1,11 @@
 const logger = require("../common/logger");
-const { oleoduc, writeData, compose, transformData } = require("oleoduc");
+const { oleoduc, writeData, compose } = require("oleoduc");
 const { Dossier } = require("../common/model/index.js");
-const { parser: jsonParser } = require("stream-json");
-const { streamArray } = require("stream-json/streamers/StreamArray");
 const { pick, sortBy } = require("lodash");
 const { omitEmpty, removeDiacritics } = require("../common/utils/objectUtils.js");
 const { findAcademieByDepartement, findAcademieByCodeInsee } = require("../common/academies.js");
-
-function streamJsonArray() {
-  return compose(
-    jsonParser(),
-    streamArray(),
-    transformData((data) => data.value)
-  );
-}
+const { streamJsonArray } = require("../common/utils/streamUtils.js");
+const TableauDeBordApi = require("../common/api/TableauDeBordApi.js");
 
 const STATUT_MAPPER = {
   2: "inscrit",
@@ -31,25 +23,50 @@ function getStatut(historique) {
 
   return new Date(res.date_statut) > now ? "inscrit" : STATUT_MAPPER[res.valeur_statut];
 }
-async function importDossiers(jsonStream) {
+
+function parseFile(input) {
+  return compose(input, streamJsonArray());
+}
+
+function addImportDate(dossierId) {
+  return Dossier.updateOne(
+    {
+      dossier_id: dossierId,
+    },
+    {
+      $push: {
+        "_meta.import_dates": new Date(),
+      },
+    },
+    { upsert: true, setDefaultsOnInsert: true, runValidators: true }
+  );
+}
+
+async function importDossiers(options = {}) {
+  const tableauDeBordApi = options.tdbApi || new TableauDeBordApi();
   const stats = { total: 0, created: 0, updated: 0, failed: 0 };
 
+  const stream = options.input ? parseFile(options.input) : await tableauDeBordApi.streamDossiers();
+
   await oleoduc(
-    jsonStream,
-    streamJsonArray(),
+    stream,
     writeData(
       async (data) => {
         try {
           stats.total++;
+          const dossierId = data._id;
           const academie =
             findAcademieByDepartement(data.etablissement_num_departement) ||
             findAcademieByCodeInsee(data.etablissement_formateur_code_commune_insee);
 
           const res = await Dossier.updateOne(
             {
-              dossier_id: data._id,
+              dossier_id: dossierId,
             },
             {
+              $setOnInsert: {
+                "_meta.import_dates": [new Date()],
+              },
               $set: omitEmpty({
                 annee_formation: data.annee_formation,
                 statut: getStatut(data.historique_statut_apprenant),
@@ -68,17 +85,20 @@ async function importDossiers(jsonStream) {
                   "contrat_date_rupture",
                 ]),
               }),
-              $push: {
-                "_meta.import_dates": new Date(),
-              },
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
-          stats.updated += res.modifiedCount || 0;
-          stats.created += res.upsertedCount || 0;
+          if (res.upsertedCount) {
+            stats.created++;
+            logger.debug(`Nouveau dossier ajouté : ${dossierId}`);
+          } else if (res.modifiedCount) {
+            stats.updated++;
+            await addImportDate(dossierId);
+            logger.debug(`Dossier ${dossierId} mis à jour`);
+          }
         } catch (e) {
-          logger.error(e, `Impossible d'importer le dossier ligne ${stats.total}`);
+          logger.error(e, `Impossible d'importer le dossier à la ligne ${stats.total}`);
           stats.failed++;
         }
       },
