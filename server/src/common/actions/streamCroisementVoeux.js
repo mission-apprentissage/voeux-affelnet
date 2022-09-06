@@ -77,6 +77,8 @@ async function streamCroisementVoeux(options = {}) {
           "Apprenant Adresse Code Postal": voeu.apprenant.adresse.code_postal,
           "Apprenant Adresse Ville": voeu.apprenant.adresse.ville,
           "Apprenant Adresse Pays": voeu.apprenant.adresse.pays,
+          "Etablissement Origine UAI": voeu.etablissement_origine.uai,
+          "Etablissement Origine Nom": voeu.etablissement_origine.nom,
           "Etablissement Origine CIO": voeu.etablissement_origine?.cio,
           "Etablissement Accueil UAI": uai,
           "Etablissement Accueil Nom": voeu.etablissement_accueil.nom,
