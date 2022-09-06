@@ -340,7 +340,7 @@ cli
 
 cli
   .command("importJeunesUniquementEnApprentissage")
-  .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
+  .argument("<file>", "Le fichier CSV contentant les INE  (default: stdin)")
   .description("Ajoute une meta pour les jeunes ayant formulés des voeux uniquement en apprentissage")
   .action((file) => {
     runScript(() => {
