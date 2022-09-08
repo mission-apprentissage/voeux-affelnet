@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Alert, Button, Card, Form, Grid, Page, Table } from "tabler-react";
+import React from "react";
+import { Card, Form, Grid, Page, Table } from "tabler-react";
 import { useFetch } from "../common/hooks/useFetch";
 import { DateTime } from "luxon";
 import styled from "styled-components";
@@ -53,7 +53,6 @@ function StatsPage() {
   const [now, loading, , setNow] = useFetch(`/api/stats/computeStats/now?academies=ALL`, null);
   const [importCfas] = useFetch(`/api/stats/importCfas`, { results: [] });
   const [importVoeux] = useFetch(`/api/stats/importVoeux`, { results: [] });
-  const [showRapport, setShowRapport] = useState(false);
 
   const academies = now ? now._meta.academies : [];
   const cfas = now ? now.stats.cfas[0].stats : null;

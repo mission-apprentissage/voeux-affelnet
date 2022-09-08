@@ -1,5 +1,6 @@
 import EventEmitter from "events";
 import { getAuth } from "./auth";
+import * as queryString from "query-string";
 
 class AuthError extends Error {
   constructor(json, statusCode) {
@@ -76,13 +77,17 @@ export const _delete = (path) => {
   }).then((res) => handleResponse(path, res));
 };
 
-export const buildLink = (path) => {
+export const buildLink = (path, params = {}) => {
   const auth = getAuth();
-  if (auth.sub !== "anonymous") {
-    //TODO better handle params
-    return `${path}?token=${auth.token}`;
-  }
-  return path;
+  const queryParams = queryString.stringify(
+    {
+      ...params,
+      ...(auth.sub !== "anonymous" ? { token: auth.token } : {}),
+    },
+    { skipNull: true, skipEmptyString: true }
+  );
+
+  return `${path}?${queryParams}`;
 };
 
 export const subscribeToHttpEvent = (eventName, callback) => emitter.on(eventName, callback);

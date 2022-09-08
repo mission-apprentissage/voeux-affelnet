@@ -4,6 +4,7 @@ const { startServer } = require("../utils/testUtils");
 const { Csaio } = require("../../src/common/model/index.js");
 const { insertDossier, insertCfa } = require("../utils/fakeData.js");
 const { DateTime } = require("luxon");
+const { strictEqual, deepStrictEqual } = require("assert");
 
 describe("csaioRoutes", () => {
   it("Vérifie qu'un csaio peut accéder à la liste des fichiers en étant authentifié", async () => {
@@ -64,7 +65,7 @@ describe("csaioRoutes", () => {
     assert.deepStrictEqual(response.data, []);
   });
 
-  it("Vérifie qu'un csaio peut télécharger le fichier de croisement par région avec les statuts du tdb", async () => {
+  it("Vérifie qu'un csaio peut télécharger le fichier de croisement", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
@@ -195,7 +196,105 @@ GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;75
     );
   });
 
-  it("Vérifie qu'un csaio peut télécharger le fichier de synthese par région avec les statuts du tdb", async () => {
+  it("Vérifie qu'un csaio peut télécharger le fichier de croisement pour une académie", async () => {
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("csaio", "password", {
+      model: Csaio,
+      region: { code: "11", nom: "Île-de-France" },
+    });
+
+    const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
+
+    await Promise.all([
+      insertCfa({
+        voeux_telechargements: [
+          {
+            uai: "0751234J",
+            date: date.toJSDate(),
+          },
+        ],
+      }),
+      insertDossier({
+        ine_apprenant: "ABCDEF",
+        formation_cfd: "40025214",
+        uai_etablissement: "0751234J",
+        statut: "apprenti",
+        _meta: {
+          import_dates: [date.toJSDate()],
+        },
+      }),
+      insertVoeu({
+        apprenant: {
+          ine: "ABCDEF",
+        },
+        academie: { code: "01", nom: "Paris" },
+      }),
+      insertVoeu({
+        apprenant: {
+          ine: "FGHIJK",
+        },
+        academie: { code: "24", nom: "Créteil" },
+      }),
+    ]);
+
+    const response = await httpClient.get("/api/csaio/fichiers/voeux-affelnet-croisement.csv?academies=01", {
+      headers: {
+        ...auth,
+      },
+    });
+
+    assert.strictEqual(response.status, 200);
+    const lines = response.data.split("\n");
+    assert.strictEqual(lines.length, 3);
+    assert.ok(lines[1].startsWith("ABCDEF"));
+    assert.strictEqual(lines[2], "");
+  });
+
+  it("Vérifie qu'un csaio ne peut pas télécharger le fichier de croisement pour une académie d'une autre région", async () => {
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("csaio", "password", {
+      model: Csaio,
+      region: { code: "11", nom: "Île-de-France" },
+    });
+
+    const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
+
+    await Promise.all([
+      insertCfa({
+        voeux_telechargements: [
+          {
+            uai: "0751234J",
+            date: date.toJSDate(),
+          },
+        ],
+      }),
+      insertDossier({
+        ine_apprenant: "ABCDEF",
+        formation_cfd: "40025214",
+        uai_etablissement: "0751234J",
+        statut: "apprenti",
+        _meta: {
+          import_dates: [date.toJSDate()],
+        },
+      }),
+      insertVoeu({
+        apprenant: {
+          ine: "ABCDE",
+        },
+        academie: { code: "01", nom: "Paris" },
+      }),
+    ]);
+
+    const response = await httpClient.get("/api/csaio/fichiers/voeux-affelnet-croisement.csv?academies=70", {
+      headers: {
+        ...auth,
+      },
+    });
+
+    assert.strictEqual(response.status, 400);
+  });
+
+  it("Vérifie qu'un csaio peut télécharger le fichier de synthese", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
@@ -259,6 +358,50 @@ ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;7
     );
   });
 
+  it("Vérifie qu'un csaio peut télécharger le fichier de synthese pour une académie", async () => {
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("csaio", "password", {
+      model: Csaio,
+      region: { code: "11", nom: "Île-de-France" },
+    });
+
+    const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
+
+    await Promise.all([
+      insertDossier({
+        ine_apprenant: "ABCDEF",
+        statut: "abandon",
+        _meta: {
+          import_dates: [date.toJSDate()],
+        },
+      }),
+      insertVoeu({
+        apprenant: {
+          ine: "ABCDEF",
+        },
+        academie: { code: "01", nom: "Paris" },
+      }),
+      insertVoeu({
+        apprenant: {
+          ine: "FGHIJK",
+        },
+        academie: { code: "25", nom: "Créteil" },
+      }),
+    ]);
+
+    const response = await httpClient.get("/api/csaio/fichiers/voeux-affelnet-synthese.csv?academies=25", {
+      headers: {
+        ...auth,
+      },
+    });
+
+    assert.strictEqual(response.status, 200);
+    const lines = response.data.split("\n");
+    assert.strictEqual(lines.length, 3);
+    assert.ok(lines[1].startsWith("FGHIJK"));
+    assert.strictEqual(lines[2], "");
+  });
+
   it("Doit rejeter un utilisateur qui n'est pas un csaio", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("user1", "password");
@@ -288,11 +431,32 @@ ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;7
     assert.strictEqual(response.status, 400);
   });
 
-  it("Doit rejeter une requete sans authentification", async () => {
+  it("Doit rejeter une requête sans authentification", async () => {
     const { httpClient } = await startServer();
 
     const response = await httpClient.get("/api/csaio/fichiers");
 
     assert.strictEqual(response.status, 401);
+  });
+
+  it("Vérifie qu'on peut lister les académies", async () => {
+    const { httpClient, createAndLogUser } = await startServer();
+    const { auth } = await createAndLogUser("csaio", "password", {
+      model: Csaio,
+      region: { code: "11", nom: "Île-de-France" },
+    });
+
+    const response = await httpClient.get("/api/csaio/academies", {
+      headers: {
+        ...auth,
+      },
+    });
+
+    strictEqual(response.status, 200);
+    deepStrictEqual(response.data, [
+      { code: "01", nom: "Paris" },
+      { code: "24", nom: "Créteil" },
+      { code: "25", nom: "Versailles" },
+    ]);
   });
 });

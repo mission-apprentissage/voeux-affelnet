@@ -3,7 +3,7 @@ const Joi = require("@hapi/joi");
 const { compose, transformIntoCSV } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { validate } = require("../../common/validators.js");
+const { validate, arrayOf } = require("../../common/validators.js");
 const { streamCroisementVoeux } = require("../../common/actions/streamCroisementVoeux.js");
 const { findRegionByCode } = require("../../common/regions.js");
 const { streamSyntheseApprenants } = require("../../common/actions/streamSyntheseApprenants.js");
@@ -46,6 +46,16 @@ module.exports = ({ users }) => {
   const { checkApiToken, ensureIs } = authMiddleware(users);
 
   router.get(
+    "/api/csaio/academies",
+    checkApiToken(),
+    ensureIs("Csaio"),
+    tryCatch(async (req, res) => {
+      const region = findRegionByCode(req.user.region.code);
+      res.json(region.academies);
+    })
+  );
+
+  router.get(
     "/api/csaio/fichiers",
     checkApiToken(),
     ensureIs("Csaio"),
@@ -72,25 +82,31 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Csaio"),
     tryCatch(async (req, res) => {
-      const { filename, ext } = await validate(req.params, {
-        filename: Joi.string().valid("voeux-affelnet-croisement", "voeux-affelnet-synthese").required(),
-        ext: Joi.string().valid("csv", "xls").required(),
-      });
+      const academieCodes = findRegionByCode(req.user.region.code).academies.map((a) => a.code);
+      const { filename, ext, academies } = await validate(
+        { ...req.params, ...req.query },
+        {
+          filename: Joi.string().valid("voeux-affelnet-croisement", "voeux-affelnet-synthese").required(),
+          ext: Joi.string().valid("csv", "xls").required(),
+          academies: arrayOf(Joi.string().valid(...academieCodes)).default(academieCodes),
+          token: Joi.string(),
+        }
+      );
 
       const fichier = fichiers.find((f) => f.name === filename);
       const latestImportDate = await getLatestImportDate(Dossier);
-      const academies = findRegionByCode(req.user.region.code).academies.map((a) => a.code);
+
       if (!fichier) {
         throw Boom.badRequest("Nom de fichier invalide");
       }
 
+      const stream = await fichier.stream({ academies });
       res.setHeader("Content-Type", "text/csv; charset=UTF-8");
       res.setHeader(
         "Content-disposition",
         `attachment; filename=${fichier.name}-${dateAsString(latestImportDate)}.csv`
       );
 
-      const stream = await fichier.stream({ academies });
       return encoders[ext](stream, res);
     })
   );

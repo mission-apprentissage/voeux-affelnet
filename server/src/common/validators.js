@@ -14,7 +14,7 @@ function validate(obj, validators) {
 }
 
 module.exports = {
-  arrayOf: () => customJoi.arrayOf().items(Joi.string()),
+  arrayOf: (itemSchema = Joi.string()) => customJoi.arrayOf().items(itemSchema),
   password: () =>
     // https://owasp.org/www-community/password-special-characters
     Joi.string().regex(
