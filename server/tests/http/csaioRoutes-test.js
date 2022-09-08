@@ -159,6 +159,7 @@ describe("csaioRoutes", () => {
         academie: { code: "01", nom: "Paris" },
         _meta: {
           adresse: "36 rue des lilas 75019 Paris FRANCE",
+          jeune_uniquement_en_apprentissage: false,
         },
       }),
       insertVoeu({
@@ -254,7 +255,7 @@ GHIJKL;Dupont;Henri;0212345678;0712345678;36 rue des lilas 75019 Paris FRANCE;75
     assert.strictEqual(
       response.data,
       `Apprenant INE;Apprenant Nom;Apprenant prénom;Apprenant Téléphone Personnel;Apprenant Téléphone Portable;Apprenant Adresse;Apprenant Adresse Code Postal;Apprenant Adresse Ville;Apprenant Adresse Pays;Statut dans le tableau de bord;Jeunes uniquement en apprentissage
-ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;75019;Paris;FRANCE;Apprenti;Non
+ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;75019;Paris;FRANCE;Apprenti;ND
 `
     );
   });

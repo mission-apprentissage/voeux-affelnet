@@ -3,6 +3,7 @@ const { compose, transformData } = require("oleoduc");
 const { findDossiers } = require("./findDossiers.js");
 const { capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { ouiNon } = require("../utils/csvUtils.js");
+const { isNil } = require("lodash");
 
 async function streamSyntheseApprenants(options = {}) {
   const academies = options.academies;
@@ -37,7 +38,9 @@ async function streamSyntheseApprenants(options = {}) {
           "Apprenant Adresse Ville": apprenant.adresse.ville,
           "Apprenant Adresse Pays": apprenant.adresse.pays,
           "Statut dans le tableau de bord": capitalizeFirstLetter(statut),
-          "Jeunes uniquement en apprentissage": ouiNon(_meta.jeune_uniquement_en_apprentissage),
+          "Jeunes uniquement en apprentissage": isNil(_meta.jeune_uniquement_en_apprentissage)
+            ? "ND"
+            : ouiNon(_meta.jeune_uniquement_en_apprentissage),
         };
       },
       { parallel: 10 }

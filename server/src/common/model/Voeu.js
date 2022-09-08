@@ -96,7 +96,6 @@ const schema = new Schema({
     type: nested({
       adresse: String,
       jeune_uniquement_en_apprentissage: {
-        default: false,
         type: Boolean,
       },
       import_dates: {
