@@ -50,7 +50,10 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Csaio"),
     tryCatch(async (req, res) => {
-      const latestImportDate = await getLatestImportDate(Dossier);
+      const region = findRegionByCode(req.user.region.code);
+      const latestImportDate = await getLatestImportDate(Dossier, {
+        "academie.code": { $in: region.academies.map((a) => a.code) },
+      });
 
       if (!latestImportDate) {
         return res.json([]);
