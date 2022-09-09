@@ -1,4 +1,4 @@
-const { Cfa, Voeu } = require("../common/model");
+const { Cfa, Voeu, Ufa } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date } = require("../common/utils/csvUtils.js");
@@ -50,6 +50,11 @@ async function exportStatutVoeux(output, options = {}) {
           } catch (e) {
             return null;
           }
+        },
+        "Type de l'établissment d'accueil": async (data) => {
+          const ufa = await Ufa.findOne({ uai: data.etablissements.uai });
+
+          return ufa?.libelle_type_etablissement ?? "";
         },
         "Statut ": (data) =>
           data.statut === "activé" ? "contact responsable confirmé" : "contact responsable non confirmé",
