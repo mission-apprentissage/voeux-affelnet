@@ -283,7 +283,7 @@ function Cfa({ cfa }) {
                 {e.voeux_date
                   ? `- Derniers vœux reçus le ${toLocaleString(e.voeux_date)}${
                       cfa.voeux_telechargements.find((vt) => vt.uai === e.uai)
-                        ? `, téléchargés le ${toLocaleString(
+                        ? `. Dernier téléchargement le ${toLocaleString(
                             cfa.voeux_telechargements
                               .sort((a, b) => sortDescending(a.date, b.date))
                               .find((vt) => vt.uai === e.uai).date
