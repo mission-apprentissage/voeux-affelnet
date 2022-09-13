@@ -20,7 +20,7 @@ describe("importJeunesUniquemenetEnApprentissage", () => {
     assert.strictEqual(voeu._meta.jeune_uniquement_en_apprentissage, true);
 
     voeu = await Voeu.findOne({ "apprenant.ine": "111111111HB" }).lean();
-    assert.strictEqual(voeu._meta.jeune_uniquement_en_apprentissage, false);
+    assert.strictEqual(voeu._meta.jeune_uniquement_en_apprentissage, undefined);
 
     assert.deepStrictEqual(stats, {
       failed: 0,
