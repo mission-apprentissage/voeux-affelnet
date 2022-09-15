@@ -1,10 +1,21 @@
 const { Voeu, Cfa } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
-const { findDossier } = require("./findDossier.js");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { sortDescending } = require("../utils/dateUtils.js");
 const { ouiNon } = require("../utils/csvUtils.js");
 const { findRegionByName } = require("../regions.js");
+const { findDossiers } = require("./findDossiers.js");
+
+async function findDossier(voeu) {
+  const results = await findDossiers(voeu.apprenant, voeu.responsable, [
+    {
+      uai_etablissement: voeu.etablissement_accueil.uai,
+      formation_cfd: voeu.formation.code_formation_diplome,
+    },
+  ]);
+
+  return results[0] || null;
+}
 
 function besoinAide(statut) {
   return !["apprenti", "inscrit"].includes(statut);
