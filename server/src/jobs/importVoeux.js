@@ -22,6 +22,7 @@ const schema = Joi.object({
     telephone_personnel: Joi.string().pattern(/^[0-9]+$/),
     telephone_portable: Joi.string().pattern(/^[0-9]+$/),
     adresse: {
+      libelle: Joi.string().required(),
       ligne_1: Joi.string(),
       ligne_2: Joi.string(),
       ligne_3: Joi.string(),
@@ -81,9 +82,18 @@ async function findFormationDiplome(code) {
   return Mef.findOne({ mef });
 }
 
-function buildAdresseLibelle(adresse) {
-  return `${adresse.ligne_1} ${adresse.ligne_2} ${adresse.ligne_3} ${adresse.ligne_4} ${adresse.code_postal} ${adresse.ville} ${adresse.pays}`
-    .replace(/undefined/g, "")
+function buildAdresseLibelle(line) {
+  return [
+    line["Adresse de l'élève - Ligne 1"],
+    line["Adresse de l'élève - Ligne 2"],
+    line["Adresse de l'élève - Ligne 3"],
+    line["Adresse de l'élève - Ligne 4"],
+    fixCodePostal(line["Code postal"]),
+    line["VILLE"],
+    line["PAYS"],
+  ]
+    .filter((s) => s)
+    .join(" ")
     .replace(/\s\s+/g, " ")
     .trim();
 }
@@ -118,6 +128,7 @@ function parseVoeuxCsv(source) {
           telephone_personnel: fixPhoneNumber(line["Téléphone personnel"]),
           telephone_portable: fixPhoneNumber(line["Téléphone portable"]),
           adresse: {
+            libelle: buildAdresseLibelle(line),
             ligne_1: line["Adresse de l'élève - Ligne 1"],
             ligne_2: line["Adresse de l'élève - Ligne 2"],
             ligne_3: line["Adresse de l'élève - Ligne 3"],
@@ -223,17 +234,13 @@ async function importVoeux(voeuxCsvStream, options = {}) {
             "formation.code_affelnet": data.formation.code_affelnet,
           };
           const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
-          const differences = diff(
-            flattenObject(omit(previous, ["_meta", "apprenant.adresse.libelle"])),
-            flattenObject(data)
-          );
+          const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
           const etablissementAccueilUAI = data.etablissement_accueil.uai;
 
           const res = await Voeu.replaceOne(
             query,
             {
               ...data,
-              "apprenant.adresse.libelle": buildAdresseLibelle(data.apprenant.adresse),
               _meta: {
                 anomalies,
                 import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
