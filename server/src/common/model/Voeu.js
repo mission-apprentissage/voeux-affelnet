@@ -34,6 +34,10 @@ const schema = new Schema({
       adresse: {
         required: true,
         type: nested({
+          libelle: {
+            required: true,
+            type: String,
+          },
           ligne_1: String,
           ligne_2: String,
           ligne_3: String,
@@ -94,7 +98,6 @@ const schema = new Schema({
   _meta: {
     required: true,
     type: nested({
-      adresse: String,
       jeune_uniquement_en_apprentissage: {
         type: Boolean,
       },

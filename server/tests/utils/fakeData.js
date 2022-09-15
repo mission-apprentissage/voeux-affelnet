@@ -94,6 +94,7 @@ module.exports = {
             telephone_personnel: faker.helpers.replaceSymbols("##########"),
             telephone_portable: faker.helpers.replaceSymbols("##########"),
             adresse: {
+              libelle: `${street} ${codePostal} ${cityName}`,
               ligne_1: street,
               code_postal: codePostal,
               ville: cityName,
@@ -126,7 +127,6 @@ module.exports = {
           },
           _meta: {
             import_dates: [...(custom?._meta?.import_dates ?? [new Date()])],
-            adresse: `${street} ${codePostal} ${cityName}`,
             anomalies: [],
           },
         },

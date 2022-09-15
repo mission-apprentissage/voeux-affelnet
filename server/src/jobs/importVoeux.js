@@ -223,16 +223,19 @@ async function importVoeux(voeuxCsvStream, options = {}) {
             "formation.code_affelnet": data.formation.code_affelnet,
           };
           const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
-          const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
+          const differences = diff(
+            flattenObject(omit(previous, ["_meta", "apprenant.adresse.libelle"])),
+            flattenObject(data)
+          );
           const etablissementAccueilUAI = data.etablissement_accueil.uai;
 
           const res = await Voeu.replaceOne(
             query,
             {
               ...data,
+              "apprenant.adresse.libelle": buildAdresseLibelle(data.apprenant.adresse),
               _meta: {
-                anomalies: anomalies,
-                adresse: buildAdresseLibelle(data.apprenant.adresse),
+                anomalies,
                 import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
               },
             },
