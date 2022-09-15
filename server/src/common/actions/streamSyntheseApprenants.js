@@ -30,11 +30,11 @@ async function streamSyntheseApprenants(options = {}) {
           responsable: { $first: "$responsable" },
           academie: { $first: "$academie" },
           adresse: { $first: "$_meta.adresse" },
-          uais: {
-            $addToSet: "$etablissement_accueil.uai",
-          },
-          cfds: {
-            $addToSet: "$formation.code_formation_diplome",
+          filters: {
+            $push: {
+              uai_etablissement: "$etablissement_accueil.uai",
+              formation_cfd: "$formation.code_formation_diplome",
+            },
           },
           jeune_statuts: {
             $addToSet: "$_meta.jeune_uniquement_en_apprentissage",
@@ -46,8 +46,8 @@ async function streamSyntheseApprenants(options = {}) {
       },
     ]).cursor(),
     transformData(
-      async ({ apprenant, responsable, academie, adresse, uais, cfds, jeune_statuts }) => {
-        const dossiers = await findDossiers(apprenant, responsable, uais, cfds);
+      async ({ apprenant, responsable, academie, adresse, filters, jeune_statuts }) => {
+        const dossiers = await findDossiers(apprenant, responsable, filters);
         const statuts = dossiers.map((d) => d.statut);
         const statut =
           statuts.find((s) => s === "apprenti") || statuts.find((s) => s === "inscrit") || statuts[0] || "Non trouvé";

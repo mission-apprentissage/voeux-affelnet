@@ -81,23 +81,31 @@ function getGestionnaires() {
   };
 }
 
-function findDossiers(apprenant, responsable, uais, cfds) {
+function findDossiers(apprenant, responsable, filters) {
   const gestionnaires = getGestionnaires();
-  const etablissements = uais.flatMap((uai) => {
-    return gestionnaires[uai] ? [uai, gestionnaires[uai]] : [uai];
-  });
 
   return Dossier.find({
-    uai_etablissement: { $in: etablissements },
-    formation_cfd: { $in: cfds },
     annee_formation: 1,
-    $or: [
-      { ine_apprenant: apprenant.ine },
+    $and: [
       {
-        "_meta.nom_complet": removeDiacritics(`${apprenant.prenom} ${apprenant.nom}`),
+        $or: filters.map((filter) => {
+          const uai = filter.uai_etablissement;
+          return {
+            ...filter,
+            ...(uai ? { uai_etablissement: { $in: gestionnaires[uai] ? [uai, gestionnaires[uai]] : [uai] } } : {}),
+          };
+        }),
       },
-      ...(responsable?.email_1 ? [{ email_contact: responsable.email_1 }] : []),
-      ...(responsable?.email_2 ? [{ email_contact: responsable.email_2 }] : []),
+      {
+        $or: [
+          { ine_apprenant: apprenant.ine },
+          {
+            "_meta.nom_complet": removeDiacritics(`${apprenant.prenom} ${apprenant.nom}`),
+          },
+          ...(responsable?.email_1 ? [{ email_contact: responsable.email_1 }] : []),
+          ...(responsable?.email_2 ? [{ email_contact: responsable.email_2 }] : []),
+        ],
+      },
     ],
   });
 }

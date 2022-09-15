@@ -1,10 +1,12 @@
 const { findDossiers } = require("./findDossiers.js");
 
 async function findDossier(voeu) {
-  const uais = [voeu.etablissement_accueil.uai];
-  const cfds = [voeu.formation.code_formation_diplome];
-
-  const results = await findDossiers(voeu.apprenant, voeu.responsable, uais, cfds);
+  const results = await findDossiers(voeu.apprenant, voeu.responsable, [
+    {
+      uai_etablissement: voeu.etablissement_accueil.uai,
+      formation_cfd: voeu.formation.code_formation_diplome,
+    },
+  ]);
 
   return results[0] || null;
 }
