@@ -92,7 +92,7 @@ async function streamCroisementVoeux(options = {}) {
           "Apprenant prénom": voeu.apprenant.prenom,
           "Apprenant Téléphone Personnel": voeu.apprenant.telephone_personnel,
           "Apprenant Téléphone Portable": voeu.apprenant.telephone_portable,
-          "Apprenant Adresse": voeu._meta.adresse,
+          "Apprenant Adresse": voeu.apprenant.adresse.libelle,
           "Apprenant Adresse Code Postal": voeu.apprenant.adresse.code_postal,
           "Apprenant Adresse Ville": voeu.apprenant.adresse.ville,
           "Apprenant Adresse Pays": voeu.apprenant.adresse.pays,

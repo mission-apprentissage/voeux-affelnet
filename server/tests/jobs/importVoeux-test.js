@@ -32,6 +32,7 @@ describe("importVoeux", () => {
         nom: "Dupont",
         prenom: "Robert",
         adresse: {
+          libelle: "36 rue des lilas 13001 MARSEILLE FRANCE",
           ligne_3: "36 rue des lilas",
           code_postal: "13001",
           ville: "MARSEILLE",
@@ -65,7 +66,6 @@ describe("importVoeux", () => {
       },
     });
     assert.deepStrictEqual(_meta.anomalies, []);
-    assert.deepStrictEqual(_meta.adresse, "36 rue des lilas 13001 MARSEILLE FRANCE");
     assert.deepStrictEqual(_meta.import_dates[0], importDate);
     assert.deepStrictEqual(stats, {
       total: 2,
