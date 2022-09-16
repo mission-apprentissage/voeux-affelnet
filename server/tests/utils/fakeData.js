@@ -54,7 +54,7 @@ module.exports = {
           username: createUsername(),
           email: createEmail(),
           emails: [],
-          region: { code: "11", nom: "Île-de-France" },
+          academies: [{ code: "01", nom: "Paris" }],
         },
         custom
       )

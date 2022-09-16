@@ -8,4 +8,8 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-module.exports = { dateAsString, capitalizeFirstLetter };
+function asArray(v) {
+  return v.split(",");
+}
+
+module.exports = { dateAsString, capitalizeFirstLetter, asArray };

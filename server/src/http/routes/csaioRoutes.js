@@ -5,7 +5,6 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { validate } = require("../../common/validators.js");
 const { streamCroisementVoeux } = require("../../common/actions/streamCroisementVoeux.js");
-const { findRegionByCode } = require("../../common/regions.js");
 const { streamSyntheseApprenants } = require("../../common/actions/streamSyntheseApprenants.js");
 const Boom = require("boom");
 const { dateAsString } = require("../../common/utils/stringUtils.js");
@@ -50,9 +49,9 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Csaio"),
     tryCatch(async (req, res) => {
-      const region = findRegionByCode(req.user.region.code);
+      const { academies } = req.user;
       const latestImportDate = await getLatestImportDate(Dossier, {
-        "academie.code": { $in: region.academies.map((a) => a.code) },
+        "academie.code": { $in: academies.map((a) => a.code) },
       });
 
       if (!latestImportDate) {
@@ -62,8 +61,8 @@ module.exports = ({ users }) => {
       res.json(
         fichiers.flatMap((f) => {
           return [
-            { name: `${f.name}.csv`, date: latestImportDate },
-            { name: `${f.name}.xls`, date: latestImportDate },
+            { name: `${f.name}.csv`, date: latestImportDate, academies },
+            { name: `${f.name}.xls`, date: latestImportDate, academies },
           ];
         })
       );
@@ -75,6 +74,7 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Csaio"),
     tryCatch(async (req, res) => {
+      const { academies } = req.user;
       const { filename, ext } = await validate(req.params, {
         filename: Joi.string().valid("voeux-affelnet-croisement", "voeux-affelnet-synthese").required(),
         ext: Joi.string().valid("csv", "xls").required(),
@@ -82,7 +82,6 @@ module.exports = ({ users }) => {
 
       const fichier = fichiers.find((f) => f.name === filename);
       const latestImportDate = await getLatestImportDate(Dossier);
-      const academies = findRegionByCode(req.user.region.code).academies.map((a) => a.code);
       if (!fichier) {
         throw Boom.badRequest("Nom de fichier invalide");
       }
