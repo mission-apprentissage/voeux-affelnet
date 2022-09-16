@@ -70,7 +70,7 @@ async function streamCroisementVoeux(options = {}) {
   const academies = options.academies;
 
   return compose(
-    Voeu.find(academies ? { "academie.code": { $in: academies } } : {})
+    Voeu.find(academies ? { "academie.code": { $in: academies.map((a) => a.code) } } : {})
       .lean()
       .cursor(),
     transformData(
