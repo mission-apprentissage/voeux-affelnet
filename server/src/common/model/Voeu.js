@@ -1,24 +1,12 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
+const { academieSchema } = require("./schemas/academieSchema.js");
 
 const schema = new Schema({
   __v: { type: Number, select: false },
   academie: {
     required: true,
-    type: new Schema(
-      {
-        code: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        nom: {
-          type: String,
-          required: true,
-        },
-      },
-      { _id: false }
-    ),
+    type: academieSchema,
   },
   apprenant: {
     required: true,
@@ -81,6 +69,10 @@ const schema = new Schema({
       nom: String,
       ville: String,
       cio: String,
+      academie: {
+        required: true,
+        type: academieSchema,
+      },
     }),
   },
   etablissement_accueil: {
@@ -93,6 +85,10 @@ const schema = new Schema({
       nom: String,
       ville: String,
       cio: String,
+      academie: {
+        required: true,
+        type: academieSchema,
+      },
     }),
   },
   _meta: {

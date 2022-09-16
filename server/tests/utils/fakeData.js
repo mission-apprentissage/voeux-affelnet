@@ -118,12 +118,14 @@ module.exports = {
             uai: createUAI(faker.helpers.replaceSymbols("075####")),
             nom: faker.company.companyName(),
             ville: faker.address.cityName(),
+            academie: { code: "01", nom: "Paris" },
           },
           etablissement_accueil: {
             uai: createUAI(faker.helpers.replaceSymbols("075####")),
             nom: faker.company.companyName(),
             ville: faker.address.cityName(),
             cio: createUAI(faker.helpers.replaceSymbols("075####")),
+            academie: { code: "01", nom: "Paris" },
           },
           _meta: {
             import_dates: [...(custom?._meta?.import_dates ?? [new Date()])],
