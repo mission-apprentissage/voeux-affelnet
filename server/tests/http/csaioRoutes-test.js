@@ -10,7 +10,7 @@ describe("csaioRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
     const date = new Date();
     await insertDossier({
@@ -31,18 +31,22 @@ describe("csaioRoutes", () => {
       {
         name: "voeux-affelnet-croisement.csv",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
       {
         name: "voeux-affelnet-croisement.xls",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
       {
         name: "voeux-affelnet-synthese.csv",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
       {
         name: "voeux-affelnet-synthese.xls",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
     ]);
   });
@@ -51,7 +55,7 @@ describe("csaioRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
 
     const response = await httpClient.get("/api/csaio/fichiers", {
@@ -68,7 +72,7 @@ describe("csaioRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "24", nom: "Centre-Val de Loire" },
+      academies: [{ code: "18", nom: "Orléans-Tours" }],
     });
 
     const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
@@ -238,7 +242,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
 
     const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
@@ -377,7 +381,7 @@ ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;7
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
 
     const response = await httpClient.get("/api/csaio/fichiers/invalide.csv", {

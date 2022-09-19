@@ -1,6 +1,6 @@
 const { oleoduc, transformData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const { pickBy, isEmpty, uniqBy } = require("lodash");
+const { pickBy, isEmpty, uniqBy, pick } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
 const { Voeu, Mef } = require("../common/model");
@@ -9,12 +9,15 @@ const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
+const { findAcademieByUai } = require("../common/academies.js");
+
+const academieValidationSchema = Joi.object({
+  code: Joi.string().required(),
+  nom: Joi.string().required(),
+}).required();
 
 const schema = Joi.object({
-  academie: Joi.object({
-    code: Joi.string().required(),
-    nom: Joi.string().required(),
-  }).required(),
+  academie: academieValidationSchema,
   apprenant: Joi.object({
     ine: Joi.string().required(),
     nom: Joi.string().required(),
@@ -58,6 +61,7 @@ const schema = Joi.object({
     nom: Joi.string().required(),
     ville: Joi.string(),
     cio: Joi.string(),
+    academie: academieValidationSchema,
   }),
   etablissement_accueil: Joi.object({
     uai: Joi.string()
@@ -66,6 +70,7 @@ const schema = Joi.object({
     nom: Joi.string().required(),
     ville: Joi.string(),
     cio: Joi.string(),
+    academie: academieValidationSchema,
   }).required(),
 });
 
@@ -98,6 +103,11 @@ function buildAdresseLibelle(line) {
     .trim();
 }
 
+function pickAcademie(academie) {
+  const res = pick(academie, ["code", "nom"]);
+  return isEmpty(res) ? null : res;
+}
+
 function parseVoeuxCsv(source) {
   return oleoduc(
     source,
@@ -110,17 +120,15 @@ function parseVoeuxCsv(source) {
     }),
     transformData(async (line) => {
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
-      const academie = findAcademieByName(line["Académie possédant le dossier élève"]);
+      const uaiEtablissementOrigine = line["Code UAI étab. origine"]?.toUpperCase();
+      const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase();
+      const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase();
+      const academieDuVoeu = pickAcademie(findAcademieByName(line["Académie possédant le dossier élève"]));
+      const academieOrigine = pickAcademie(findAcademieByUai(uaiCIO || uaiEtablissementOrigine));
+      const academieAccueil = pickAcademie(findAcademieByUai(uaiEtablissementAccueil));
 
       return deepOmitEmpty({
-        ...(academie
-          ? {
-              academie: {
-                code: academie.code,
-                nom: academie.nom,
-              },
-            }
-          : {}),
+        academie: academieDuVoeu,
         apprenant: {
           ine: line["INE"],
           nom: line["Nom de l'élève"],
@@ -152,16 +160,18 @@ function parseVoeuxCsv(source) {
           cle_ministere_educatif: line["clé ministère éducatif"],
         },
         etablissement_origine: {
-          uai: line["Code UAI étab. origine"]?.toUpperCase(),
+          uai: uaiEtablissementOrigine,
           nom: `${line["Type étab. origine"] || ""} ${line["Libellé étab. origine"] || ""}`.trim(),
           ville: line["Ville étab. origine"],
-          cio: line["Code UAI CIO origine"],
+          cio: uaiCIO,
+          academie: academieOrigine || academieDuVoeu,
         },
         etablissement_accueil: {
-          uai: line["Code UAI étab. Accueil"]?.toUpperCase(),
+          uai: uaiEtablissementAccueil,
           nom: `${line["Type étab. Accueil"] || ""} ${line["Libellé établissement Accueil"] || ""}`.trim(),
           ville: line["Ville étab. Accueil"],
           cio: line["UAI CIO de l'établissement d'accueil"],
+          academie: academieAccueil || academieDuVoeu,
         },
       });
     }),

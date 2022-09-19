@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils.js");
+const { academieSchema } = require("./schemas/academieSchema.js");
 
 const schema = new Schema({
   __v: { type: Number, select: false },
@@ -45,20 +46,7 @@ const schema = new Schema({
   contrat_date_rupture: Date,
   academie: {
     required: true,
-    type: new Schema(
-      {
-        code: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        nom: {
-          type: String,
-          required: true,
-        },
-      },
-      { _id: false }
-    ),
+    type: academieSchema,
   },
   _meta: {
     required: true,

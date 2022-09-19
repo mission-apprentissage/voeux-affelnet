@@ -1,6 +1,7 @@
 const { Schema } = require("mongoose");
 const User = require("./User");
 const { nested } = require("../utils/mongooseUtils");
+const { academieSchema } = require("./schemas/academieSchema.js");
 
 const schema = new Schema({
   siret: {
@@ -13,20 +14,7 @@ const schema = new Schema({
     type: String,
   },
   academie: {
-    type: new Schema(
-      {
-        code: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        nom: {
-          type: String,
-          required: true,
-        },
-      },
-      { _id: false }
-    ),
+    type: academieSchema,
   },
   etablissements: {
     required: true,
