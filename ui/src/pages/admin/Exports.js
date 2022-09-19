@@ -43,6 +43,10 @@ function Exports() {
                   name="Statut de téléchargement des voeux (csv)"
                   link={buildLink(`/api/admin/etablissements/statut-voeux.csv`)}
                 />
+                <File
+                  name="Voeux de recensement (csv)"
+                  link={buildLink(`/api/admin/etablissements/voeux-recensement.csv`)}
+                />
               </Table.Body>
             </Table>
           </Card.Body>

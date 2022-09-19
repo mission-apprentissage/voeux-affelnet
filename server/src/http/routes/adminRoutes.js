@@ -11,6 +11,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const exportCfas = require("../../jobs/exportCfas");
 const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissementsInconnus.js");
 const { exportStatutVoeux } = require("../../jobs/exportStatutVoeux.js");
+const { exportVoeuxRecensement } = require("../../jobs/exportVoeuxRecensement.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
@@ -192,6 +193,15 @@ module.exports = ({ resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       return exportStatutVoeux(asCsvResponse("statut-voeux", res));
+    })
+  );
+
+  router.get(
+    "/api/admin/etablissements/voeux-recensement.csv",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      return exportVoeuxRecensement(asCsvResponse("voeux-recensement", res));
     })
   );
 
