@@ -18,7 +18,7 @@ async function exportVoeuxRecensement(output, options = {}) {
       columns: {
         Académie: (data) => data.academie,
         Uai: (data) => data?.uai,
-        "Raison sociale depusi l'offre de formation": async (data) => {
+        "Raison sociale depuis l'offre de formation": async (data) => {
           return data.libelle_etablissement;
         },
         "Raison sociale depuis le catalogue": async (data) => {
