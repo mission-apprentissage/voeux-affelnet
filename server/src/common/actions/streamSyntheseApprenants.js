@@ -22,14 +22,14 @@ async function streamSyntheseApprenants(options = {}) {
 
   return compose(
     Voeu.aggregate([
-      { $match: academies ? { "academie.code": { $in: academies } } : {} },
+      { $match: academies ? { "academie.code": { $in: academies.map((a) => a.code) } } : {} },
       {
         $group: {
           _id: "$apprenant.ine",
           apprenant: { $first: "$apprenant" },
           responsable: { $first: "$responsable" },
           academie: { $first: "$academie" },
-          adresse: { $first: "$_meta.adresse" },
+          adresse: { $first: "$apprenant.adresse.libelle" },
           filters: {
             $push: {
               uai_etablissement: "$etablissement_accueil.uai",

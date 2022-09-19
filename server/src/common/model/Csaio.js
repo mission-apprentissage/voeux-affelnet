@@ -1,22 +1,10 @@
 const { Schema } = require("mongoose");
 const User = require("./User");
+const { academieSchema } = require("./schemas/academieSchema.js");
 
 const schema = new Schema({
-  region: {
-    type: new Schema(
-      {
-        code: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        nom: {
-          type: String,
-          required: true,
-        },
-      },
-      { _id: false }
-    ),
+  academies: {
+    type: [academieSchema],
   },
 });
 

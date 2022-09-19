@@ -1,6 +1,6 @@
 const { oleoduc, transformData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const { pickBy, isEmpty, uniqBy } = require("lodash");
+const { pickBy, isEmpty, uniqBy, pick } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
 const { Voeu, Mef } = require("../common/model");
@@ -9,12 +9,15 @@ const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
+const { findAcademieByUai } = require("../common/academies.js");
+
+const academieValidationSchema = Joi.object({
+  code: Joi.string().required(),
+  nom: Joi.string().required(),
+}).required();
 
 const schema = Joi.object({
-  academie: Joi.object({
-    code: Joi.string().required(),
-    nom: Joi.string().required(),
-  }).required(),
+  academie: academieValidationSchema,
   apprenant: Joi.object({
     ine: Joi.string().required(),
     nom: Joi.string().required(),
@@ -22,6 +25,7 @@ const schema = Joi.object({
     telephone_personnel: Joi.string().pattern(/^[0-9]+$/),
     telephone_portable: Joi.string().pattern(/^[0-9]+$/),
     adresse: {
+      libelle: Joi.string().required(),
       ligne_1: Joi.string(),
       ligne_2: Joi.string(),
       ligne_3: Joi.string(),
@@ -57,6 +61,7 @@ const schema = Joi.object({
     nom: Joi.string().required(),
     ville: Joi.string(),
     cio: Joi.string(),
+    academie: academieValidationSchema,
   }),
   etablissement_accueil: Joi.object({
     uai: Joi.string()
@@ -65,6 +70,7 @@ const schema = Joi.object({
     nom: Joi.string().required(),
     ville: Joi.string(),
     cio: Joi.string(),
+    academie: academieValidationSchema,
   }).required(),
 });
 
@@ -81,11 +87,25 @@ async function findFormationDiplome(code) {
   return Mef.findOne({ mef });
 }
 
-function buildAdresseLibelle(adresse) {
-  return `${adresse.ligne_1} ${adresse.ligne_2} ${adresse.ligne_3} ${adresse.ligne_4} ${adresse.code_postal} ${adresse.ville} ${adresse.pays}`
-    .replace(/undefined/g, "")
+function buildAdresseLibelle(line) {
+  return [
+    line["Adresse de l'élève - Ligne 1"],
+    line["Adresse de l'élève - Ligne 2"],
+    line["Adresse de l'élève - Ligne 3"],
+    line["Adresse de l'élève - Ligne 4"],
+    fixCodePostal(line["Code postal"]),
+    line["VILLE"],
+    line["PAYS"],
+  ]
+    .filter((s) => s)
+    .join(" ")
     .replace(/\s\s+/g, " ")
     .trim();
+}
+
+function pickAcademie(academie) {
+  const res = pick(academie, ["code", "nom"]);
+  return isEmpty(res) ? null : res;
 }
 
 function parseVoeuxCsv(source) {
@@ -100,17 +120,15 @@ function parseVoeuxCsv(source) {
     }),
     transformData(async (line) => {
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
-      const academie = findAcademieByName(line["Académie possédant le dossier élève"]);
+      const uaiEtablissementOrigine = line["Code UAI étab. origine"]?.toUpperCase();
+      const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase();
+      const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase();
+      const academieDuVoeu = pickAcademie(findAcademieByName(line["Académie possédant le dossier élève"]));
+      const academieOrigine = pickAcademie(findAcademieByUai(uaiCIO || uaiEtablissementOrigine));
+      const academieAccueil = pickAcademie(findAcademieByUai(uaiEtablissementAccueil));
 
       return deepOmitEmpty({
-        ...(academie
-          ? {
-              academie: {
-                code: academie.code,
-                nom: academie.nom,
-              },
-            }
-          : {}),
+        academie: academieDuVoeu,
         apprenant: {
           ine: line["INE"],
           nom: line["Nom de l'élève"],
@@ -118,6 +136,7 @@ function parseVoeuxCsv(source) {
           telephone_personnel: fixPhoneNumber(line["Téléphone personnel"]),
           telephone_portable: fixPhoneNumber(line["Téléphone portable"]),
           adresse: {
+            libelle: buildAdresseLibelle(line),
             ligne_1: line["Adresse de l'élève - Ligne 1"],
             ligne_2: line["Adresse de l'élève - Ligne 2"],
             ligne_3: line["Adresse de l'élève - Ligne 3"],
@@ -141,16 +160,18 @@ function parseVoeuxCsv(source) {
           cle_ministere_educatif: line["clé ministère éducatif"],
         },
         etablissement_origine: {
-          uai: line["Code UAI étab. origine"]?.toUpperCase(),
+          uai: uaiEtablissementOrigine,
           nom: `${line["Type étab. origine"] || ""} ${line["Libellé étab. origine"] || ""}`.trim(),
           ville: line["Ville étab. origine"],
-          cio: line["Code UAI CIO origine"],
+          cio: uaiCIO,
+          academie: academieOrigine || academieDuVoeu,
         },
         etablissement_accueil: {
-          uai: line["Code UAI étab. Accueil"]?.toUpperCase(),
+          uai: uaiEtablissementAccueil,
           nom: `${line["Type étab. Accueil"] || ""} ${line["Libellé établissement Accueil"] || ""}`.trim(),
           ville: line["Ville étab. Accueil"],
           cio: line["UAI CIO de l'établissement d'accueil"],
+          academie: academieAccueil || academieDuVoeu,
         },
       });
     }),
@@ -231,8 +252,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
             {
               ...data,
               _meta: {
-                anomalies: anomalies,
-                adresse: buildAdresseLibelle(data.apprenant.adresse),
+                anomalies,
                 import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
               },
             },

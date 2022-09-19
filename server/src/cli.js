@@ -29,6 +29,8 @@ const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
 const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js");
 const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUniquementEnApprentissage.js");
+const { asArray } = require("./common/utils/stringUtils.js");
+const { findAcademieByCode } = require("./common/academies.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -175,10 +177,12 @@ cli
 
 cli
   .command("createCsaio")
-  .arguments("<username> <email> <region>")
-  .action((username, email, region) => {
+  .argument("<username>", "Le nom de l'utilisateur")
+  .argument("<email>", "Le email de l'utilisateur")
+  .argument("<academies>", "La liste des codes des académies", asArray)
+  .action((username, email, academies) => {
     runScript(() => {
-      return createCsaio(username, email, region);
+      return createCsaio(username, email, academies.map(findAcademieByCode));
     });
   });
 cli

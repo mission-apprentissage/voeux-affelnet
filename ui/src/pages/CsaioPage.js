@@ -25,9 +25,10 @@ function CsaioPage() {
                     <Table.Header>
                       <Table.ColHeader>Nom du fichier</Table.ColHeader>
                       <Table.ColHeader>Date de mise à jour</Table.ColHeader>
+                      <Table.ColHeader>Académies</Table.ColHeader>
                     </Table.Header>
                     <Table.Body>
-                      {fichiers.map(({ name, date }, index) => {
+                      {fichiers.map(({ name, date, academies }, index) => {
                         const link = buildLink(`/api/csaio/fichiers/${name}`);
 
                         return (
@@ -40,6 +41,9 @@ function CsaioPage() {
                             </Table.Col>
                             <Table.Col>
                               <div>{DateTime.fromISO(date).setLocale("fr").toFormat("cccc dd LLLL yyyy à HH:mm")}</div>
+                            </Table.Col>
+                            <Table.Col>
+                              <div>{academies.map((a) => a.nom).join(",")}</div>
                             </Table.Col>
                           </Table.Row>
                         );

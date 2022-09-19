@@ -10,7 +10,7 @@ describe("csaioRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
     const date = new Date();
     await insertDossier({
@@ -31,18 +31,22 @@ describe("csaioRoutes", () => {
       {
         name: "voeux-affelnet-croisement.csv",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
       {
         name: "voeux-affelnet-croisement.xls",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
       {
         name: "voeux-affelnet-synthese.csv",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
       {
         name: "voeux-affelnet-synthese.xls",
         date: date.toISOString(),
+        academies: [{ code: "01", nom: "Paris" }],
       },
     ]);
   });
@@ -51,7 +55,7 @@ describe("csaioRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
 
     const response = await httpClient.get("/api/csaio/fichiers", {
@@ -68,7 +72,7 @@ describe("csaioRoutes", () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "24", nom: "Centre-Val de Loire" },
+      academies: [{ code: "18", nom: "Orléans-Tours" }],
     });
 
     const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
@@ -90,6 +94,7 @@ describe("csaioRoutes", () => {
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 45000 Orléans FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "45000",
             ville: "Orléans",
@@ -118,7 +123,6 @@ describe("csaioRoutes", () => {
         },
         academie: { code: "18", nom: "Orléans-Tours" },
         _meta: {
-          adresse: "36 rue des lilas 45000 Orléans FRANCE",
           jeune_uniquement_en_apprentissage: true,
         },
       }),
@@ -130,6 +134,7 @@ describe("csaioRoutes", () => {
           telephone_personnel: "0212345678",
           telephone_portable: "0712345678",
           adresse: {
+            libelle: "36 rue des lilas 45000 Orléans FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "45000",
             ville: "Orléans",
@@ -158,7 +163,6 @@ describe("csaioRoutes", () => {
         },
         academie: { code: "18", nom: "Orléans-Tours" },
         _meta: {
-          adresse: "36 rue des lilas 45000 Orléans FRANCE",
           jeune_uniquement_en_apprentissage: false,
         },
       }),
@@ -170,6 +174,7 @@ describe("csaioRoutes", () => {
           telephone_personnel: "0212345678",
           telephone_portable: "0712345678",
           adresse: {
+            libelle: "36 rue des lilas 45000 Orléans FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "45000",
             ville: "Orléans",
@@ -197,9 +202,6 @@ describe("csaioRoutes", () => {
           cle_ministere_educatif: "607555K72235467880206761827130152735855-78100#L60",
         },
         academie: { code: "18", nom: "Orléans-Tours" },
-        _meta: {
-          adresse: "36 rue des lilas 45000 Orléans FRANCE",
-        },
       }),
       insertVoeu({
         academie: { code: "11", nom: "Montpellier" },
@@ -240,7 +242,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
 
     const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
@@ -254,6 +256,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 75019 Paris FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "75019",
             ville: "Paris",
@@ -268,7 +271,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           code_formation_diplome: "50025214",
         },
         _meta: {
-          adresse: "36 rue des lilas 75019 Paris FRANCE",
           jeune_uniquement_en_apprentissage: true,
         },
       }),
@@ -280,6 +282,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 75019 Paris FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "75019",
             ville: "Paris",
@@ -294,7 +297,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           code_formation_diplome: "50025214",
         },
         _meta: {
-          adresse: "36 rue des lilas 75019 Paris FRANCE",
           jeune_uniquement_en_apprentissage: false,
         },
       }),
@@ -306,6 +308,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 75019 Paris FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "75019",
             ville: "Paris",
@@ -318,9 +321,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
         },
         formation: {
           code_formation_diplome: "50025214",
-        },
-        _meta: {
-          adresse: "36 rue des lilas 75019 Paris FRANCE",
         },
       }),
       insertDossier({
@@ -381,7 +381,7 @@ ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;7
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
-      region: { code: "11", nom: "Île-de-France" },
+      academies: [{ code: "01", nom: "Paris" }],
     });
 
     const response = await httpClient.get("/api/csaio/fichiers/invalide.csv", {

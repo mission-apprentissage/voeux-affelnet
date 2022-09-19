@@ -1,43 +1,68 @@
 const { JobEvent } = require("../common/model");
 const logger = require("../common/logger");
-const { promiseAllProps } = require("../common/utils/asyncUtils");
-const { Dossier } = require("../common/model/index.js");
+const { Voeu, Csaio } = require("../common/model/index.js");
+const { raw } = require("../common/utils/mongooseUtils.js");
+const { findRegionByCode } = require("../common/regions.js");
 
-const VERSION = 27;
+const VERSION = 28;
 
-async function addImportDateToDossiers() {
-  let updated = 0;
-
-  const res = await Dossier.updateMany(
-    {},
-    {
-      $push: {
-        "_meta.import_dates": { $each: [new Date("2022-07-04T00:00:00.000Z"), new Date("2022-08-15T00:00:00.000Z")] },
-      },
-    },
-    { upsert: true, setDefaultsOnInsert: true, runValidators: true }
+async function tasks() {
+  const users = await raw(Csaio)
+    .find({ type: "Csaio", region: { $exists: true } })
+    .toArray();
+  const convertCsaio = await Promise.all(
+    users.map((user) => {
+      return Csaio.updateOne(
+        { _id: user._id },
+        {
+          academies: findRegionByCode(user.region.code).academies,
+        }
+      );
+    })
   );
 
-  updated += res.modifiedCount || 0;
-
-  return { updated };
+  return {
+    convertCsaio,
+    addPreviousMigration: await JobEvent.create({
+      job: "migrate",
+      date: new Date(),
+      stats: {
+        version: 27,
+      },
+    }),
+    removeMetaAdresse: await raw(Voeu).updateMany(
+      { "_meta.adresse": { $exists: true } },
+      { $unset: { "_meta.adresse": 1 } }
+    ),
+  };
 }
 
-async function hasAlreadyBeenExecuted() {
+async function _hasAlreadyBeenExecuted() {
   const count = await JobEvent.countDocuments({ job: "migrate", "stats.version": VERSION });
   return count > 0;
 }
 
+async function _saveMigration() {
+  await JobEvent.create({
+    job: "migrate",
+    date: new Date(),
+    stats: {
+      version: VERSION,
+    },
+  });
+}
+
 async function migrate() {
-  if (await hasAlreadyBeenExecuted()) {
+  if (await _hasAlreadyBeenExecuted()) {
     logger.warn("Migration script has already been executed");
     return;
   }
 
-  return promiseAllProps({
-    version: VERSION,
-    addImportDateToDossiers: addImportDateToDossiers(),
-  });
+  const res = await tasks();
+
+  await _saveMigration();
+
+  return res;
 }
 
 module.exports = migrate;
