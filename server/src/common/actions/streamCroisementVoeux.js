@@ -1,10 +1,21 @@
 const { Voeu, Cfa } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
-const { findDossier } = require("./findDossier.js");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { sortDescending } = require("../utils/dateUtils.js");
 const { ouiNon } = require("../utils/csvUtils.js");
-const { isNil } = require("lodash");
+const { findRegionByName } = require("../regions.js");
+const { findDossiers } = require("./findDossiers.js");
+
+async function findDossier(voeu) {
+  const results = await findDossiers(voeu.apprenant, voeu.responsable, [
+    {
+      uai_etablissement: voeu.etablissement_accueil.uai,
+      formation_cfd: voeu.formation.code_formation_diplome,
+    },
+  ]);
+
+  return results[0] || null;
+}
 
 function besoinAide(statut) {
   return !["apprenti", "inscrit"].includes(statut);
@@ -38,7 +49,14 @@ function getDidaskModules(statut) {
   };
 }
 
-function getTrajectoiresPro(statut, voeu) {
+function getJeuneStatut(voeu) {
+  const academies = findRegionByName("Centre-Val de Loire").academies;
+  return academies.find((a) => a.code === voeu.academie.code)
+    ? ouiNon(voeu._meta.jeune_uniquement_en_apprentissage)
+    : "ND";
+}
+
+function getTrajectoiresProUrl(statut, voeu) {
   if (!besoinAide(statut)) {
     return "";
   }
@@ -91,11 +109,9 @@ async function streamCroisementVoeux(options = {}) {
           "Statut dans le tableau de bord": statut ? capitalizeFirstLetter(statut) : "Non trouvé",
           "Date de téléchargement du voeu par l'OF": downloadDate ? dateAsString(downloadDate) : "",
           "La Bonne Alternance": getWidgetLBAUrl(statut, voeu),
-          InserJeunes: getTrajectoiresPro(statut, voeu),
+          InserJeunes: getTrajectoiresProUrl(statut, voeu),
           ...getDidaskModules(statut),
-          "Jeunes uniquement en apprentissage": isNil(voeu._meta.jeune_uniquement_en_apprentissage)
-            ? "ND"
-            : ouiNon(voeu._meta.jeune_uniquement_en_apprentissage),
+          "Jeunes uniquement en apprentissage": getJeuneStatut(voeu),
         };
       },
       { parallel: 10 }
