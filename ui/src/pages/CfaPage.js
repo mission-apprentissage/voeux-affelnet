@@ -1,11 +1,45 @@
 import React from "react";
-import { DateTime } from "luxon";
-import { Card, Grid, Page, Table } from "tabler-react";
-import { useGet } from "../common/hooks/httpHooks";
-import { buildLink } from "../common/httpClient";
-import TablerIcon from "../common/components/TablerIcon";
+import styled from "styled-components";
+import { Page } from "tabler-react";
+// import { DateTime } from "luxon";
+// import { Card, Grid, Page, Table } from "tabler-react";
+// import { useGet } from "../common/hooks/httpHooks";
+// import { buildLink } from "../common/httpClient";
+// import TablerIcon from "../common/components/TablerIcon";
+
+const Notification = styled.div`
+  width: 100%;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  div {
+    padding: 0.75rem;
+    border-radius: 3px;
+    background-color: #c7d5f0;
+  }
+`;
 
 function CfaPage() {
+  return (
+    <Page>
+      <Page.Main>
+        <Page.Content title={<h2>Voeux Affelnet</h2>}>
+          <Notification>
+            <div>
+              <p>Le téléchargement des vœux 2022 est maintenant terminé.</p>
+              <p>
+                Vous pouvez toujours contacter un administrateur en cas de besoin :<br />
+                <a href="voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>.
+              </p>
+            </div>
+          </Notification>
+        </Page.Content>
+      </Page.Main>
+    </Page>
+  );
+
+  /*
+  !! NOTE : Commenté suite à la fin de la session 2022 !!
+
   const [fichiers, loading] = useGet("/api/cfa/fichiers", []);
 
   return (
@@ -116,6 +150,7 @@ function CfaPage() {
       </Page.Main>
     </Page>
   );
+  */
 }
 
 export default CfaPage;
