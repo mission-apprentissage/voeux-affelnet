@@ -90,6 +90,7 @@ describe("csaioRoutes", () => {
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 45000 Orléans FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "45000",
             ville: "Orléans",
@@ -118,7 +119,6 @@ describe("csaioRoutes", () => {
         },
         academie: { code: "18", nom: "Orléans-Tours" },
         _meta: {
-          adresse: "36 rue des lilas 45000 Orléans FRANCE",
           jeune_uniquement_en_apprentissage: true,
         },
       }),
@@ -130,6 +130,7 @@ describe("csaioRoutes", () => {
           telephone_personnel: "0212345678",
           telephone_portable: "0712345678",
           adresse: {
+            libelle: "36 rue des lilas 45000 Orléans FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "45000",
             ville: "Orléans",
@@ -158,7 +159,6 @@ describe("csaioRoutes", () => {
         },
         academie: { code: "18", nom: "Orléans-Tours" },
         _meta: {
-          adresse: "36 rue des lilas 45000 Orléans FRANCE",
           jeune_uniquement_en_apprentissage: false,
         },
       }),
@@ -170,6 +170,7 @@ describe("csaioRoutes", () => {
           telephone_personnel: "0212345678",
           telephone_portable: "0712345678",
           adresse: {
+            libelle: "36 rue des lilas 45000 Orléans FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "45000",
             ville: "Orléans",
@@ -197,9 +198,6 @@ describe("csaioRoutes", () => {
           cle_ministere_educatif: "607555K72235467880206761827130152735855-78100#L60",
         },
         academie: { code: "18", nom: "Orléans-Tours" },
-        _meta: {
-          adresse: "36 rue des lilas 45000 Orléans FRANCE",
-        },
       }),
       insertVoeu({
         academie: { code: "11", nom: "Montpellier" },
@@ -254,6 +252,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 75019 Paris FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "75019",
             ville: "Paris",
@@ -268,7 +267,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           code_formation_diplome: "50025214",
         },
         _meta: {
-          adresse: "36 rue des lilas 75019 Paris FRANCE",
           jeune_uniquement_en_apprentissage: true,
         },
       }),
@@ -280,6 +278,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 75019 Paris FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "75019",
             ville: "Paris",
@@ -294,7 +293,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           code_formation_diplome: "50025214",
         },
         _meta: {
-          adresse: "36 rue des lilas 75019 Paris FRANCE",
           jeune_uniquement_en_apprentissage: false,
         },
       }),
@@ -306,6 +304,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           telephone_personnel: "0112345678",
           telephone_portable: "0612345678",
           adresse: {
+            libelle: "36 rue des lilas 75019 Paris FRANCE",
             ligne_1: "36 rue des lilas",
             code_postal: "75019",
             ville: "Paris",
@@ -318,9 +317,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
         },
         formation: {
           code_formation_diplome: "50025214",
-        },
-        _meta: {
-          adresse: "36 rue des lilas 75019 Paris FRANCE",
         },
       }),
       insertDossier({
