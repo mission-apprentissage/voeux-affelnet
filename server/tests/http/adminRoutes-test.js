@@ -339,7 +339,7 @@ describe("adminRoutes", () => {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(
       response.data,
-      `"Académie";"Siret de l’organisme responsable";"Raison sociale de l’organisme responsable";"Email de contact de l’organisme responsable";"Uai";"Raison sociale de l’établissement d’accueil";"Type de l'établissment d'accueil";"Statut ";"Vœux";"Nombre de vœux";"Date du dernier import de vœux";"Téléchargement";"Téléchargement effectué pour tous les établissements d’accueil liés ?";"Date du dernier téléchargement";"Nombre de vœux téléchargés au moins une fois";"Nombre de vœux jamais téléchargés";"Nombre de vœux à télécharger (nouveau+maj)"
+      `"Académie";"Siret de l’organisme responsable";"Raison sociale de l’organisme responsable";"Email de contact de l’organisme responsable";"Uai";"Raison sociale de l’établissement d’accueil";"Type de l'établissement d'accueil";"Statut ";"Vœux";"Nombre de vœux";"Date du dernier import de vœux";"Téléchargement";"Téléchargement effectué pour tous les établissements d’accueil liés ?";"Date du dernier téléchargement";"Nombre de vœux téléchargés au moins une fois";"Nombre de vœux jamais téléchargés";"Nombre de vœux à télécharger (nouveau+maj)"
 "Paris";"11111111100015";"Organisme de formation";"test@apprentissage.beta.gouv.fr";"1234567A";"";"";"contact responsable confirmé";"Oui";"3";"${date(
         new Date("2022-06-15T00:00:00.000Z")
       )}";"Oui";"Oui";"${date(new Date("2022-06-06T00:00:00.000Z"))}";"2";"1";"2"

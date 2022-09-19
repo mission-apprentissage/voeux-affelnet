@@ -51,7 +51,7 @@ async function exportStatutVoeux(output, options = {}) {
             return null;
           }
         },
-        "Type de l'établissment d'accueil": async (data) => {
+        "Type de l'établissement d'accueil": async (data) => {
           const ufa = await Ufa.findOne({ uai: data.etablissements.uai });
 
           return ufa?.libelle_type_etablissement ?? "";
