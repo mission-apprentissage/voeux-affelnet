@@ -29,7 +29,7 @@ async function streamSyntheseApprenants(options = {}) {
           apprenant: { $first: "$apprenant" },
           responsable: { $first: "$responsable" },
           academie: { $first: "$academie" },
-          adresse: { $first: "$_meta.adresse" },
+          adresse: { $first: "$apprenant.adresse.libelle" },
           filters: {
             $push: {
               uai_etablissement: "$etablissement_accueil.uai",
