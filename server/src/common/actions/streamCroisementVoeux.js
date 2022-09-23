@@ -3,7 +3,6 @@ const { compose, transformData } = require("oleoduc");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { sortDescending } = require("../utils/dateUtils.js");
 const { ouiNon } = require("../utils/csvUtils.js");
-const { findRegionByName } = require("../regions.js");
 const { findDossiers } = require("./findDossiers.js");
 
 async function findDossier(voeu) {
@@ -50,10 +49,7 @@ function getDidaskModules(statut) {
 }
 
 function getJeuneStatut(voeu) {
-  const academies = findRegionByName("Centre-Val de Loire").academies;
-  return academies.find((a) => a.code === voeu.academie.code)
-    ? ouiNon(voeu._meta.jeune_uniquement_en_apprentissage)
-    : "ND";
+  return ouiNon(voeu._meta.jeune_uniquement_en_apprentissage);
 }
 
 function getTrajectoiresProUrl(statut, voeu) {

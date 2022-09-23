@@ -300,29 +300,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
           jeune_uniquement_en_apprentissage: false,
         },
       }),
-      insertVoeu({
-        apprenant: {
-          ine: "MNOPQR",
-          nom: "Dupont",
-          prenom: "Pierre",
-          telephone_personnel: "0112345678",
-          telephone_portable: "0612345678",
-          adresse: {
-            libelle: "36 rue des lilas 75019 Paris FRANCE",
-            ligne_1: "36 rue des lilas",
-            code_postal: "75019",
-            ville: "Paris",
-            pays: "FRANCE",
-          },
-        },
-        academie: { code: "01", nom: "Paris" },
-        etablissement_accueil: {
-          uai: "0751234Z",
-        },
-        formation: {
-          code_formation_diplome: "50025214",
-        },
-      }),
       insertDossier({
         ine_apprenant: "ABCDEF",
         statut: "abandon",
@@ -358,7 +335,6 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
       response.data,
       `Apprenant INE;Apprenant Nom;Apprenant prénom;Apprenant Téléphone Personnel;Apprenant Téléphone Portable;Apprenant Adresse;Apprenant Adresse Code Postal;Apprenant Adresse Ville;Apprenant Adresse Pays;Statut dans le tableau de bord;Jeunes uniquement en apprentissage
 GHIJKL;Dupont;Jacques;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;75019;Paris;FRANCE;Non trouvé;Non
-MNOPQR;Dupont;Pierre;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;75019;Paris;FRANCE;Non trouvé;ND
 ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;75019;Paris;FRANCE;Apprenti;Oui
 `
     );
