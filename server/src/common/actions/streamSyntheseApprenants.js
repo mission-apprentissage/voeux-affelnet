@@ -15,7 +15,7 @@ async function streamSyntheseApprenants(options = {}) {
 
   return compose(
     Voeu.aggregate([
-      { $match: academies ? { "academie.code": { $in: academies.map((a) => a.code) } } : {} },
+      { $match: academies ? { "etablissement_origine.academie.code": { $in: academies.map((a) => a.code) } } : {} },
       {
         $group: {
           _id: "$apprenant.ine",
