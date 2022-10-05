@@ -3,7 +3,6 @@ const { compose, transformData } = require("oleoduc");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { sortDescending } = require("../utils/dateUtils.js");
 const { ouiNon } = require("../utils/csvUtils.js");
-const { findRegionByName } = require("../regions.js");
 const { findDossiers } = require("./findDossiers.js");
 
 async function findDossier(voeu) {
@@ -47,13 +46,6 @@ function getDidaskModules(statut) {
     "Didask - Préparer un entretien avec un employeur": `${baseUrl}/60d1adbb877dae00003f0eac`,
     "Didask - S'intégrer dans l'entreprise": `${baseUrl}/6283bd5ad9c7ae00003ede91`,
   };
-}
-
-function getJeuneStatut(voeu) {
-  const academies = findRegionByName("Centre-Val de Loire").academies;
-  return academies.find((a) => a.code === voeu.academie.code)
-    ? ouiNon(voeu._meta.jeune_uniquement_en_apprentissage)
-    : "ND";
 }
 
 function getTrajectoiresProUrl(statut, voeu) {
@@ -111,7 +103,7 @@ async function streamCroisementVoeux(options = {}) {
           "La Bonne Alternance": getWidgetLBAUrl(statut, voeu),
           InserJeunes: getTrajectoiresProUrl(statut, voeu),
           ...getDidaskModules(statut),
-          "Jeunes uniquement en apprentissage": getJeuneStatut(voeu),
+          "Jeunes uniquement en apprentissage": ouiNon(voeu._meta.jeune_uniquement_en_apprentissage),
         };
       },
       { parallel: 10 }

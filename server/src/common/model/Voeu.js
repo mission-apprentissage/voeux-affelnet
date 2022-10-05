@@ -96,6 +96,8 @@ const schema = new Schema({
     type: nested({
       jeune_uniquement_en_apprentissage: {
         type: Boolean,
+        required: true,
+        default: false,
       },
       import_dates: {
         required: true,

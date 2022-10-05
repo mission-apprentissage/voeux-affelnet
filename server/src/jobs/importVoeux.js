@@ -253,6 +253,7 @@ async function importVoeux(voeuxCsvStream, options = {}) {
               ...data,
               _meta: {
                 anomalies,
+                jeune_uniquement_en_apprentissage: previous?._meta.jeune_uniquement_en_apprentissage || false,
                 import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
               },
             },

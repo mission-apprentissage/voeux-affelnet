@@ -4,6 +4,9 @@ const { Voeu, Cfa } = require("../../src/common/model");
 const importVoeux = require("../../src/jobs/importVoeux");
 const { DateTime } = require("luxon");
 const { insertMef, insertCfa } = require("../utils/fakeData");
+const {
+  markVoeuxUniquementEnApprentissage,
+} = require("../../src/common/actions/markVoeuxUniquementEnApprentissage.js");
 
 describe("importVoeux", () => {
   it("Vérifie qu'on peut importer les voeux du fichier Affelnet", async () => {
@@ -129,6 +132,7 @@ describe("importVoeux", () => {
       ]),
       { importDate: yesterday }
     );
+    await markVoeuxUniquementEnApprentissage("111111111HA");
 
     const stats = await importVoeux(
       Readable.from([
@@ -141,6 +145,7 @@ describe("importVoeux", () => {
     const results = await Voeu.find().lean();
     assert.strictEqual(results.length, 1);
     assert.deepStrictEqual(results[0]._meta.import_dates, [yesterday, today]);
+    assert.deepStrictEqual(results[0]._meta.jeune_uniquement_en_apprentissage, true);
     assert.deepStrictEqual(results[0].apprenant.adresse.ligne_3, "31 rue des lilas");
     assert.deepStrictEqual(results[0]._meta.anomalies, [
       {
