@@ -48,10 +48,6 @@ function getDidaskModules(statut) {
   };
 }
 
-function getJeuneStatut(voeu) {
-  return ouiNon(voeu._meta.jeune_uniquement_en_apprentissage);
-}
-
 function getTrajectoiresProUrl(statut, voeu) {
   if (!besoinAide(statut)) {
     return "";
@@ -107,7 +103,7 @@ async function streamCroisementVoeux(options = {}) {
           "La Bonne Alternance": getWidgetLBAUrl(statut, voeu),
           InserJeunes: getTrajectoiresProUrl(statut, voeu),
           ...getDidaskModules(statut),
-          "Jeunes uniquement en apprentissage": getJeuneStatut(voeu),
+          "Jeunes uniquement en apprentissage": ouiNon(voeu._meta.jeune_uniquement_en_apprentissage),
         };
       },
       { parallel: 10 }
