@@ -3,18 +3,11 @@ const { compose, transformData } = require("oleoduc");
 const { findDossiers } = require("./findDossiers.js");
 const { capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { uniq } = require("lodash");
-const { findRegionByName } = require("../regions.js");
+const { ouiNon } = require("../utils/csvUtils.js");
 
-function getJeuneStatut(statuts, academie) {
+function getJeuneStatut(statuts) {
   const array = uniq(statuts);
-  const academies = findRegionByName("Centre-Val de Loire").academies;
-
-  if (array.includes(true)) {
-    return "Oui";
-  } else if (array.includes(false) || academies.find((a) => a.code === academie.code)) {
-    return "Non";
-  }
-  return "ND";
+  return ouiNon(array.includes(true));
 }
 
 async function streamSyntheseApprenants(options = {}) {
@@ -22,13 +15,12 @@ async function streamSyntheseApprenants(options = {}) {
 
   return compose(
     Voeu.aggregate([
-      { $match: academies ? { "academie.code": { $in: academies.map((a) => a.code) } } : {} },
+      { $match: academies ? { "etablissement_origine.academie.code": { $in: academies.map((a) => a.code) } } : {} },
       {
         $group: {
           _id: "$apprenant.ine",
           apprenant: { $first: "$apprenant" },
           responsable: { $first: "$responsable" },
-          academie: { $first: "$academie" },
           adresse: { $first: "$apprenant.adresse.libelle" },
           filters: {
             $push: {
@@ -46,7 +38,7 @@ async function streamSyntheseApprenants(options = {}) {
       },
     ]).cursor(),
     transformData(
-      async ({ apprenant, responsable, academie, adresse, filters, jeune_statuts }) => {
+      async ({ apprenant, responsable, adresse, filters, jeune_statuts }) => {
         const dossiers = await findDossiers(apprenant, responsable, filters);
         const statuts = dossiers.map((d) => d.statut);
         const statut =
@@ -63,7 +55,7 @@ async function streamSyntheseApprenants(options = {}) {
           "Apprenant Adresse Ville": apprenant.adresse.ville,
           "Apprenant Adresse Pays": apprenant.adresse.pays,
           "Statut dans le tableau de bord": capitalizeFirstLetter(statut),
-          "Jeunes uniquement en apprentissage": getJeuneStatut(jeune_statuts, academie),
+          "Jeunes uniquement en apprentissage": getJeuneStatut(jeune_statuts),
         };
       },
       { parallel: 10 }

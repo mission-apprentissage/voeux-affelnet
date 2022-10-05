@@ -1,7 +1,7 @@
 const logger = require("../common/logger");
 const { oleoduc, writeData } = require("oleoduc");
-const { Voeu } = require("../common/model/index.js");
 const { parseCsv } = require("../common/utils/csvUtils.js");
+const { markVoeuxUniquementEnApprentissage } = require("../common/actions/markVoeuxUniquementEnApprentissage.js");
 
 async function importJeunesUniquementEnApprentissage(input) {
   const stats = { total: 0, updated: 0, failed: 0 };
@@ -15,17 +15,7 @@ async function importJeunesUniquementEnApprentissage(input) {
           stats.total++;
           const ine = data.INE;
 
-          const res = await Voeu.updateOne(
-            {
-              "apprenant.ine": ine,
-            },
-            {
-              $set: {
-                "_meta.jeune_uniquement_en_apprentissage": true,
-              },
-            },
-            { runValidators: true }
-          );
+          const res = await markVoeuxUniquementEnApprentissage(ine);
 
           if (res.modifiedCount) {
             stats.updated++;
