@@ -9,7 +9,7 @@ class ReferentielApi extends RateLimitedApi {
   }
 
   static get baseApiUrl() {
-    return "https://referentiel.apprentissage.beta.gouv.fr/api/v1";
+    return "https://referentiel.apprentissage.onisep.fr/api/v1";
   }
 
   async getOrganisme(siret, params = {}) {
@@ -20,9 +20,9 @@ class ReferentielApi extends RateLimitedApi {
     });
   }
 
-  async searchOrganismes(siret, params = {}) {
+  async searchOrganismes(params = {}) {
     return this.execute(async () => {
-      logger.debug(`[${this.name}] Searching organismes ${siret}...`);
+      logger.debug(`[${this.name}] Searching organismes...`);
       const url = `${ReferentielApi.baseApiUrl}/organismes?${queryString.stringify(params)}`;
       return fetchJson(url);
     });
