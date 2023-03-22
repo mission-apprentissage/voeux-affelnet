@@ -1,0 +1,60 @@
+name: CI
+on: [ push ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: 'server'
+
+    steps:
+      - uses: actions/checkout@v3.3.0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Restore yarn cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: yarn-cache-folder-${{ hashFiles('**/yarn.lock', '.yarnrc.yml') }}
+          restore-keys: |
+            yarn-cache-folder-
+
+      - name: Create .yarnrc.yml
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          yarn config set yarnPath .yarn/releases/yarn-3.3.1.cjs
+          yarn config set nodeLinker node-modules
+          yarn config set defaultSemverRangePrefix ""
+
+      # Install dependencies
+      - name: Run Yarn Install
+        run: |
+          yarn install --immutable
+
+      # Lint
+      - name: Run Lint
+        run: |
+          yarn lint
+
+      # Run tests
+      - name: Run Tests
+        run: |
+          yarn test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./.coverage
+          name: codecov-server
+          verbose: true
