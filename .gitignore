@@ -145,3 +145,6 @@ sdk/lib
 .history/
 
 .local/*
+!.local/.keep
+
+.clinic/
