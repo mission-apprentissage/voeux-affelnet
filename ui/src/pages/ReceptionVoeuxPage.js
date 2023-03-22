@@ -1,11 +1,24 @@
-import { Field, Form, Formik } from "formik";
 import React, { useState } from "react";
-import { Button, Card, Form as TablerForm, Grid, Page, Table } from "tabler-react";
+import { Field, Form, Formik } from "formik";
 import * as Yup from "yup";
 import ErrorMessage from "../common/components/ErrorMessage";
 import { _get } from "../common/httpClient";
-import { asTablerInputError } from "../common/utils/tablerReactUtils";
 import { sortDescending } from "../common/utils/dateUtils";
+import { Page } from "../common/components/layout/Page";
+import {
+  Input,
+  Button,
+  Card,
+  CardHeader,
+  CardBody,
+  Heading,
+  Tbody,
+  Td,
+  Tr,
+  Thead,
+  Table,
+  Stack,
+} from "@chakra-ui/react";
 
 function getDownloadStatus(gestionnaire, formateur) {
   let statut;
@@ -16,7 +29,7 @@ function getDownloadStatus(gestionnaire, formateur) {
     return;
   }
 
-  const etablissement = gestionnaire.etablissements?.find((e) => e.uai === formateur.uai);
+  const etablissement = gestionnaire.formateurs?.find((etab) => etab.uai === formateur.uai);
   const telechargements = gestionnaire.voeux_telechargements
     ?.sort((a, b) => sortDescending(a.date, b.date))
     .filter((t) => t.uai === formateur.uai);
@@ -82,220 +95,197 @@ function ReceptionVoeuxPage() {
   };
 
   return (
-    <Page>
-      <Page.Main>
-        <Page.Content
-          title="Diffusion des listes de vœux exprimés sur le service en ligne Affelnet : identifiez les établissements
+    <Page
+      title="Diffusion des listes de vœux exprimés sur le service en ligne Affelnet : identifiez les établissements
             d'accueil qui vous sont rattachés ou votre organisme responsable"
-        >
-          <br />
-          <Grid.Row>
-            <Grid.Col width={12}>
-              <Card>
-                <Card.Header>
-                  <Card.Title>
-                    {" "}
-                    1/ vous êtes un établissement responsable (signataire des conventions de formation) et vous
-                    souhaitez savoir pour quelles UAI d’accueil vous allez recevoir la liste des vœux exprimés sur le
-                    service en ligne Affelnet ?{" "}
-                  </Card.Title>
-                </Card.Header>
-                <Card.Body>
-                  <Formik
-                    initialValues={{
-                      search: "",
-                    }}
-                    validationSchema={Yup.object().shape({
-                      search: Yup.string().required("Requis"),
-                    })}
-                    onSubmit={submitGestionnaireSearch}
-                  >
-                    {({ status = {} }) => {
-                      return (
-                        <Form>
-                          <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-                            <div style={{ flexBasis: "80%" }}>
-                              <TablerForm.Group>
-                                <Field name="search">
-                                  {({ field, meta }) => {
-                                    return (
-                                      <TablerForm.Input
-                                        type={"text"}
-                                        placeholder="Rechercher un siret, une raison sociale du responsable"
-                                        {...field}
-                                        {...asTablerInputError(meta)}
-                                      />
-                                    );
-                                  }}
-                                </Field>
-                              </TablerForm.Group>
-                            </div>
-                            <div>
-                              <Button color="primary" type={"submit"} style={{ margin: "auto" }}>
-                                Rechercher
-                              </Button>
-                            </div>
-                          </div>
-                          {gestionnaireError && (
-                            <ErrorMessage>
-                              L'établissement n'a pas été trouvé. Vous pouvez relancer une nouvelle recherche avec un
-                              autre paramètre.
-                            </ErrorMessage>
-                          )}
-                        </Form>
-                      );
-                    }}
-                  </Formik>
+    >
+      <br />
 
-                  {gestionnaireData &&
-                    gestionnaireData.map((result, index) => (
-                      <React.Fragment key={index}>
-                        <br />
-                        <div style={{ borderLeft: "2px solid black", paddingLeft: "12px" }}>
-                          Organisme responsable trouvé : {result.gestionnaire.siret}
-                          <br />
-                          <br />
-                          Cet organisme recevra les vœux exprimés pour les établissements d'accueil suivants :
-                          <Table>
-                            <Table.Header>
-                              <Table.Row>
-                                <Table.ColHeader>UAI</Table.ColHeader>
-                                <Table.ColHeader>LIBELLE_TYPE_ETABLISSEMENT</Table.ColHeader>
-                                <Table.ColHeader>LIBELLE_ETABLISSEMENT</Table.ColHeader>
-                                <Table.ColHeader>ADRESSE</Table.ColHeader>
-                                <Table.ColHeader>CP</Table.ColHeader>
-                                <Table.ColHeader>COMMUNE</Table.ColHeader>
-                                <Table.ColHeader>TÉLÉCHARGEMENT DES VŒUX</Table.ColHeader>
-                              </Table.Row>
-                            </Table.Header>
-                            <Table.Body>
-                              {result.formateurs?.map((formateur, index) => {
-                                return (
-                                  <Table.Row key={index}>
-                                    <Table.Col>{formateur.uai}</Table.Col>
-                                    <Table.Col>{formateur.libelle_type_etablissement}</Table.Col>
-                                    <Table.Col>{formateur.libelle_etablissement}</Table.Col>
-                                    <Table.Col>{formateur.adresse}</Table.Col>
-                                    <Table.Col>{formateur.cp}</Table.Col>
-                                    <Table.Col>{formateur.commune}</Table.Col>
-                                    <Table.Col>{getDownloadStatus(result.gestionnaire, formateur)}</Table.Col>
-                                  </Table.Row>
-                                );
-                              })}
-                            </Table.Body>
-                          </Table>
-                        </div>
-                      </React.Fragment>
-                    ))}
+      <Card mb={4}>
+        <CardHeader>
+          <Heading as="h3" size="sm">
+            1/ vous êtes un établissement responsable (signataire des conventions de formation) et vous souhaitez savoir
+            pour quelles UAI d’accueil vous allez recevoir la liste des vœux exprimés sur le service en ligne Affelnet ?
+          </Heading>
+        </CardHeader>
+        <CardBody>
+          <Formik
+            initialValues={{
+              search: "",
+            }}
+            validationSchema={Yup.object().shape({
+              search: Yup.string().required("Requis"),
+            })}
+            onSubmit={submitGestionnaireSearch}
+          >
+            {({ status = {} }) => {
+              return (
+                <Form style={{ width: "80%", margin: "auto" }}>
+                  <Stack direction="row">
+                    <Field name="search">
+                      {({ field, meta }) => {
+                        return (
+                          <Input
+                            placeholder="Rechercher un siret, une raison sociale du responsable"
+                            style={{ margin: 0 }}
+                            {...field}
+                          />
+                        );
+                      }}
+                    </Field>
+                    <Button variant="primary" type="submit">
+                      Rechercher
+                    </Button>
+                  </Stack>
 
-                  {/* TODO :
+                  {gestionnaireError && (
+                    <ErrorMessage>
+                      L'établissement n'a pas été trouvé. Vous pouvez relancer une nouvelle recherche avec un autre
+                      paramètre.
+                    </ErrorMessage>
+                  )}
+                </Form>
+              );
+            }}
+          </Formik>
+
+          {gestionnaireData &&
+            gestionnaireData.map((result, index) => (
+              <React.Fragment key={index}>
+                <br />
+                <div style={{ borderLeft: "2px solid black", paddingLeft: "12px" }}>
+                  Organisme responsable trouvé : {result.gestionnaire.siret}
+                  <br />
+                  <br />
+                  Cet organisme recevra les vœux exprimés pour les établissements d'accueil suivants :
+                  <Table>
+                    <Thead>
+                      <Tr>
+                        <Td>UAI</Td>
+                        <Td>LIBELLE_TYPE_ETABLISSEMENT</Td>
+                        <Td>LIBELLE_ETABLISSEMENT</Td>
+                        <Td>ADRESSE</Td>
+                        <Td>CP</Td>
+                        <Td>COMMUNE</Td>
+                        <Td>TÉLÉCHARGEMENT DES VŒUX</Td>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {result.formateurs?.map((formateur, index) => {
+                        return (
+                          <Tr key={index}>
+                            <Td>{formateur.uai}</Td>
+                            <Td>{formateur.libelle_type_etablissement}</Td>
+                            <Td>{formateur.libelle_etablissement}</Td>
+                            <Td>{formateur.adresse}</Td>
+                            <Td>{formateur.cp}</Td>
+                            <Td>{formateur.commune}</Td>
+                            <Td>{getDownloadStatus(result.gestionnaire, formateur)}</Td>
+                          </Tr>
+                        );
+                      })}
+                    </Tbody>
+                  </Table>
+                </div>
+              </React.Fragment>
+            ))}
+
+          {/* TODO :
                     Si Siret non trouvé :
                     [message à rédiger + tard] */}
-                </Card.Body>
-              </Card>
-            </Grid.Col>
-          </Grid.Row>
-          <br />
+        </CardBody>
+      </Card>
+      <br />
 
-          <Grid.Row>
-            <Grid.Col width={12}>
-              <Card>
-                <Card.Header>
-                  <Card.Title>
-                    {" "}
-                    2/ vous êtes un établissement d’accueil et vous souhaitez savoir quel organisme responsable va
-                    recevoir la liste des vœux exprimés sur le service en ligne Affelnet ?{" "}
-                  </Card.Title>
-                </Card.Header>
-                <Card.Body>
-                  <Formik
-                    initialValues={{
-                      search: "",
-                    }}
-                    validationSchema={Yup.object().shape({
-                      search: Yup.string().required("Requis"),
-                    })}
-                    onSubmit={submitFormateurSearch}
-                  >
-                    {({ status = {} }) => {
-                      return (
-                        <Form>
-                          <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-                            <div style={{ flexBasis: "80%" }}>
-                              <TablerForm.Group>
-                                <Field name="search">
-                                  {({ field, meta }) => {
-                                    return (
-                                      <TablerForm.Input
-                                        type={"text"}
-                                        placeholder="Rechercher un UAI, un libellé établissement (tel que figurant sur Affelnet)"
-                                        {...field}
-                                        {...asTablerInputError(meta)}
-                                      />
-                                    );
-                                  }}
-                                </Field>
-                              </TablerForm.Group>
-                            </div>
-                            <div>
-                              <Button color="primary" type={"submit"} style={{ margin: "auto" }}>
-                                Rechercher
-                              </Button>
-                            </div>
-                          </div>
+      <Card>
+        <CardHeader>
+          <Heading as="h3" size="sm">
+            2/ vous êtes un établissement d’accueil et vous souhaitez savoir quel organisme responsable va recevoir la
+            liste des vœux exprimés sur le service en ligne Affelnet ?
+          </Heading>
+        </CardHeader>
+        <CardBody>
+          <Formik
+            initialValues={{
+              search: "",
+            }}
+            validationSchema={Yup.object().shape({
+              search: Yup.string().required("Requis"),
+            })}
+            onSubmit={submitFormateurSearch}
+          >
+            {({ status = {} }) => {
+              return (
+                <Form style={{ width: "80%", margin: "auto" }}>
+                  <Stack direction="row">
+                    <Field name="search">
+                      {({ field, meta }) => {
+                        return (
+                          <Input
+                            placeholder="Rechercher un UAI, un libellé établissement (tel que figurant sur Affelnet)"
+                            style={{ margin: 0 }}
+                            {...field}
+                          />
+                        );
+                      }}
+                    </Field>
+                    <Button variant="primary" type="submit">
+                      Rechercher
+                    </Button>
+                  </Stack>
 
-                          {formateurError && (
-                            <ErrorMessage>
-                              L'établissement n'a pas été trouvé. Vous pouvez relancer une nouvelle recherche avec un
-                              autre paramètre.
-                            </ErrorMessage>
-                          )}
-                        </Form>
-                      );
-                    }}
-                  </Formik>
+                  {formateurError && (
+                    <ErrorMessage>
+                      L'établissement n'a pas été trouvé. Vous pouvez relancer une nouvelle recherche avec un autre
+                      paramètre.
+                    </ErrorMessage>
+                  )}
+                </Form>
+              );
+            }}
+          </Formik>
 
-                  {formateurData &&
-                    formateurData.map((result, index) => (
-                      <React.Fragment key={index}>
-                        <br />
-                        <div style={{ borderLeft: "2px solid black", paddingLeft: "12px" }}>
-                          Etablissement d'accueil trouvé : {result.formateur.uai}
-                          <br />
-                          <br />
-                          Cet établissement d'accueil devra contacter l'organisme gestionnaire suivant afin de récupérer
-                          la liste des vœux exprimés :
-                          <Table>
-                            <Table.Header>
-                              <Table.Row>
-                                <Table.ColHeader>SIRET</Table.ColHeader>
-                                <Table.ColHeader>UAI</Table.ColHeader>
-                                <Table.ColHeader>RAISON SOCIALE</Table.ColHeader>
-                                <Table.ColHeader>ADRESSE</Table.ColHeader>
+          {formateurData &&
+            formateurData.map((result, index) => (
+              <React.Fragment key={index}>
+                <br />
+                <div style={{ borderLeft: "2px solid black", paddingLeft: "12px" }}>
+                  Etablissement d'accueil trouvé : {result.formateur.uai}
+                  <br />
+                  <br />
+                  Cet établissement d'accueil devra contacter l'organisme gestionnaire suivant afin de récupérer la
+                  liste des vœux exprimés :
+                  <Table>
+                    <Thead>
+                      <Tr>
+                        <Td>SIRET</Td>
+                        <Td>UAI</Td>
+                        <Td>RAISON SOCIALE</Td>
+                        <Td>ADRESSE</Td>
 
-                                <Table.ColHeader>MAIL</Table.ColHeader>
-                                <Table.ColHeader>STATUT</Table.ColHeader>
-                                <Table.ColHeader>TÉLÉCHARGEMENT DES VŒUX</Table.ColHeader>
-                              </Table.Row>
-                            </Table.Header>
-                            <Table.Body>
-                              <Table.Row>
-                                <Table.Col>{result.gestionnaire.siret}</Table.Col>
-                                <Table.Col>{result.gestionnaire.uai}</Table.Col>
-                                <Table.Col>{result.gestionnaire.raison_sociale}</Table.Col>
-                                <Table.Col>{result.gestionnaire.adresse.label}</Table.Col>
+                        <Td>MAIL</Td>
+                        <Td>STATUT</Td>
+                        <Td>TÉLÉCHARGEMENT DES VŒUX</Td>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr>
+                        <Td>{result.gestionnaire.siret}</Td>
+                        <Td>{result.gestionnaire.uai}</Td>
+                        <Td>{result.gestionnaire.raison_sociale}</Td>
+                        <Td>{result.gestionnaire.adresse.label}</Td>
 
-                                <Table.Col>{result.gestionnaire.email}</Table.Col>
-                                <Table.Col>{result.gestionnaire.statut}</Table.Col>
-                                <Table.Col>{getDownloadStatus(result.gestionnaire, result.formateur)}</Table.Col>
-                              </Table.Row>
-                            </Table.Body>
-                          </Table>
-                        </div>
-                      </React.Fragment>
-                    ))}
+                        <Td>{result.gestionnaire.email}</Td>
+                        <Td>{result.gestionnaire.statut}</Td>
+                        <Td>{getDownloadStatus(result.gestionnaire, result.formateur)}</Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </div>
+              </React.Fragment>
+            ))}
 
-                  {/* TODO :
+          {/* TODO :
                     Si on pouvait avoir un second encart dans lequel on indique à ce moment-là et selon le cas :
 
                     1/ Cet UAI n’est pas référencé sur le service en ligne Affelnet pour la campagne 2022, n’hésitez pas à vous rapprocher de votre Carif-Oref pour déclarer votre offre de formation
@@ -303,12 +293,8 @@ function ReceptionVoeuxPage() {
                     3/ Des vœux ont été téléchargés pour votre UAI établissement d'accueil par l’organisme  responsable (Siret : {Siret}), le {JJ/MM/AAAA}.
                     C’est l’établissement responsable qui est chargé de vous transmettre la liste correspondant à votre établissement. Vous pouvez vous rapprocher de votre établissement responsable pour vous assurer que la liste vous sera bien transmise dans les meilleurs délais. nous vous invitons à le contacter afin que cette liste puisse vous être transmise
                     4/ Des vœux sont disponibles pour téléchargement par l’établissement responsable (Siret : {Siret}), depuis le JJ/MM/AAAA. Vous pouvez vous rapprocher de votre établissement responsable pour vous assurer que la liste vous sera bien transmise dans les meilleurs délaisun délai raisonnable., nous vous invitons à le contacter afin qu’il puisse entamer les démarches nécessaires (confirmation mail et activation de compte) et que cette liste puisse vous être transmise */}
-                </Card.Body>
-              </Card>
-            </Grid.Col>
-          </Grid.Row>
-        </Page.Content>
-      </Page.Main>
+        </CardBody>
+      </Card>
     </Page>
   );
 }

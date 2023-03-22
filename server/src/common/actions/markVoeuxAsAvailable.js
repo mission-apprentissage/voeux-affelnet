@@ -1,8 +1,8 @@
-const { Cfa } = require("../model/index.js");
+const { Gestionnaire } = require("../model/index.js");
 const logger = require("../logger.js");
 
 async function markVoeuxAsAvailable(uai, voeuxDate) {
-  const { matchedCount } = await Cfa.updateOne(
+  const { matchedCount } = await Gestionnaire.updateOne(
     { "etablissements.uai": uai },
     {
       $set: {

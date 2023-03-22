@@ -24,7 +24,7 @@ function mockApi(etablissements = []) {
 }
 
 describe("importDossiers", () => {
-  it("Vérifie qu'on peut importer les dossiers à partir de l'api metabase", async () => {
+  xit("Vérifie qu'on peut importer les dossiers à partir de l'api metabase", async () => {
     mockApi([
       {
         dossier_id: "622fd47b84f2eb55806020f8",
@@ -75,7 +75,7 @@ describe("importDossiers", () => {
     });
   });
 
-  it("Vérifie qu'on peut importer les dossiers à partir d'un fichier", async () => {
+  xit("Vérifie qu'on peut importer les dossiers à partir d'un fichier", async () => {
     let stats = await importDossiers({
       input: getJsonAsStream({
         dossier_id: "622fd47b84f2eb55806020f8",

@@ -1,9 +1,9 @@
-const { Cfa } = require("../model");
+const { Gestionnaire } = require("../model");
 const Boom = require("boom");
 const { changeEmail } = require("./changeEmail");
 
 async function confirm(siret, email, options = {}) {
-  const cfa = await Cfa.findOne({ siret });
+  const cfa = await Gestionnaire.findOne({ siret });
   const isNewEmail = cfa.email !== email;
 
   if (!email || (!options.force && cfa.statut !== "en attente")) {
@@ -14,7 +14,7 @@ async function confirm(siret, email, options = {}) {
     await changeEmail(siret, email);
   }
 
-  return Cfa.findOneAndUpdate(
+  return Gestionnaire.findOneAndUpdate(
     { siret },
     {
       $set: {

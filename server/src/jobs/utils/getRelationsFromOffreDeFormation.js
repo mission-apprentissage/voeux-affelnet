@@ -2,10 +2,13 @@ const CatalogueApi = require("../../common/api/CatalogueApi.js");
 const ReferentielApi = require("../../common/api/ReferentielApi.js");
 const logger = require("../../common/logger.js");
 const { uniq } = require("lodash");
-const { compose, transformData, filterData } = require("oleoduc");
-const { Cfa } = require("../../common/model/index.js");
+const { compose, transformData, filterData, accumulateData, flattenArray } = require("oleoduc");
+const { Gestionnaire } = require("../../common/model/index.js");
 const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
+
+const referentielApi = new ReferentielApi();
+const catalogueApi = new CatalogueApi();
 
 async function getOffreDeFormationCsv(csv) {
   const stream = csv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-07-06-2022.csv"));
@@ -23,8 +26,8 @@ async function getOffreDeFormationCsv(csv) {
   );
 }
 
-function referentiel() {
-  const referentielApi = new ReferentielApi();
+async function referentiel() {
+  // const referentielApi = new ReferentielApi();
 
   return {
     findEmailReferentiel: async (siret) => {
@@ -64,15 +67,17 @@ function referentiel() {
   };
 }
 
-function catalogue() {
-  const catalogueApi = new CatalogueApi();
+async function catalogue() {
+  // const catalogueApi = new CatalogueApi();
+
+  await catalogueApi.connect();
 
   return {
-    findFormations: async (uai, cleMinistereEducation, siretGestionnaire) => {
+    findFormations: async (uai, cleMinistereEducatif, siretGestionnaire) => {
       const { formations } = await catalogueApi.getFormations(
         {
           published: true,
-          ...(cleMinistereEducation ? { cle_ministere_educatif: cleMinistereEducation } : {}),
+          ...(cleMinistereEducatif ? { cle_ministere_educatif: cleMinistereEducatif } : {}),
           $or: [
             { etablissement_formateur_uai: uai },
             { etablissement_gestionnaire_uai: uai },
@@ -90,8 +95,10 @@ function catalogue() {
       );
 
       const alternatives = {
-        sirets: uniq(formations.map((f) => f.etablissement_gestionnaire_siret)),
-        emails: uniq(formations.flatMap((f) => f.etablissement_gestionnaire_courriel?.split("##"))),
+        sirets: uniq(formations.map((f) => f.etablissement_gestionnaire_siret)).filter((siret) => !!siret),
+        emails: uniq(formations.flatMap((f) => f.etablissement_gestionnaire_courriel?.split("##"))).filter(
+          (email) => !!email
+        ),
       };
 
       return { formations, alternatives };
@@ -121,12 +128,12 @@ function filterConflicts(onConflict = () => ({})) {
 }
 
 async function getRelationsFromOffreDeFormation(options = {}) {
-  const { findEmailReferentiel, findSiretResponsableReferentiel } = referentiel();
-  const { findFormations } = catalogue();
+  const { findEmailReferentiel, findSiretResponsableReferentiel } = await referentiel();
+  const { findFormations } = await catalogue();
   const { onConflict = () => ({}), affelnet } = options;
 
-  async function searchSiretAndEmail(uai, cleMinistereEducation, siretGestionnaire) {
-    const { formations, alternatives } = await findFormations(uai, cleMinistereEducation, siretGestionnaire);
+  async function searchSiretAndEmail(uai, cleMinistereEducatif, siretGestionnaire) {
+    const { formations, alternatives } = await findFormations(uai, cleMinistereEducatif, siretGestionnaire);
 
     const siret =
       siretGestionnaire ||
@@ -143,29 +150,79 @@ async function getRelationsFromOffreDeFormation(options = {}) {
     };
   }
 
-  let currentLine = 1;
   return compose(
     await getOffreDeFormationCsv(affelnet),
-    transformData(
-      async (data) => {
-        try {
-          currentLine++;
-          const uai = data["UAI"];
-          const cleMinistereEducation = data["CLE_MINISTERE_EDUCATIF"];
-          const siretGestionnaire = data["SIRET_UAI_GESTIONNAIRE"];
-          const cfa = await Cfa.findOne({ siret: siretGestionnaire });
 
-          if (cfa) {
+    // Permet de n'avoir qu'une ligne pour une unique ensemble {uai / siretGestionnaire / cleMinistereEducatif}
+    accumulateData(
+      async (accumulator, data) => {
+        const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
+
+        const uai = data["UAI"];
+        const cleMinistereEducatif = data["CLE_MINISTERE_EDUCATIF"];
+        const siretGestionnaire = !["RECTORAT"].includes(libelleTypeEtablissement)
+          ? data["SIRET_UAI_GESTIONNAIRE"]
+          : "99999999999999";
+
+        if (!libelleTypeEtablissement.length || typeof libelleTypeEtablissement !== "string") {
+          logger.error(`${libelleTypeEtablissement} - ${typeof libelleTypeEtablissement}`);
+        }
+
+        const existingRelations = accumulator.filter(
+          (acc) => acc.uai === uai && acc.siretGestionnaire !== siretGestionnaire
+        );
+
+        if (existingRelations.length > 1) {
+          // console.error(existingRelations);
+          logger.error(
+            `${uai} - ${siretGestionnaire} / ${existingRelations.map((rel) => rel.siretGestionnaire).join(" / ")}`
+          );
+        }
+
+        if (
+          !accumulator.filter(
+            (acc) =>
+              acc.uai === uai &&
+              acc.cleMinistereEducatif === cleMinistereEducatif &&
+              acc.siretGestionnaire === siretGestionnaire
+          ).length
+        ) {
+          accumulator.push({ uai, cleMinistereEducatif, siretGestionnaire });
+        }
+
+        return accumulator;
+      },
+      { accumulator: [] }
+    ),
+    flattenArray(),
+    // transformData(async (data) => {
+    //   logger.info(data);
+    //   return data;
+    // }),
+    transformData(
+      async ({ uai, cleMinistereEducatif, siretGestionnaire }) => {
+        if (!uai?.length || !cleMinistereEducatif?.length || !siretGestionnaire?.length) {
+          logger.warn("Informations manquantes : ", {
+            uai,
+            cleMinistereEducatif,
+            siretGestionnaire,
+          });
+        }
+
+        try {
+          const gestionnaire = await Gestionnaire.findOne({ siret: siretGestionnaire });
+
+          if (gestionnaire) {
             return {
               uai_etablissement: uai,
-              siret_gestionnaire: cfa.siret,
-              email_gestionnaire: cfa.email,
+              siret_gestionnaire: gestionnaire.siret,
+              email_gestionnaire: gestionnaire.email,
             };
           }
 
           const { siret, email, alternatives } = await searchSiretAndEmail(
             uai,
-            cleMinistereEducation,
+            cleMinistereEducatif,
             siretGestionnaire
           );
 
@@ -178,7 +235,7 @@ async function getRelationsFromOffreDeFormation(options = {}) {
         } catch (e) {
           logger.error(
             { err: e },
-            `Une erreur est survenue lors du traitement de la ligne ${currentLine} avec l'uai ${data["uai"]}`
+            `Une erreur est survenue lors du traitement de la ligne avec les valeurs { uai: ${uai}, cleMinistereEduatif: ${cleMinistereEducatif}, siretGestionnaire: ${siretGestionnaire} }`
           );
         }
       },

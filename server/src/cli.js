@@ -14,16 +14,17 @@ const sendActivationEmails = require("./jobs/sendActivationEmails");
 const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
-const importCfas = require("./jobs/importCfas");
-const importUfas = require("./jobs/importUfas");
+const importGestionnaires = require("./jobs/importGestionnaires");
+const importFormateurs = require("./jobs/importFormateurs");
+const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
-const exportCfas = require("./jobs/exportCfas");
-const buildCfaCsv = require("./jobs/buildCfaCsv");
+const exportGestionnaires = require("./jobs/exportGestionnaires");
+const buildRelationCsv = require("./jobs/buildRelationCsv");
 const { exportStatutVoeux } = require("./jobs/exportStatutVoeux");
 const { createAdmin } = require("./jobs/createAdmin.js");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
-const { Cfa } = require("./common/model");
+const { Gestionnaire } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
@@ -51,43 +52,59 @@ cli
   });
 
 cli
-  .command("buildCfaCsv")
+  .command("buildRelationCsv")
   .description("Permet de créer le fichier des CFA")
   .option("--affelnet <affelnet>", "Le fichier CSV contentant l'offre de formation Affelnet", createReadStream)
-  .option("--relations <relations>", "Le fichier CSV contenant les relations complémentaires", createReadStream)
+  .option(
+    "--additionalRelations <additionalRelations>",
+    "Le fichier CSV contenant les relations complémentaires",
+    createReadStream
+  )
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, ...rest }) => {
     runScript(() => {
       const output = out || writeToStdout();
 
-      return buildCfaCsv(output, rest);
+      return buildRelationCsv(output, rest);
     });
   });
 
 cli
-  .command("importCfas <cfaCsv>")
+  .command("importGestionnaires <gestionnaireCsv>")
   .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
-  .action((cfaCsv) => {
+  .action((gestionnaireCsv) => {
     runScript(() => {
-      const input = cfaCsv ? createReadStream(cfaCsv) : process.stdin;
+      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
 
-      return importCfas(input);
+      return importGestionnaires(input);
     });
   });
 
 cli
-  .command("importUfas [<ufaCsv>]")
-  .description("Importe les UFA depuis le fichier transmis par Affelnet")
-  .action((ufaCsv) => {
+  .command("importFormateurs <formateurCsv>")
+  .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
+  .action((formateurCsv) => {
     runScript(() => {
-      const input = ufaCsv ? createReadStream(ufaCsv) : null;
+      const input = formateurCsv ? createReadStream(formateurCsv) : process.stdin;
 
-      return importUfas(input);
+      return importFormateurs(input);
+    });
+  });
+
+cli
+  .command("importFormations [<formationCsv>]")
+  .description("Importe les formations depuis le fichier transmis par Affelnet")
+  .action((formationCsv) => {
+    runScript(() => {
+      const input = formationCsv ? createReadStream(formationCsv) : null;
+
+      return importFormations(input);
     });
   });
 
 cli
   .command("sendConfirmationEmails")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul CFA")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
     runScript(({ sendEmail }) => {
@@ -186,7 +203,7 @@ cli
     });
   });
 cli
-  .command("confirmCfa")
+  .command("confirmGestionnaire")
   .description("Permet de confirmer manuellement un CFA")
   .arguments("<siret> <email>")
   .option("--force", "Ecrase les données déjà confirmées")
@@ -207,14 +224,14 @@ cli
   });
 
 cli
-  .command("exportCfas")
+  .command("exportGestionnaires")
   .option("--filter <filter>", "Filtre au format json", JSON.parse)
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
       const output = out || writeToStdout();
 
-      return exportCfas(output, { filter });
+      return exportGestionnaires(output, { filter });
     });
   });
 
@@ -245,7 +262,7 @@ cli.command("migrate").action(() => {
 cli
   .command("injectDataset")
   .option("--mef", "Importe les mefs")
-  .option("--cfa", "Ajoute un cfa")
+  .option("--gestionnaire", "Ajoute un gestionnaire")
   .option("--admin", "Ajoute un administrateur")
   .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
   .action((options) => {
@@ -284,7 +301,7 @@ cli
       };
 
       return await oleoduc(
-        Cfa.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
+        Gestionnaire.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
         transformData((etablissement) => etablissement.uai),
         transformData(async (uai) => await getEmailsFormateurFromUai(uai)),
         flattenArray(),
@@ -311,7 +328,7 @@ cli
       const output = out || writeToStdout();
 
       // Récupération des adresses emails des CFAs gestionnaires
-      const etablissement_gestionnaire_emails = await Cfa.distinct("email");
+      const etablissement_gestionnaire_emails = await Gestionnaire.distinct("email");
 
       const source = Readable.from(etablissement_gestionnaire_emails);
 

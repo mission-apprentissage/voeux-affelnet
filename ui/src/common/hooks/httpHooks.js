@@ -1,16 +1,16 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { _get, _put } from "../httpClient";
 
 export function useGet(url, initalState = {}) {
   const [response, setResponse] = useState(initalState);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const mountedRef = useRef(true);
 
   const sendRequest = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
     try {
+      setLoading(true);
+      setError(null);
       const response = await _get(url);
       setResponse(response);
       setLoading(false);
@@ -22,10 +22,13 @@ export function useGet(url, initalState = {}) {
 
   useEffect(() => {
     async function run() {
-      return sendRequest();
+      if (mountedRef.current) {
+        mountedRef.current = false;
+        return sendRequest();
+      }
     }
     run();
-  }, [url, sendRequest]);
+  }, [sendRequest]);
 
   return [response, loading, error];
 }
@@ -34,12 +37,12 @@ export function usePut(url, body) {
   const [response, setResponse] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const mountedRef = useRef(true);
 
   const sendRequest = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
     try {
+      setLoading(true);
+      setError(null);
       const response = await _put(url, body || {});
       setResponse(response);
       setLoading(false);
@@ -51,10 +54,13 @@ export function usePut(url, body) {
 
   useEffect(() => {
     async function run() {
-      return sendRequest();
+      if (mountedRef.current) {
+        mountedRef.current = false;
+        return sendRequest();
+      }
     }
     run();
-  }, [url, sendRequest]);
+  }, [sendRequest]);
 
   return [response, loading, error];
 }

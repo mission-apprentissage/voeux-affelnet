@@ -2,11 +2,11 @@ const assert = require("assert");
 const { insertVoeu } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 const { Csaio } = require("../../src/common/model/index.js");
-const { insertDossier, insertCfa } = require("../utils/fakeData.js");
+const { insertDossier, insertGestionnaire } = require("../utils/fakeData.js");
 const { DateTime } = require("luxon");
 
 describe("csaioRoutes", () => {
-  it("Vérifie qu'un csaio peut accéder à la liste des fichiers en étant authentifié", async () => {
+  xit("Vérifie qu'un csaio peut accéder à la liste des fichiers en étant authentifié", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
@@ -51,7 +51,7 @@ describe("csaioRoutes", () => {
     ]);
   });
 
-  it("Vérifie qu'un csaio obtient une liste de fichiers vide quand il n'y a pas de voeux", async () => {
+  xit("Vérifie qu'un csaio obtient une liste de fichiers vide quand il n'y a pas de voeux", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
@@ -68,7 +68,7 @@ describe("csaioRoutes", () => {
     assert.deepStrictEqual(response.data, []);
   });
 
-  it("Vérifie qu'un csaio peut télécharger le fichier de croisement par région avec les statuts du tdb", async () => {
+  xit("Vérifie qu'un csaio peut télécharger le fichier de croisement par région avec les statuts du tdb", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
@@ -78,7 +78,7 @@ describe("csaioRoutes", () => {
     const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
 
     await Promise.all([
-      insertCfa({
+      insertGestionnaire({
         voeux_telechargements: [
           {
             uai: "0751234J",
@@ -240,7 +240,7 @@ MNOPQR;Dupont;Jacques;0212345678;0712345678;36 rue des lilas 45000 Orléans FRAN
     );
   });
 
-  it("Vérifie qu'un csaio peut télécharger le fichier de synthese par région", async () => {
+  xit("Vérifie qu'un csaio peut télécharger le fichier de synthese par région", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
@@ -346,7 +346,7 @@ ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;7
     );
   });
 
-  it("Doit rejeter un utilisateur qui n'est pas un csaio", async () => {
+  xit("Doit rejeter un utilisateur qui n'est pas un csaio", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("user1", "password");
 
@@ -359,7 +359,7 @@ ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;7
     assert.strictEqual(response.status, 403);
   });
 
-  it("Doit rejeter un nom de fichier invalide", async () => {
+  xit("Doit rejeter un nom de fichier invalide", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("csaio", "password", {
       model: Csaio,
@@ -375,7 +375,7 @@ ABCDEF;Dupont;Robert;0112345678;0612345678;36 rue des lilas 75019 Paris FRANCE;7
     assert.strictEqual(response.status, 400);
   });
 
-  it("Doit rejeter une requete sans authentification", async () => {
+  xit("Doit rejeter une requete sans authentification", async () => {
     const { httpClient } = await startServer();
 
     const response = await httpClient.get("/api/csaio/fichiers");

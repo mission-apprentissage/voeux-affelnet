@@ -4,11 +4,11 @@ const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
 const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { Cfa, Log, Voeu } = require("../../common/model");
+const { User, Gestionnaire, Log, Voeu, Formateur } = require("../../common/model");
 const { getAcademies } = require("../../common/academies");
 const { paginate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
-const exportCfas = require("../../jobs/exportCfas");
+const exportGestionnaires = require("../../jobs/exportGestionnaires");
 const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissementsInconnus.js");
 const { exportStatutVoeux } = require("../../jobs/exportStatutVoeux.js");
 const { exportVoeuxRecensement } = require("../../jobs/exportVoeuxRecensement.js");
@@ -31,8 +31,14 @@ module.exports = ({ resendEmail }) => {
     return res;
   }
 
+  /**
+   * USERS (GESTIONNAIRES & FORMATEURS)
+   */
+  /**
+   * Permet de récupérer la liste des formateurs
+   */
   router.get(
-    "/api/admin/cfas",
+    "/api/admin/users",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -43,9 +49,10 @@ module.exports = ({ resendEmail }) => {
       }).validateAsync(req.query, { abortEarly: false });
 
       const { find, pagination } = await paginate(
-        Cfa,
+        User,
         {
           ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+          $or: [{ type: "Formateur" }, { type: "Gestionnaire" }],
         },
         {
           page,
@@ -60,7 +67,7 @@ module.exports = ({ resendEmail }) => {
           arrayWrapper: {
             pagination,
           },
-          arrayPropertyName: "cfas",
+          arrayPropertyName: "users",
         })
       );
 
@@ -68,8 +75,137 @@ module.exports = ({ resendEmail }) => {
     })
   );
 
+  /**
+   * GESTIONNAIRES
+   * =============
+   */
+
+  /**
+   * Permet de récupérer la liste des gestionnaires
+   */
+  router.get(
+    "/api/admin/gestionnaires",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { text, page, items_par_page } = await Joi.object({
+        text: Joi.string(),
+        page: Joi.number().default(1),
+        items_par_page: Joi.number().default(10),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const { find, pagination } = await paginate(
+        Gestionnaire,
+        {
+          ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+          type: "Gestionnaire",
+        },
+        {
+          page,
+          items_par_page,
+          select: { _id: 0, password: 0 },
+        }
+      );
+
+      const stream = oleoduc(
+        find.sort({ siret: 1 }).cursor(),
+        transformIntoJSON({
+          arrayWrapper: {
+            pagination,
+          },
+          arrayPropertyName: "gestionnaires",
+        })
+      );
+
+      return sendJsonStream(stream, res);
+    })
+  );
+
+  /**
+   * Permet de récupérer la liste des formateurs
+   */
+  router.get(
+    "/api/admin/formateurs",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { text, page, items_par_page } = await Joi.object({
+        text: Joi.string(),
+        page: Joi.number().default(1),
+        items_par_page: Joi.number().default(10),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const { find, pagination } = await paginate(
+        Formateur,
+        {
+          ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+          type: "Formateur",
+        },
+        {
+          page,
+          items_par_page,
+          select: { _id: 0, password: 0 },
+        }
+      );
+
+      const stream = oleoduc(
+        find.sort({ siret: 1 }).cursor(),
+        transformIntoJSON({
+          arrayWrapper: {
+            pagination,
+          },
+          arrayPropertyName: "formateurs",
+        })
+      );
+
+      return sendJsonStream(stream, res);
+    })
+  );
+
+  router.get(
+    "/api/admin/gestionnaires/:siret",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { siret } = await Joi.object({
+        siret: Joi.string().required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const gestionnaire = await Gestionnaire.findOne({ siret });
+
+      res.json(gestionnaire);
+    })
+  );
+
+  router.get(
+    "/api/admin/gestionnaires/:siret/formateurs",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { siret } = await Joi.object({
+        siret: Joi.string().required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const gestionnaire = await Gestionnaire.findOne({ siret });
+
+      if (!gestionnaire.formateurs.filter((e) => e.voeux_date).length === 0) {
+        return res.json([]);
+      }
+
+      res.json(
+        await Promise.all(
+          gestionnaire.formateurs.map(async (etablissement) => {
+            const formateur = await Formateur.findOne({ uai: etablissement.uai });
+
+            return formateur;
+          })
+        )
+      );
+    })
+  );
+
   router.put(
-    "/api/admin/cfas/:siret/setEmail",
+    "/api/admin/gestionnaires/:siret/setEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -85,7 +221,7 @@ module.exports = ({ resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/cfas/:siret/resendConfirmationEmail",
+    "/api/admin/gestionnaires/:siret/resendConfirmationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -101,7 +237,7 @@ module.exports = ({ resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/cfas/:siret/resendActivationEmail",
+    "/api/admin/gestionnaires/:siret/resendActivationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -117,7 +253,7 @@ module.exports = ({ resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/cfas/:siret/resendNotificationEmail",
+    "/api/admin/gestionnaires/:siret/resendNotificationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -133,37 +269,42 @@ module.exports = ({ resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/cfas/:uai/markAsNonConcerne",
+    "/api/admin/gestionnaires/:siret/markAsNonConcerne",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { uai } = await Joi.object({
-        uai: Joi.string().required(),
+      const { siret } = await Joi.object({
+        siret: Joi.string().required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await markAsNonConcerne(uai);
+      await markAsNonConcerne(siret);
 
       return res.json({ statut: "non concerné" });
     })
   );
 
+  /**
+   * FICHIERS
+   * =============
+   */
+
   router.get(
-    "/api/admin/cfas/injoinables.csv",
+    "/api/admin/fichiers/injoinables.csv",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      return exportCfas(asCsvResponse("cfas-injoinables", res), {
+      return exportGestionnaires(asCsvResponse("gestionnaires-injoinables", res), {
         filter: { $or: [{ "emails.error": { $exists: true } }, { unsubscribe: true }] },
       });
     })
   );
 
   router.get(
-    "/api/admin/cfas/relances.csv",
+    "/api/admin/fichiers/relances.csv",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      return exportCfas(asCsvResponse("cfas-relances", res), {
+      return exportGestionnaires(asCsvResponse("gestionnaires-relances", res), {
         filter: { statut: { $in: ["en attente", "confirmé"] }, "etablissements.voeux_date": { $exists: true } },
         columns: {
           statut: (data) => data.statut,
@@ -179,7 +320,7 @@ module.exports = ({ resendEmail }) => {
   );
 
   router.get(
-    "/api/admin/etablissements/inconnus.csv",
+    "/api/admin/fichiers/inconnus.csv",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -188,7 +329,7 @@ module.exports = ({ resendEmail }) => {
   );
 
   router.get(
-    "/api/admin/etablissements/statut-voeux.csv",
+    "/api/admin/fichiers/statut-voeux.csv",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -197,13 +338,18 @@ module.exports = ({ resendEmail }) => {
   );
 
   router.get(
-    "/api/admin/etablissements/voeux-recensement.csv",
+    "/api/admin/fichiers/voeux-recensement.csv",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       return exportVoeuxRecensement(asCsvResponse("voeux-recensement", res));
     })
   );
+
+  /**
+   * ACADEMIES
+   * =============
+   */
 
   router.get(
     "/api/admin/academies",

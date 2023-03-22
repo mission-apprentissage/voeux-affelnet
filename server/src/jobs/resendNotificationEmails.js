@@ -1,6 +1,6 @@
 const logger = require("../common/logger");
 const { DateTime } = require("luxon");
-const { Cfa } = require("../common/model");
+const { Gestionnaire } = require("../common/model");
 const { every } = require("lodash");
 
 function allFilesAsAlreadyBeenDownloaded(cfa) {
@@ -26,7 +26,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
       ? {
           emails: {
             $elemMatch: {
-              templateName: "notification",
+              templateName: /^notification.*/,
               "error.type": "fatal",
             },
           },
@@ -34,7 +34,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
       : {
           emails: {
             $elemMatch: {
-              templateName: "notification",
+              templateName: /^notification.*/,
               error: { $exists: false },
               $and: [
                 { sendDates: { $not: { $gt: DateTime.now().minus({ days: 7 }).toJSDate() } } },
@@ -45,7 +45,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
         }),
   };
 
-  await Cfa.find(query)
+  await Gestionnaire.find(query)
     .lean()
     .cursor()
     .eachAsync(async (cfa) => {
@@ -53,7 +53,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
         return;
       }
 
-      const previous = cfa.emails.find((e) => e.templateName === "notification");
+      const previous = cfa.emails.find((e) => e.templateName.startsWith("notification_"));
 
       try {
         stats.total++;

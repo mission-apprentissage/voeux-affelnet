@@ -1,0 +1,2 @@
+- yarn cli importFormations
+- yarn cli buildRelationCsv --affelnet <affelnet> --additionalRelations <additionalRelations> --out ./relations.csv

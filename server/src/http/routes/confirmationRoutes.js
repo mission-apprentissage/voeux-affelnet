@@ -14,7 +14,7 @@ module.exports = ({ sendEmail }) => {
   router.get(
     "/api/confirmation/status",
     checkActionToken(),
-    ensureIs("Cfa"),
+    ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
       const cfa = req.user;
 
@@ -36,7 +36,7 @@ module.exports = ({ sendEmail }) => {
   router.post(
     "/api/confirmation/accept",
     checkActionToken(),
-    ensureIs("Cfa"),
+    ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
       const cfa = req.user;
       const { email } = await Joi.object({
@@ -46,7 +46,7 @@ module.exports = ({ sendEmail }) => {
 
       await confirm(cfa.siret, email);
 
-      await sendEmail({ ...cfa, email }, "confirmation_accepted");
+      await sendEmail({ ...cfa, email }, "confirmed");
 
       await sendActivationEmails(sendEmail, { username: cfa.username });
 

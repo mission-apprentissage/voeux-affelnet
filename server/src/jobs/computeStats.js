@@ -1,4 +1,4 @@
-const { Cfa, Voeu } = require("../common/model");
+const { Gestionnaire, Voeu } = require("../common/model");
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
 const {
@@ -7,45 +7,49 @@ const {
   areTelechargementsAucun,
 } = require("../common/utils/cfaUtils");
 
-function computeCfasStats(filter = {}) {
+function computeGestionnairesStats(filter = {}) {
   return promiseAllProps({
-    total: Cfa.countDocuments({ ...filter, etablissements: { $exists: true, $not: { $size: 0 } } }),
-    enAttente: Cfa.countDocuments({
+    total: Gestionnaire.countDocuments({ ...filter, etablissements: { $exists: true, $not: { $size: 0 } } }),
+    enAttente: Gestionnaire.countDocuments({
       ...filter,
       statut: "en attente",
       etablissements: { $exists: true, $not: { $size: 0 } },
     }),
 
-    enAttenteAvecVoeux: Cfa.countDocuments({
+    enAttenteAvecVoeux: Gestionnaire.countDocuments({
       ...filter,
       statut: "en attente",
       etablissements: { $exists: true, $not: { $size: 0 } },
       "etablissements.voeux_date": { $exists: true },
     }),
 
-    confirmés: Cfa.countDocuments({
+    confirmés: Gestionnaire.countDocuments({
       ...filter,
       statut: "confirmé",
       etablissements: { $exists: true, $not: { $size: 0 } },
     }),
 
-    confirmésAvecVoeux: Cfa.countDocuments({
+    confirmésAvecVoeux: Gestionnaire.countDocuments({
       ...filter,
       statut: "confirmé",
       etablissements: { $exists: true, $not: { $size: 0 } },
       "etablissements.voeux_date": { $exists: true },
     }),
 
-    activés: Cfa.countDocuments({ ...filter, statut: "activé", etablissements: { $exists: true, $not: { $size: 0 } } }),
+    activés: Gestionnaire.countDocuments({
+      ...filter,
+      statut: "activé",
+      etablissements: { $exists: true, $not: { $size: 0 } },
+    }),
 
-    activésAvecVoeux: Cfa.countDocuments({
+    activésAvecVoeux: Gestionnaire.countDocuments({
       ...filter,
       statut: "activé",
       etablissements: { $exists: true, $not: { $size: 0 } },
       "etablissements.voeux_date": { $exists: true },
     }),
 
-    téléchargésVoeux: Cfa.countDocuments({
+    téléchargésVoeux: Gestionnaire.countDocuments({
       ...filter,
       statut: "activé",
       etablissements: { $exists: true, $not: { $size: 0 } },
@@ -54,7 +58,7 @@ function computeCfasStats(filter = {}) {
     }),
 
     téléchargésVoeuxTotal: (async () => {
-      const cfas = await Cfa.find({
+      const cfas = await Gestionnaire.find({
         ...filter,
         statut: "activé",
         etablissements: { $exists: true, $not: { $size: 0 } },
@@ -66,7 +70,7 @@ function computeCfasStats(filter = {}) {
     })(),
 
     téléchargésVoeuxPartiel: (async () => {
-      const cfas = await Cfa.find({
+      const cfas = await Gestionnaire.find({
         ...filter,
         statut: "activé",
         etablissements: { $exists: true, $not: { $size: 0 } },
@@ -78,7 +82,7 @@ function computeCfasStats(filter = {}) {
     })(),
 
     téléchargésVoeuxAucun: (async () => {
-      const cfas = await Cfa.find({
+      const cfas = await Gestionnaire.find({
         ...filter,
         statut: "activé",
         etablissements: { $exists: true, $not: { $size: 0 } },
@@ -88,26 +92,26 @@ function computeCfasStats(filter = {}) {
       return cfas.filter((cfa) => areTelechargementsAucun(cfa.etablissements, cfa.voeux_telechargements)).length;
     })(),
 
-    désinscrits: Cfa.countDocuments({
+    désinscrits: Gestionnaire.countDocuments({
       ...filter,
       statut: { $ne: "non concerné" },
       $or: [{ unsubscribe: true }, { "emails.error.type": { $eq: "blocked" } }],
     }),
 
-    désinscritsAvecVoeux: Cfa.countDocuments({
+    désinscritsAvecVoeux: Gestionnaire.countDocuments({
       ...filter,
       "etablissements.voeux_date": { $exists: true },
       statut: { $ne: "non concerné" },
       $or: [{ unsubscribe: true }, { "emails.error.type": { $eq: "blocked" } }],
     }),
 
-    injoinables: Cfa.countDocuments({
+    injoinables: Gestionnaire.countDocuments({
       ...filter,
       statut: { $ne: "non concerné" },
       $and: [{ "emails.error": { $exists: true } }, { "emails.error.type": { $ne: "blocked" } }],
     }),
 
-    injoinablesAvecVoeux: Cfa.countDocuments({
+    injoinablesAvecVoeux: Gestionnaire.countDocuments({
       ...filter,
       statut: { $ne: "non concerné" },
       "etablissements.voeux_date": { $exists: true },
@@ -117,7 +121,7 @@ function computeCfasStats(filter = {}) {
 }
 
 async function computeVoeuxStats(filter = {}) {
-  const etablissements = await Cfa.aggregate([
+  const etablissements = await Gestionnaire.aggregate([
     { $match: { ...filter } },
     { $unwind: "$etablissements" },
     { $project: { uai: "$etablissements.uai" } },
@@ -159,7 +163,7 @@ async function computeVoeuxStats(filter = {}) {
         $count: "total",
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
-    nbVoeuxDiffusés: Cfa.aggregate([
+    nbVoeuxDiffusés: Gestionnaire.aggregate([
       {
         $match: {
           ...filter,
@@ -248,7 +252,7 @@ async function computeVoeuxStats(filter = {}) {
 }
 
 function computeEmailsStats(filter = {}) {
-  return Cfa.aggregate([
+  return Gestionnaire.aggregate([
     {
       $match: { ...filter },
     },
@@ -313,7 +317,7 @@ async function computeDownloadStats(filter = {}) {
 
       return promiseAllProps({
         import_date: importDate,
-        total: Cfa.countDocuments({ ...filter, voeux_telechargements: { $elemMatch: { ...dateFilter } } }),
+        total: Gestionnaire.countDocuments({ ...filter, voeux_telechargements: { $elemMatch: { ...dateFilter } } }),
       });
     })
   );
@@ -340,7 +344,7 @@ async function computeStats(options = {}) {
   }
 
   return promiseAllProps({
-    cfas: forAcademies(computeCfasStats),
+    cfas: forAcademies(computeGestionnairesStats),
     voeux: forAcademies(computeVoeuxStats),
     emails: forAcademies(computeEmailsStats),
     téléchargements: forAcademies(computeDownloadStats),

@@ -31,9 +31,11 @@ module.exports = {
   },
   catalog: {
     endpoint: env
-      .get("VOEUX_AFFELNET_CATALOG_ENDPOINT")
-      .default("https://catalogue.apprentissage.beta.gouv.fr")
+      .get("VOEUX_AFFELNET_CATALOGUE_ENDPOINT")
+      .default("https://catalogue.apprentissage.education.gouv.fr/api")
       .asString(),
+    username: env.get("VOEUX_AFFELNET_CATALOGUE_USERNAME").asString(),
+    password: env.get("VOEUX_AFFELNET_CATALOGUE_PASSWORD").asString(),
   },
   tableauDeBord: {
     username: env.get("VOEUX_AFFELNET_TDB_USERNAME").asString(),

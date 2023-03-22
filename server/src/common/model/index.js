@@ -1,8 +1,9 @@
 module.exports = {
   User: require("./User"),
-  Cfa: require("./Cfa"),
+  Gestionnaire: require("./Gestionnaire"),
   Csaio: require("./Csaio"),
-  Ufa: require("./Ufa"),
+  Formateur: require("./Formateur"),
+  Formation: require("./Formation"),
   Voeu: require("./Voeu"),
   Mef: require("./Mef"),
   Log: require("./Log"),

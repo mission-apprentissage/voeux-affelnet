@@ -1,73 +1,228 @@
-import React from "react";
-import { BrowserRouter as Router, Redirect, Route, Switch } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import Layout from "./pages/Layout";
+import React, { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
+import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
-import CfaPage from "./pages/CfaPage.js";
-import ActivationPage from "./pages/ActivationPage";
-import ResetPasswordPage from "./pages/password/ResetPasswordPage";
-import ForgottenPasswordPage from "./pages/password/ForgottenPasswordPage";
-import PreviewEmail from "./pages/PreviewEmail";
-import ConfirmationPage from "./pages/ConfirmationPage";
-import StatsPage from "./pages/StatsPage";
-import AdminPage from "./pages/AdminPage";
-import ReceptionVoeuxPage from "./pages/ReceptionVoeuxPage";
-import CsaioPage from "./pages/CsaioPage.js";
 import { getUserType } from "./common/utils/getUserType.js";
 
-function PrivateRoute({ children, allowed, ...rest }) {
+const ForgottenPasswordPage = lazy(() => import("./pages/password/ForgottenPasswordPage"));
+const ActivationPage = lazy(() => import("./pages/ActivationPage"));
+const PreviewEmail = lazy(() => import("./pages/PreviewEmail"));
+const StatsPage = lazy(() => import("./pages/StatsPage"));
+const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
+
+const GestionnairePage = lazy(() => import("./pages/GestionnairePage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const CsaioPage = lazy(() => import("./pages/CsaioPage.js"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
+const ConfirmationPage = lazy(() => import("./pages/ConfirmationPage"));
+
+const Contact = lazy(() => import("./pages/legal/Contact"));
+const Cookies = lazy(() => import("./pages/legal/Cookies"));
+const DonneesPersonnelles = lazy(() => import("./pages/legal/DonneesPersonnelles"));
+const MentionsLegales = lazy(() => import("./pages/legal/MentionsLegales"));
+const Accessibilite = lazy(() => import("./pages/legal/Accessibilite"));
+
+const RequireAuth = ({ children, allowed }) => {
   const [auth] = useAuth();
+  const type = getUserType(auth);
+  const isNotAllowed = allowed && !allowed.includes(type);
 
-  return (
-    <Layout>
-      <Route
-        {...rest}
-        render={() => {
-          const type = getUserType(auth);
-          const isNotAllowed = allowed && !allowed.includes(type);
+  if (!auth || auth.sub === "anonymous" || isNotAllowed) {
+    return <Navigate to="/login" />;
+  }
 
-          if (auth.sub === "anonymous" || isNotAllowed) {
-            return <Redirect to="/login" />;
-          }
+  return <Layout>{children}</Layout>;
+};
 
-          return children;
-        }}
-      />
-    </Layout>
-  );
-}
-
-function App() {
+const App = () => {
   const [auth] = useAuth();
 
   return (
     <div className="App">
       <Router>
-        <Switch>
-          <PrivateRoute exact path="/">
-            <Redirect to={`/${getUserType(auth)}`} />
-          </PrivateRoute>
-          <PrivateRoute exact path="/admin" allowed={["admin"]}>
-            <AdminPage />
-          </PrivateRoute>
-          <PrivateRoute exact path="/cfa" allowed={["cfa"]}>
-            <CfaPage />
-          </PrivateRoute>
-          <PrivateRoute exact path="/csaio" allowed={["csaio"]}>
-            <CsaioPage />
-          </PrivateRoute>
-          <Route exact path="/login" component={LoginPage} />
-          <Route exact path="/activation" component={ActivationPage} />
-          <Route exact path="/confirmation" component={ConfirmationPage} />
-          <Route exact path="/stats" component={StatsPage} />
-          <Route exact path="/reception-voeux" component={ReceptionVoeuxPage} />
-          <Route exact path="/reset-password" component={ResetPasswordPage} />
-          <Route exact path="/forgotten-password" component={ForgottenPasswordPage} />
-          <Route exact path="/emails/:token/preview" component={PreviewEmail} />
-        </Switch>
+        <Routes>
+          <Route
+            exact
+            path="/"
+            element={
+              <Suspense>
+                <RequireAuth>
+                  <Navigate to={`/${getUserType(auth)}`} />
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/admin/*"
+            element={
+              <Suspense>
+                <RequireAuth allowed={["admin"]}>
+                  <AdminPage />
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/gestionnaire"
+            element={
+              <Suspense>
+                <RequireAuth allowed={["gestionnaire"]}>
+                  <GestionnairePage />
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/csaio"
+            element={
+              <Suspense>
+                <RequireAuth allowed={["csaio"]}>
+                  <CsaioPage />
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/stats"
+            element={
+              <Suspense>
+                <Layout>
+                  <StatsPage />
+                </Layout>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/reception-voeux"
+            element={
+              <Suspense>
+                <Layout>
+                  <ReceptionVoeuxPage />
+                </Layout>
+              </Suspense>
+            }
+          />
+
+          <Route
+            exact
+            path="/login"
+            element={
+              <Suspense>
+                <LoginPage />
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/activation"
+            element={
+              <Suspense>
+                <ActivationPage />
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/confirmation"
+            element={
+              <Suspense>
+                <ConfirmationPage />
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/reset-password"
+            element={
+              <Suspense>
+                <ResetPasswordPage />
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/forgotten-password"
+            element={
+              <Suspense>
+                <ForgottenPasswordPage />
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/emails/:token/preview"
+            element={
+              <Suspense>
+                <PreviewEmail />
+              </Suspense>
+            }
+          />
+
+          <Route
+            exact
+            path="/contact"
+            element={
+              <Suspense>
+                <Layout>
+                  <Contact />
+                </Layout>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/cookies"
+            element={
+              <Suspense>
+                <Layout>
+                  <Cookies />
+                </Layout>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/donnees-personnelles"
+            element={
+              <Suspense>
+                <Layout>
+                  <DonneesPersonnelles />
+                </Layout>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/mentions-legales"
+            element={
+              <Suspense>
+                <Layout>
+                  <MentionsLegales />
+                </Layout>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/accessibilite"
+            element={
+              <Suspense>
+                <Layout>
+                  <Accessibilite />
+                </Layout>
+              </Suspense>
+            }
+          />
+        </Routes>
       </Router>
     </div>
   );
-}
+};
 
 export default App;

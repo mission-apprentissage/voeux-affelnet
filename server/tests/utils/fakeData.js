@@ -1,6 +1,6 @@
 const faker = require("@faker-js/faker/locale/fr").faker;
 const { merge } = require("lodash");
-const { Cfa, Ufa, Voeu, User, Mef, Log } = require("../../src/common/model");
+const { Gestionnaire, Formateur, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 const { Csaio, Dossier } = require("../../src/common/model/index.js");
 
@@ -28,10 +28,10 @@ module.exports = {
       )
     );
   },
-  insertCfa: (custom = {}) => {
+  insertGestionnaire: (custom = {}) => {
     const username = custom.username || custom.siret || faker.helpers.replaceSymbols("#########00015");
 
-    return Cfa.create(
+    return Gestionnaire.create(
       merge(
         {},
         {
@@ -60,8 +60,8 @@ module.exports = {
       )
     );
   },
-  insertUfa: (custom = {}) => {
-    return Ufa.create(
+  insertFormateur: (custom = {}) => {
+    return Formateur.create(
       merge(
         {},
         {

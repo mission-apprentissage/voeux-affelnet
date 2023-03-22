@@ -1,31 +1,25 @@
 import React from "react";
-import { Button } from "tabler-react";
-import styled from "styled-components";
+import { Button, Stack, Text } from "@chakra-ui/react";
 
 const noop = () => ({});
 
-const PaginationPosition = styled.span`
-  font-size: 0.75rem;
-  padding-right: 0.5rem;
-`;
-
 export function Pagination({ pagination, onClick = noop }) {
   return (
-    <Button.List>
-      <Button size="sm" onClick={() => onClick(pagination.page - 1)} disabled={pagination.page === 1}>
+    <Stack direction="row">
+      <Button variant="slight" onClick={() => onClick(pagination.page - 1)} disabled={pagination.page === 1}>
         &lt; Précédent
       </Button>
-      <PaginationPosition>
+      <Text variant="slight" style={{ lineHeight: "40px" }}>
         {pagination.page} / {pagination.nombre_de_page}
-      </PaginationPosition>
+      </Text>
       <Button
-        size="sm"
+        variant="slight"
         onClick={() => onClick(pagination.page + 1)}
         disabled={pagination.nombre_de_page === pagination.page}
       >
         Suivant &gt;
       </Button>
-    </Button.List>
+    </Stack>
   );
 }
 

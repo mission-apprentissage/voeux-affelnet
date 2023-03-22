@@ -1,7 +1,7 @@
-const { Cfa } = require("../model");
+const { Gestionnaire } = require("../model");
 
 function markVoeuxAsDownloaded(siret, uai) {
-  return Cfa.updateOne(
+  return Gestionnaire.updateOne(
     { siret },
     {
       $push: {

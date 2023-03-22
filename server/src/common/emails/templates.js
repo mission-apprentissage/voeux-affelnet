@@ -6,36 +6,36 @@ function getTemplateFile(name) {
 }
 
 module.exports = {
-  confirmation: (cfa, token, options = {}) => {
+  confirmation_gestionnaire: (gestionnaire, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2022 (Siret : ${cfa.siret})`,
-      templateFile: getTemplateFile("confirmation"),
+      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2023 (SIRET : ${gestionnaire.siret})`,
+      templateFile: getTemplateFile("confirmation_gestionnaire"),
       data: {
-        cfa,
+        gestionnaire,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(gestionnaire.username),
       },
     };
   },
-  confirmation_voeux: (cfa, token, options = {}) => {
+  confirmation_formateur: (formateur, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2022 (Siret : ${cfa.siret})`,
-      templateFile: getTemplateFile("confirmation_voeux"),
+      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2023 (UAI : ${formateur.uai})`,
+      templateFile: getTemplateFile("confirmation_formateur"),
       data: {
-        cfa,
+        formateur,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(formateur.username),
       },
     };
   },
-  confirmation_accepted: (cfa) => {
+  confirmed: (user) => {
     return {
-      subject: `Vœux Affelnet : l'adresse du directeur de l'établissement a bien été enregistrée`,
-      templateFile: getTemplateFile("confirmation_accepted"),
+      subject: `Vœux Affelnet : l'adresse du destinataire des vœux a bien été enregistrée`,
+      templateFile: getTemplateFile("confirmed"),
       data: {
-        cfa,
+        user,
       },
     };
   },
@@ -51,15 +51,27 @@ module.exports = {
       },
     };
   },
-  activation_cfa: (cfa, token, options = {}) => {
+  activation_gestionnaire: (gestionnaire, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Des vœux Affelnet sont téléchargeables (Siret : ${cfa.siret})`,
-      templateFile: getTemplateFile("activation_cfa"),
+      subject: `${prefix}Des vœux Affelnet sont téléchargeables (SIRET : ${gestionnaire.siret})`,
+      templateFile: getTemplateFile("activation_gestionnaire"),
       data: {
-        cfa,
+        gestionnaire,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(gestionnaire.username),
+      },
+    };
+  },
+  activation_formateur: (user, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+    return {
+      subject: `${prefix}Activation de votre compte`,
+      templateFile: getTemplateFile("activation_formateur"),
+      data: {
+        user,
+        token,
+        actionToken: createActionToken(user.username),
       },
     };
   },
@@ -75,14 +87,25 @@ module.exports = {
       },
     };
   },
-  notification: (cfa, token) => {
+  notification_gestionnaire: (gestionnaire, token) => {
     return {
       subject: `De nouveaux vœux Affelnet sont téléchargeables`,
-      templateFile: getTemplateFile("notification"),
+      templateFile: getTemplateFile("notification_gestionnaire"),
       data: {
-        cfa,
+        gestionnaire,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(gestionnaire.username),
+      },
+    };
+  },
+  notification_formateur: (formateur, token) => {
+    return {
+      subject: `De nouveaux vœux Affelnet sont téléchargeables`,
+      templateFile: getTemplateFile("notification_formateur"),
+      data: {
+        formateur,
+        token,
+        actionToken: createActionToken(formateur.username),
       },
     };
   },

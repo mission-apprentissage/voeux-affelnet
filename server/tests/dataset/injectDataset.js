@@ -4,16 +4,16 @@ const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");
 const sendActivationEmails = require("../../src/jobs/sendActivationEmails");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 const importMefs = require("../../src/jobs/importMefs");
-const { insertCfa, insertUfa, insertVoeu } = require("../utils/fakeData");
+const { insertGestionnaire, insertFormateur, insertVoeu } = require("../utils/fakeData");
 const { range } = require("lodash");
 const { insertDossier, createUsername, createEmail } = require("../utils/fakeData.js");
 const { createAdmin } = require("../../src/jobs/createAdmin.js");
 const { createCsaio } = require("../../src/jobs/createCsaio.js");
 const logger = require("../../src/common/logger.js");
 
-async function generateUfas(uais) {
-  const stats = uais.map(async (uai) => await insertUfa({ uai }));
-  await JobEvent.create({ job: "importUfas", stats });
+async function generateFormateurs(uais) {
+  const stats = uais.map(async (uai) => await insertFormateur({ uai }));
+  await JobEvent.create({ job: "importFormatiions", stats });
 }
 
 async function generateVoeux(uais, options = {}) {
@@ -51,18 +51,18 @@ async function generateVoeux(uais, options = {}) {
   await JobEvent.create({ job: "importVoeux", stats });
 }
 
-async function generateCfa(sendEmail, uais) {
+async function generateGestionnaire(sendEmail, uais) {
   const siret = faker.helpers.replaceSymbols("#########00015");
 
   logger.info(`Generating CFA ${siret}...`);
-  const stats = await insertCfa({
+  const stats = await insertGestionnaire({
     siret,
     etablissements: uais.map((uai) => {
       return { uai, voeux_date: new Date() };
     }),
   });
-  await JobEvent.create({ job: "importCfas", stats });
-  await generateUfas(uais);
+  await JobEvent.create({ job: "importGestionnaires", stats });
+  await generateFormateurs(uais);
   await sendConfirmationEmails(sendEmail, { username: siret });
 
   return { siret };
@@ -98,8 +98,8 @@ async function injectDataset(actions, options = {}) {
     await generateCsaio(sendEmail);
   }
 
-  if (options.cfa) {
-    await generateCfa(sendEmail, uais);
+  if (options.gestionnaire) {
+    await generateGestionnaire(sendEmail, uais);
   }
 
   await generateVoeux(uais, options);

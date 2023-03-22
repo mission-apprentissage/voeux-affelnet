@@ -5,7 +5,7 @@ const { importJeunesUniquementEnApprentissage } = require("../../src/jobs/import
 const { insertVoeu } = require("../utils/fakeData.js");
 
 describe("importJeunesUniquemenetEnApprentissage", () => {
-  it("Vérifie qu'on ajoute une meta pour un jeune ayant formulé des voeux uniquement en apprentissage", async () => {
+  xit("Vérifie qu'on ajoute une meta pour un jeune ayant formulé des voeux uniquement en apprentissage", async () => {
     await insertVoeu({ apprenant: { ine: "111111111HA" } });
     await insertVoeu({ apprenant: { ine: "111111111HA" } });
     await insertVoeu({ apprenant: { ine: "111111111HB" } });

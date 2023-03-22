@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 const logger = require("../common/logger");
-const { Cfa } = require("../common/model");
+const { Gestionnaire } = require("../common/model");
 
 async function resendConfirmationEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -36,21 +36,21 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
         }),
   };
 
-  stats.total = await Cfa.countDocuments(query);
+  stats.total = await Gestionnaire.countDocuments(query);
 
-  await Cfa.find(query)
+  await Gestionnaire.find(query)
     .lean()
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
-    .eachAsync(async (cfa) => {
-      const previous = cfa.emails.find((e) => e.templateName.startsWith("confirmation"));
+    .eachAsync(async (gestionnaire) => {
+      const previous = gestionnaire.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
       try {
-        logger.info(`Resending ${previous.templateName} to CFA ${cfa.username}...`);
+        logger.info(`Resending ${previous.templateName} to CFA ${gestionnaire.username}...`);
         await resendEmail(previous.token, { retry: options.retry });
         stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent email to ${cfa.username}`, e);
+        logger.error(`Unable to sent email to ${gestionnaire.username}`, e);
         stats.failed++;
       }
     });

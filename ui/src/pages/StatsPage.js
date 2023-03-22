@@ -51,7 +51,7 @@ const AcademiesWrapper = styled.div`
 
 function StatsPage() {
   const [now, loading, , setNow] = useFetch(`/api/stats/computeStats/now?academies=ALL`, null);
-  const [importCfas] = useFetch(`/api/stats/importCfas`, { results: [] });
+  const [importGestionnaires] = useFetch(`/api/stats/importGestionnaires`, { results: [] });
   const [importVoeux] = useFetch(`/api/stats/importVoeux`, { results: [] });
   const [showRapport, setShowRapport] = useState(false);
 
@@ -150,7 +150,7 @@ function StatsPage() {
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Cfas inconnus</div>
+                    <div>Gestionnaires inconnus</div>
                     <div className="value">{voeux.cfasInconnus}</div>
                   </StatsCard>
                 </Grid.Col>
@@ -175,13 +175,13 @@ function StatsPage() {
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Cfas activés</div>
+                    <div>Gestionnaires activés</div>
                     <div className="value">{cfas.activés}</div>
                   </StatsCard>
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Cfas ayant téléchargés des voeux</div>
+                    <div>Gestionnaires ayant téléchargés des voeux</div>
                     <div className="value">{cfas.téléchargésVoeux}</div>
                     <div className="details">
                       ({cfas.téléchargésVoeuxTotal} totalement, {cfas.téléchargésVoeuxPartiel} partiellement)
@@ -190,28 +190,28 @@ function StatsPage() {
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Cfas confirmés</div>
+                    <div>Gestionnaires confirmés</div>
                     <div className="value">{cfas.confirmés}</div>
                     <div className="details">({cfas.confirmésAvecVoeux} avec voeux)</div>
                   </StatsCard>
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Cfas en attente</div>
+                    <div>Gestionnaires en attente</div>
                     <div className="value">{cfas.enAttente}</div>
                     <div className="details">({cfas.enAttenteAvecVoeux} avec voeux)</div>
                   </StatsCard>
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Cfas injoignables</div>
+                    <div>Gestionnaires injoignables</div>
                     <div className="value">{cfas.injoinables}</div>
                     <div className="details">({cfas.injoinablesAvecVoeux} avec voeux)</div>
                   </StatsCard>
                 </Grid.Col>
                 <Grid.Col width={3}>
                   <StatsCard>
-                    <div>Cfas désinscrits</div>
+                    <div>Gestionnaires désinscrits</div>
                     <div className="value">{cfas.désinscrits}</div>
                     <div className="details">({cfas.désinscritsAvecVoeux} avec voeux)</div>
                   </StatsCard>
@@ -280,7 +280,7 @@ function StatsPage() {
             </AcademiesWrapper>
           )}
 
-          {!loading && importVoeux.results.length > 0 && importCfas.results.length > 0 && (
+          {!loading && importVoeux.results.length > 0 && importGestionnaires.results.length > 0 && (
             <>
               <h3>Imports</h3>
               <Grid.Row>
@@ -337,7 +337,7 @@ function StatsPage() {
                           <Table.ColHeader>Erreurs</Table.ColHeader>
                         </Table.Header>
                         <Table.Body>
-                          {importCfas.results.map((res, index) => {
+                          {importGestionnaires.results.map((res, index) => {
                             return (
                               <Table.Row key={index}>
                                 <Table.Col>{DateTime.fromISO(res.date).toISODate()}</Table.Col>
