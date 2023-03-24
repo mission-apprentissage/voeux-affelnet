@@ -21,14 +21,17 @@ import { useParams } from "react-router-dom";
 
 import { Page } from "../../../common/components/layout/Page";
 import { _get, _put } from "../../../common/httpClient";
-import { Localite } from "../../../common/components/fields/formateur/Localite";
+import { FormateurLocalite } from "../../../common/components/fields/formateur/Localite";
+import { FormateurSiret } from "../../../common/components/fields/formateur/Siret";
+import { FormateurUai } from "../../../common/components/fields/formateur/Uai";
+import { FormateurLibelle } from "../../../common/components/fields/formateur/Libelle";
 
 const EtablissementEmail = ({ gestionnaire, etablissement, callback }) => {
   const [enableForm, setEnableForm] = useState(false);
 
   const setEtablissementEmail = useCallback(async ({ form, etablissement }) => {
     try {
-      await _put(`/api/gestionnaire/formateurs/${etablissement.uai}`, { email: form.email });
+      await _put(`/api/gestionnaire/formateurs/${etablissement.uai}`, { email: form.email, diffusionAutorisee: true });
       setEnableForm(false);
       callback();
     } catch (error) {
@@ -189,16 +192,22 @@ const GestionnairePage = () => {
             </Thead>
             <Tbody>
               {formateurs.map((formateur) => {
-                const etablissement = gestionnaire.formateurs?.find((etab) => etab.uai === formateur?.uai);
+                const etablissement = gestionnaire.etablissements?.find((etab) => etab.uai === formateur?.uai);
 
                 return (
                   <Tr key={formateur?.uai}>
-                    <Td>{formateur?.libelle_etablissement}</Td>
                     <Td>
-                      <Localite formateur={formateur} />
+                      <FormateurLibelle formateur={formateur} />
                     </Td>
-                    <Td>{formateur?.siret}</Td>
-                    <Td>{formateur?.uai}</Td>
+                    <Td>
+                      <FormateurLocalite formateur={formateur} />
+                    </Td>
+                    <Td>
+                      <FormateurSiret formateur={formateur} />
+                    </Td>
+                    <Td>
+                      <FormateurUai formateur={formateur} />
+                    </Td>
                     <Td>{etablissement?.email ? "<STATUT PLACEHOLDER>" : "<STATUT PLACEHOLDER>"}</Td>
                   </Tr>
                 );
@@ -213,18 +222,20 @@ const GestionnairePage = () => {
               <Tr>
                 <Th width="350px">Raison sociale</Th>
                 <Th width="250px">Localité</Th>
-                <Th width="375px">Couriel habilité</Th>
+                <Th width="375px">Courriel habilité</Th>
                 <Th></Th>
               </Tr>
             </Thead>
             <Tbody>
               {formateurs.map((formateur) => {
-                const etablissement = gestionnaire.formateurs?.find((etab) => etab.uai === formateur.uai);
+                const etablissement = gestionnaire.etablissements?.find((etab) => etab.uai === formateur.uai);
                 return (
                   <Tr key={formateur.uai}>
-                    <Td>{formateur.libelle_etablissement}</Td>
                     <Td>
-                      <Localite formateur={formateur} />
+                      <FormateurLibelle formateur={formateur} />
+                    </Td>
+                    <Td>
+                      <FormateurLocalite formateur={formateur} />
                     </Td>
                     <Td>
                       <EtablissementEmail

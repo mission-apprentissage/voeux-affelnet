@@ -23,6 +23,10 @@ const Link = {
       _hover: { textDecoration: "none", bg: "grey.200" },
       p: 2,
     },
+    action: {
+      color: "grey.800",
+      textDecoration: "underline",
+    },
     popup: {
       fontSize: "zeta",
       color: "grey.800",

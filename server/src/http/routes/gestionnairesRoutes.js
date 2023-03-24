@@ -13,6 +13,9 @@ module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, ensureIs } = authMiddleware(users);
 
+  /**
+   * Retourne le gestionnaire connecté
+   */
   router.get(
     "/api/gestionnaire",
     checkApiToken(),
@@ -24,6 +27,9 @@ module.exports = ({ users }) => {
     })
   );
 
+  /**
+   * Retourne la liste des formateurs associés au gestionnaire connecté
+   */
   router.get(
     "/api/gestionnaire/formateurs",
     checkApiToken(),
@@ -31,20 +37,23 @@ module.exports = ({ users }) => {
     tryCatch(async (req, res) => {
       const gestionnaire = req.user;
 
-      if (!gestionnaire.formateurs.filter((e) => e.voeux_date).length === 0) {
+      if (!gestionnaire.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
       res.json(
         await Promise.all(
-          gestionnaire.formateurs.map(async (formateur) => {
-            return await Formateur.findOne({ uai: formateur.uai });
+          gestionnaire.etablissements.map(async (etablissement) => {
+            return await Formateur.findOne({ uai: etablissement.uai });
           })
         )
       );
     })
   );
 
+  /**
+   * Permet au gestionnaire de modifier les paramètres de diffusion à un de ses formateurs associés
+   */
   router.put(
     "/api/gestionnaire/formateurs/:uai",
     checkApiToken(),
@@ -52,18 +61,19 @@ module.exports = ({ users }) => {
     tryCatch(async (req, res) => {
       const gestionnaire = req.user;
 
-      if (!gestionnaire.formateurs.filter((formateur) => formateur.uai === req.params.uai).length === 0) {
+      if (!gestionnaire.etablissements.filter((etablissements) => etablissements.uai === req.params.uai).length === 0) {
         throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
       }
 
-      const formateurs = gestionnaire.formateurs.map((formateur) => {
-        if (formateur.uai === req.params.uai) {
-          formateur.email = req.body.email;
+      const etablissements = gestionnaire.etablissements.map((etablissement) => {
+        if (etablissement.uai === req.params.uai) {
+          req.body.email && (etablissement.email = req.body.email);
+          req.body.diffusionAutorisee && (etablissement.diffusionAutorisee = req.body.diffusionAutorisee);
         }
-        return formateur;
+        return etablissement;
       });
 
-      await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { formateurs });
+      await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { etablissements });
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });
 
@@ -71,43 +81,50 @@ module.exports = ({ users }) => {
     })
   );
 
+  // /**
+  //  * TODO : A modifier en une route par formateur ?
+  //  */
+  // router.get(
+  //   "/api/gestionnaire/fichiers",
+  //   checkApiToken(),
+  //   ensureIs("Gestionnaire"),
+  //   tryCatch(async (req, res) => {
+  //     const gestionnaire = req.user;
+
+  //     if (!gestionnaire.etablissements.filter((e) => e.voeux_date).length === 0) {
+  //       return res.json([]);
+  //     }
+
+  //     res.json(
+  //       await Promise.all(
+  //         gestionnaire.etablissements
+  //           .filter((etablissement) => !!etablissement.voeux_date)
+  //           .map(async (etablissement) => {
+  //             const telechargements = gestionnaire.voeux_telechargements
+  //               .filter((t) => t.uai === etablissement.uai && t.date >= etablissement.voeux_date)
+  //               .sort((a, b) => {
+  //                 return a - b;
+  //               });
+
+  //             return {
+  //               //voeux
+  //               name: `${etablissement.uai}.csv`,
+  //               date: etablissement.voeux_date,
+  //               formateur: await Formateur.findOne({ uai: etablissement.uai }),
+  //               lastDownloadDate: telechargements[0]?.date || null,
+  //             };
+  //           })
+  //       )
+  //     );
+  //   })
+  // );
+
+  /**
+   * TODO : A modifier en une route par formateur ?
+   */
+
   router.get(
-    "/api/gestionnaire/fichiers",
-    checkApiToken(),
-    ensureIs("Gestionnaire"),
-    tryCatch(async (req, res) => {
-      const gestionnaire = req.user;
-
-      if (!gestionnaire.formateurs.filter((e) => e.voeux_date).length === 0) {
-        return res.json([]);
-      }
-
-      res.json(
-        await Promise.all(
-          gestionnaire.formateurs
-            .filter((formateur) => !!formateur.voeux_date)
-            .map(async (formateur) => {
-              const telechargements = gestionnaire.voeux_telechargements
-                .filter((t) => t.uai === formateur.uai && t.date >= formateur.voeux_date)
-                .sort((a, b) => {
-                  return a - b;
-                });
-
-              return {
-                //voeux
-                name: `${formateur.uai}.csv`,
-                date: formateur.voeux_date,
-                formateur: await Formateur.findOne({ uai: formateur.uai }),
-                lastDownloadDate: telechargements[0]?.date || null,
-              };
-            })
-        )
-      );
-    })
-  );
-
-  router.get(
-    "/api/gestionnaire/fichiers/:file",
+    "/api/gestionnaire/formateurs/:file",
     checkApiToken(),
     ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
@@ -119,8 +136,9 @@ module.exports = ({ users }) => {
       });
 
       const uai = file.split(".csv")[0];
+      // const uai = req.params.uai;
 
-      if (!req.user.formateurs.find((e) => e.uai === uai)) {
+      if (!req.user.etablissements.find((e) => e.uai === uai)) {
         throw Boom.notFound();
       }
 

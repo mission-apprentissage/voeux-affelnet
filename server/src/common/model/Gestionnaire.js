@@ -16,11 +16,7 @@ const schema = new Schema({
   academie: {
     type: academieSchema,
   },
-  // diffusionAutorisee: {
-  //   type: Boolean,
-  //   default: undefined,
-  // },
-  formateurs: {
+  etablissements: {
     required: true,
     default: [],
     type: [

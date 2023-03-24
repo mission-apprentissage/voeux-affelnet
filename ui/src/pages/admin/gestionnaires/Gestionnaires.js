@@ -61,15 +61,15 @@ function getStatutVoeux(gestionnaire) {
   let statut;
 
   switch (true) {
-    case !gestionnaire.formateurs?.find((e) => e.voeux_date):
+    case !gestionnaire.etablissements?.find((e) => e.voeux_date):
       statut = "Pas de voeux";
       break;
-    case !!gestionnaire.formateurs?.find((e) => e.voeux_date) && !gestionnaire.voeux_telechargements?.length:
+    case !!gestionnaire.etablissements?.find((e) => e.voeux_date) && !gestionnaire.voeux_telechargements?.length:
       statut = "Pas encore téléchargés";
       break;
 
-    case !!gestionnaire.formateurs?.find((e) => e.voeux_date) &&
-      !!gestionnaire.formateurs?.find(
+    case !!gestionnaire.etablissements?.find((e) => e.voeux_date) &&
+      !!gestionnaire.etablissements?.find(
         (etablissement) =>
           etablissement?.voeux_date &&
           !gestionnaire?.voeux_telechargements
@@ -78,8 +78,8 @@ function getStatutVoeux(gestionnaire) {
       ):
       statut = "En partie téléchargés";
       break;
-    case !!gestionnaire.formateurs?.find((e) => e.voeux_date) &&
-      !gestionnaire.formateurs?.find(
+    case !!gestionnaire.etablissements?.find((e) => e.voeux_date) &&
+      !gestionnaire.etablissements?.find(
         (etablissement) =>
           etablissement?.voeux_date &&
           !gestionnaire?.voeux_telechargements
@@ -195,7 +195,7 @@ const Email = ({ gestionnaire }) => {
           },
         ]
       : []),
-    ...(gestionnaire.statut === "confirmé" && gestionnaire.formateurs?.find((e) => e.voeux_date)
+    ...(gestionnaire.statut === "confirmé" && gestionnaire.etablissements?.find((e) => e.voeux_date)
       ? [
           {
             icon: <SendPlaneLine {...iconProps} />,
@@ -204,7 +204,7 @@ const Email = ({ gestionnaire }) => {
           },
         ]
       : []),
-    ...(gestionnaire.statut === "activé" && gestionnaire.formateurs?.find((e) => e.voeux_date)
+    ...(gestionnaire.statut === "activé" && gestionnaire.etablissements?.find((e) => e.voeux_date)
       ? [
           {
             icon: <SendPlaneLine {...iconProps} />,
@@ -410,7 +410,7 @@ const Statut = ({ gestionnaire }) => {
 //           <b>Établissement: </b>
 
 //           <ul>
-//             {gestionnaire.formateurs?.map((e) => (
+//             {gestionnaire.etablissements?.map((e) => (
 //               <li>
 //                 {e.uai}{" "}
 //                 {e.voeux_date

@@ -29,7 +29,7 @@ function getDownloadStatus(gestionnaire, formateur) {
     return;
   }
 
-  const etablissement = gestionnaire.formateurs?.find((etab) => etab.uai === formateur.uai);
+  const etablissement = gestionnaire.etablissements?.find((etab) => etab.uai === formateur.uai);
   const telechargements = gestionnaire.voeux_telechargements
     ?.sort((a, b) => sortDescending(a.date, b.date))
     .filter((t) => t.uai === formateur.uai);

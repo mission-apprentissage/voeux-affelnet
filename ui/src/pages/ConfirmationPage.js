@@ -27,7 +27,9 @@ function ServerErrorMessage() {
     <Alert type="danger">
       <Text mb={4}>
         Une erreur est survenue, merci de prendre contact avec un administrateur en précisant votre identifiant via :{" "}
-        <Link href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</Link>
+        <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+          {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+        </Link>
       </Text>
     </Alert>
   );
@@ -41,8 +43,8 @@ function StatusErrorMessage({ error, username }) {
           <Text mb={4}>
             Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre
             Identifiant ({username}) via :{" "}
-            <Link href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">
-              voeux-affelnet@apprentissage.beta.gouv.fr
+            <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+              {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
             </Link>
           </Text>
         </Alert>
@@ -56,8 +58,8 @@ function StatusErrorMessage({ error, username }) {
           </Text>
           <Text mb={4}>
             Si vous pensez qu’il s’agit d’une erreur, veuillez le signaler en envoyant un courriel à :{" "}
-            <Link href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">
-              voeux-affelnet@apprentissage.beta.gouv.fr
+            <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+              {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
             </Link>
           </Text>
         </Alert>
@@ -95,8 +97,8 @@ function ConfirmationPage() {
           <Text>
             Pour toute question, vous pouvez prendre contact contact avec un administrateur en précisant votre numéro
             Siret ({username}) via :
-            <Link href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">
-              voeux-affelnet@apprentissage.beta.gouv.fr
+            <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+              {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
             </Link>
           </Text>
         </Alert>

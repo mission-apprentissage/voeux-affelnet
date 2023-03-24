@@ -4,7 +4,18 @@ import * as Yup from "yup";
 import { Alert } from "tabler-react";
 import { Field, Form, Formik } from "formik";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Center, Box, Heading, FormControl, FormLabel, Input, Button, FormErrorMessage, Text } from "@chakra-ui/react";
+import {
+  Center,
+  Box,
+  Heading,
+  FormControl,
+  FormLabel,
+  Input,
+  Button,
+  FormErrorMessage,
+  Text,
+  Link,
+} from "@chakra-ui/react";
 import useAuth from "../common/hooks/useAuth";
 import { _post } from "../common/httpClient";
 import decodeJWT from "../common/utils/decodeJWT";
@@ -19,7 +30,9 @@ function StatusErrorMessage({ error, username }) {
         <p>
           Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur votre identifiant ({username})
           via :&nbsp;
-          <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
+          <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+            {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+          </Link>
         </p>
       </Alert>
     );

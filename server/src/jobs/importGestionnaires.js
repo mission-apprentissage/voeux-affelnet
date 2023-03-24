@@ -25,7 +25,7 @@ async function buildEtablissements(uais, gestionnaire) {
     uniq(uais).map(async (uai) => {
       // const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
 
-      const existingEtablissement = gestionnaire?.formateurs?.find((formateur) => formateur === uai);
+      const existingEtablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement === uai);
       return {
         uai,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
@@ -83,7 +83,7 @@ async function importGestionnaires(relationCsv, options = {}) {
           }
 
           const updates = omitEmpty({
-            formateurs,
+            etablissements: formateurs,
             raison_sociale: organisme?.raison_sociale || "Inconnue",
             academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),
           });

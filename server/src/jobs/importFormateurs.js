@@ -103,10 +103,10 @@ async function importFormateurs(
             return acc;
           }, []);
 
-          // if (raison_sociale.length > 1) {
-          //   logger.warn(`Multiple libellés pour l'uai ${uai}`);
-          //   return;
-          // }
+          if (raison_sociale.length > 1) {
+            logger.warn(`Multiple libellés pour l'uai ${uai}`);
+            return;
+          }
 
           const libelle_ville = formations.reduce((acc, value) => {
             if (!acc.includes(value.libelle_ville)) {
@@ -144,7 +144,7 @@ async function importFormateurs(
 
           const updates = omitEmpty({
             gestionnaires,
-            raison_sociale: raison_sociale[0],
+            raison_sociale: raison_sociale[0] || "Inconnue",
             libelle_ville: libelle_ville[0],
             adresse: adresse[0],
             cp: cp[0],

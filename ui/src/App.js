@@ -10,8 +10,8 @@ const PreviewEmail = lazy(() => import("./pages/PreviewEmail"));
 const StatsPage = lazy(() => import("./pages/StatsPage"));
 const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
 
-const GestionnairePage = lazy(() => import("./pages/GestionnairePage"));
-const AdminPage = lazy(() => import("./pages/AdminPage"));
+const GestionnairePage = lazy(() => import("./pages/gestionnaire/GestionnairePage"));
+const AdminPage = lazy(() => import("./pages/admin/AdminPage"));
 const CsaioPage = lazy(() => import("./pages/CsaioPage.js"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
@@ -65,8 +65,7 @@ const App = () => {
             }
           />
           <Route
-            exact
-            path="/gestionnaire"
+            path="/gestionnaire/*"
             element={
               <Suspense>
                 <RequireAuth allowed={["gestionnaire"]}>

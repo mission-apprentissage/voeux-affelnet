@@ -1,9 +1,9 @@
 import React from "react";
-import { Page } from "../common/components/layout/Page";
-import Academies from "./admin/academies/Academies";
-import Gestionnaires from "./admin/gestionnaires/Gestionnaires";
-import Exports from "./admin/exports/Exports";
-import Gestionnaire from "./admin/gestionnaires/Gestionnaire";
+import { Page } from "../../common/components/layout/Page";
+import Academies from "./academies/Academies";
+import Gestionnaires from "./gestionnaires/Gestionnaires";
+import Exports from "./exports/Exports";
+import Gestionnaire from "./gestionnaires/Gestionnaire";
 import { Route, Routes } from "react-router-dom";
 
 function AdminPage() {

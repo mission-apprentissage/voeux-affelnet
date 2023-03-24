@@ -25,6 +25,7 @@ module.exports = ({ sendEmail }) => {
 
       const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
       const user = await getUser(fixed?.replace(/\s/g, "")?.trim());
+      // TODO : à réactiver !
       if (!user || !user.password) {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }

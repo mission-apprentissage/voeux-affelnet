@@ -15,6 +15,7 @@ services:
       dockerfile: Dockerfile.dev
       args:
         - VOEUX_AFFELNET_ENV=dev
+        - VOEUX_AFFELNET_EMAIL=voeux-affelnet@apprentissage.beta.gouv.fr
     mem_limit: 1g
     stdin_open: true
     environment:

@@ -22,7 +22,7 @@ import useAuth from "../common/hooks/useAuth";
 import { _post } from "../common/httpClient";
 import { siretFormat } from "../common/utils/format";
 
-const mailVoeux = "voeux-affelnet@apprentissage.beta.gouv.fr";
+const mailVoeux = process.env.REACT_APP_VOEUX_AFFELNET_EMAIL;
 
 const checkUsername = async (username, { path, createError }) => {
   try {
@@ -155,8 +155,8 @@ function LoginPage() {
               <Alert type={"info"}>
                 <p>
                   Besoin d'aide ? Prenez contact avec un administrateur à l'adresse mail{" "}
-                  <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">
-                    voeux-affelnet@apprentissage.beta.gouv.fr
+                  <a href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
                   </a>{" "}
                   en précisant votre siret ({username})
                 </p>

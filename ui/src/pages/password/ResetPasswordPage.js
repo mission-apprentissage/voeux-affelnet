@@ -39,7 +39,9 @@ function ResetPasswordPage() {
             Le lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre adresse
             mail de réception des voeux ou votre siret via :
             <br />
-            <a href="mailto:voeux-affelnet@apprentissage.beta.gouv.fr">voeux-affelnet@apprentissage.beta.gouv.fr</a>
+            <a href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+              {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+            </a>
           </span>
         ),
       });
