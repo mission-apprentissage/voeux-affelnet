@@ -10,12 +10,26 @@ const schema = new Schema({
     index: true,
     unique: true,
   },
+
+  uai: {
+    type: String,
+    index: true,
+  },
+
   raison_sociale: {
     type: String,
   },
   academie: {
     type: academieSchema,
   },
+
+  libelle_ville: {
+    type: String,
+  },
+  adresse: {
+    type: String,
+  },
+
   etablissements: {
     required: true,
     default: [],
@@ -39,6 +53,7 @@ const schema = new Schema({
       }),
     ],
   },
+
   voeux_telechargements: {
     default: [],
     type: [
@@ -61,11 +76,12 @@ const schema = new Schema({
 schema.index(
   {
     siret: "text",
+    uai: "text",
     raison_sociale: "text",
     // "academie.nom": "text",
     email: "text",
     // statut: "text",
-    // "formateurs.uai": "text",
+    // "etablissements.uai": "text",
   },
   { default_language: "french" }
 );

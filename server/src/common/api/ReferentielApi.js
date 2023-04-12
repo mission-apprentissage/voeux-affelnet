@@ -20,10 +20,10 @@ class ReferentielApi extends RateLimitedApi {
     });
   }
 
-  async searchOrganismes(siret, params = {}) {
+  async searchOrganismes(search) {
     return this.execute(async () => {
-      logger.debug(`[${this.name}] Searching organismes ${siret}...`);
-      const url = `${ReferentielApi.baseApiUrl}/organismes?${queryString.stringify(params)}`;
+      logger.debug(`[${this.name}] Searching organismes with ${queryString.stringify(search)}...`);
+      const url = `${ReferentielApi.baseApiUrl}/organismes?${queryString.stringify(search)}`;
       return fetchJson(url);
     });
   }

@@ -2,7 +2,7 @@ import { useGet } from "../../../common/hooks/httpHooks";
 import React from "react";
 import { Card, CardHeader, CardBody, Heading, Table, Thead, Tbody, Tr, Td } from "@chakra-ui/react";
 
-function Academies() {
+export const Academies = () => {
   const [academies, loading] = useGet("/api/admin/academies", []);
 
   return (
@@ -33,6 +33,6 @@ function Academies() {
       </CardBody>
     </Card>
   );
-}
+};
 
 export default Academies;

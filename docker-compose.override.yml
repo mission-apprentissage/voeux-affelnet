@@ -49,8 +49,8 @@ services:
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
-      - .local/mongodb/db:/data/db
-      - .local/mongodb/configdb:/data/configdb
+      - .local/mongodb/db:/data/db:z
+      - .local/mongodb/configdb:/data/configdb:z
 
   smtp:
     restart: "no"

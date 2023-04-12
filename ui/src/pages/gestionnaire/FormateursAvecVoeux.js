@@ -1,47 +1,36 @@
-import { FormateurLibelle } from "../../common/components/fields/formateur/Libelle";
-import { useCallback, useState } from "react";
-import * as Yup from "yup";
-import { Field, Form, Formik } from "formik";
-import { Button, Input, Link, Table, Tbody, Td, Th, Thead, Tr, Text, Flex } from "@chakra-ui/react";
+import { FormateurLibelle } from "../../common/components/formateur/fields/Libelle";
+import { Button, Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 
-import { downloadCSV } from "../../common/utils/downloadUtils";
-import { getHeaders } from "../../common/httpClient";
+import { FormateurEmail } from "../../common/components/formateur/fields/Email";
+import { useDownloadVoeux } from "../../common/hooks/gestionnaireHooks";
 
-const FormateurVoeuxDisponibles = (gestionnaire, formateur, callback) => {
-  // const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
+const FormateurVoeuxDisponibles = ({ gestionnaire, formateur, callback }) => {
+  const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 
-  // const diffusionAutorisee = etablissement?.diffusionAutorisee;
+  if (!etablissement) {
+    return;
+  }
 
-  // // TODO :
-  // const voeuxDisponible = 4
-
-  // const
-  return <>0</>;
+  return (
+    <>
+      <Text>{etablissement?.nombre_voeux}</Text>
+    </>
+  );
 };
 
 const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
-  console.log("FormateurStatut", formateur);
-
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 
   const diffusionAutorisee = etablissement?.diffusionAutorisee;
 
-  // TODO :
-  const voeuxDisponible = 4;
+  const voeuxDisponible = etablissement.nombre_voeux > 0;
 
-  console.log(formateur);
+  const downloadVoeux = useDownloadVoeux({ formateur });
 
-  const downloadVoeux = useCallback(async () => {
-    const filename = `${formateur.uai}.csv`;
-    const content = await fetch(`/api/gestionnaire/formateurs/${filename}`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
+  if (!etablissement) {
+    return;
+  }
 
-    downloadCSV(filename, await content.blob());
-  }, [formateur]);
-
-  // const
   return (
     <>
       {diffusionAutorisee ? (
@@ -61,88 +50,7 @@ const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
   );
 };
 
-const FormateurEmail = ({ gestionnaire, formateur, callback }) => {
-  console.log("FormateurEmail", formateur);
-
-  // const [enableForm, setEnableForm] = useState(false);
-
-  // const setEtablissementEmail = useCallback(async ({ values, etablissement }) => {
-  //   try {
-  //     await _put(`/api/gestionnaire/formateurs/${etablissement.uai}`, { email: values.email });
-  //     setEnableForm(false);
-  //     callback();
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // });
-
-  const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
-
-  const diffusionAutorisee = etablissement?.diffusionAutorisee;
-
-  const isResponsableFormateur = formateur.siret === gestionnaire.siret;
-
-  return (
-    <>
-      {diffusionAutorisee ? (
-        <Text>{etablissement.email}</Text>
-      ) : (
-        <Flex alignItems="center">
-          <Text mr={4}>
-            <strong>Vous</strong> ({gestionnaire.email})
-          </Text>
-          {!isResponsableFormateur && <Button variant="primary">Déléguer</Button>}
-        </Flex>
-      )}
-    </>
-  );
-
-  // return (
-  //   <>
-  //     {!etablissement.email || enableForm ? (
-  //       <Formik
-  //         initialValues={{
-  //           email: etablissement.email, // formateur.mel ?
-  //         }}
-  //         validationSchema={Yup.object().shape({
-  //           email: Yup.string().required("Requis"),
-  //         })}
-  //         onSubmit={(form) => setEtablissementEmail({ form, etablissement })}
-  //       >
-  //         <Form style={{ display: "inline-flex", width: "100%" }}>
-  //           <Field name="email">
-  //             {({ field, meta }) => {
-  //               return (
-  //                 <Input
-  //                   type="email"
-  //                   role="presentation"
-  //                   placeholder="Renseigner l'email"
-  //                   style={{ margin: 0 }}
-  //                   {...field}
-  //                 />
-  //               );
-  //             }}
-  //           </Field>
-  //           <Button variant="primary" type="submit">
-  //             OK
-  //           </Button>
-  //         </Form>
-  //       </Formik>
-  //     ) : (
-  //       <>
-  //         {etablissement.email}{" "}
-  //         <Link fontSize={"zeta"} textDecoration={"underline"} onClick={() => setEnableForm(true)}>
-  //           Modifier
-  //         </Link>
-  //       </>
-  //     )}
-  //   </>
-  // );
-};
-
-export const FormateursAvecVoeux = ({ gestionnaire, formateurs, updateCallback }) => {
-  console.log("FormateursAvecVoeux", formateurs);
-
+export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
   return (
     <Table mt={12}>
       <Thead>
@@ -167,7 +75,7 @@ export const FormateursAvecVoeux = ({ gestionnaire, formateurs, updateCallback }
                 <FormateurLibelle formateur={formateur} />
               </Td>
               <Td>
-                <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={updateCallback} />
+                <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
               </Td>
               <Td>
                 <FormateurVoeuxDisponibles gestionnaire={gestionnaire} formateur={formateur} />

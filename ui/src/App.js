@@ -10,12 +10,14 @@ const PreviewEmail = lazy(() => import("./pages/PreviewEmail"));
 const StatsPage = lazy(() => import("./pages/StatsPage"));
 const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
 
-const GestionnairePage = lazy(() => import("./pages/gestionnaire/GestionnairePage"));
-const AdminPage = lazy(() => import("./pages/admin/AdminPage"));
+const GestionnaireRoutes = lazy(() => import("./pages/gestionnaire/Routes"));
+const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
+const AdminPage = lazy(() => import("./pages/admin/Page"));
 const CsaioPage = lazy(() => import("./pages/CsaioPage.js"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
 const ConfirmationPage = lazy(() => import("./pages/ConfirmationPage"));
+const AnomaliePage = lazy(() => import("./pages/AnomaliePage"));
 
 const Contact = lazy(() => import("./pages/legal/Contact"));
 const Cookies = lazy(() => import("./pages/legal/Cookies"));
@@ -69,7 +71,18 @@ const App = () => {
             element={
               <Suspense>
                 <RequireAuth allowed={["gestionnaire"]}>
-                  <GestionnairePage />
+                  <GestionnaireRoutes />
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/formateur/*"
+            element={
+              <Suspense>
+                <RequireAuth allowed={["formateur"]}>
+                  <FormateurRoutes />
                 </RequireAuth>
               </Suspense>
             }
@@ -85,6 +98,19 @@ const App = () => {
               </Suspense>
             }
           />
+
+          <Route
+            exact
+            path="/profil"
+            element={
+              <Suspense>
+                <RequireAuth allowed={["gestionnaire", "formateur"]}>
+                  <Navigate to={`/${getUserType(auth)}`} />;
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+
           <Route
             exact
             path="/stats"
@@ -92,6 +118,17 @@ const App = () => {
               <Suspense>
                 <Layout>
                   <StatsPage />
+                </Layout>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/anomalie"
+            element={
+              <Suspense>
+                <Layout>
+                  <AnomaliePage />
                 </Layout>
               </Suspense>
             }

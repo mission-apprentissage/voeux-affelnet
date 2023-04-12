@@ -1,6 +1,16 @@
-import { Box, Button, Center, FormControl, FormErrorMessage, FormLabel, Heading, Input, Text } from "@chakra-ui/react";
+import {
+  Alert,
+  Box,
+  Button,
+  Center,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  Input,
+  Text,
+} from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
-import { Alert } from "tabler-react";
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -73,8 +83,10 @@ const ForgottenPasswordPage = () => {
         </Box>
 
         <Box mt={8}>
-          <Alert type={"info"}>
-            <p>Le siret figure dans l'objet du mail que vous avez précédemment reçu.</p>
+          <Alert status="info">
+            <Box>
+              <Text>Le siret figure dans l'objet du mail que vous avez précédemment reçu.</Text>
+            </Box>
           </Alert>
         </Box>
       </Box>

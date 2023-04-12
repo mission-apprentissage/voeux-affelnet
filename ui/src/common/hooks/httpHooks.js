@@ -5,7 +5,7 @@ export function useGet(url, initalState = {}) {
   const [response, setResponse] = useState(initalState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const mountedRef = useRef(true);
+  const mountedRef = useRef(false);
 
   const sendRequest = useCallback(async () => {
     try {
@@ -22,8 +22,8 @@ export function useGet(url, initalState = {}) {
 
   useEffect(() => {
     async function run() {
-      if (mountedRef.current) {
-        mountedRef.current = false;
+      if (!mountedRef.current) {
+        mountedRef.current = true;
         return sendRequest();
       }
     }
@@ -37,7 +37,7 @@ export function usePut(url, body) {
   const [response, setResponse] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const mountedRef = useRef(true);
+  const mountedRef = useRef(false);
 
   const sendRequest = useCallback(async () => {
     try {
@@ -54,8 +54,8 @@ export function usePut(url, body) {
 
   useEffect(() => {
     async function run() {
-      if (mountedRef.current) {
-        mountedRef.current = false;
+      if (!mountedRef.current) {
+        mountedRef.current = true;
         return sendRequest();
       }
     }

@@ -10,6 +10,7 @@ const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/ob
 const { parseCsv } = require("../common/utils/csvUtils");
 const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
+const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -47,30 +48,29 @@ const schema = Joi.object({
   }),
   formation: Joi.object({
     code_affelnet: Joi.string().required(),
-    code_formation_diplome: Joi.string().pattern(/^[0-9]{8}$/),
-    mef: Joi.string().pattern(/^[0-9]{10}$/),
+    code_formation_diplome: Joi.string().pattern(cfdFormat),
+    mef: Joi.string().pattern(mef10Format),
     libelle: Joi.string(),
     cle_ministere_educatif: Joi.string(),
   })
     .or("mef", "libelle", "code_formation_diplome")
     .required(),
   etablissement_origine: Joi.object({
-    uai: Joi.string()
-      .pattern(/^[0-9]{7}[A-Z]{1}$/)
-      .required(),
+    uai: Joi.string().pattern(uaiFormat).required(),
     nom: Joi.string().required(),
     ville: Joi.string(),
     cio: Joi.string(),
     academie: academieValidationSchema,
   }),
   etablissement_accueil: Joi.object({
-    uai: Joi.string()
-      .pattern(/^[0-9]{7}[A-Z]{1}$/)
-      .required(),
+    uai: Joi.string().pattern(uaiFormat).required(),
     nom: Joi.string().required(),
     ville: Joi.string(),
     cio: Joi.string(),
     academie: academieValidationSchema,
+  }).required(),
+  etablissement_gestionnaire: Joi.object({
+    siret: Joi.string().pattern(siretFormat),
   }).required(),
 });
 
@@ -172,6 +172,9 @@ function parseVoeuxCsv(source) {
           ville: line["Ville étab. Accueil"],
           cio: line["UAI CIO de l'établissement d'accueil"],
           academie: academieAccueil || academieDuVoeu,
+        },
+        etablissement_gestionnaire: {
+          siret: line["SIRET UAI gestionnaire"],
         },
       });
     }),

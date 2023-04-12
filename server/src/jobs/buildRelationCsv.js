@@ -1,31 +1,21 @@
 const { compose, transformIntoCSV, oleoduc, accumulateData, flattenArray, mergeStreams } = require("oleoduc");
-const { uniq } = require("lodash");
 const { getRelationsFromOffreDeFormation } = require("./utils/getRelationsFromOffreDeFormation.js");
 const { parseCsv } = require("../common/utils/csvUtils.js");
-// const { Gestionnaire } = require("../common/model/index.js");
+const logger = require("../common/logger.js");
 
 function parseAdditionalRelationsCsv(csv) {
   return compose(csv, parseCsv());
 }
 
-// async function getGestionnaireStatut({ siret, uai }) {
-//   const found = await Gestionnaire.findOne({ siret });
-
-//   if (!found) {
-//     return "nouveau";
-//   }
-
-//   return found.etablissements.find((e) => e.uai === uai) ? "importé" : "maj nécessaire";
-// }
-
 async function buildRelationCsv(output, options = {}) {
-  const conflicts = [];
   const stats = {
     total: 0,
     valid: 0,
     invalid: 0,
     conflicts: 0,
   };
+  const conflicts = [];
+  const invalids = [];
 
   const streams = [
     await getRelationsFromOffreDeFormation({
@@ -44,33 +34,50 @@ async function buildRelationCsv(output, options = {}) {
   await oleoduc(
     mergeStreams(...streams),
     accumulateData(
-      async (gestionnaires, relation) => {
+      async (accumulator, relation) => {
         if (!relation.uai_etablissement || !relation.siret_gestionnaire || !relation.email_gestionnaire) {
+          logger.error(
+            `INVALIDE : ${relation.uai_etablissement} || ${relation.siret_gestionnaire} || ${relation.email_gestionnaire}`
+          );
           stats.invalid++;
-          return gestionnaires;
+          invalids.push(relation);
+          return accumulator;
         }
 
-        const index = gestionnaires.findIndex((item) => item.siret === relation.siret_gestionnaire);
-        // const formateurIndex = gestionnaires.findIndex((item) => item.etablissements?.includes(etablissement => etablissement === ) === relation.siret_gestionnaire)
+        const index = accumulator.findIndex((item) => item.siret === relation.siret_gestionnaire);
 
         if (index === -1) {
+          // console.log("don't exists");
           stats.valid++;
-          gestionnaires.push({
+          accumulator.push({
             siret: relation.siret_gestionnaire,
             email: relation.email_gestionnaire,
-            etablissements: relation.uai_etablissement.split(","),
+            etablissements: [...new Set(relation.uai_etablissement.split(",").map((uai) => uai.toUpperCase()))],
             // statut: await getGestionnaireStatut({
             //   siret: relation.siret_gestionnaire,
             //   uai: relation.uai_etablissement,
             // }),
           });
         } else {
-          gestionnaires[index].etablissements = uniq([
-            ...gestionnaires[index].etablissements,
-            relation.uai_etablissement,
-          ]);
+          // console.log("exists");
+          // console.log({
+          //   existingEtablissements: accumulator[index].etablissements,
+          //   newEtablissements: relation.uai_etablissement.split(",").map((uai) => uai.toUpperCase()),
+          //   resultingEtablissements: [
+          //     ...new Set([
+          //       ...accumulator[index].etablissements,
+          //       ...relation.uai_etablissement.split(",").map((uai) => uai.toUpperCase()),
+          //     ]),
+          //   ],
+          // });
+          accumulator[index].etablissements = [
+            ...new Set([
+              ...accumulator[index].etablissements,
+              ...relation.uai_etablissement.split(",").map((uai) => uai.toUpperCase()),
+            ]),
+          ];
         }
-        return gestionnaires;
+        return accumulator;
       },
       { accumulator: [] }
     ),
@@ -79,6 +86,6 @@ async function buildRelationCsv(output, options = {}) {
     output
   );
 
-  return { stats, conflicts };
+  return { stats, conflicts, invalids };
 }
 module.exports = buildRelationCsv;

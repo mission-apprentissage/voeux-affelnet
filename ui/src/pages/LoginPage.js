@@ -1,26 +1,26 @@
 import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
-import { Alert } from "tabler-react";
-
+import { Formik, Field, Form } from "formik";
 import {
-  Button,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Input,
-  Center,
+  Alert,
   Box,
+  Button,
+  Center,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
   Heading,
   HStack,
+  Input,
   Link,
   Text,
 } from "@chakra-ui/react";
-import { Formik, Field, Form } from "formik";
-import { NavLink, useNavigate } from "react-router-dom";
+
 import { useQuery } from "../common/hooks/useQuery";
 import useAuth from "../common/hooks/useAuth";
 import { _post } from "../common/httpClient";
-import { siretFormat } from "../common/utils/format";
+import { siretFormat, uaiFormat } from "../common/utils/format";
 
 const mailVoeux = process.env.REACT_APP_VOEUX_AFFELNET_EMAIL;
 
@@ -31,21 +31,22 @@ const checkUsername = async (username, { path, createError }) => {
     }
     return true;
   } catch (err) {
-    if (!username?.match(siretFormat)) {
+    if (!username?.match(siretFormat) && !username?.match(uaiFormat)) {
       return createError({
         path,
-        message: "Vous devez indiquer un numéro de Siret valide",
+        message: "Vous devez indiquer un numéro de Siret ou Uai valide",
       });
     } else {
-      const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (SIRET ${username})`;
+      const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (Identifiant ${username})`;
       return createError({
         path,
         message: (
-          <>
-            Ce numéro de Siret ne correspond pas à un organisme responsable enregistré comme tel dans Affelnet. Veuillez
-            utiliser le numéro de Siret figurant dans nos précédent emails. En cas de difficulté, veuillez contacter le
-            service support en indiquant votre Siret : <a href={mailTo}>{mailVoeux}</a>
-          </>
+          <Text>
+            Cet identifiant ne correspond pas au Siret d'un organisme responsable enregistré comme tel dans Affelnet ni
+            à l'UAI d'un organisme formateur. Veuillez utiliser l'identifiant figurant dans nos précédents emails. En
+            cas de difficulté, veuillez contacter le service support en indiquant votre identifiant à{" "}
+            <a href={mailTo}>{mailVoeux}</a>
+          </Text>
         ),
       });
     }
@@ -58,15 +59,6 @@ function LoginPage() {
   const query = useQuery();
   const username = query.get("username");
   const alreadyActivated = query.get("alreadyActivated");
-
-  const feedback = (meta, message) => {
-    return meta.touched && meta.error
-      ? {
-          feedback: meta.error || message,
-          invalid: true,
-        }
-      : {};
-  };
 
   const login = async (values, { setStatus }) => {
     try {
@@ -152,7 +144,7 @@ function LoginPage() {
 
           <Box mt={8}>
             {alreadyActivated && (
-              <Alert type={"info"}>
+              <Alert status="info">
                 <p>
                   Besoin d'aide ? Prenez contact avec un administrateur à l'adresse mail{" "}
                   <a href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>

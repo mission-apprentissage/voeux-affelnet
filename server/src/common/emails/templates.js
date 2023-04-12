@@ -63,27 +63,27 @@ module.exports = {
       },
     };
   },
-  activation_formateur: (user, token, options = {}) => {
+  activation_formateur: (formateur, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Activation de votre compte`,
       templateFile: getTemplateFile("activation_formateur"),
       data: {
-        user,
+        formateur,
         token,
-        actionToken: createActionToken(user.username),
+        actionToken: createActionToken(formateur.username),
       },
     };
   },
-  activation_csaio: (user, token, options = {}) => {
+  activation_csaio: (csaio, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Activation de votre compte`,
       templateFile: getTemplateFile("activation_csaio"),
       data: {
-        user,
+        csaio,
         token,
-        actionToken: createActionToken(user.username),
+        actionToken: createActionToken(csaio.username),
       },
     };
   },

@@ -85,12 +85,10 @@ async function importFormations(formationsCsv) {
   console.log("reading stream");
 
   await Formation.deleteMany({});
-  // await Formation.countDocuments({});
 
   await oleoduc(
     stream,
     filterData(async (json) => {
-      // console.log(json);
       stats.total++;
       const { error } = schema.validate(json, { abortEarly: false });
       if (!error) {
@@ -115,8 +113,6 @@ async function importFormations(formationsCsv) {
       { parallel: 10 }
     )
   );
-
-  console.log(await Formation.find({}));
 
   return stats;
 }

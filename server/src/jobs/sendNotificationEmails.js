@@ -13,20 +13,22 @@ function allFilesAsAlreadyBeenDownloaded(gestionnaire) {
 
 async function sendNotificationEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
-  // const templateName = "notification";
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+
   const query = {
     unsubscribe: false,
     statut: "activé",
     "etablissements.voeux_date": { $exists: true },
     "emails.templateName": { $not: { $regex: "^notification_.*$" } },
 
+    $or: [{ type: "Gestionnaire" }, { type: "Formateur" }],
+
     ...(options.username ? { username: options.username } : {}),
   };
 
   await User.find(query)
     .lean()
-    .limit(options.limit || Number.MAX_SAFE_INTEGER)
+    .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
       if (allFilesAsAlreadyBeenDownloaded(user)) {
@@ -34,7 +36,6 @@ async function sendNotificationEmails(sendEmail, options = {}) {
       }
 
       const templateName = `notification_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
-
       stats.total++;
 
       try {

@@ -1,8 +1,10 @@
 const logger = require("../common/logger");
-const { User } = require("../common/model");
+const { User, Gestionnaire } = require("../common/model");
 
 async function sendConfirmationEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
+  const limit = options.limit || Number.MAX_SAFE_INTEGER;
+
   const query = {
     unsubscribe: false,
     statut: "en attente",
@@ -19,11 +21,21 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
 
   await User.find(query)
     .lean()
-    .limit(options.limit || Number.MAX_SAFE_INTEGER)
+    .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      const templateName = `confirmation_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
+      if (user.type === "Formateur") {
+        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
 
+        const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === user.username);
+
+        if (!etablissement.diffusionAutorisee) {
+          return;
+        }
+        user.email = etablissement?.email;
+      }
+
+      const templateName = `confirmation_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
       stats.total++;
 
       try {

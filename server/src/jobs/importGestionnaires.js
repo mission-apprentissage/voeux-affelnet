@@ -1,4 +1,5 @@
 const { oleoduc, transformData, writeData } = require("oleoduc");
+const { pick } = require("lodash");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
 const { findAcademieByCode } = require("../common/academies");
@@ -10,19 +11,17 @@ const { parseCsv } = require("../common/utils/csvUtils");
 const ReferentielApi = require("../common/api/ReferentielApi");
 const Joi = require("@hapi/joi");
 const { arrayOf } = require("../common/validators.js");
-const { uniq, pick } = require("lodash");
+const { siretFormat, uaiFormat } = require("../common/utils/format");
 
 const schema = Joi.object({
-  siret: Joi.string()
-    .pattern(/^[0-9]{14}$/)
-    .required(),
+  siret: Joi.string().pattern(siretFormat).required(),
   email: Joi.string().email().required(),
-  etablissements: arrayOf().required(),
+  etablissements: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
 async function buildEtablissements(uais, gestionnaire) {
   return Promise.all(
-    uniq(uais).map(async (uai) => {
+    [...new Set(uais)].map(async (uai) => {
       // const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
 
       const existingEtablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement === uai);
@@ -81,11 +80,15 @@ async function importGestionnaires(relationCsv, options = {}) {
             logger.error(`Le gestionnaire ${siret} n'a aucun établissement formateur`);
             return;
           }
+          // console.log(organisme);
 
           const updates = omitEmpty({
+            uai: organisme?.uai,
             etablissements: formateurs,
-            raison_sociale: organisme?.raison_sociale || "Inconnue",
+            raison_sociale: organisme?.raison_sociale,
             academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),
+            adresse: organisme?.adresse?.label,
+            libelle_ville: organisme?.adresse?.localite,
           });
 
           const res = await Gestionnaire.updateOne(
@@ -110,7 +113,7 @@ async function importGestionnaires(relationCsv, options = {}) {
             logger.info(
               `Gestionnaire ${siret} mis à jour \n${JSON.stringify(
                 {
-                  previous: pick(found, ["formateurs", "raison_sociale", "academie"]),
+                  previous: pick(found, ["formateurs", "raison_sociale", "academie", "adresse", "libelle_ville"]),
                   updates,
                 },
                 null,

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import * as Yup from "yup";
-import { Alert } from "tabler-react";
 import { Field, Form, Formik } from "formik";
-import { useNavigate, useLocation } from "react-router-dom";
 import {
   Center,
   Box,
@@ -15,7 +14,9 @@ import {
   FormErrorMessage,
   Text,
   Link,
+  Alert,
 } from "@chakra-ui/react";
+
 import useAuth from "../common/hooks/useAuth";
 import { _post } from "../common/httpClient";
 import decodeJWT from "../common/utils/decodeJWT";
@@ -26,14 +27,14 @@ function StatusErrorMessage({ error, username }) {
 
   if (error.statusCode === 401) {
     return (
-      <Alert type={"danger"}>
-        <p>
+      <Alert status="error">
+        <Text>
           Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur votre identifiant ({username})
           via :&nbsp;
           <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
             {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
           </Link>
-        </p>
+        </Text>
       </Alert>
     );
   } else if (error.statusCode === 400) {

@@ -38,7 +38,7 @@ describe("confirm", () => {
       await confirm("11111111100006");
       assert.fail();
     } catch (e) {
-      assert.deepStrictEqual(e.message, "Une confirmation a déjà été enregistrée pour le cfa 11111111100006");
+      assert.deepStrictEqual(e.message, "Une confirmation a déjà été enregistrée pour le compte 11111111100006");
       const found = await Gestionnaire.findOne({}, { _id: 0 }).lean();
       assert.strictEqual(found.email, "11111111100006@apprentissage.beta.gouv.fr");
     }
@@ -55,7 +55,7 @@ describe("confirm", () => {
       await confirm("11111111100006", "user2@apprentissage.beta.gouv.fr");
       assert.fail();
     } catch (e) {
-      assert.deepStrictEqual(e.message, "Une confirmation a déjà été enregistrée pour le cfa 11111111100006");
+      assert.deepStrictEqual(e.message, "Une confirmation a déjà été enregistrée pour le compte 11111111100006");
       const found = await Gestionnaire.findOne({}, { _id: 0 }).lean();
       assert.strictEqual(found.email, "11111111100006@apprentissage.beta.gouv.fr");
     }

@@ -42,17 +42,40 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { text, page, items_par_page } = await Joi.object({
+      const { text, page, items_par_page, sort } = await Joi.object({
         text: Joi.string(),
         page: Joi.number().default(1),
         items_par_page: Joi.number().default(10),
+        sort: Joi.string().default(`{ "username": 1 }`),
       }).validateAsync(req.query, { abortEarly: false });
 
+      const regex = ".*" + text?.trim() + ".*";
+      const regexQuery = { $regex: regex, $options: "i" };
       const { find, pagination } = await paginate(
         User,
         {
-          ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
-          $or: [{ type: "Formateur" }, { type: "Gestionnaire" }],
+          // $or: [{ type: "Formateur" }, { type: "Gestionnaire" }],
+          // type: "Gestionnaire",
+          // ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+
+          $or: [
+            {
+              type: "Formateur",
+              ...(text
+                ? {
+                    $or: [{ uai: regexQuery }, { raison_sociale: regexQuery }],
+                  }
+                : {}),
+            },
+            {
+              type: "Gestionnaire",
+              ...(text
+                ? {
+                    $or: [{ siret: regexQuery }, { raison_sociale: regexQuery }],
+                  }
+                : {}),
+            },
+          ],
         },
         {
           page,
@@ -62,7 +85,7 @@ module.exports = ({ resendEmail }) => {
       );
 
       const stream = oleoduc(
-        find.sort({ siret: 1 }).cursor(),
+        find.sort(JSON.parse(sort ?? "{}")).cursor(),
         transformIntoJSON({
           arrayWrapper: {
             pagination,
@@ -188,13 +211,13 @@ module.exports = ({ resendEmail }) => {
 
       const gestionnaire = await Gestionnaire.findOne({ siret });
 
-      if (!gestionnaire.formateurs.filter((e) => e.voeux_date).length === 0) {
+      if (!gestionnaire.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
       res.json(
         await Promise.all(
-          gestionnaire.formateurs.map(async (etablissement) => {
+          gestionnaire.etablissements.map(async (etablissement) => {
             const formateur = await Formateur.findOne({ uai: etablissement.uai });
 
             return formateur;

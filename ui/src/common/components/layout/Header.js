@@ -11,6 +11,7 @@ import {
   Menu,
   MenuButton,
   MenuList,
+  MenuDivider,
   MenuItem,
 } from "@chakra-ui/react";
 import { Logo } from "./Logo";
@@ -26,8 +27,6 @@ const Header = () => {
     navigate("/login");
   };
 
-  console.log(auth);
-
   return (
     <>
       <Container maxW="full" borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 0, 4]}>
@@ -39,7 +38,7 @@ const Header = () => {
             </Link>
 
             <Box p={[1, 1, 6]} flex="1">
-              <Heading as="h6" textStyle="h6">
+              <Heading as="h6" textStyle="h6" fontSize="20px">
                 Transmission des Vœux Affelnet
               </Heading>
             </Box>
@@ -68,6 +67,10 @@ const Header = () => {
                   </Flex>
                 </MenuButton>
                 <MenuList>
+                  <MenuItem as="a" href="/profil">
+                    Profil
+                  </MenuItem>
+                  <MenuDivider />
                   <MenuItem onClick={logout}>Déconnexion</MenuItem>
                 </MenuList>
               </Menu>

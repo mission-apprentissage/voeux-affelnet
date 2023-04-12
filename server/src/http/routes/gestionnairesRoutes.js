@@ -4,12 +4,13 @@ const Joi = require("@hapi/joi");
 const { compose, transformIntoCSV } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { validate } = require("../../common/validators.js");
-const { markVoeuxAsDownloaded } = require("../../common/actions/markVoeuxAsDownloaded");
+const { markVoeuxAsDownloadedByGestionnaire } = require("../../common/actions/markVoeuxAsDownloaded");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
-const { Gestionnaire, Formateur } = require("../../common/model");
+const { Gestionnaire, Formateur, Voeu } = require("../../common/model");
+const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
+const { uaiFormat } = require("../../common/utils/format");
 
-module.exports = ({ users }) => {
+module.exports = ({ users, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, ensureIs } = authMiddleware(users);
 
@@ -21,9 +22,56 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
-      const gestionnaire = req.user;
+      const { siret } = req.user;
+      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+
+      gestionnaire.etablissements = await Promise.all(
+        gestionnaire.etablissements?.map(async (etablissement) => {
+          const voeuxFilter = {
+            "etablissement_accueil.uai": etablissement.uai,
+            "etablissement_gestionnaire.siret": siret,
+          };
+
+          const voeux = await Voeu.find(voeuxFilter);
+
+          return {
+            ...etablissement,
+            nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+            first_date_voeux: etablissement.uai
+              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+              : null,
+
+            last_date_voeux: etablissement.uai
+              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+              : null,
+          };
+        })
+      );
 
       res.json(gestionnaire);
+    })
+  );
+
+  router.put(
+    "/api/gestionnaire",
+    checkApiToken(),
+    ensureIs("Gestionnaire"),
+    tryCatch(async (req, res) => {
+      const { siret } = req.user;
+
+      await Gestionnaire.updateOne(
+        { siret },
+        {
+          $set: {
+            ...(typeof req.body.email !== "undefined" ? { email: req.body.email } : {}),
+          },
+        }
+      );
+
+      const updatedGestionnaire = await Gestionnaire.findOne({ siret });
+
+      res.json(updatedGestionnaire);
     })
   );
 
@@ -35,7 +83,8 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
-      const gestionnaire = req.user;
+      const { siret } = req.user;
+      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
       if (!gestionnaire.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
@@ -44,7 +93,7 @@ module.exports = ({ users }) => {
       res.json(
         await Promise.all(
           gestionnaire.etablissements.map(async (etablissement) => {
-            return await Formateur.findOne({ uai: etablissement.uai });
+            return await Formateur.findOne({ uai: etablissement.uai }).lean();
           })
         )
       );
@@ -59,16 +108,21 @@ module.exports = ({ users }) => {
     checkApiToken(),
     ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
-      const gestionnaire = req.user;
+      const { siret } = req.user;
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      if (!gestionnaire.etablissements.filter((etablissements) => etablissements.uai === req.params.uai).length === 0) {
+      if (!gestionnaire.etablissements.filter((etablissements) => etablissements.uai === uai).length === 0) {
         throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
       }
 
       const etablissements = gestionnaire.etablissements.map((etablissement) => {
-        if (etablissement.uai === req.params.uai) {
-          req.body.email && (etablissement.email = req.body.email);
-          req.body.diffusionAutorisee && (etablissement.diffusionAutorisee = req.body.diffusionAutorisee);
+        if (etablissement.uai === uai) {
+          typeof req.body.email !== "undefined" && (etablissement.email = req.body.email);
+          typeof req.body.diffusionAutorisee !== "undefined" &&
+            (etablissement.diffusionAutorisee = req.body.diffusionAutorisee);
         }
         return etablissement;
       });
@@ -81,71 +135,52 @@ module.exports = ({ users }) => {
     })
   );
 
-  // /**
-  //  * TODO : A modifier en une route par formateur ?
-  //  */
-  // router.get(
-  //   "/api/gestionnaire/fichiers",
-  //   checkApiToken(),
-  //   ensureIs("Gestionnaire"),
-  //   tryCatch(async (req, res) => {
-  //     const gestionnaire = req.user;
-
-  //     if (!gestionnaire.etablissements.filter((e) => e.voeux_date).length === 0) {
-  //       return res.json([]);
-  //     }
-
-  //     res.json(
-  //       await Promise.all(
-  //         gestionnaire.etablissements
-  //           .filter((etablissement) => !!etablissement.voeux_date)
-  //           .map(async (etablissement) => {
-  //             const telechargements = gestionnaire.voeux_telechargements
-  //               .filter((t) => t.uai === etablissement.uai && t.date >= etablissement.voeux_date)
-  //               .sort((a, b) => {
-  //                 return a - b;
-  //               });
-
-  //             return {
-  //               //voeux
-  //               name: `${etablissement.uai}.csv`,
-  //               date: etablissement.voeux_date,
-  //               formateur: await Formateur.findOne({ uai: etablissement.uai }),
-  //               lastDownloadDate: telechargements[0]?.date || null,
-  //             };
-  //           })
-  //       )
-  //     );
-  //   })
-  // );
-
   /**
-   * TODO : A modifier en une route par formateur ?
+   * Retourne la liste des voeux pour un formateur donné sous forme d'un CSV.
    */
-
   router.get(
-    "/api/gestionnaire/formateurs/:file",
+    "/api/gestionnaire/formateurs/:uai/voeux",
     checkApiToken(),
     ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
       const { siret } = req.user;
-      const { file } = await validate(req.params, {
-        file: Joi.string()
-          .pattern(/^[0-9]{7}[A-Z]{1}\.csv$/)
-          .required(),
-      });
+      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      const uai = file.split(".csv")[0];
-      // const uai = req.params.uai;
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const filename = `${uai}.csv`;
 
       if (!req.user.etablissements.find((e) => e.uai === uai)) {
         throw Boom.notFound();
       }
 
-      await markVoeuxAsDownloaded(siret, uai);
-      res.setHeader("Content-disposition", `attachment; filename=${uai}.csv`);
+      if (!gestionnaire.etablissements.find((etablissement) => etablissement.uai === uai)?.diffusionAutorisee) {
+        await markVoeuxAsDownloadedByGestionnaire(siret, uai);
+      }
+
+      res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-      return compose(getVoeuxStream(uai), transformIntoCSV({ mapper: (v) => `"${v || ""}"` }), res);
+      return compose(getVoeuxStream({ siret, uai }), transformIntoCSV({ mapper: (v) => `"${v || ""}"` }), res);
+    })
+  );
+
+  /**
+   * TODO : Renvoi l'email de notification
+   */
+  router.put(
+    "/api/gestionnaire/formateurs/:uai/resendNotificationEmail",
+    checkApiToken(),
+    ensureIs("Gestionnaire"),
+    tryCatch(async (req, res) => {
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const stats = await resendNotificationEmails(resendEmail, { username: uai, force: true });
+
+      return res.json(stats);
     })
   );
 

@@ -13,6 +13,7 @@ const User = model(
       },
       password: {
         type: String,
+        select: false,
       },
       statut: {
         type: String,

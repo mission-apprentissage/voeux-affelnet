@@ -5,23 +5,22 @@ const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
 const { Formation, Formateur } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
-const { uniq, pick } = require("lodash");
+const { pick } = require("lodash");
 const { arrayOf } = require("../common/validators");
+const { siretFormat, uaiFormat } = require("../common/utils/format");
 
 const schema = Joi.object({
-  siret: Joi.string()
-    .pattern(/^[0-9]{14}$/)
-    .required(),
-  etablissements: arrayOf().required(),
+  siret: Joi.string().pattern(siretFormat).required(),
+  etablissements: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
 async function buildEtablissements(sirets, formateur) {
   return Promise.all(
-    uniq(sirets).map(async (siret) => {
+    [...new Set(sirets)].map(async (siret) => {
       // const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
 
       // eslint-disable-next-line
-      const existingEtablissement = formateur?.gestionnaires?.find((gestionnaire) => gestionnaire === siret);
+      const existingEtablissement = formateur?.etablissements?.find((etablissement) => etablissement === siret);
       return {
         siret,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
@@ -68,7 +67,7 @@ async function importFormateurs(
           } else {
             accumulator = accumulator.map((acc) => {
               if (acc.uai === uai) {
-                return { ...acc, etablissements: uniq(acc.etablissements.push(siret)) };
+                return { ...acc, etablissements: [...new Set([...acc.etablissements, siret])] };
               } else {
                 return acc;
               }
@@ -143,12 +142,13 @@ async function importFormateurs(
           }
 
           const updates = omitEmpty({
-            gestionnaires,
-            raison_sociale: raison_sociale[0] || "Inconnue",
+            etablissements: gestionnaires,
+            raison_sociale: raison_sociale[0],
             libelle_ville: libelle_ville[0],
             adresse: adresse[0],
             cp: cp[0],
             commune: commune[0],
+
             // raison_sociale: organisme?.raison_sociale || "Inconnue",
             // academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),
           });
@@ -174,7 +174,14 @@ async function importFormateurs(
             logger.info(
               `Formateur ${uai} mis à jour \n${JSON.stringify(
                 {
-                  previous: pick(found, ["gestionnaires", "raison_sociale" /*, "academie"*/]),
+                  previous: pick(found, [
+                    "etablissements",
+                    "raison_sociale",
+                    "libelle_ville",
+                    "adresse",
+                    "cp",
+                    "commune" /*, "academie"*/,
+                  ]),
                   updates,
                 },
                 null,

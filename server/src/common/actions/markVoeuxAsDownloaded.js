@@ -1,6 +1,6 @@
-const { Gestionnaire } = require("../model");
+const { Gestionnaire, Formateur } = require("../model");
 
-function markVoeuxAsDownloaded(siret, uai) {
+function markVoeuxAsDownloadedByGestionnaire(siret, uai) {
   return Gestionnaire.updateOne(
     { siret },
     {
@@ -14,4 +14,18 @@ function markVoeuxAsDownloaded(siret, uai) {
   ).exec();
 }
 
-module.exports = { markVoeuxAsDownloaded };
+function markVoeuxAsDownloadedByFormateur(siret, uai) {
+  return Formateur.updateOne(
+    { uai },
+    {
+      $push: {
+        voeux_telechargements: {
+          $each: [{ siret, date: new Date() }],
+          $slice: 500,
+        },
+      },
+    }
+  ).exec();
+}
+
+module.exports = { markVoeuxAsDownloadedByGestionnaire, markVoeuxAsDownloadedByFormateur };

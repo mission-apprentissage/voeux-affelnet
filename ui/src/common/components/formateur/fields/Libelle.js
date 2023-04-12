@@ -3,8 +3,8 @@ import { Text } from "@chakra-ui/react";
 export const FormateurLibelle = ({ formateur }) => {
   if (!formateur) return <></>;
   return (
-    <Text>
-      {formateur.raison_sociale} ({formateur.libelle_ville})
+    <Text display={"inline"}>
+      {formateur.raison_sociale ?? "Raison sociale inconnue"} ({formateur.libelle_ville ?? "Ville inconnue"})
     </Text>
   );
 };

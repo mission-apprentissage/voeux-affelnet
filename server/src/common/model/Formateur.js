@@ -12,6 +12,7 @@ const schema = new Schema({
 
   siret: {
     type: String,
+    index: true,
   },
 
   raison_sociale: {
@@ -31,7 +32,7 @@ const schema = new Schema({
     type: String,
   },
 
-  gestionnaires: {
+  etablissements: {
     required: true,
     default: [],
     type: [
@@ -44,12 +45,32 @@ const schema = new Schema({
       }),
     ],
   },
+
+  voeux_telechargements: {
+    default: [],
+    type: [
+      nested({
+        siret: {
+          type: String,
+          required: true,
+          index: true,
+        },
+        date: {
+          type: Date,
+          required: true,
+          default: () => new Date(),
+        },
+      }),
+    ],
+  },
 });
 
 schema.index(
   {
     uai: "text",
-    // libelle_etablissement: "text",
+    siret: "text",
+    raison_sociale: "text",
+    email: "text",
   },
   { default_language: "french" }
 );
