@@ -5,7 +5,7 @@ COPY .yarnrc.yml* /tmp/
 RUN echo -e "yarnPath: .yarn/releases/yarn-3.3.1.cjs\n\
 nodeLinker: node-modules\n\
 defaultSemverRangePrefix: ''\n\
-" > /.yarnrc.yml ;
+" > /tmp/.yarnrc.yml ;
 
 #Install and cache node_modules
 COPY package.json yarn.lock /tmp/

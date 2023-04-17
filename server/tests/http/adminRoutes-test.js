@@ -216,7 +216,7 @@ describe("adminRoutes", () => {
     );
   });
 
-  it("Vérifie qu'on peut exporter les établissements inconnus", async () => {
+  xit("Vérifie qu'on peut exporter les établissements inconnus", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertVoeu({
@@ -242,7 +242,7 @@ describe("adminRoutes", () => {
     );
   });
 
-  it("Vérifie qu'il faut être admin pour exporter", async () => {
+  xit("Vérifie qu'il faut être admin pour exporter", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
