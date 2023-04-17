@@ -1,56 +1,72 @@
 const { DateTime } = require("luxon");
 const logger = require("../common/logger");
-const { Gestionnaire } = require("../common/model");
+const { User, Gestionnaire } = require("../common/model");
+const { UserStatut } = require("../common/constants/UserStatut");
 
 async function resendConfirmationEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
   const maxNbEmailsSent = options.max || 2;
   const query = {
-    unsubscribe: false,
-    statut: "en attente",
     ...(options.username ? { username: options.username } : {}),
-    ...(options.retry
-      ? {
-          emails: {
-            $elemMatch: {
-              templateName: /^confirmation.*/,
-              "error.type": "fatal",
-            },
-          },
-        }
+    ...(options.force
+      ? {}
       : {
-          emails: {
-            $elemMatch: {
-              templateName: /^confirmation.*/,
-              ...(options.username
-                ? {}
-                : {
-                    error: { $exists: false },
-                    $and: [
-                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 3 }).toJSDate() } } },
-                      { [`sendDates.${maxNbEmailsSent}`]: { $exists: false } },
-                    ],
-                  }),
-            },
-          },
+          unsubscribe: false,
+          statut: UserStatut.EN_ATTENTE,
+          ...(options.retry
+            ? {
+                emails: {
+                  $elemMatch: {
+                    templateName: /^confirmation_.*/,
+                    "error.type": "fatal",
+                  },
+                },
+              }
+            : {
+                emails: {
+                  $elemMatch: {
+                    templateName: /^confirmation_.*/,
+                    ...(options.username
+                      ? {}
+                      : {
+                          error: { $exists: false },
+                          $and: [
+                            { sendDates: { $not: { $gt: DateTime.now().minus({ days: 3 }).toJSDate() } } },
+                            { [`sendDates.${maxNbEmailsSent}`]: { $exists: false } },
+                          ],
+                        }),
+                  },
+                },
+              }),
         }),
   };
 
-  stats.total = await Gestionnaire.countDocuments(query);
+  stats.total = await User.countDocuments(query);
 
-  await Gestionnaire.find(query)
+  await User.find(query)
     .lean()
     .limit(options.limit || Number.MAX_SAFE_INTEGER)
     .cursor()
-    .eachAsync(async (gestionnaire) => {
-      const previous = gestionnaire.emails.find((e) => e.templateName.startsWith("confirmation_"));
+    .eachAsync(async (user) => {
+      const previous = user.emails.find((e) => e.templateName.startsWith("confirmation_"));
+
+      if (user.type === "Formateur") {
+        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+
+        const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === user.username);
+
+        if (!etablissement.diffusionAutorisee) {
+          return;
+        }
+        user.email = etablissement?.email;
+      }
 
       try {
-        logger.info(`Resending ${previous.templateName} to CFA ${gestionnaire.username}...`);
-        await resendEmail(previous.token, { retry: options.retry });
+        logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);
+        await resendEmail(previous.token, { retry: options.retry, user });
         stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent email to ${gestionnaire.username}`, e);
+        logger.error(`Unable to resent ${previous.templateName} email to ${user.type} ${user.username}`, e);
         stats.failed++;
       }
     });

@@ -1,8 +1,9 @@
-import { FormateurLibelle } from "../../common/components/formateur/fields/Libelle";
+import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { Button, Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 
-import { FormateurEmail } from "../../common/components/formateur/fields/Email";
+import { FormateurEmail } from "../../common/components/gestionnaire/fields/FormateurEmail";
 import { useDownloadVoeux } from "../../common/hooks/gestionnaireHooks";
+import { UserStatut } from "../../common/constants/UserStatut";
 
 const FormateurVoeuxDisponibles = ({ gestionnaire, formateur, callback }) => {
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
@@ -19,22 +20,157 @@ const FormateurVoeuxDisponibles = ({ gestionnaire, formateur, callback }) => {
 };
 
 const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
-  const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
+  const etablissementFormateur = gestionnaire.etablissements?.find(
+    (etablissement) => formateur.uai === etablissement.uai
+  );
 
-  const diffusionAutorisee = etablissement?.diffusionAutorisee;
+  const etablissementGestionnaire = formateur.etablissements?.find(
+    (etablissement) => gestionnaire.siret === etablissement.siret
+  );
 
-  const voeuxDisponible = etablissement.nombre_voeux > 0;
+  const diffusionAutorisee = etablissementFormateur?.diffusionAutorisee;
 
-  const downloadVoeux = useDownloadVoeux({ formateur });
+  const voeuxDisponible = etablissementFormateur.nombre_voeux > 0;
 
-  if (!etablissement) {
-    return;
+  const downloadVoeux = useDownloadVoeux({ gestionnaire, formateur });
+
+  const formateurActive = UserStatut.ACTIVE === formateur.statut;
+
+  const voeuxTelechargementsFormateur = formateur.voeux_telechargements.filter(
+    (telechargement) => telechargement.siret === gestionnaire.siret
+  );
+
+  const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
+    (telechargement) => telechargement.uai === formateur.uai
+  );
+
+  /** Log toutes les constantes déclarées plus haut */
+  if (formateur.uai === "0490983C")
+    console.log({
+      gestionnaire,
+      formateur,
+      etablissementFormateur,
+      etablissementGestionnaire,
+      diffusionAutorisee,
+      voeuxDisponible,
+      formateurActive,
+      voeuxTelechargementsFormateur,
+      voeuxTelechargementsGestionnaire,
+    });
+
+  // if (!etablissementFormateur ||) {
+  //   return;
+  // }
+
+  // Compte créé
+  // En attente de confirmation d'email
+  // Email confirmé, compte non créé
+  // Compté créé, liste non téléchargée
+  // Liste téléchargée
+  // Mise à jour non téléchargée
+  // Mise à jour téléchargée
+  // Email non distribué
+
+  switch (diffusionAutorisee) {
+    case true: {
+      switch (true) {
+        case UserStatut.ACTIVE === formateur.statut &&
+          voeuxDisponible &&
+          new Date(etablissementFormateur.first_date_voeux) !== new Date(etablissementFormateur.last_date_voeux) &&
+          !!voeuxTelechargementsFormateur.find(
+            (telechargement) => new Date(telechargement.date) > new Date(etablissementFormateur.last_date_voeux)
+          ): {
+          return <>Mise à jour téléchargée</>;
+        }
+        case UserStatut.ACTIVE === formateur.statut &&
+          voeuxDisponible &&
+          new Date(etablissementFormateur.first_date_voeux) !== new Date(etablissementFormateur.last_date_voeux) &&
+          !!voeuxTelechargementsFormateur.find(
+            (telechargement) =>
+              new Date(telechargement.date) <= new Date(etablissementFormateur.last_date_voeux) &&
+              new Date(telechargement.date) > new Date(etablissementFormateur.first_date_voeux)
+          ): {
+          return <>Mise à jour non téléchargée</>;
+        }
+        case UserStatut.ACTIVE === formateur.statut &&
+          voeuxDisponible &&
+          new Date(etablissementFormateur.first_date_voeux) === new Date(etablissementFormateur.last_date_voeux) &&
+          !!voeuxTelechargementsFormateur.find(
+            (telechargement) => new Date(telechargement.date) > new Date(etablissementFormateur.last_date_voeux)
+          ): {
+          return <>Liste téléchargée</>;
+        }
+        case UserStatut.ACTIVE === formateur.statut && voeuxDisponible && !voeuxTelechargementsFormateur.length: {
+          return <>Compte créé, liste non téléchargée</>;
+        }
+        case UserStatut.ACTIVE === formateur.statut && !voeuxDisponible: {
+          return <>Compte créé</>;
+        }
+        case UserStatut.CONFIRME === formateur.statut: {
+          return <>Email confirmé, compte non créé</>;
+        }
+        case UserStatut.EN_ATTENTE === formateur.statut: {
+          return <>En attente de confirmation d'email</>;
+        }
+        default: {
+          return <>Etat du formateur inconnu</>;
+        }
+      }
+    }
+    case false: {
+      switch (true) {
+        case UserStatut.ACTIVE === gestionnaire.statut &&
+          voeuxDisponible &&
+          new Date(etablissementFormateur.first_date_voeux) !== new Date(etablissementFormateur.last_date_voeux) &&
+          !!voeuxTelechargementsGestionnaire.find(
+            (telechargement) => new Date(telechargement.date) > new Date(etablissementFormateur.last_date_voeux)
+          ): {
+          return <>Mise à jour téléchargée</>;
+        }
+        case UserStatut.ACTIVE === gestionnaire.statut &&
+          voeuxDisponible &&
+          new Date(etablissementFormateur.first_date_voeux) !== new Date(etablissementFormateur.last_date_voeux) &&
+          !!voeuxTelechargementsGestionnaire.find(
+            (telechargement) =>
+              new Date(telechargement.date) <= new Date(etablissementFormateur.last_date_voeux) &&
+              new Date(telechargement.date) > new Date(etablissementFormateur.first_date_voeux)
+          ): {
+          return <>Mise à jour non téléchargée</>;
+        }
+        case UserStatut.ACTIVE === gestionnaire.statut &&
+          voeuxDisponible &&
+          new Date(etablissementFormateur.first_date_voeux) === new Date(etablissementFormateur.last_date_voeux) &&
+          !!voeuxTelechargementsGestionnaire.find(
+            (telechargement) => new Date(telechargement.date) > new Date(etablissementFormateur.last_date_voeux)
+          ): {
+          return <>Liste téléchargée</>;
+        }
+        case UserStatut.ACTIVE === gestionnaire.statut && voeuxDisponible && !voeuxTelechargementsGestionnaire.length: {
+          return <>Compte créé, liste non téléchargée</>;
+        }
+        case UserStatut.ACTIVE === gestionnaire.statut && !voeuxDisponible: {
+          return <>Compte créé</>;
+        }
+        case UserStatut.CONFIRME === gestionnaire.statut: {
+          return <>Email confirmé, compte non créé</>;
+        }
+        case UserStatut.EN_ATTENTE === gestionnaire.statut: {
+          return <>En attente de confirmation d'email</>;
+        }
+        default: {
+          return <>Etat du responsable inconnu</>;
+        }
+      }
+    }
+    default: {
+      break;
+    }
   }
 
   return (
     <>
       {diffusionAutorisee ? (
-        <></>
+        <>{{}[formateur]}</>
       ) : (
         <>
           {voeuxDisponible ? (

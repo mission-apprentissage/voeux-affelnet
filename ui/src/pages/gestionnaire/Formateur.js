@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { FormateurLibelle } from "../../common/components/formateur/fields/Libelle";
+import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { Page } from "../../common/components/layout/Page";
 import {
   Accordion,
@@ -18,20 +18,22 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
+
 import { useDownloadVoeux } from "../../common/hooks/gestionnaireHooks";
 import { _put } from "../../common/httpClient";
 import { DelegationModal } from "../../common/components/gestionnaire/modals/DelegationModal";
 import { UpdateDelegationModal } from "../../common/components/gestionnaire/modals/UpdateDelegationModal";
 import { ErrorWarningLine } from "../../theme/components/icons/ErrorWarningLine";
 import { SuccessLine } from "../../theme/components/icons";
-import { FormateurEmail } from "../../common/components/formateur/fields/Email";
-import { UpdateEmailModal } from "../../common/components/gestionnaire/modals/UpdateEmailModal";
+import { UpdateGestionnaireEmailModal } from "../../common/components/gestionnaire/modals/UpdateGestionnaireEmailModal";
+import { GestionnaireEmail } from "../../common/components/gestionnaire/fields/GestionnaireEmail";
 
 export const Formateur = ({ gestionnaire, formateurs, callback }) => {
   const { uai } = useParams();
+
   const formateur = formateurs?.find((formateur) => formateur.uai === uai);
 
-  const downloadVoeux = useDownloadVoeux({ formateur });
+  const downloadVoeux = useDownloadVoeux({ gestionnaire, formateur });
 
   const cancelDelegation = useCallback(async () => {
     await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { diffusionAutorisee: false });
@@ -76,25 +78,34 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
   const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === formateur.uai);
 
-  const hasVoeux = etablissement.nombre_voeux > 0;
-
   const isDiffusionAutorisee = etablissement?.diffusionAutorisee;
 
-  const voeuxTelecharges = !isDiffusionAutorisee
-    ? !!gestionnaire.etablissements?.find(
-        (e) =>
-          !!gestionnaire.voeux_telechargements?.find(
-            (telechargement) =>
-              telechargement.uai === e.uai && Date(telechargement.date) >= Date(etablissement.last_date_voeux)
-          )
+  const hasVoeux = etablissement.nombre_voeux > 0;
+
+  const voeuxTelechargementsFormateur = formateur.voeux_telechargements.filter(
+    (telechargement) => telechargement.siret === gestionnaire.siret
+  );
+
+  const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
+    (telechargement) => telechargement.uai === formateur.uai
+  );
+
+  const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
+    ? !!voeuxTelechargementsGestionnaire.find(
+        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
       )
-    : !!formateur.etablissements?.find(
-        (e) =>
-          !!formateur.voeux_telechargements?.find(
-            (telechargement) =>
-              telechargement.siret === e.siret && Date(telechargement.date) >= Date(etablissement.last_date_voeux)
-          )
+    : !!voeuxTelechargementsFormateur?.find(
+        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
       );
+
+  const voeuxTelecharges = !isDiffusionAutorisee
+    ? !!voeuxTelechargementsGestionnaire.find(
+        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+      )
+    : !!voeuxTelechargementsGestionnaire.find(
+        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+      );
+  const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
   if (!formateur) {
     return;
@@ -120,14 +131,14 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           <Box mb={12}>
             <Text mb={4}>
               Cet organisme formateur est également responsable (signataire des conventions de formation), directement
-              habilité à accéder aux listes de vœux. Personne habilitée à réceptionner les listes de vœux : vous (
-              {gestionnaire.email}).{" "}
+              habilité à accéder aux listes de vœux. Personne habilitée à réceptionner les listes de vœux :{" "}
+              <GestionnaireEmail gestionnaire={gestionnaire} />.{" "}
               <Link variant="action" onClick={onOpenUpdateGestionnaireEmailModal}>
                 Modifier l'email
               </Link>
             </Text>
 
-            <UpdateEmailModal
+            <UpdateGestionnaireEmailModal
               isOpen={isOpenUpdateGestionnaireEmailModal}
               onClose={onCloseUpdateGestionnaireEmailModal}
               callback={callback}
@@ -150,7 +161,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                 </Text>
                 <Text mb={2}>
                   Personne habilitée à réceptionner les listes de vœux au sein de l'organisme responsable :{" "}
-                  {gestionnaire.email}
+                  <GestionnaireEmail gestionnaire={gestionnaire} />
                 </Text>
                 <Text mb={2}>
                   <Link variant="action" href="/gestionnaire">
@@ -212,7 +223,11 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           </Heading>
 
           <Heading as="h4" size="sm" mb={4}>
-            Nombre de vœux disponibles : {etablissement.nombre_voeux}
+            {hasUpdatedVoeux ? (
+              <>Une liste mise à jour de {etablissement.nombre_voeux} vœux est disponible pour cet établissement</>
+            ) : (
+              <>Nombre de vœux disponibles : {etablissement.nombre_voeux}</>
+            )}
           </Heading>
 
           {hasVoeux && (
@@ -223,14 +238,19 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   <>| Dernière mise à jour : {new Date(etablissement.last_date_voeux).toLocaleDateString()}</>
                 )}
               </Text>
-
+              {hasUpdatedVoeux && (
+                <Text mb={4}>
+                  Cette mise à jour peut comporter de nouveaux vœux, des suppressions de vœux, ou des mises à jour de
+                  vœux existants.
+                </Text>
+              )}
               {isDiffusionAutorisee ? (
                 <>
                   {voeuxTelecharges ? (
                     <>
                       <Text display={"flex"} alignItems="center" mb={4}>
-                        <SuccessLine height="20px" width="20px" mr={2} /> Le destinataire ({etablissement.email}) a bien
-                        téléchargé la liste de vœux.{" "}
+                        <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Le destinataire (
+                        {etablissement.email}) a bien téléchargé la liste de vœux.{" "}
                       </Text>
                       <Text>
                         Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par courriel.
@@ -256,16 +276,19 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                 <>
                   {voeuxTelecharges ? (
                     <Text display={"flex"} alignItems="center" mb={4}>
-                      <SuccessLine height="20px" width="20px" mr={2} /> Vœux téléchargés par vous ({gestionnaire.email}
+                      <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Vœux téléchargés par
+                      vous ({gestionnaire.email}
                       ). &nbsp;
                       <Link variant="action" onClick={downloadVoeuxAndReload}>
-                        Télécharger à nouveau.
+                        Télécharger à nouveau
                       </Link>
                     </Text>
                   ) : (
-                    <Button variant="primary" mb={4} onClick={downloadVoeuxAndReload}>
-                      Télécharger la liste
-                    </Button>
+                    <>
+                      <Button variant="primary" mb={4} onClick={downloadVoeuxAndReload}>
+                        Télécharger la liste
+                      </Button>
+                    </>
                   )}
                 </>
               )}

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
 import {
   Button,
@@ -20,7 +19,9 @@ import {
 import { useParams } from "react-router-dom";
 
 import { Page } from "../../../common/components/layout/Page";
+
 import { _get, _put } from "../../../common/httpClient";
+import { Yup } from "../../../common/Yup";
 import { FormateurLocalite } from "../../../common/components/formateur/fields/Localite";
 import { FormateurSiret } from "../../../common/components/formateur/fields/Siret";
 import { FormateurUai } from "../../../common/components/formateur/fields/Uai";

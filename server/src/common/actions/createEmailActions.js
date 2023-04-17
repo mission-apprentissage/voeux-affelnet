@@ -27,7 +27,7 @@ module.exports = (options = {}) => {
       return token;
     },
     async resendEmail(token, options = {}) {
-      const user = await User.findOne({ "emails.token": token }).lean();
+      const user = options.user ?? (await User.findOne({ "emails.token": token }).lean());
       const previous = user.emails.find((e) => e.token === token);
 
       const nextTemplateName = options.newTemplateName || previous.templateName;

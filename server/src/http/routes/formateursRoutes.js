@@ -7,6 +7,7 @@ const { markVoeuxAsDownloadedByFormateur } = require("../../common/actions/markV
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Gestionnaire, Formateur, Voeu } = require("../../common/model");
 const { siretFormat } = require("../../common/utils/format");
+const { changeEmail } = require("../../common/actions/changeEmail");
 
 module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -51,25 +52,26 @@ module.exports = ({ users }) => {
         })
       );
 
-      res.json(formateur);
+      res.json({
+        ...formateur,
+
+        nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": uai }),
+      });
     })
   );
 
   router.put(
-    "/api/formateur",
+    "/api/formateur/setEmail",
     checkApiToken(),
     ensureIs("Formateur"),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
 
-      await Formateur.updateOne(
-        { uai },
-        {
-          $set: {
-            ...(typeof req.body.email !== "undefined" ? { email: req.body.email } : {}),
-          },
-        }
-      );
+      const { email } = await Joi.object({
+        email: Joi.string().email(),
+      }).validateAsync(req.body, { abortEarly: false });
+
+      email && (await changeEmail(uai, email, { auteur: req.user.username }));
 
       const updatedFormateur = await Formateur.findOne({ uai });
 
@@ -112,20 +114,22 @@ module.exports = ({ users }) => {
     ensureIs("Formateur"),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
-      const formateur = await Formateur.findOne({ uai });
-      const filename = `${uai}.csv`;
+      // const formateur = await Formateur.findOne({ uai });
 
       const { siret } = await Joi.object({
-        uai: Joi.string().pattern(siretFormat).required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
+      const filename = `${siret}-${uai}.csv`;
       // TODO : filtrer sur les délégation autorisées.
 
-      await Promise.all(
-        formateur.etablissements?.map(
-          async (etablissement) => await markVoeuxAsDownloadedByFormateur(etablissement.siret, uai)
-        )
-      );
+      // await Promise.all(
+      //   formateur.etablissements?.map(
+      //     async (etablissement) => await markVoeuxAsDownloadedByFormateur(etablissement.siret, uai)
+      //   )
+      // );
+
+      await markVoeuxAsDownloadedByFormateur(siret, uai);
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);

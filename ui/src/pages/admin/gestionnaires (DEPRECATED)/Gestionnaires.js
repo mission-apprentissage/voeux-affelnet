@@ -27,16 +27,16 @@ import {
 import { SettingsIcon } from "@chakra-ui/icons";
 import { Field, Form, Formik } from "formik";
 import * as queryString from "query-string";
-import * as Yup from "yup";
 
 import { Pagination } from "../../../common/components/Pagination";
 import SuccessMessage from "../../../common/components/SuccessMessage";
 import ErrorMessage from "../../../common/components/ErrorMessage";
+import { ErrorLine } from "../../../theme/components/icons";
+import { Yup } from "../../../common/Yup";
 import { _get, _put } from "../../../common/httpClient";
 import { sortDescending } from "../../../common/utils/dateUtils";
-import { ErrorLine } from "../../../theme/components/icons";
-import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/Libelle";
-import { GestionnaireEmail } from "../../../common/components/gestionnaire/fields/Email";
+import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
+import { GestionnaireEmail } from "../../../common/components/gestionnaire/fields/GestionnaireEmail";
 
 const iconProps = {
   width: "16px",

@@ -1,4 +1,12 @@
-const { compose, transformIntoCSV, oleoduc, accumulateData, flattenArray, mergeStreams } = require("oleoduc");
+const {
+  compose,
+  transformIntoCSV,
+  oleoduc,
+  accumulateData,
+  flattenArray,
+  mergeStreams,
+  filterData,
+} = require("oleoduc");
 const { getRelationsFromOffreDeFormation } = require("./utils/getRelationsFromOffreDeFormation.js");
 const { parseCsv } = require("../common/utils/csvUtils.js");
 const logger = require("../common/logger.js");
@@ -35,15 +43,6 @@ async function buildRelationCsv(output, options = {}) {
     mergeStreams(...streams),
     accumulateData(
       async (accumulator, relation) => {
-        if (!relation.uai_etablissement || !relation.siret_gestionnaire || !relation.email_gestionnaire) {
-          logger.error(
-            `INVALIDE : ${relation.uai_etablissement} || ${relation.siret_gestionnaire} || ${relation.email_gestionnaire}`
-          );
-          stats.invalid++;
-          invalids.push(relation);
-          return accumulator;
-        }
-
         const index = accumulator.findIndex((item) => item.siret === relation.siret_gestionnaire);
 
         if (index === -1) {
@@ -52,7 +51,14 @@ async function buildRelationCsv(output, options = {}) {
           accumulator.push({
             siret: relation.siret_gestionnaire,
             email: relation.email_gestionnaire,
-            etablissements: [...new Set(relation.uai_etablissement.split(",").map((uai) => uai.toUpperCase()))],
+            etablissements: [
+              ...new Set(
+                relation.uai_etablissement
+                  .split(",")
+                  .map((uai) => uai.toUpperCase())
+                  .filter((uai) => uai?.length)
+              ),
+            ],
             // statut: await getGestionnaireStatut({
             //   siret: relation.siret_gestionnaire,
             //   uai: relation.uai_etablissement,
@@ -82,6 +88,17 @@ async function buildRelationCsv(output, options = {}) {
       { accumulator: [] }
     ),
     flattenArray(),
+    filterData((relation) => {
+      if (!relation.siret?.length || !relation.email?.length || !relation.etablissements?.length) {
+        logger.error(`INVALIDE : ${relation.siret} || ${relation.email} || ${relation.etablissements}`);
+        stats.invalid++;
+        invalids.push(relation);
+        return false;
+      }
+
+      return relation;
+    }),
+
     transformIntoCSV(),
     output
   );

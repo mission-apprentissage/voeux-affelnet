@@ -17,29 +17,12 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
 
+import { Yup } from "../../../Yup";
 import { _put } from "../../../httpClient";
-import { FormateurLibelle } from "../../formateur/fields/Libelle";
+import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 
 export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onClose }) => {
-  function equalsTo(ref, msg) {
-    return this.test({
-      name: "equalTo",
-      exclusive: false,
-      // eslint-disable-next-line no-template-curly-in-string
-      message: msg || "${path} must be the same as ${reference}",
-      params: {
-        reference: ref.path,
-      },
-      test: function (value) {
-        return value === this.resolve(ref);
-      },
-    });
-  }
-
-  Yup.addMethod(Yup.string, "equalsTo", equalsTo);
-
   const activateDelegation = useCallback(async ({ form }) => {
     try {
       await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });

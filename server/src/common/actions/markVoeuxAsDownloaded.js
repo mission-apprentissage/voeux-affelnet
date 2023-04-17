@@ -1,7 +1,7 @@
 const { Gestionnaire, Formateur } = require("../model");
 
-function markVoeuxAsDownloadedByGestionnaire(siret, uai) {
-  return Gestionnaire.updateOne(
+const markVoeuxAsDownloadedByGestionnaire = async (siret, uai) => {
+  await Gestionnaire.updateOne(
     { siret },
     {
       $push: {
@@ -11,11 +11,12 @@ function markVoeuxAsDownloadedByGestionnaire(siret, uai) {
         },
       },
     }
-  ).exec();
-}
+  );
+};
 
-function markVoeuxAsDownloadedByFormateur(siret, uai) {
-  return Formateur.updateOne(
+const markVoeuxAsDownloadedByFormateur = async (siret, uai) => {
+  console.log("markVoeuxAsDownloadedByFormateur", { siret, uai });
+  await Formateur.updateOne(
     { uai },
     {
       $push: {
@@ -25,7 +26,7 @@ function markVoeuxAsDownloadedByFormateur(siret, uai) {
         },
       },
     }
-  ).exec();
-}
+  );
+};
 
 module.exports = { markVoeuxAsDownloadedByGestionnaire, markVoeuxAsDownloadedByFormateur };

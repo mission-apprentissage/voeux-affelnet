@@ -1,3 +1,4 @@
+const { UserStatut } = require("../common/constants/UserStatut");
 const logger = require("../common/logger");
 const { User } = require("../common/model");
 const { every } = require("lodash");
@@ -17,7 +18,8 @@ async function sendNotificationEmails(sendEmail, options = {}) {
 
   const query = {
     unsubscribe: false,
-    statut: "activé",
+    statut: UserStatut.ACTIVE,
+
     "etablissements.voeux_date": { $exists: true },
     "emails.templateName": { $not: { $regex: "^notification_.*$" } },
 
@@ -40,12 +42,12 @@ async function sendNotificationEmails(sendEmail, options = {}) {
 
       try {
         if (limit > stats.sent) {
-          logger.info(`Sending ${templateName} to ${user.type} ${user.username}...`);
+          logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
           await sendEmail(user, templateName);
           stats.sent++;
         }
       } catch (e) {
-        logger.error(`Unable to sent email to ${user.username}`, e);
+        logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);
         stats.failed++;
       }
     });

@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
-import * as Yup from "yup";
 import { Field, Form, Formik } from "formik";
 import {
   Center,
@@ -17,14 +16,15 @@ import {
   Alert,
 } from "@chakra-ui/react";
 
-import useAuth from "../common/hooks/useAuth";
+import { Yup } from "../common/Yup";
 import { _post } from "../common/httpClient";
+import useAuth from "../common/hooks/useAuth";
 import decodeJWT from "../common/utils/decodeJWT";
 import { useFetch } from "../common/hooks/useFetch";
 
 function StatusErrorMessage({ error, username }) {
   const navigate = useNavigate();
-
+  console.log(error);
   if (error.statusCode === 401) {
     return (
       <Alert status="error">
@@ -52,7 +52,7 @@ function ActivationPage() {
   const username = decodeJWT(actionToken).sub;
   const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
 
-  const activation = async (values) => {
+  const activation = useCallback(async (values) => {
     try {
       const { token } = await _post("/api/activation", { ...values, actionToken });
       setAuth(token);
@@ -62,7 +62,7 @@ function ActivationPage() {
 
       setMessage(<StatusErrorMessage error={e} username={username} />);
     }
-  };
+  });
 
   const showForm = !loading && !message && !error;
   const title = `Activation de votre compte ${username}`;

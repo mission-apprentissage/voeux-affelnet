@@ -1,88 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
-import {
-  Button,
-  Text,
-  Input,
-  Radio,
-  Stack,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Link,
-  Heading,
-  Box,
-} from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
+import { Text, Link, Heading, Box, useDisclosure, Button } from "@chakra-ui/react";
 
 import { Page } from "../../../common/components/layout/Page";
-import { _get, _put } from "../../../common/httpClient";
-import { FormateurLocalite } from "../../../common/components/formateur/fields/Localite";
-import { FormateurSiret } from "../../../common/components/formateur/fields/Siret";
-import { FormateurUai } from "../../../common/components/formateur/fields/Uai";
-import { FormateurLibelle } from "../../../common/components/formateur/fields/Libelle";
-
-const EtablissementEmail = ({ gestionnaire, etablissement, callback }) => {
-  const [enableForm, setEnableForm] = useState(false);
-
-  const setEtablissementEmail = useCallback(async ({ form, etablissement }) => {
-    try {
-      await _put(`/api/gestionnaire/formateurs/${etablissement.uai}`, { email: form.email, diffusionAutorisee: true });
-      setEnableForm(false);
-      callback();
-    } catch (error) {
-      console.error(error);
-    }
-  });
-
-  return (
-    <>
-      {!etablissement.email || enableForm ? (
-        <Formik
-          initialValues={{
-            email: etablissement.email, // formateur.mel ?
-          }}
-          validationSchema={Yup.object().shape({
-            email: Yup.string().required("Requis"),
-          })}
-          onSubmit={(form) => setEtablissementEmail({ form, etablissement })}
-        >
-          <Form style={{ display: "inline-flex", width: "100%" }}>
-            <Field name="email">
-              {({ field, meta }) => {
-                return (
-                  <Input
-                    type="email"
-                    role="presentation"
-                    placeholder="Renseigner l'email"
-                    style={{ margin: 0 }}
-                    {...field}
-                  />
-                );
-              }}
-            </Field>
-            <Button variant="primary" type="submit">
-              OK
-            </Button>
-          </Form>
-        </Formik>
-      ) : (
-        <>
-          {etablissement.email}{" "}
-          <Link fontSize={"zeta"} textDecoration={"underline"} onClick={() => setEnableForm(true)}>
-            Modifier
-          </Link>
-        </>
-      )}
-    </>
-  );
-};
+import { _get } from "../../../common/httpClient";
+import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
+import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
 
 export const Gestionnaire = () => {
+  const {
+    onOpen: onOpenUpdateGestionnaireEmailModal,
+    isOpen: isOpenUpdateGestionnaireEmailModal,
+    onClose: onCloseUpdateGestionnaireEmailModal,
+  } = useDisclosure();
+
   const { siret } = useParams();
 
   const [gestionnaire, setGestionnaire] = useState(undefined);
@@ -108,102 +39,124 @@ export const Gestionnaire = () => {
       setFormateurs(undefined);
       throw Error;
     }
-  }, [siret]);
+  }, [siret, setFormateurs]);
+
+  const reload = useCallback(async () => {
+    await getGestionnaire();
+    await getFormateurs();
+  }, [getGestionnaire, getFormateurs]);
 
   useEffect(() => {
     const run = async () => {
       if (!mounted.current) {
-        await getGestionnaire();
-        await getFormateurs();
+        await reload();
         mounted.current = true;
       }
     };
     run();
-  }, [siret]);
+
+    return () => {
+      mounted.current = false;
+    };
+  }, [reload]);
 
   if (!gestionnaire) {
     return;
   }
 
+  const isResponsableFormateurForAtLeastOneEtablissement = !!gestionnaire?.etablissements?.find(
+    (etablissement) => etablissement.uai === gestionnaire.uai || etablissement.siret === gestionnaire.siret
+  );
+
   return (
-    <Page title={`Organisme responsable ${siret}`}>
+    <Page
+      title={
+        <>
+          Organisme responsable :&nbsp;
+          <GestionnaireLibelle gestionnaire={gestionnaire} />
+        </>
+      }
+    >
       <Box my={12}>
-        <Heading as="h3" size="md">
-          Organismes formateurs associés
-        </Heading>
+        <Box mb={12}>
+          <Text mb={4}>
+            Adresse : {gestionnaire.adresse} {gestionnaire.cp} {gestionnaire.commune} - Siret :{" "}
+            {gestionnaire.siret ?? "Inconnu"} - UAI : {gestionnaire.uai ?? "Inconnu"}
+          </Text>
 
-        {formateurs && !gestionnaire.diffusionAutorisee && (
-          <Table mt={12}>
-            <Thead>
-              <Tr>
-                <Th width="350px">Raison sociale</Th>
-                <Th width="250px">Localité</Th>
-                <Th>Siret</Th>
-                <Th>UAI</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {formateurs.map((formateur) => {
-                const etablissement = gestionnaire.etablissements?.find((etab) => etab.uai === formateur?.uai);
+          <Text mb={4}>
+            Email de direction enregistré : <strong>{gestionnaire?.email}</strong>.{" "}
+          </Text>
 
-                return (
-                  <Tr key={formateur?.uai}>
-                    <Td>
-                      <FormateurLibelle formateur={formateur} />
-                    </Td>
-                    <Td>
-                      <FormateurLocalite formateur={formateur} />
-                    </Td>
-                    <Td>
-                      <FormateurSiret formateur={formateur} />
-                    </Td>
-                    <Td>
-                      <FormateurUai formateur={formateur} />
-                    </Td>
-                    <Td>{etablissement?.email ? "<STATUT PLACEHOLDER>" : "<STATUT PLACEHOLDER>"}</Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-        )}
+          <Text mb={4}>
+            L'organisme est responsable de l'offre de {gestionnaire?.etablissements?.length} organisme
+            {gestionnaire?.etablissements?.length > 1 && "s"} formateur{gestionnaire?.etablissements?.length > 1 && "s"}
+            .{" "}
+            <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateurs`}>
+              Accéder à la liste
+            </Link>
+          </Text>
 
-        {formateurs && gestionnaire.diffusionAutorisee && (
-          <Table mt={12}>
-            <Thead>
-              <Tr>
-                <Th width="350px">Raison sociale</Th>
-                <Th width="250px">Localité</Th>
-                <Th width="375px">Courriel habilité</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {formateurs.map((formateur) => {
-                const etablissement = gestionnaire.etablissements?.find((etab) => etab.uai === formateur.uai);
-                return (
-                  <Tr key={formateur.uai}>
-                    <Td>
-                      <FormateurLibelle formateur={formateur} />
-                    </Td>
-                    <Td>
-                      <FormateurLocalite formateur={formateur} />
-                    </Td>
-                    <Td>
-                      <EtablissementEmail
-                        gestionnaire={gestionnaire}
-                        etablissement={etablissement}
-                        callback={getGestionnaire}
-                      />
-                    </Td>
-                    <Td>{etablissement.email ? "<STATUT PLACEHOLDER>" : "<STATUT PLACEHOLDER>"}</Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
-        )}
+          {isResponsableFormateurForAtLeastOneEtablissement && (
+            <Text mb={4}>
+              L'organisme dispense directement des formations.{" "}
+              <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateur/${gestionnaire.uai}`}>
+                Accéder à la page de téléchargement des vœux
+              </Link>
+            </Text>
+          )}
+
+          <Button variant="primary" onClick={onOpenUpdateGestionnaireEmailModal}>
+            Modifier l'email
+          </Button>
+        </Box>
+
+        <Box mb={12} id="statut">
+          <Heading as="h3" size="md" mb={4}>
+            Statut
+          </Heading>
+
+          <Heading as="h4" size="sm" mb={4}>
+            Nombre de vœux disponibles : {gestionnaire.nombre_voeux}
+          </Heading>
+
+          <Text mb={4}>
+            <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateurs`}>
+              Voir la liste des organismes formateurs
+            </Link>{" "}
+            pour accéder aux listes de vœux disponibles et à leurs statuts de téléchargement.
+          </Text>
+
+          {/* TODO: Définir quel est le mail à renvoyer fonction du statut du User (comparer avec UserStatut.XXXX) */}
+          {/* <Button variant="primary" onClick={}>
+            Renvoyer l'email de notification
+          </Button> */}
+        </Box>
+
+        <Box mb={12}>
+          <Heading as="h3" size="md" mb={4}>
+            Historique des actions
+          </Heading>
+          {/* <List>
+            <ListItem>-</ListItem>
+            <ListItem>-</ListItem>
+            <ListItem>-</ListItem>
+            <ListItem>-</ListItem>
+          </List> */}
+        </Box>
+
+        <Box mb={12}>
+          <Link href="/anomalie" variant="action">
+            Signaler une anomalie
+          </Link>
+        </Box>
+
+        <UpdateGestionnaireEmailModal
+          isOpen={isOpenUpdateGestionnaireEmailModal}
+          onClose={onCloseUpdateGestionnaireEmailModal}
+          callback={reload}
+          gestionnaire={gestionnaire}
+        />
       </Box>
     </Page>
   );

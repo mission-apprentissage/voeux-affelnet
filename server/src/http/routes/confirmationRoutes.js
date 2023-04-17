@@ -5,9 +5,10 @@ const { confirm } = require("../../common/actions/confirm");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const sendActivationEmails = require("../../jobs/sendActivationEmails");
+const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { User, Gestionnaire } = require("../../common/model");
 
-module.exports = ({ sendEmail }) => {
+module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkActionToken, ensureIsOneOf } = authMiddleware();
 
@@ -58,6 +59,12 @@ module.exports = ({ sendEmail }) => {
       await confirm(user.username, email);
 
       await sendEmail({ ...user, email }, "confirmed");
+
+      const previousActivationEmail = user.emails?.find((e) => e.templateName.startsWith("activation_"));
+
+      previousActivationEmail
+        ? await resendActivationEmails(resendEmail, { username: user.username, force: true })
+        : await sendActivationEmails(sendEmail, { username: user.username });
 
       await sendActivationEmails(sendEmail, { username: user.username });
 

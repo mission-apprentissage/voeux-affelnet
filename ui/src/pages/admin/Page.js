@@ -2,12 +2,10 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { Page } from "../../common/components/layout/Page";
-import { Academies } from "./academies/Academies";
-import { Gestionnaires } from "./gestionnaires/Gestionnaires";
-import Exports from "./exports/Exports";
 import { Users } from "./users/Users";
-import { Formateur } from "./users/Formateur";
 import { Gestionnaire } from "./users/Gestionnaire";
+import { Formateurs } from "./users/Formateurs";
+import { Formateur } from "./users/Formateur";
 
 function AdminPage() {
   return (
@@ -16,16 +14,15 @@ function AdminPage() {
         path="/"
         exact
         element={
-          <Page title="Administration">
+          <Page title="Listes de vœux Affelnet : console de pilotage">
             <Users />
-            <Gestionnaires />
-            <Exports />
-            <Academies />
           </Page>
         }
       ></Route>
 
       <Route path="/gestionnaire/:siret" element={<Gestionnaire />}></Route>
+      <Route path="/gestionnaire/:siret/formateurs" element={<Formateurs />}></Route>
+      <Route path="/gestionnaire/:siret/formateur/:uai" element={<Formateur />}></Route>
       <Route path="/formateur/:uai" element={<Formateur />}></Route>
     </Routes>
   );

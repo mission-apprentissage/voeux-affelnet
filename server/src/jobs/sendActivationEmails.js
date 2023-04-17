@@ -1,3 +1,4 @@
+const { UserStatut } = require("../common/constants/UserStatut");
 const logger = require("../common/logger");
 const { User } = require("../common/model");
 
@@ -8,7 +9,7 @@ async function sendActivationEmails(sendEmail, options = {}) {
   const query = {
     unsubscribe: false,
     password: { $exists: false },
-    statut: "confirmé",
+    statut: UserStatut.CONFIRME,
     "emails.templateName": { $not: { $regex: "^activation_.*$" } },
     $or: [
       { type: "Gestionnaire" /*, "etablissements.voeux_date": { $exists: true } */ },
@@ -27,11 +28,11 @@ async function sendActivationEmails(sendEmail, options = {}) {
       stats.total++;
 
       try {
-        logger.info(`Sending ${templateName} to ${user.type} ${user.username}...`);
+        logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
         await sendEmail(user, templateName);
         stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent email to ${user.username}`, e);
+        logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);
         stats.failed++;
       }
     });

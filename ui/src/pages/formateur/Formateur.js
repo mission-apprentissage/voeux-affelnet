@@ -4,8 +4,10 @@ import { Box, Text, Heading, Link, List, ListItem, Alert, Button } from "@chakra
 import { useDownloadVoeux } from "../../common/hooks/formateurHooks";
 import { SuccessLine } from "../../theme/components/icons";
 import { Page } from "../../common/components/layout/Page";
-import { FormateurLibelle } from "../../common/components/formateur/fields/Libelle";
-import { GestionnaireLibelle } from "../../common/components/gestionnaire/fields/Libelle";
+import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
+import { GestionnaireLibelle } from "../../common/components/gestionnaire/fields/GestionnaireLibelle";
+import { GestionnaireEmail } from "../../common/components/formateur/fields/GestionnaireEmail";
+import { FormateurEmail } from "../../common/components/formateur/fields/FormateurEmail";
 
 export const Formateur = ({ formateur, gestionnaires, callback }) => {
   const downloadVoeux = useDownloadVoeux({ formateur });
@@ -81,7 +83,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                   </Text>
                   <Text mb={2}>
                     Personne habilitée à réceptionner les listes de vœux au sein de l'organisme responsable :{" "}
-                    {gestionnaire.email}
+                    <GestionnaireEmail gestionnaire={gestionnaire} />
                   </Text>
                 </Box>
               </Alert>
@@ -89,7 +91,10 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
               <Box mb={12}>
                 <Text mb={4}>
                   {isDiffusionAutorisee ? (
-                    <>La délégation des droits de réception des listes de vœux a été activée pour votre organisme.</>
+                    <>
+                      La délégation des droits de réception des listes de vœux a été activée pour votre organisme à
+                      l'adresse : <FormateurEmail formateur={formateur} gestionnaire={gestionnaire} />.
+                    </>
                   ) : (
                     <>La délégation des droits de réception n'est pas activée pour votre organisme.</>
                   )}
@@ -118,16 +123,15 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                       <>
                         {voeuxTelecharges ? (
                           <>
-                            <Text display={"flex"} alignItems="center" mb={4}>
-                              <SuccessLine height="20px" width="20px" mr={2} /> Le destinataire ({formateur.email}) a
-                              bien téléchargé la liste de vœux.{" "}
+                            <Text mb={4}>
+                              <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Vous (
+                              {formateur.email}) avez téléchargé la liste de vœux.{" "}
+                              <Link variant="action" onClick={() => downloadVoeuxAndReload({ gestionnaire })}>
+                                Télécharger à nouveau
+                              </Link>
                             </Text>
                             <Text mb={4}>
-                              Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par
-                              courriel.{" "}
-                              <Link variant="action" onClick={() => downloadVoeuxAndReload({ gestionnaire })}>
-                                Télécharger à nouveau.
-                              </Link>
+                              Si une mise à jour de cette liste est disponible, vous en serez notifié par courriel.
                             </Text>
                           </>
                         ) : (
@@ -144,7 +148,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                           <>
                             <Text mb={4}>
                               La liste des vœux a été téléchargée par votre organisme responsable. Vous pouvez le
-                              contacter pour récupérer cette liste.
+                              contacter ({gestionnaire.email}) pour récupérer cette liste.
                             </Text>
                             <Text mb={4}>
                               Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par
@@ -154,8 +158,9 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                         ) : (
                           <>
                             <Text mb={4}>
-                              La liste des vœux n'a pas été téléchargée par votre organisme responsable. Vous pouvez le
-                              contacter pour l'inviter à télécharger cette liste et vous la transmettre.
+                              La liste des vœux n'a pas été téléchargée par votre organisme responsable (
+                              {gestionnaire.email}). Vous pouvez le contacter pour l'inviter à télécharger cette liste
+                              et vous la transmettre.
                             </Text>
                           </>
                         )}

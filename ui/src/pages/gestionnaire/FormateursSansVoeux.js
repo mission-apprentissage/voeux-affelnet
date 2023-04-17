@@ -1,7 +1,7 @@
 import { Box, Link, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 
-import { FormateurLibelle } from "../../common/components/formateur/fields/Libelle";
-import { FormateurEmail } from "../../common/components/formateur/fields/Email";
+import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
+import { FormateurEmail } from "../../common/components/gestionnaire/fields/FormateurEmail";
 
 export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
   return (

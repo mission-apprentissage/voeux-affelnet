@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import queryString from "query-string";
-import * as Yup from "yup";
+
 import { Field, Form, Formik } from "formik";
 import {
   Alert,
@@ -17,6 +17,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 
+import { Yup } from "../common/Yup";
 import { _post } from "../common/httpClient";
 import decodeJWT from "../common/utils/decodeJWT";
 import ErrorMessage from "../common/components/ErrorMessage";

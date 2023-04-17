@@ -1,6 +1,5 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import * as Yup from "yup";
 import { Formik, Field, Form } from "formik";
 import {
   Alert,
@@ -17,9 +16,10 @@ import {
   Text,
 } from "@chakra-ui/react";
 
+import { Yup } from "../common/Yup";
+import { _post } from "../common/httpClient";
 import { useQuery } from "../common/hooks/useQuery";
 import useAuth from "../common/hooks/useAuth";
-import { _post } from "../common/httpClient";
 import { siretFormat, uaiFormat } from "../common/utils/format";
 
 const mailVoeux = process.env.REACT_APP_VOEUX_AFFELNET_EMAIL;
@@ -150,7 +150,7 @@ function LoginPage() {
                   <a href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                     {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
                   </a>{" "}
-                  en précisant votre siret ({username})
+                  en précisant votre identifiant ({username})
                 </p>
               </Alert>
             )}

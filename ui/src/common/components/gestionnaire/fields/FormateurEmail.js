@@ -1,6 +1,7 @@
 import { Button, Flex, Text, useDisclosure } from "@chakra-ui/react";
 import { isResponsableFormateur } from "../../../utils/getUserType";
 import { DelegationModal } from "../../gestionnaire/modals/DelegationModal";
+import { UserStatut } from "../../../constants/UserStatut";
 
 export const FormateurEmail = ({ gestionnaire, formateur, callback, showDelegationButton }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -12,7 +13,9 @@ export const FormateurEmail = ({ gestionnaire, formateur, callback, showDelegati
   return (
     <>
       {diffusionAutorisee ? (
-        <Text display={"inline"}>{etablissement.email}</Text>
+        <Text display={"inline"}>
+          {[UserStatut.CONFIRME, UserStatut.ACTIVE].includes(formateur.statut) ? formateur.email : etablissement.email}
+        </Text>
       ) : (
         <Flex alignItems="center">
           <Text mr={4}>

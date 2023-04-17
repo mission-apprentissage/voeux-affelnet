@@ -1,8 +1,9 @@
 import { Box, Text, Heading, Link, useDisclosure, List, ListItem } from "@chakra-ui/react";
 
-import { UpdateEmailModal } from "../../common/components/gestionnaire/modals/UpdateEmailModal";
+import { UpdateGestionnaireEmailModal } from "../../common/components/gestionnaire/modals/UpdateGestionnaireEmailModal";
 import { Page } from "../../common/components/layout/Page";
-import { GestionnaireLibelle } from "../../common/components/gestionnaire/fields/Libelle";
+import { GestionnaireLibelle } from "../../common/components/gestionnaire/fields/GestionnaireLibelle";
+import { GestionnaireEmail } from "../../common/components/gestionnaire/fields/GestionnaireEmail";
 
 export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
   const { onOpen, isOpen, onClose } = useDisclosure();
@@ -17,27 +18,31 @@ export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
 
   return (
     <>
-      <Page title={`Organisme responsable : ${gestionnaire.raison_sociale ?? "Raison sociale inconnue"}`}>
-        <Box mb={12}>
-          <Heading as="h3" size="md" display="flex" mb={4}>
+      <Page
+        title={
+          <>
             Organisme responsable :&nbsp;
             <GestionnaireLibelle gestionnaire={gestionnaire} />
-          </Heading>
-
+          </>
+        }
+      >
+        <Box mb={12}>
           <Text mb={4}>
             Adresse : {gestionnaire.adresse} {gestionnaire.cp} {gestionnaire.commune} - Siret :{" "}
             {gestionnaire.siret ?? "Inconnu"} - UAI : {gestionnaire.uai ?? "Inconnu"}
           </Text>
 
           <Text mb={4}>
-            Adresse courriel du directeur de l'établissement : {gestionnaire?.email}.{" "}
+            Adresse courriel du directeur de l'établissement : <GestionnaireEmail gestionnaire={gestionnaire} />.{" "}
             <Link variant="action" onClick={onOpen}>
               Modifier
             </Link>
           </Text>
 
           <Text mb={4}>
-            L'organisme est responsable de l'offre de {gestionnaire?.etablissements?.length} organisme(s) formateur(s).{" "}
+            L'organisme est responsable de l'offre de {gestionnaire?.etablissements?.length} organisme
+            {gestionnaire?.etablissements?.length > 1 && "s"} formateur{gestionnaire?.etablissements?.length > 1 && "s"}
+            .{" "}
             <Link variant="action" href="/gestionnaire/formateurs">
               Accéder à la liste
             </Link>
@@ -47,10 +52,27 @@ export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
               <Link variant="action" href={`/gestionnaire/formateurs/${gestionnaire.uai}`}>
-                Accéder à la page de téléchargement des vœux.
+                Accéder à la page de téléchargement des vœux
               </Link>
             </Text>
           )}
+        </Box>
+
+        <Box mb={12} id="statut">
+          <Heading as="h3" size="md" mb={4}>
+            Statut
+          </Heading>
+
+          <Heading as="h4" size="sm" mb={4}>
+            Nombre de vœux disponibles : {gestionnaire.nombre_voeux}
+          </Heading>
+
+          <Text mb={4}>
+            <Link variant="action" href={`/gestionnaire/formateurs`}>
+              Voir la liste des organismes formateurs
+            </Link>{" "}
+            pour accéder aux listes de vœux disponibles et à leurs statuts de téléchargement.
+          </Text>
         </Box>
 
         <Box mb={12}>
@@ -71,7 +93,12 @@ export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
           </Link>
         </Box>
 
-        <UpdateEmailModal isOpen={isOpen} onClose={onClose} callback={callback} gestionnaire={gestionnaire} />
+        <UpdateGestionnaireEmailModal
+          isOpen={isOpen}
+          onClose={onClose}
+          callback={callback}
+          gestionnaire={gestionnaire}
+        />
       </Page>
     </>
   );

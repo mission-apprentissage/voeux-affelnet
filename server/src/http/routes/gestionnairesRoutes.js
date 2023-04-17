@@ -9,8 +9,12 @@ const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Gestionnaire, Formateur, Voeu } = require("../../common/model");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const { uaiFormat } = require("../../common/utils/format");
+const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
+const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
+const { UserStatut } = require("../../common/constants/UserStatut");
+const { changeEmail } = require("../../common/actions/changeEmail");
 
-module.exports = ({ users, resendEmail }) => {
+module.exports = ({ users, sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, ensureIs } = authMiddleware(users);
 
@@ -49,25 +53,24 @@ module.exports = ({ users, resendEmail }) => {
         })
       );
 
-      res.json(gestionnaire);
+      res.json({
+        ...gestionnaire,
+        nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": siret }),
+      });
     })
   );
 
   router.put(
-    "/api/gestionnaire",
+    "/api/gestionnaire/setEmail",
     checkApiToken(),
     ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
       const { siret } = req.user;
+      const { email } = await Joi.object({
+        email: Joi.string().email(),
+      }).validateAsync(req.body, { abortEarly: false });
 
-      await Gestionnaire.updateOne(
-        { siret },
-        {
-          $set: {
-            ...(typeof req.body.email !== "undefined" ? { email: req.body.email } : {}),
-          },
-        }
-      );
+      email && (await changeEmail(siret, email, { auteur: req.user.username }));
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret });
 
@@ -129,6 +132,16 @@ module.exports = ({ users, resendEmail }) => {
 
       await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { etablissements });
 
+      if (typeof req.body.email !== "undefined" && req.body.diffusionAutorisee === true) {
+        const formateur = await Formateur.findOne({ uai });
+        await Formateur.updateOne({ uai }, { $set: { statut: UserStatut.EN_ATTENTE } });
+        const previousConfirmationEmail = formateur.emails.find((e) => e.templateName.startsWith("confirmation_"));
+
+        previousConfirmationEmail
+          ? await resendConfirmationEmails(resendEmail, { username: uai, force: true })
+          : await sendConfirmationEmails(sendEmail, { username: uai });
+      }
+
       const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });
 
       res.json(updatedGestionnaire);
@@ -150,7 +163,7 @@ module.exports = ({ users, resendEmail }) => {
         uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const filename = `${uai}.csv`;
+      const filename = `${siret}-${uai}.csv`;
 
       if (!req.user.etablissements.find((e) => e.uai === uai)) {
         throw Boom.notFound();

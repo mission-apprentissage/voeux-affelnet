@@ -1,12 +1,12 @@
 import React from "react";
 import queryString from "query-string";
-import * as Yup from "yup";
 import { Formik, Field, Form } from "formik";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Center, FormControl, FormErrorMessage, FormLabel, Heading, Input, Button } from "@chakra-ui/react";
 
-import useAuth from "../../common/hooks/useAuth";
+import { Yup } from "../../common/Yup";
 import { _post } from "../../common/httpClient";
+import useAuth from "../../common/hooks/useAuth";
 import decodeJWT from "../../common/utils/decodeJWT";
 import ErrorMessage from "../../common/components/ErrorMessage";
 

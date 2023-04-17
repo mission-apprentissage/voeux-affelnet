@@ -1,3 +1,6 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Field, Form, Formik } from "formik";
 import {
   Alert,
   Box,
@@ -10,11 +13,8 @@ import {
   Input,
   Text,
 } from "@chakra-ui/react";
-import { Field, Form, Formik } from "formik";
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import * as Yup from "yup";
+import { Yup } from "../../common/Yup";
 import { _post } from "../../common/httpClient";
 
 const ForgottenPasswordPage = () => {

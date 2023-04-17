@@ -1,10 +1,5 @@
 import React, { useState } from "react";
 import { Field, Form, Formik } from "formik";
-import * as Yup from "yup";
-import ErrorMessage from "../common/components/ErrorMessage";
-import { _get } from "../common/httpClient";
-import { sortDescending } from "../common/utils/dateUtils";
-import { Page } from "../common/components/layout/Page";
 import {
   Input,
   Button,
@@ -19,6 +14,12 @@ import {
   Table,
   Stack,
 } from "@chakra-ui/react";
+
+import { Yup } from "../common/Yup";
+import { _get } from "../common/httpClient";
+import { sortDescending } from "../common/utils/dateUtils";
+import ErrorMessage from "../common/components/ErrorMessage";
+import { Page } from "../common/components/layout/Page";
 
 function getDownloadStatus(gestionnaire, formateur) {
   let statut;

@@ -67,10 +67,14 @@ const Header = () => {
                   </Flex>
                 </MenuButton>
                 <MenuList>
-                  <MenuItem as="a" href="/profil">
-                    Profil
-                  </MenuItem>
-                  <MenuDivider />
+                  {["Gestionnaire", "Formateur"].includes(auth.type) && (
+                    <>
+                      <MenuItem as="a" href="/profil">
+                        Profil
+                      </MenuItem>
+                      <MenuDivider />
+                    </>
+                  )}
                   <MenuItem onClick={logout}>Déconnexion</MenuItem>
                 </MenuList>
               </Menu>

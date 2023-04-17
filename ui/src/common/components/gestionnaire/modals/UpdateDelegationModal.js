@@ -22,49 +22,38 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
 
+import { Yup } from "../../../Yup";
 import { _put } from "../../../httpClient";
-import { FormateurLibelle } from "../../formateur/fields/Libelle";
-import { FormateurEmail } from "../../formateur/fields/Email";
+import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
+import { FormateurEmail } from "../../gestionnaire/fields/FormateurEmail";
 
 export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpen, onClose }) => {
-  function equalsTo(ref, msg) {
-    return this.test({
-      name: "equalTo",
-      exclusive: false,
-      // eslint-disable-next-line no-template-curly-in-string
-      message: msg || "${path} must be the same as ${reference}",
-      params: {
-        reference: ref.path,
-      },
-      test: function (value) {
-        return value === this.resolve(ref);
-      },
-    });
-  }
+  const updateDelegationEmail = useCallback(
+    async ({ form }) => {
+      try {
+        await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
+        onClose();
+        await callback?.();
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [callback, onClose, formateur?.uai]
+  );
 
-  Yup.addMethod(Yup.string, "equalsTo", equalsTo);
-
-  const updateDelegationEmail = useCallback(async ({ form }) => {
-    try {
-      await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
-      onClose();
-      await callback?.();
-    } catch (error) {
-      console.error(error);
-    }
-  });
-
-  const cancelDelegation = useCallback(async ({ form }) => {
-    try {
-      await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { diffusionAutorisee: false });
-      onClose();
-      await callback?.();
-    } catch (error) {
-      console.error(error);
-    }
-  });
+  const cancelDelegation = useCallback(
+    async ({ form }) => {
+      try {
+        await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { diffusionAutorisee: false });
+        onClose();
+        await callback?.();
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [callback, onClose, formateur?.uai]
+  );
 
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 

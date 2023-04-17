@@ -1,5 +1,5 @@
 const express = require("express");
-const { oleoduc, transformIntoJSON } = require("oleoduc");
+const { oleoduc, transformIntoJSON, transformData } = require("oleoduc");
 const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
 const { sendJsonStream } = require("../utils/httpUtils");
@@ -19,8 +19,11 @@ const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
 const { dateAsString } = require("../../common/utils/stringUtils.js");
+const { siretFormat, uaiFormat } = require("../../common/utils/format");
+const { UserStatut } = require("../../common/constants/UserStatut");
+const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 
-module.exports = ({ resendEmail }) => {
+module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, checkIsAdmin } = authMiddleware();
 
@@ -42,8 +45,9 @@ module.exports = ({ resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { text, page, items_par_page, sort } = await Joi.object({
+      const { text, type, page, items_par_page, sort } = await Joi.object({
         text: Joi.string(),
+        type: Joi.string(),
         page: Joi.number().default(1),
         items_par_page: Joi.number().default(10),
         sort: Joi.string().default(`{ "username": 1 }`),
@@ -57,23 +61,29 @@ module.exports = ({ resendEmail }) => {
           // $or: [{ type: "Formateur" }, { type: "Gestionnaire" }],
           // type: "Gestionnaire",
           // ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
-
-          $or: [
+          $and: [
             {
-              type: "Formateur",
-              ...(text
-                ? {
-                    $or: [{ uai: regexQuery }, { raison_sociale: regexQuery }],
-                  }
-                : {}),
+              ...(type ? { type } : {}),
             },
             {
-              type: "Gestionnaire",
-              ...(text
-                ? {
-                    $or: [{ siret: regexQuery }, { raison_sociale: regexQuery }],
-                  }
-                : {}),
+              $or: [
+                {
+                  type: "Formateur",
+                  ...(text
+                    ? {
+                        $or: [{ uai: regexQuery }, { raison_sociale: regexQuery }],
+                      }
+                    : {}),
+                },
+                {
+                  type: "Gestionnaire",
+                  ...(text
+                    ? {
+                        $or: [{ siret: regexQuery }, { raison_sociale: regexQuery }],
+                      }
+                    : {}),
+                },
+              ],
             },
           ],
         },
@@ -86,6 +96,25 @@ module.exports = ({ resendEmail }) => {
 
       const stream = oleoduc(
         find.sort(JSON.parse(sort ?? "{}")).cursor(),
+        transformData(async (user) => {
+          return {
+            ...user,
+
+            ...(user.type === "Gestionnaire"
+              ? {
+                  nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": user.siret }),
+                  formateurs: await Formateur.find({
+                    uai: { $in: user.etablissements.map((etablissement) => etablissement.uai) },
+                  }),
+                }
+              : {
+                  nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": user.uai }),
+                  gestionnaires: await Gestionnaire.find({
+                    siret: { $in: user.etablissements.map((etablissement) => etablissement.siret) },
+                  }),
+                }),
+          };
+        }),
         transformIntoJSON({
           arrayWrapper: {
             pagination,
@@ -132,52 +161,37 @@ module.exports = ({ resendEmail }) => {
 
       const stream = oleoduc(
         find.sort({ siret: 1 }).cursor(),
+        // transformData(async (gestionnaire) => {
+        //   return {
+        //     ...gestionnaire,
+        //     etablissements: await Promise.all(async (etablissement) => {
+        //       const voeuxFilter = {
+        //         "etablissement_accueil.uai": etablissement.uai,
+        //         "etablissement_gestionnaire.siret": gestionnaire.siret,
+        //       };
+
+        //       const voeux = await Voeu.find(voeuxFilter);
+
+        //       return {
+        //         ...etablissement,
+        //         nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+        //         first_date_voeux: etablissement.uai
+        //           ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+        //           : null,
+
+        //         last_date_voeux: etablissement.uai
+        //           ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+        //           : null,
+        //       };
+        //     }),
+        //   };
+        // }),
         transformIntoJSON({
           arrayWrapper: {
             pagination,
           },
           arrayPropertyName: "gestionnaires",
-        })
-      );
-
-      return sendJsonStream(stream, res);
-    })
-  );
-
-  /**
-   * Permet de récupérer la liste des formateurs
-   */
-  router.get(
-    "/api/admin/formateurs",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      const { text, page, items_par_page } = await Joi.object({
-        text: Joi.string(),
-        page: Joi.number().default(1),
-        items_par_page: Joi.number().default(10),
-      }).validateAsync(req.query, { abortEarly: false });
-
-      const { find, pagination } = await paginate(
-        Formateur,
-        {
-          ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
-          type: "Formateur",
-        },
-        {
-          page,
-          items_par_page,
-          select: { _id: 0, password: 0 },
-        }
-      );
-
-      const stream = oleoduc(
-        find.sort({ siret: 1 }).cursor(),
-        transformIntoJSON({
-          arrayWrapper: {
-            pagination,
-          },
-          arrayPropertyName: "formateurs",
         })
       );
 
@@ -191,12 +205,43 @@ module.exports = ({ resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       const { siret } = await Joi.object({
-        siret: Joi.string().required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret });
+      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      res.json(gestionnaire);
+      const voeuxFilter = {
+        "etablissement_gestionnaire.siret": gestionnaire.siret,
+      };
+
+      res.json({
+        ...gestionnaire,
+        nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
+
+        etablissements: await Promise.all(
+          gestionnaire.etablissements.map(async (etablissement) => {
+            const voeuxFilter = {
+              "etablissement_accueil.uai": etablissement.uai,
+              "etablissement_gestionnaire.siret": gestionnaire.siret,
+            };
+
+            const voeux = await Voeu.find(voeuxFilter);
+
+            return {
+              ...etablissement,
+              nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+              first_date_voeux: etablissement.uai
+                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+                : null,
+
+              last_date_voeux: etablissement.uai
+                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+                : null,
+            };
+          })
+        ),
+      });
     })
   );
 
@@ -206,7 +251,7 @@ module.exports = ({ resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       const { siret } = await Joi.object({
-        siret: Joi.string().required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const gestionnaire = await Gestionnaire.findOne({ siret });
@@ -238,6 +283,14 @@ module.exports = ({ resendEmail }) => {
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
       await changeEmail(siret, email, { auteur: req.user.username });
+
+      const gestionnaire = await Gestionnaire.findOne({ siret });
+      await Gestionnaire.updateOne({ siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
+      const previousConfirmationEmail = gestionnaire.emails.find((e) => e.templateName.startsWith("confirmation_"));
+
+      previousConfirmationEmail
+        ? await resendConfirmationEmails(resendEmail, { username: siret, force: true })
+        : await sendConfirmationEmails(sendEmail, { username: siret });
 
       return res.json({});
     })
@@ -303,6 +356,94 @@ module.exports = ({ resendEmail }) => {
       await markAsNonConcerne(siret);
 
       return res.json({ statut: "non concerné" });
+    })
+  );
+
+  /**
+   * FORMATEURS
+   * =============
+   */
+
+  /**
+   * Permet de récupérer la liste des formateurs
+   */
+  router.get(
+    "/api/admin/formateurs",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { text, page, items_par_page } = await Joi.object({
+        text: Joi.string(),
+        page: Joi.number().default(1),
+        items_par_page: Joi.number().default(10),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      const { find, pagination } = await paginate(
+        Formateur,
+        {
+          ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+          type: "Formateur",
+        },
+        {
+          page,
+          items_par_page,
+          select: { _id: 0, password: 0 },
+        }
+      );
+
+      const stream = oleoduc(
+        find.sort({ siret: 1 }).cursor(),
+        transformIntoJSON({
+          arrayWrapper: {
+            pagination,
+          },
+          arrayPropertyName: "formateurs",
+        })
+      );
+
+      return sendJsonStream(stream, res);
+    })
+  );
+
+  router.get(
+    "/api/admin/formateurs/:uai",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const formateur = await Formateur.findOne({ uai });
+
+      res.json(formateur);
+    })
+  );
+
+  router.get(
+    "/api/admin/formateurs/:uai/gestionnaires",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const formateur = await Formateur.findOne({ uai });
+
+      if (!formateur.etablissements.filter((e) => e.voeux_date).length === 0) {
+        return res.json([]);
+      }
+
+      res.json(
+        await Promise.all(
+          formateur.etablissements.map(async (etablissement) => {
+            const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret });
+
+            return gestionnaire;
+          })
+        )
+      );
     })
   );
 

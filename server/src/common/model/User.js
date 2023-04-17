@@ -1,5 +1,6 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
+const { UserStatut } = require("../constants/UserStatut");
 
 const User = model(
   "User",
@@ -19,7 +20,7 @@ const User = model(
         type: String,
         index: true,
         default: "en attente",
-        enum: ["en attente", "confirmé", "activé", "non concerné"],
+        enum: [UserStatut.EN_ATTENTE, UserStatut.CONFIRME, UserStatut.ACTIVE, UserStatut.NON_CONCERNE],
       },
       isAdmin: {
         type: Boolean,
