@@ -6,10 +6,10 @@ export default function useAuth() {
 
   const setAuthFromToken = (token) => {
     if (!token) {
-      sessionStorage.removeItem("voeux-affelnet:token");
+      localStorage.removeItem("voeux-affelnet:token");
       setAuth(anonymous);
     } else {
-      sessionStorage.setItem("voeux-affelnet:token", token);
+      localStorage.setItem("voeux-affelnet:token", token);
       setAuth(decodeJWT(token));
     }
   };

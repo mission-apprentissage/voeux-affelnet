@@ -3,7 +3,7 @@ import { subscribeToHttpEvent } from "./httpClient";
 import decodeJWT from "./utils/decodeJWT";
 
 const anonymous = { sub: "anonymous", permissions: {} };
-const token = sessionStorage.getItem("voeux-affelnet:token");
+const token = localStorage.getItem("voeux-affelnet:token");
 
 const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
   auth: token ? decodeJWT(token) : anonymous,
@@ -12,7 +12,7 @@ const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
 subscribeToHttpEvent("http:error", (response) => {
   if (response.status === 401) {
     //Auto logout user when token is invalid
-    sessionStorage.removeItem("voeux-affelnet:token");
+    localStorage.removeItem("voeux-affelnet:token");
     setGlobalState("auth", anonymous);
   }
 });
