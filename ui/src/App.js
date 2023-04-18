@@ -40,6 +40,10 @@ const RequireAuth = ({ children, allowed }) => {
 const App = () => {
   const [auth] = useAuth();
 
+  const getDefaultRedirection = () => {
+    return auth.type === "Gestionnaire" ? "gestionnaire/formateurs" : getUserType(auth);
+  };
+
   return (
     <div className="App">
       <Router>
@@ -50,7 +54,7 @@ const App = () => {
             element={
               <Suspense>
                 <RequireAuth>
-                  <Navigate to={`/${getUserType(auth)}`} />
+                  <Navigate to={`/${getDefaultRedirection()}`} />
                 </RequireAuth>
               </Suspense>
             }
