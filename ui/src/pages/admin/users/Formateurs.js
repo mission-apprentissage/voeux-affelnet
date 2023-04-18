@@ -6,6 +6,7 @@ import { Page } from "../../../common/components/layout/Page";
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
 import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
+import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { _get } from "../../../common/httpClient";
 
 export const Formateurs = ({}) => {
@@ -115,7 +116,9 @@ export const Formateurs = ({}) => {
                       <Td>
                         <Text>{etablissement?.nombre_voeux}</Text>
                       </Td>
-                      <Td></Td>
+                      <Td>
+                        <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />
+                      </Td>
                     </Tr>
                   );
                 })}

@@ -50,22 +50,30 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
 
           const isDiffusionAutorisee = etablissement?.diffusionAutorisee;
 
-          const voeuxTelecharges = !isDiffusionAutorisee
-            ? !!gestionnaire.etablissements?.find(
-                (e) =>
-                  !!gestionnaire.voeux_telechargements?.find(
-                    (telechargement) =>
-                      telechargement.uai === e.uai && Date(telechargement.date) >= Date(etablissement.last_date_voeux)
-                  )
+          const voeuxTelechargementsFormateur = formateur.voeux_telechargements.filter(
+            (telechargement) => telechargement.siret === gestionnaire.siret
+          );
+
+          const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
+            (telechargement) => telechargement.uai === formateur.uai
+          );
+
+          const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
+            ? !!voeuxTelechargementsGestionnaire.find(
+                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
               )
-            : !!formateur.etablissements?.find(
-                (e) =>
-                  !!formateur.voeux_telechargements?.find(
-                    (telechargement) =>
-                      telechargement.siret === e.siret &&
-                      Date(telechargement.date) >= Date(etablissement.last_date_voeux)
-                  )
+            : !!voeuxTelechargementsFormateur?.find(
+                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
               );
+
+          const voeuxTelecharges = !isDiffusionAutorisee
+            ? !!voeuxTelechargementsGestionnaire.find(
+                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+              )
+            : !!voeuxTelechargementsFormateur.find(
+                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+              );
+          const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
           return (
             <>
@@ -107,7 +115,13 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                 </Heading>
 
                 <Heading as="h4" size="sm" mb={4}>
-                  Nombre de vœux disponibles : {etablissement.nombre_voeux}
+                  {hasUpdatedVoeux ? (
+                    <>
+                      Une liste mise à jour de {etablissement.nombre_voeux} vœux est disponible pour cet établissement.
+                    </>
+                  ) : (
+                    <>Nombre de vœux disponibles : {etablissement.nombre_voeux}</>
+                  )}
                 </Heading>
 
                 {hasVoeux && (
@@ -118,6 +132,12 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                         <>| Dernière mise à jour : {new Date(etablissement.last_date_voeux).toLocaleDateString()}</>
                       )}
                     </Text>
+                    {hasUpdatedVoeux && (
+                      <Text mb={4}>
+                        Cette mise à jour peut comporter de nouveaux vœux, des suppressions de vœux, ou des mises à jour
+                        de vœux existants.
+                      </Text>
+                    )}
 
                     {isDiffusionAutorisee ? (
                       <>

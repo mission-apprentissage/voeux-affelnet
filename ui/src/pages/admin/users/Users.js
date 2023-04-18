@@ -10,6 +10,8 @@ import { Yup } from "../../../common/Yup";
 import { _get } from "../../../common/httpClient";
 import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
+import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
+import { GestionnaireStatut } from "../../../common/components/admin/fields/GestionnaireStatut";
 
 // const iconProps = {
 //   width: "16px",
@@ -195,8 +197,10 @@ export const Users = () => {
                               {user.email} <Tag>R</Tag>
                             </Text>
                           </Td>
-                          <Td>{user.nombre_voeux}</Td>
-                          <Td>{/* <GestionnaireStatut gestionnaire={user} /> */}</Td>
+                          <Td></Td>
+                          <Td>
+                            <GestionnaireStatut gestionnaire={user} />{" "}
+                          </Td>
                         </>
                       ),
                       Formateur: (
@@ -231,7 +235,11 @@ export const Users = () => {
                             })}
                           </Td>
                           <Td>{user.nombre_voeux}</Td>
-                          <Td>{/* <FormateurStatut formateur={user} /> */}</Td>
+                          <Td>
+                            {user.gestionnaires?.map((gestionnaire) => {
+                              return <FormateurStatut gestionnaire={gestionnaire} formateur={user} />;
+                            })}
+                          </Td>
                         </>
                       ),
                     }[user.type]

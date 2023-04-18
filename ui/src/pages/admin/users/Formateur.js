@@ -122,6 +122,7 @@ export const Formateur = () => {
 
   const hasOnlyOneResponsable = gestionnaires.length === 1;
 
+  // TODO :
   const gestionnaire = gestionnaires[0];
 
   const isResponsableFormateurCheck = isResponsableFormateur({
@@ -137,7 +138,7 @@ export const Formateur = () => {
     <Page
       title={
         <>
-          Organisme formateur :&nbsp;
+          Organisme {isResponsableFormateurCheck ? <>responsable-formateur</> : <>formateur</>} :&nbsp;
           <FormateurLibelle formateur={formateur} />
         </>
       }
@@ -158,12 +159,11 @@ export const Formateur = () => {
 
       {isResponsableFormateurCheck ? (
         <Box mb={12}>
-          {/* <Text mb={4}>
+          <Text mb={4}>
             Cet organisme formateur est également responsable (signataire des conventions de formation), directement
             habilité à accéder aux listes de vœux. Personne habilitée à réceptionner les listes de vœux :{" "}
             {gestionnaires[0]?.email}.{" "}
-
-          </Text> */}
+          </Text>
 
           {/* <UpdateGestionnaireEmailModal
             isOpen={isOpenUpdateGestionnaireEmailModal}

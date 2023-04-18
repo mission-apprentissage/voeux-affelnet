@@ -102,7 +102,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
     ? !!voeuxTelechargementsGestionnaire.find(
         (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
       )
-    : !!voeuxTelechargementsGestionnaire.find(
+    : !!voeuxTelechargementsFormateur.find(
         (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
       );
   const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
@@ -224,7 +224,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
           <Heading as="h4" size="sm" mb={4}>
             {hasUpdatedVoeux ? (
-              <>Une liste mise à jour de {etablissement.nombre_voeux} vœux est disponible pour cet établissement</>
+              <>Une liste mise à jour de {etablissement.nombre_voeux} vœux est disponible pour cet établissement.</>
             ) : (
               <>Nombre de vœux disponibles : {etablissement.nombre_voeux}</>
             )}

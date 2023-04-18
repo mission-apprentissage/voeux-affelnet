@@ -29,33 +29,35 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       const { siret } = req.user;
       const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      gestionnaire.etablissements = await Promise.all(
-        gestionnaire.etablissements?.map(async (etablissement) => {
-          const voeuxFilter = {
-            "etablissement_accueil.uai": etablissement.uai,
-            "etablissement_gestionnaire.siret": siret,
-          };
-
-          const voeux = await Voeu.find(voeuxFilter);
-
-          return {
-            ...etablissement,
-            nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
-
-            first_date_voeux: etablissement.uai
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-              : null,
-
-            last_date_voeux: etablissement.uai
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-              : null,
-          };
-        })
-      );
-
       res.json({
         ...gestionnaire,
+
         nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": siret }),
+
+        etablissements: await Promise.all(
+          gestionnaire.etablissements?.map(async (etablissement) => {
+            const voeuxFilter = {
+              "etablissement_accueil.uai": etablissement.uai,
+              "etablissement_gestionnaire.siret": siret,
+            };
+
+            const voeux = await Voeu.find(voeuxFilter);
+
+            return {
+              ...etablissement,
+
+              nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+              first_date_voeux: etablissement.uai
+                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+                : null,
+
+              last_date_voeux: etablissement.uai
+                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+                : null,
+            };
+          })
+        ),
       });
     })
   );

@@ -14,7 +14,7 @@ export function Pagination({ pagination, onClick = noop }) {
       </Text>
       <Button
         variant="slight"
-        onClick={() => onClick(pagination.page + 1)}
+        onClick={() => pagination.page < pagination.nombre_de_page && onClick(pagination.page + 1)}
         disabled={pagination.nombre_de_page === pagination.page}
       >
         Suivant &gt;

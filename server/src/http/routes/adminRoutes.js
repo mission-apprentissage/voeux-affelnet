@@ -23,6 +23,80 @@ const { siretFormat, uaiFormat } = require("../../common/utils/format");
 const { UserStatut } = require("../../common/constants/UserStatut");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 
+const fillGestionnaire = async (gestionnaire) => {
+  const voeuxFilter = {
+    "etablissement_gestionnaire.siret": gestionnaire.siret,
+  };
+
+  return {
+    ...gestionnaire,
+
+    nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
+
+    etablissements: await Promise.all(
+      gestionnaire.etablissements.map(async (etablissement) => {
+        const voeuxFilter = {
+          "etablissement_accueil.uai": etablissement.uai,
+          "etablissement_gestionnaire.siret": gestionnaire.siret,
+        };
+
+        const voeux = await Voeu.find(voeuxFilter);
+
+        return {
+          ...etablissement,
+
+          nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+          first_date_voeux: etablissement.uai
+            ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+            : null,
+
+          last_date_voeux: etablissement.uai
+            ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+            : null,
+        };
+      })
+    ),
+  };
+};
+
+const fillFormateur = async (formateur) => {
+  const voeuxFilter = {
+    "etablissement_accueil.uai": formateur.uai,
+  };
+
+  return {
+    ...formateur,
+
+    nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
+
+    etablissements: await Promise.all(
+      formateur.etablissements.map(async (etablissement) => {
+        const voeuxFilter = {
+          "etablissement_accueil.uai": formateur.uai,
+          "etablissement_gestionnaire.siret": etablissement.siret,
+        };
+
+        const voeux = await Voeu.find(voeuxFilter);
+
+        return {
+          ...etablissement,
+
+          nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+          first_date_voeux: etablissement.siret
+            ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+            : null,
+
+          last_date_voeux: etablissement.siret
+            ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+            : null,
+        };
+      })
+    ),
+  };
+};
+
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, checkIsAdmin } = authMiddleware();
@@ -58,8 +132,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const { find, pagination } = await paginate(
         User,
         {
-          // $or: [{ type: "Formateur" }, { type: "Gestionnaire" }],
-          // type: "Gestionnaire",
           // ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
           $and: [
             {
@@ -103,15 +175,47 @@ module.exports = ({ sendEmail, resendEmail }) => {
             ...(user.type === "Gestionnaire"
               ? {
                   nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": user.siret }),
-                  formateurs: await Formateur.find({
-                    uai: { $in: user.etablissements.map((etablissement) => etablissement.uai) },
-                  }),
+
+                  formateurs: await Promise.all(
+                    (
+                      await Formateur.find({
+                        uai: { $in: user.etablissements.map((etablissement) => etablissement.uai) },
+                      }).lean()
+                    ).map(fillFormateur)
+                  ),
+
+                  etablissements: await Promise.all(
+                    user.etablissements.map(async (etablissement) => ({
+                      ...etablissement,
+
+                      nombre_voeux: await Voeu.countDocuments({
+                        "etablissement_gestionnaire.siret": user.siret,
+                        "etablissement_accueil.uai": etablissement.uai,
+                      }),
+                    }))
+                  ),
                 }
               : {
                   nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": user.uai }),
-                  gestionnaires: await Gestionnaire.find({
-                    siret: { $in: user.etablissements.map((etablissement) => etablissement.siret) },
-                  }),
+
+                  gestionnaires: await Promise.all(
+                    (
+                      await Gestionnaire.find({
+                        siret: { $in: user.etablissements.map((etablissement) => etablissement.siret) },
+                      }).lean()
+                    ).map(fillGestionnaire)
+                  ),
+
+                  etablissements: await Promise.all(
+                    user.etablissements.map(async (etablissement) => ({
+                      ...etablissement,
+
+                      nombre_voeux: await Voeu.countDocuments({
+                        "etablissement_gestionnaire.siret": etablissement.siret,
+                        "etablissement_accueil.uai": user.uai,
+                      }),
+                    }))
+                  ),
                 }),
           };
         }),
@@ -161,32 +265,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const stream = oleoduc(
         find.sort({ siret: 1 }).cursor(),
-        // transformData(async (gestionnaire) => {
-        //   return {
-        //     ...gestionnaire,
-        //     etablissements: await Promise.all(async (etablissement) => {
-        //       const voeuxFilter = {
-        //         "etablissement_accueil.uai": etablissement.uai,
-        //         "etablissement_gestionnaire.siret": gestionnaire.siret,
-        //       };
-
-        //       const voeux = await Voeu.find(voeuxFilter);
-
-        //       return {
-        //         ...etablissement,
-        //         nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
-
-        //         first_date_voeux: etablissement.uai
-        //           ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-        //           : null,
-
-        //         last_date_voeux: etablissement.uai
-        //           ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-        //           : null,
-        //       };
-        //     }),
-        //   };
-        // }),
+        transformData(fillGestionnaire),
         transformIntoJSON({
           arrayWrapper: {
             pagination,
@@ -210,38 +289,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      const voeuxFilter = {
-        "etablissement_gestionnaire.siret": gestionnaire.siret,
-      };
-
-      res.json({
-        ...gestionnaire,
-        nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
-
-        etablissements: await Promise.all(
-          gestionnaire.etablissements.map(async (etablissement) => {
-            const voeuxFilter = {
-              "etablissement_accueil.uai": etablissement.uai,
-              "etablissement_gestionnaire.siret": gestionnaire.siret,
-            };
-
-            const voeux = await Voeu.find(voeuxFilter);
-
-            return {
-              ...etablissement,
-              nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
-
-              first_date_voeux: etablissement.uai
-                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-                : null,
-
-              last_date_voeux: etablissement.uai
-                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-                : null,
-            };
-          })
-        ),
-      });
+      res.json(await fillGestionnaire(gestionnaire));
     })
   );
 
@@ -263,9 +311,36 @@ module.exports = ({ sendEmail, resendEmail }) => {
       res.json(
         await Promise.all(
           gestionnaire.etablissements.map(async (etablissement) => {
-            const formateur = await Formateur.findOne({ uai: etablissement.uai });
+            const formateur = await Formateur.findOne({ uai: etablissement.uai }).lean();
 
-            return formateur;
+            return {
+              ...formateur,
+
+              etablissements: await Promise.all(
+                formateur.etablissements.map(async (etablissement) => {
+                  const voeuxFilter = {
+                    "etablissement_accueil.uai": formateur.uai,
+                    "etablissement_gestionnaire.siret": etablissement.siret,
+                  };
+
+                  const voeux = await Voeu.find(voeuxFilter);
+
+                  return {
+                    ...etablissement,
+
+                    nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+                    first_date_voeux: etablissement.siret
+                      ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+                      : null,
+
+                    last_date_voeux: etablissement.siret
+                      ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+                      : null,
+                  };
+                })
+              ),
+            };
           })
         )
       );
@@ -393,6 +468,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const stream = oleoduc(
         find.sort({ siret: 1 }).cursor(),
+        transformData(fillFormateur),
         transformIntoJSON({
           arrayWrapper: {
             pagination,
@@ -414,9 +490,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
         uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const formateur = await Formateur.findOne({ uai });
+      const formateur = await Formateur.findOne({ uai }).lean();
 
-      res.json(formateur);
+      res.json(await fillFormateur(formateur));
     })
   );
 

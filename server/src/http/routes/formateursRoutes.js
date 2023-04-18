@@ -24,38 +24,38 @@ module.exports = ({ users }) => {
       const { uai } = req.user;
       const formateur = await Formateur.findOne({ uai }).lean();
 
-      formateur.etablissements = await Promise.all(
-        formateur.etablissements?.map(async (etablissement) => {
-          const voeuxFilter = {
-            "etablissement_accueil.uai": uai,
-            "etablissement_gestionnaire.siret": etablissement.siret,
-          };
-          const voeux = await Voeu.find(voeuxFilter);
-
-          return {
-            ...etablissement,
-
-            diffusionAutorisee: (await Gestionnaire.findOne({ siret: etablissement.siret }))?.etablissements?.find(
-              (etablissement) => etablissement.uai === uai
-            )?.diffusionAutorisee,
-
-            nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
-
-            first_date_voeux: etablissement.siret
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-              : null,
-
-            last_date_voeux: etablissement.siret
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-              : null,
-          };
-        })
-      );
-
       res.json({
         ...formateur,
 
         nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": uai }),
+
+        etablissements: await Promise.all(
+          formateur.etablissements?.map(async (etablissement) => {
+            const voeuxFilter = {
+              "etablissement_accueil.uai": uai,
+              "etablissement_gestionnaire.siret": etablissement.siret,
+            };
+            const voeux = await Voeu.find(voeuxFilter);
+
+            return {
+              ...etablissement,
+
+              diffusionAutorisee: (await Gestionnaire.findOne({ siret: etablissement.siret }))?.etablissements?.find(
+                (etablissement) => etablissement.uai === uai
+              )?.diffusionAutorisee,
+
+              nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+
+              first_date_voeux: etablissement.siret
+                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+                : null,
+
+              last_date_voeux: etablissement.siret
+                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+                : null,
+            };
+          })
+        ),
       });
     })
   );
