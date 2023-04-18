@@ -71,7 +71,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                   type: "Formateur",
                   ...(text
                     ? {
-                        $or: [{ uai: regexQuery }, { raison_sociale: regexQuery }],
+                        $or: [{ uai: regexQuery }, { raison_sociale: regexQuery }, { email: regexQuery }],
                       }
                     : {}),
                 },
@@ -79,7 +79,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                   type: "Gestionnaire",
                   ...(text
                     ? {
-                        $or: [{ siret: regexQuery }, { raison_sociale: regexQuery }],
+                        $or: [{ siret: regexQuery }, { raison_sociale: regexQuery }, { email: regexQuery }],
                       }
                     : {}),
                 },

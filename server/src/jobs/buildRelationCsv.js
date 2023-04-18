@@ -7,15 +7,15 @@ const {
   mergeStreams,
   filterData,
 } = require("oleoduc");
+const { Readable } = require("stream");
 const { getRelationsFromOffreDeFormation } = require("./utils/getRelationsFromOffreDeFormation.js");
 const { parseCsv } = require("../common/utils/csvUtils.js");
-const logger = require("../common/logger.js");
 
 function parseAdditionalRelationsCsv(csv) {
   return compose(csv, parseCsv());
 }
 
-async function buildRelationCsv(output, options = {}) {
+async function buildRelationCsv({ outputRelations, outputInvalids }, options = {}) {
   const stats = {
     total: 0,
     valid: 0,
@@ -46,7 +46,6 @@ async function buildRelationCsv(output, options = {}) {
         const index = accumulator.findIndex((item) => item.siret === relation.siret_gestionnaire);
 
         if (index === -1) {
-          // console.log("don't exists");
           stats.valid++;
           accumulator.push({
             siret: relation.siret_gestionnaire,
@@ -59,23 +58,8 @@ async function buildRelationCsv(output, options = {}) {
                   .filter((uai) => uai?.length)
               ),
             ],
-            // statut: await getGestionnaireStatut({
-            //   siret: relation.siret_gestionnaire,
-            //   uai: relation.uai_etablissement,
-            // }),
           });
         } else {
-          // console.log("exists");
-          // console.log({
-          //   existingEtablissements: accumulator[index].etablissements,
-          //   newEtablissements: relation.uai_etablissement.split(",").map((uai) => uai.toUpperCase()),
-          //   resultingEtablissements: [
-          //     ...new Set([
-          //       ...accumulator[index].etablissements,
-          //       ...relation.uai_etablissement.split(",").map((uai) => uai.toUpperCase()),
-          //     ]),
-          //   ],
-          // });
           accumulator[index].etablissements = [
             ...new Set([
               ...accumulator[index].etablissements,
@@ -90,7 +74,6 @@ async function buildRelationCsv(output, options = {}) {
     flattenArray(),
     filterData((relation) => {
       if (!relation.siret?.length || !relation.email?.length || !relation.etablissements?.length) {
-        logger.error(`INVALIDE : ${relation.siret} || ${relation.email} || ${relation.etablissements}`);
         stats.invalid++;
         invalids.push(relation);
         return false;
@@ -98,11 +81,12 @@ async function buildRelationCsv(output, options = {}) {
 
       return relation;
     }),
-
     transformIntoCSV(),
-    output
+    outputRelations
   );
 
-  return { stats, conflicts, invalids };
+  await oleoduc(Readable.from(invalids), transformIntoCSV(), outputInvalids);
+
+  return { stats };
 }
 module.exports = buildRelationCsv;

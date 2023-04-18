@@ -125,7 +125,7 @@ async function importGestionnaires(relationCsv, options = {}) {
           }
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter le cfa ${siret}`, error);
+          logger.error(`Impossible de traiter le gestionnaire ${siret}`, error);
         }
       },
       { parallel: 10 }

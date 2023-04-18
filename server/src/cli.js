@@ -60,12 +60,22 @@ cli
     "Le fichier CSV contenant les relations complémentaires",
     createReadStream
   )
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
-  .action(({ out, ...rest }) => {
+  .option(
+    "--outRelations <outputRelationsFile",
+    "Fichier cible dans lequel sera stocké l'export (defaut: stdout)",
+    createWriteStream
+  )
+  .option(
+    "--outInvalids <outputInvalidsFile>",
+    "Fichier cible dans lequel sera stocké l'export (defaut: stdout)",
+    createWriteStream
+  )
+  .action(({ outRelations, outInvalids, ...rest }) => {
     runScript(() => {
-      const output = out || writeToStdout();
+      const outputRelations = outRelations || writeToStdout();
+      const outputInvalids = outInvalids || writeToStdout();
 
-      return buildRelationCsv(output, rest);
+      return buildRelationCsv({ outputRelations, outputInvalids }, rest);
     });
   });
 
