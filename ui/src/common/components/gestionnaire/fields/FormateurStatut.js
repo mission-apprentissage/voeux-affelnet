@@ -38,32 +38,6 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
     (telechargement) => telechargement.uai === formateur.uai
   );
 
-  if (!gestionnaire.nombre_voeux) {
-    return (
-      <>
-        {!isResponsableFormateur({ gestionnaire, formateur }) && (
-          <>
-            {etablissementFromGestionnaire.diffusionAutorisee ? (
-              <>Délégation effectuée</>
-            ) : (
-              <Button ml={4} variant="primary" onClick={onOpen}>
-                Déléguer
-              </Button>
-            )}
-          </>
-        )}
-
-        <DelegationModal
-          gestionnaire={gestionnaire}
-          formateur={formateur}
-          callback={callback}
-          isOpen={isOpen}
-          onClose={onClose}
-        />
-      </>
-    );
-  }
-
   switch (diffusionAutorisee) {
     case true: {
       switch (true) {
@@ -109,7 +83,13 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
             </>
           );
         }
-        case UserStatut.ACTIVE === formateur.statut && voeuxDisponible && !voeuxTelechargementsFormateur.length: {
+        case UserStatut.ACTIVE === formateur.statut &&
+          voeuxDisponible &&
+          (!voeuxTelechargementsFormateur.length ||
+            !voeuxTelechargementsFormateur.find(
+              (telechargement) =>
+                new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            )): {
           return (
             <>
               <WarningFill verticalAlign="text-bottom" />
@@ -148,6 +128,28 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
       }
     }
     case false: {
+      if (!gestionnaire.nombre_voeux) {
+        return (
+          <>
+            {!isResponsableFormateur({ gestionnaire, formateur }) && !etablissementFromGestionnaire.diffusionAutorisee && (
+              <>
+                <Button ml={4} variant="primary" onClick={onOpen}>
+                  Déléguer
+                </Button>
+
+                <DelegationModal
+                  gestionnaire={gestionnaire}
+                  formateur={formateur}
+                  callback={callback}
+                  isOpen={isOpen}
+                  onClose={onClose}
+                />
+              </>
+            )}
+          </>
+        );
+      }
+
       switch (true) {
         case voeuxDisponible &&
           new Date(etablissementFromGestionnaire.first_date_voeux) !==
@@ -189,7 +191,12 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
             </>
           );
         }
-        case voeuxDisponible && !voeuxTelechargementsGestionnaire.length: {
+        case voeuxDisponible &&
+          (!voeuxTelechargementsGestionnaire.length ||
+            !voeuxTelechargementsGestionnaire.find(
+              (telechargement) =>
+                new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            )): {
           return (
             <>
               <Button variant="primary" onClick={downloadVoeuxAndReload}>

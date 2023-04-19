@@ -70,7 +70,13 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
             </>
           );
         }
-        case UserStatut.ACTIVE === formateur.statut && voeuxDisponible && !voeuxTelechargementsFormateur.length: {
+        case UserStatut.ACTIVE === formateur.statut &&
+          voeuxDisponible &&
+          (!voeuxTelechargementsFormateur.length ||
+            !voeuxTelechargementsFormateur.find(
+              (telechargement) =>
+                new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            )): {
           return (
             <>
               <WarningFill verticalAlign="text-bottom" />
@@ -151,7 +157,13 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
             </>
           );
         }
-        case UserStatut.ACTIVE === gestionnaire.statut && voeuxDisponible && !voeuxTelechargementsGestionnaire.length: {
+        case UserStatut.ACTIVE === gestionnaire.statut &&
+          voeuxDisponible &&
+          (!voeuxTelechargementsGestionnaire.length ||
+            !voeuxTelechargementsGestionnaire.find(
+              (telechargement) =>
+                new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            )): {
           return (
             <>
               <WarningFill verticalAlign="text-bottom" /> Compte créé, liste non téléchargée

@@ -250,7 +250,7 @@ export const Formateur = () => {
         </Heading>
 
         <Heading as="h4" size="sm" mb={4}>
-          Nombre de vœux disponibles : {gestionnaire.nombre_voeux}
+          Nombre de vœux disponibles : {gestionnaire.nombre_voeux ?? formateur.nombre_voeux}
         </Heading>
         {/*
         <Link variant="action" onClick={downloadVoeux}>
