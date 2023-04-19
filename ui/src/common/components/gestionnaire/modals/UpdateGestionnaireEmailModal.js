@@ -41,6 +41,7 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
         <ModalHeader>Modifier votre adresse email :</ModalHeader>
 
         <ModalCloseButton />
+
         <ModalBody>
           <Formik
             initialValues={{

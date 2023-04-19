@@ -23,17 +23,30 @@ import { _put } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 
 export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onClose }) => {
-  const activateDelegation = useCallback(async ({ form }) => {
-    try {
-      await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
-      onClose();
-      await callback?.();
-    } catch (error) {
-      console.error(error);
-    }
-  });
+  const activateDelegation = useCallback(
+    async ({ form }) => {
+      try {
+        await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
+        onClose();
+        await callback?.();
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [onClose, callback, formateur?.uai]
+  );
 
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
+
+  const hasVoeux = etablissement.nombre_voeux > 0;
+
+  const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
+    (telechargement) => telechargement.uai === formateur.uai
+  );
+
+  const voeuxTelecharges = !!voeuxTelechargementsGestionnaire.find(
+    (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
@@ -44,6 +57,7 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
         </ModalHeader>
 
         <ModalCloseButton />
+
         <ModalBody>
           <Formik
             initialValues={{
@@ -79,22 +93,21 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
                 personne ne reçoit pas le courriel de notification, invitez-la à vérifier dans ses spam.
               </Text>
               <Text mb={4}>
-                {/* TODO:  */}
-                {true ? (
-                  <>
-                    {/* Pas de vœux ou vœux non téléchargés */}
-                    Cette délégation vous dispensera, en tant qu'organisme responsable, de télécharger les listes de
-                    vœux. Vous conserverez néanmoins un accès à ces listes et vous pourrez visualiser le statut
-                    d'avancement de la personne désignée : confirmation d'adresse courriel, création du mot de passe,
-                    téléchargement de la liste, téléchargement de l'éventuelle mise à jour.
-                  </>
-                ) : (
+                {hasVoeux && voeuxTelecharges ? (
                   <>
                     {/* Voeux disponibles et téléchargés par le responsable */}
                     Cette délégation de droits aura pour effet de réinitialiser le statut de téléchargement :
                     actuellement considérée comme déjà téléchargée pour cet établissement, la liste devra à nouveau être
                     téléchargée par la personne désignée. Votre téléchargement restera toutefois enregistré dans
                     l'historique. Vous conserverez un accès à ces listes et vous pourrez visualiser le statut
+                    d'avancement de la personne désignée : confirmation d'adresse courriel, création du mot de passe,
+                    téléchargement de la liste, téléchargement de l'éventuelle mise à jour.
+                  </>
+                ) : (
+                  <>
+                    {/* Pas de vœux ou vœux non téléchargés */}
+                    Cette délégation vous dispensera, en tant qu'organisme responsable, de télécharger les listes de
+                    vœux. Vous conserverez néanmoins un accès à ces listes et vous pourrez visualiser le statut
                     d'avancement de la personne désignée : confirmation d'adresse courriel, création du mot de passe,
                     téléchargement de la liste, téléchargement de l'éventuelle mise à jour.
                   </>

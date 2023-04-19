@@ -1,12 +1,16 @@
 import { useCallback } from "react";
-import { Button } from "@chakra-ui/react";
+import { Button, useDisclosure } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../../hooks/gestionnaireHooks";
 import { UserStatut } from "../../../constants/UserStatut";
 import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
 import { WarningFill } from "../../../../theme/components/icons/WarningFill";
+import { isResponsableFormateur } from "../../../utils/getUserType";
+import { DelegationModal } from "../modals/DelegationModal";
 
 export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const etablissementFromGestionnaire = gestionnaire.etablissements?.find(
     (etablissement) => formateur.uai === etablissement.uai
   );
@@ -23,7 +27,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
 
   const downloadVoeuxAndReload = useCallback(async () => {
     await downloadVoeux();
-    await callback();
+    await callback?.();
   }, [downloadVoeux, callback]);
 
   const voeuxTelechargementsFormateur = formateur.voeux_telechargements.filter(
@@ -33,6 +37,32 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
   const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
     (telechargement) => telechargement.uai === formateur.uai
   );
+
+  if (!gestionnaire.nombre_voeux) {
+    return (
+      <>
+        {!isResponsableFormateur({ gestionnaire, formateur }) && (
+          <>
+            {etablissementFromGestionnaire.diffusionAutorisee ? (
+              <>Délégation effectuée</>
+            ) : (
+              <Button ml={4} variant="primary" onClick={onOpen}>
+                Déléguer
+              </Button>
+            )}
+          </>
+        )}
+
+        <DelegationModal
+          gestionnaire={gestionnaire}
+          formateur={formateur}
+          callback={callback}
+          isOpen={isOpen}
+          onClose={onClose}
+        />
+      </>
+    );
+  }
 
   switch (diffusionAutorisee) {
     case true: {

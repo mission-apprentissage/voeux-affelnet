@@ -2,6 +2,7 @@ import { Box, Link, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../common/components/gestionnaire/fields/FormateurEmail";
+import { FormateurStatut } from "../../common/components/gestionnaire/fields/FormateurStatut";
 
 export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
   return (
@@ -11,6 +12,7 @@ export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
           <Th width="100px"></Th>
           <Th width="400px">Raison sociale / Ville</Th>
           <Th width="450px">Courriel habilité</Th>
+          <Th></Th>
         </Tr>
       </Thead>
       <Tbody>
@@ -27,13 +29,11 @@ export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
               </Td>
               <Td>
                 <Box display="flex">
-                  <FormateurEmail
-                    gestionnaire={gestionnaire}
-                    formateur={formateur}
-                    showDelegationButton={true}
-                    callback={callback}
-                  />
+                  <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
                 </Box>
+              </Td>
+              <Td>
+                <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
               </Td>
             </Tr>
           );

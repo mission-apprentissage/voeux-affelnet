@@ -49,7 +49,7 @@ export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
                 <FormateurVoeuxDisponibles gestionnaire={gestionnaire} formateur={formateur} />
               </Td>
               <Td>
-                <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />
+                <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
               </Td>
             </Tr>
           );

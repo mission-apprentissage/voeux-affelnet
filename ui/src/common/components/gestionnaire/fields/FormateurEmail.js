@@ -1,11 +1,7 @@
-import { Button, Flex, Text, useDisclosure } from "@chakra-ui/react";
-import { isResponsableFormateur } from "../../../utils/getUserType";
-import { DelegationModal } from "../../gestionnaire/modals/DelegationModal";
+import { Flex, Text } from "@chakra-ui/react";
 import { UserStatut } from "../../../constants/UserStatut";
 
-export const FormateurEmail = ({ gestionnaire, formateur, callback, showDelegationButton }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
+export const FormateurEmail = ({ gestionnaire, formateur }) => {
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 
   const diffusionAutorisee = etablissement?.diffusionAutorisee;
@@ -21,21 +17,8 @@ export const FormateurEmail = ({ gestionnaire, formateur, callback, showDelegati
           <Text mr={4}>
             <strong>Vous</strong> ({gestionnaire.email})
           </Text>
-          {!isResponsableFormateur({ gestionnaire, formateur }) && showDelegationButton && (
-            <Button ml={4} variant="primary" onClick={onOpen}>
-              Déléguer
-            </Button>
-          )}
         </Flex>
       )}
-
-      <DelegationModal
-        gestionnaire={gestionnaire}
-        formateur={formateur}
-        callback={callback}
-        isOpen={isOpen}
-        onClose={onClose}
-      />
     </>
   );
 };

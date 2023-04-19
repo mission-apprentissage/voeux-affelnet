@@ -69,6 +69,7 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
         </ModalHeader>
 
         <ModalCloseButton />
+
         <ModalBody>
           <Text mb={4}>
             <strong>
