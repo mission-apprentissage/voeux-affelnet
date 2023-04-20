@@ -115,7 +115,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
   return (
     <>
-      <Page title={"Accès aux listes de vœux exprimés sur le service en ligne Affelnet"}>
+      <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
         <Box mb={4}>
           <Heading as="h3" size="md" display="flex" mb={4}>
             {isResponsableFormateur ? <>Organisme responsable-formateur</> : <>Organisme formateur</>} :&nbsp;
@@ -131,7 +131,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           <Box mb={12}>
             <Text mb={4}>
               Cet organisme formateur est également responsable (signataire des conventions de formation), directement
-              habilité à accéder aux listes de vœux. Personne habilitée à réceptionner les listes de vœux :{" "}
+              habilité à accéder aux listes de candidats. Personne habilitée à réceptionner les listes :{" "}
               <GestionnaireEmail gestionnaire={gestionnaire} />.{" "}
               <Link variant="action" onClick={onOpenUpdateGestionnaireEmailModal}>
                 Modifier l'email
@@ -160,7 +160,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   {gestionnaire.uai ?? "Inconnu"}
                 </Text>
                 <Text mb={2}>
-                  Personne habilitée à réceptionner les listes de vœux au sein de l'organisme responsable :{" "}
+                  Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
                   <GestionnaireEmail gestionnaire={gestionnaire} />
                 </Text>
                 <Text mb={2}>
@@ -179,8 +179,8 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
             {isDiffusionAutorisee ? (
               <>
                 <Text>
-                  La délégation des droits de réception des listes de vœux a été activée pour cet organisme formateur.
-                  Personne habilitée à réceptionner les listes de vœux au sein de l'organisme formateur :{" "}
+                  La délégation des droits de réception des listes de candidats a été activée pour cet organisme
+                  formateur. Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
                   {etablissement?.email}{" "}
                   <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                     (modifier)
@@ -198,7 +198,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
             ) : (
               <>
                 <Text mb={4}>
-                  La délégation des droits de réception des listes de vœux n'a pas été activée pour cet organisme
+                  La délégation des droits de réception des listes de candidats n'a pas été activée pour cet organisme
                   formateur. Seul le responsable peut les réceptionner.
                 </Text>
                 <Button variant="primary" mb={4} onClick={onOpenDelegationModal}>
@@ -224,9 +224,11 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
           <Heading as="h4" size="sm" mb={4}>
             {hasUpdatedVoeux ? (
-              <>Une liste mise à jour de {etablissement.nombre_voeux} vœux est disponible pour cet établissement.</>
+              <>
+                Une liste mise à jour de {etablissement.nombre_voeux} candidats est disponible pour cet établissement.
+              </>
             ) : (
-              <>Nombre de vœux disponibles : {etablissement.nombre_voeux}</>
+              <>Nombre de candidats: {etablissement.nombre_voeux}</>
             )}
           </Heading>
 
@@ -240,8 +242,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
               </Text>
               {hasUpdatedVoeux && (
                 <Text mb={4}>
-                  Cette mise à jour peut comporter de nouveaux vœux, des suppressions de vœux, ou des mises à jour de
-                  vœux existants.
+                  Cette mise à jour peut comporter de nouveaux candidats, des suppressions, ou des mises à jour.
                 </Text>
               )}
               {isDiffusionAutorisee ? (
@@ -250,7 +251,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                     <>
                       <Text display={"flex"} alignItems="center" mb={4}>
                         <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Le destinataire (
-                        {etablissement.email}) a bien téléchargé la liste de vœux.{" "}
+                        {etablissement.email}) a bien téléchargé la liste de candidats.{" "}
                       </Text>
                       <Text>
                         Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par courriel.
@@ -276,8 +277,8 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                 <>
                   {voeuxTelecharges ? (
                     <Text display={"flex"} alignItems="center" mb={4}>
-                      <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Vœux téléchargés par
-                      vous ({gestionnaire.email}
+                      <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Liste téléchargée
+                      par vous ({gestionnaire.email}
                       ). &nbsp;
                       <Link variant="action" onClick={downloadVoeuxAndReload}>
                         Télécharger à nouveau
@@ -314,6 +315,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                 </h2>
                 <AccordionPanel pb={4}>
                   <Text mb={4}>
+                    {/* TODO : Date à compléter */}
                     Prenez contact avec la personne destinataire pour l'inviter à télécharger la liste. Si la personne
                     n'a pas reçu d'email de notification invitez-la à consulter ses spam, en lui communiquant la date à
                     laquelle la dernière notification lui a été envoyée (JJ/MM/AAAA, hh:mm) et l'expéditeur des

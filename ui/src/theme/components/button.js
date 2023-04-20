@@ -1,4 +1,4 @@
-const commonButtonStyle = {
+export const commonButtonStyle = {
   borderRadius: 0,
   textTransform: "none",
   fontWeight: 400,

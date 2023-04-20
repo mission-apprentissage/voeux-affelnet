@@ -57,9 +57,12 @@ services:
     image: mailhog/mailhog
     container_name: voeux_affelnet_smtp
     mem_limit: 128m
+    volumes:
+      - .local/mailhog:/data
     ports:
       - 1025:1025
     networks:
       - voeux_affelnet_network
     environment:
       - MH_UI_WEB_PATH=smtp
+    entrypoint: MailHog -auth-file=/data/auth.file

@@ -161,7 +161,7 @@ export const Formateur = () => {
         <Box mb={12}>
           <Text mb={4}>
             Cet organisme formateur est également responsable (signataire des conventions de formation), directement
-            habilité à accéder aux listes de vœux. Personne habilitée à réceptionner les listes de vœux :{" "}
+            habilité à accéder aux listes de candidats. Personne habilitée à réceptionner les listes :{" "}
             {gestionnaires[0]?.email}.{" "}
           </Text>
 
@@ -187,7 +187,7 @@ export const Formateur = () => {
                 {gestionnaire?.uai ?? "Inconnu"}
               </Text>
               <Text mb={2}>
-                Personne habilitée à réceptionner les listes de vœux au sein de l'organisme responsable :{" "}
+                Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
                 {gestionnaire?.email}
               </Text>
               <Text mb={2}>
@@ -206,8 +206,8 @@ export const Formateur = () => {
           {isDiffusionAutorisee ? (
             <>
               <Text>
-                La délégation des droits de réception des listes de vœux a été activée pour cet organisme formateur.
-                Personne habilitée à réceptionner les listes de vœux au sein de l'organisme formateur :{" "}
+                La délégation des droits de réception des listes de candidats a été activée pour cet organisme
+                formateur. Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
                 {formateur?.email ?? etablissement?.email}{" "}
                 {/* <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                   (modifier)
@@ -225,7 +225,7 @@ export const Formateur = () => {
           ) : (
             <>
               <Text mb={4}>
-                La délégation des droits de réception des listes de vœux n'a pas été activée pour cet organisme
+                La délégation des droits de réception des listes de candidats n'a pas été activée pour cet organisme
                 formateur. Seul le responsable peut les réceptionner.
               </Text>
               {/* <Button variant="primary" mb={4} onClick={onOpenDelegationModal}>
@@ -250,7 +250,7 @@ export const Formateur = () => {
         </Heading>
 
         <Heading as="h4" size="sm" mb={4}>
-          Nombre de vœux disponibles : {gestionnaire.nombre_voeux ?? formateur.nombre_voeux}
+          Nombre de candidats: {gestionnaire.nombre_voeux ?? formateur.nombre_voeux}
         </Heading>
         {/*
         <Link variant="action" onClick={downloadVoeux}>

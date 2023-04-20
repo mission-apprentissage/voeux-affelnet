@@ -9,7 +9,8 @@ import { Accordion } from "./accordion";
 import { Select } from "./select";
 import { Radio } from "./radio";
 import { Switch } from "./switch";
+import { Alert } from "./alert";
 
-const components = { Tabs, Badge, Button, Input, Text, Textarea, Link, Accordion, Select, Radio, Switch };
+const components = { Tabs, Badge, Button, Input, Text, Textarea, Link, Accordion, Select, Radio, Switch, Alert };
 
 export { components };

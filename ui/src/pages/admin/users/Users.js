@@ -167,7 +167,7 @@ export const Users = () => {
             <Th width="450px">Raison sociale / Ville</Th>
             <Th width="350px">Courriel habilité</Th>
 
-            <Th width={"80px"}>Vœux 2023</Th>
+            <Th width={"80px"}>Candidats 2023</Th>
             <Th width={"150px"}>Statut d'avancement</Th>
           </Tr>
         </Thead>
@@ -185,7 +185,7 @@ export const Users = () => {
                       Gestionnaire: (
                         <>
                           <Td>
-                            <Link variant="action" href={`/admin/gestionnaire/${user.siret}`}>
+                            <Link variant="primary" href={`/admin/gestionnaire/${user.siret}`}>
                               Détail
                             </Link>
                           </Td>
@@ -206,7 +206,7 @@ export const Users = () => {
                       Formateur: (
                         <>
                           <Td>
-                            <Link variant="action" href={`/admin/formateur/${user.uai}`}>
+                            <Link variant="primary" href={`/admin/formateur/${user.uai}`}>
                               Détail
                             </Link>
                           </Td>

@@ -101,7 +101,7 @@ export const Gestionnaire = () => {
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
               <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateur/${gestionnaire.uai}`}>
-                Accéder à la page de téléchargement des vœux
+                Accéder à la page de téléchargement des listes de candidats
               </Link>
             </Text>
           )}
@@ -117,14 +117,14 @@ export const Gestionnaire = () => {
           </Heading>
 
           <Heading as="h4" size="sm" mb={4}>
-            Nombre de vœux disponibles : {gestionnaire.nombre_voeux}
+            Nombre de candidats: {gestionnaire.nombre_voeux}
           </Heading>
 
           <Text mb={4}>
             <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateurs`}>
               Voir la liste des organismes formateurs
             </Link>{" "}
-            pour accéder aux listes de vœux disponibles et à leurs statuts de téléchargement.
+            pour accéder aux listes de candidats disponibles et à leurs statuts de téléchargement.
           </Text>
 
           {/* TODO: Définir quel est le mail à renvoyer fonction du statut du User (comparer avec UserStatut.XXXX) */}

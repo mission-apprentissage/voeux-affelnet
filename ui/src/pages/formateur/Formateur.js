@@ -26,7 +26,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
 
   return (
     <>
-      <Page title={"Accès aux listes de vœux exprimés sur le service en ligne Affelnet"}>
+      <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
         <Box mb={4}>
           <Heading as="h3" size="md" display="flex" mb={4}>
             Organisme formateur :&nbsp;
@@ -90,7 +90,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                     {gestionnaire.uai ?? "Inconnu"}
                   </Text>
                   <Text mb={2}>
-                    Personne habilitée à réceptionner les listes de vœux au sein de l'organisme responsable :{" "}
+                    Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
                     <GestionnaireEmail gestionnaire={gestionnaire} />
                   </Text>
                 </Box>
@@ -100,8 +100,8 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                 <Text mb={4}>
                   {isDiffusionAutorisee ? (
                     <>
-                      La délégation des droits de réception des listes de vœux a été activée pour votre organisme à
-                      l'adresse : <FormateurEmail formateur={formateur} gestionnaire={gestionnaire} />.
+                      La délégation des droits de réception des listes a été activée pour votre organisme à l'adresse :{" "}
+                      <FormateurEmail formateur={formateur} gestionnaire={gestionnaire} />.
                     </>
                   ) : (
                     <>La délégation des droits de réception n'est pas activée pour votre organisme.</>
@@ -117,10 +117,11 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                 <Heading as="h4" size="sm" mb={4}>
                   {hasUpdatedVoeux ? (
                     <>
-                      Une liste mise à jour de {etablissement.nombre_voeux} vœux est disponible pour cet établissement.
+                      Une liste mise à jour de {etablissement.nombre_voeux} candidats est disponible pour cet
+                      établissement.
                     </>
                   ) : (
-                    <>Nombre de vœux disponibles : {etablissement.nombre_voeux}</>
+                    <>Nombre de candidats: {etablissement.nombre_voeux}</>
                   )}
                 </Heading>
 
@@ -134,8 +135,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                     </Text>
                     {hasUpdatedVoeux && (
                       <Text mb={4}>
-                        Cette mise à jour peut comporter de nouveaux vœux, des suppressions de vœux, ou des mises à jour
-                        de vœux existants.
+                        Cette mise à jour peut comporter de nouveaux candidats, des suppressions, ou des mises à jour.
                       </Text>
                     )}
 
@@ -145,7 +145,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                           <>
                             <Text mb={4}>
                               <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Vous (
-                              {formateur.email}) avez téléchargé la liste de vœux.{" "}
+                              {formateur.email}) avez téléchargé la liste.{" "}
                               <Link variant="action" onClick={() => downloadVoeuxAndReload({ gestionnaire })}>
                                 Télécharger à nouveau
                               </Link>
@@ -167,8 +167,8 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                         {voeuxTelecharges ? (
                           <>
                             <Text mb={4}>
-                              La liste des vœux a été téléchargée par votre organisme responsable. Vous pouvez le
-                              contacter ({gestionnaire.email}) pour récupérer cette liste.
+                              La liste des candidats a été téléchargée par votre organisme responsable. Vous pouvez le
+                              contacter ({gestionnaire.email}) pour la récupérer.
                             </Text>
                             <Text mb={4}>
                               Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par
@@ -178,9 +178,9 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                         ) : (
                           <>
                             <Text mb={4}>
-                              La liste des vœux n'a pas été téléchargée par votre organisme responsable (
-                              {gestionnaire.email}). Vous pouvez le contacter pour l'inviter à télécharger cette liste
-                              et vous la transmettre.
+                              La liste des candidats n'a pas été téléchargée par votre organisme responsable (
+                              {gestionnaire.email}). Vous pouvez le contacter pour l'inviter à la télécharger et vous la
+                              transmettre.
                             </Text>
                           </>
                         )}

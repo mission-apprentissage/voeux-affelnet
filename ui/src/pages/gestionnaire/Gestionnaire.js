@@ -52,7 +52,7 @@ export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
               <Link variant="action" href={`/gestionnaire/formateurs/${gestionnaire.uai}`}>
-                Accéder à la page de téléchargement des vœux
+                Accéder à la page de téléchargement des listes de candidats
               </Link>
             </Text>
           )}
@@ -64,14 +64,14 @@ export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
           </Heading>
 
           <Heading as="h4" size="sm" mb={4}>
-            Nombre de vœux disponibles : {gestionnaire.nombre_voeux}
+            Nombre de candidats : {gestionnaire.nombre_voeux}
           </Heading>
 
           <Text mb={4}>
             <Link variant="action" href={`/gestionnaire/formateurs`}>
               Voir la liste des organismes formateurs
             </Link>{" "}
-            pour accéder aux listes de vœux disponibles et à leurs statuts de téléchargement.
+            pour accéder aux listes de candidats et à leurs statuts de téléchargement.
           </Text>
         </Box>
 

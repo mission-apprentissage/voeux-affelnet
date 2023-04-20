@@ -20,6 +20,7 @@ import {
   ModalOverlay,
   Text,
   Stack,
+  Heading,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
@@ -62,21 +63,19 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          <Text>
-            Modifier la délégation de droit de réception de la liste de vœux exprimés pour{" "}
+          <Heading as="h2" size="lg">
+            Modifier la délégation de droit de réception de la liste de candidats pour{" "}
             <FormateurLibelle formateur={formateur} />
-          </Text>
+          </Heading>
         </ModalHeader>
 
         <ModalCloseButton />
 
         <ModalBody>
-          <Text mb={4}>
-            <strong>
-              Vous vous apprêtez à modifier le destinataire de la délégation de droits au sein de l'organisme formateur{" "}
-              <FormateurLibelle formateur={formateur} />, actuellement{" "}
-              <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} />.
-            </strong>
+          <Text fontSize="lg" mb={4}>
+            Vous vous apprêtez à modifier le destinataire de la délégation de droits au sein de l'organisme formateur{" "}
+            <FormateurLibelle formateur={formateur} />, actuellement{" "}
+            <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} />.
           </Text>
           <Text mb={4}>
             <strong>Précisez ce que vous souhaitez faire :</strong>
@@ -86,7 +85,7 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
               <h2>
                 <AccordionButton>
                   <Box as="span" flex="1" textAlign="left">
-                    Annuler la délégation et récupérer le rôle exclusif de réception des listes de vœux
+                    Annuler la délégation et récupérer le rôle exclusif de réception des listes de candidats
                   </Box>
                   <AccordionIcon />
                 </AccordionButton>
@@ -117,8 +116,8 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
               <h2>
                 <AccordionButton>
                   <Box as="span" flex="1" textAlign="left">
-                    Saisir une autre adresse courriel habilitée à réceptionner les liste de vœux au sein de l'organisme
-                    formateur
+                    Saisir une autre adresse courriel habilitée à réceptionner les liste de candidats au sein de
+                    l'organisme formateur
                   </Box>
                   <AccordionIcon />
                 </AccordionButton>

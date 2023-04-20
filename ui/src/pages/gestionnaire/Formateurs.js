@@ -15,14 +15,14 @@ export const Formateurs = ({ gestionnaire, formateurs, callback }) => {
   // const avecVoeux = false;
   return (
     <>
-      <Page title={"Listes de vœux Affelnet : console d'administration et de téléchargement"}>
+      <Page title={"Listes de candidats aux formations : console d'administration et de téléchargement"}>
         <Box mb={12}>
           {!avecVoeux && (
             <Text mb={4}>
               <strong>
                 Voici la listes des organismes formateurs pour lesquels vous êtes identifié comme responsable. Vous
-                aurez prochainement la possibilité sur ce même écran de télécharger les listes de vœux exprimés via le
-                service en ligne Affelnet.
+                aurez prochainement la possibilité sur ce même écran de télécharger les listes de candidats exprimés via
+                le service en ligne Affelnet.
               </strong>
             </Text>
           )}
@@ -32,8 +32,8 @@ export const Formateurs = ({ gestionnaire, formateurs, callback }) => {
           <AlertIcon />
           <Text fontStyle="italic">
             Nouveauté pour 2023 : vous avez maintenant la possibilité de déléguer les droits de réception des listes de
-            vœux aux organismes dont vous êtes responsable. En cas de délégation de droits, vous conserverez un accès à
-            l'ensemble des listes de vœux, et vous pourrez visualiser les statuts d'avancement de chaque établissement.
+            candidats aux organismes dont vous êtes responsable. En cas de délégation de droits, vous conserverez un
+            accès à l'ensemble des listes, et vous pourrez visualiser les statuts d'avancement de chaque établissement.
           </Text>
         </Alert>
 

@@ -1,10 +1,12 @@
 import { useCallback } from "react";
 import {
+  Alert,
   Box,
   Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Heading,
   Input,
   Link,
   Modal,
@@ -53,7 +55,9 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          Déléguer le droit de réception de la liste de vœux exprimés pour <FormateurLibelle formateur={formateur} />
+          <Heading as="h2" size="lg">
+            Déléguer le droit de réception de la liste de candidats pour <FormateurLibelle formateur={formateur} />
+          </Heading>
         </ModalHeader>
 
         <ModalCloseButton />
@@ -72,27 +76,7 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
             onSubmit={(form) => activateDelegation({ form })}
           >
             <Form style={{ width: "100%" }} id="delegation-form">
-              <Text mb={4}>
-                <strong>
-                  La personne à laquelle vous allez déléguer le droit de réception des listes doit impérativement
-                  exercer au sein de l'établissement formateur.
-                </strong>
-              </Text>
-              <Text fontStyle="italic" mb={4}>
-                Attention : si vous souhaitez modifier votre email en tant que directeur d'organisme responsable,
-                habilité à accéder aux listes de tous les organismes formateurs, n'utilisez cette fonctionnalité, et
-                accédez à votre{" "}
-                <Link variant="action" href="/profil">
-                  page profil
-                </Link>
-                .
-              </Text>
-              <Text mb={4}>
-                Après validation de cette délégation, le destinataire sera automatiquement informé par courriel, et
-                devra procéder à la création de son mot de passe pour accéder à son espace de téléchargement. Si la
-                personne ne reçoit pas le courriel de notification, invitez-la à vérifier dans ses spam.
-              </Text>
-              <Text mb={4}>
+              <Text fontSize="lg" mb={4}>
                 {hasVoeux && voeuxTelecharges ? (
                   <>
                     {/* Voeux disponibles et téléchargés par le responsable */}
@@ -112,6 +96,22 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
                     téléchargement de la liste, téléchargement de l'éventuelle mise à jour.
                   </>
                 )}
+              </Text>
+              <Alert mb={4}>
+                <Text fontStyle="italic">
+                  Attention : si vous souhaitez modifier votre email en tant que directeur d'organisme responsable,
+                  habilité à accéder aux listes de tous les organismes formateurs, n'utilisez cette fonctionnalité, et
+                  accédez à votre{" "}
+                  <Link variant="action" href="/profil">
+                    page profil
+                  </Link>
+                  .
+                </Text>
+              </Alert>
+              <Text mb={4}>
+                Après validation de cette délégation, le destinataire sera automatiquement informé par courriel, et
+                devra procéder à la création de son mot de passe pour accéder à son espace de téléchargement. Si la
+                personne ne reçoit pas le courriel de notification, invitez-la à vérifier dans ses spam.
               </Text>
               <Text mb={4}>
                 Vous pourrez également, si nécessaire, récupérer le droit exclusif de réception des listes, ou modifier

@@ -20,7 +20,7 @@ export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
           return (
             <Tr key={formateur?.uai}>
               <Td>
-                <Link variant="action" href={`/gestionnaire/formateurs/${formateur.uai}`}>
+                <Link variant="primary" href={`/gestionnaire/formateurs/${formateur.uai}`}>
                   Détail
                 </Link>
               </Td>

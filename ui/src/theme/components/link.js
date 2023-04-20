@@ -1,3 +1,5 @@
+import { commonButtonStyle } from "./button";
+
 const Link = {
   baseStyle: {
     _focus: { boxShadow: "none", outlineColor: "none" },
@@ -26,6 +28,16 @@ const Link = {
     action: {
       color: "grey.800",
       textDecoration: "underline",
+    },
+    primary: {
+      ...commonButtonStyle,
+      color: "bluefrance",
+      border: "1px solid",
+      borderColor: "bluefrance",
+      bg: "white",
+      padding: "8px",
+      textDecoration: "none",
+      _hover: { bg: "bluefrance", color: "white", textDecoration: "none" },
     },
     popup: {
       fontSize: "zeta",

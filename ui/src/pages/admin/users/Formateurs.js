@@ -88,7 +88,7 @@ export const Formateurs = ({}) => {
                   <Th width="450px">Raison sociale / Ville</Th>
                   <Th width="350px">Courriel habilité</Th>
 
-                  <Th width={"80px"}>Vœux 2023</Th>
+                  <Th width={"80px"}>Candidats 2023</Th>
                   <Th>Statut d'avancement</Th>
                 </Tr>
               </Thead>
@@ -101,7 +101,7 @@ export const Formateurs = ({}) => {
                     <Tr key={formateur?.uai}>
                       <Td>
                         <Link
-                          variant="action"
+                          variant="primary"
                           href={`/admin/gestionnaire/${gestionnaire.siret}/formateur/${formateur.uai}`}
                         >
                           Détail

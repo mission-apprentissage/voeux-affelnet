@@ -18,7 +18,7 @@ const catalogueColors = {
   primaryBackground: "white",
   secondaryBackground: "#e5edef",
   blue: {
-    500: "#007BFF",
+    500: "#0078f3",
   },
 };
 

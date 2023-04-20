@@ -5,6 +5,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Heading,
   Input,
   Modal,
   ModalBody,
@@ -38,7 +39,11 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Modifier votre adresse email :</ModalHeader>
+        <ModalHeader>
+          <Heading as="h2" size="lg">
+            Modifier votre adresse email
+          </Heading>
+        </ModalHeader>
 
         <ModalCloseButton />
 
@@ -56,7 +61,9 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
             onSubmit={(form) => updateEmail({ form })}
           >
             <Form style={{ width: "100%" }} id="update-email-form">
-              <Text mb={4}>{/* TODO : Texte à écrire */}</Text>
+              {/* <Text fontSize="lg" mb={4}> */}
+              {/* TODO :  */}
+              {/* </Text> */}
 
               <Box mb={8}>
                 <Field name="email" required>
