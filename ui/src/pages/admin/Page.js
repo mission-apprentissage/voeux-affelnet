@@ -14,7 +14,7 @@ function AdminPage() {
         path="/"
         exact
         element={
-          <Page title="Listes de vœux Affelnet : console de pilotage">
+          <Page title="Listes de candidats Affelnet : console de pilotage">
             <Users />
           </Page>
         }
