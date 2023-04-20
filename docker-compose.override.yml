@@ -65,4 +65,4 @@ services:
       - voeux_affelnet_network
     environment:
       - MH_UI_WEB_PATH=smtp
-    entrypoint: MailHog -auth-file=/data/auth.file
+    # entrypoint: MailHog -auth-file=/data/auth.file
