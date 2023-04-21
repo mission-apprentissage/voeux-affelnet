@@ -136,11 +136,11 @@ export const Users = () => {
                   }}
                 </Field>
 
-                <Field name="statut">
+                {/* <Field name="statut">
                   {({ field, meta }) => {
                     return <Select placeholder={"Statuts (tous)"} style={{ margin: 0 }} {...field} />;
                   }}
-                </Field>
+                </Field> */}
 
                 <Field name="type">
                   {({ field, meta }) => {

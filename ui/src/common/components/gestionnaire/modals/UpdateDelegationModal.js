@@ -106,7 +106,7 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
                     Récupérer les droits exclusifs pour cet organisme formateur
                   </Button>
                   <Button variant="ghost" onClick={onClose}>
-                    Annulé
+                    Annuler
                   </Button>
                 </Stack>
               </AccordionPanel>
@@ -191,7 +191,7 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
                         Valider
                       </Button>
                       <Button variant="ghost" onClick={onClose}>
-                        Annulé
+                        Annuler
                       </Button>
                     </Stack>
                   </Form>

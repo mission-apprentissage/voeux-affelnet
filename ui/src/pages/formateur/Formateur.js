@@ -60,18 +60,22 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
 
           const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
             ? !!voeuxTelechargementsGestionnaire.find(
-                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
+                (telechargement) =>
+                  new Date(telechargement.date).getTime() >= new Date(etablissement.first_date_voeux).getTime()
               )
             : !!voeuxTelechargementsFormateur?.find(
-                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
+                (telechargement) =>
+                  new Date(telechargement.date).getTime() >= new Date(etablissement.first_date_voeux).getTime()
               );
 
           const voeuxTelecharges = !isDiffusionAutorisee
             ? !!voeuxTelechargementsGestionnaire.find(
-                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+                (telechargement) =>
+                  new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
               )
             : !!voeuxTelechargementsFormateur.find(
-                (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+                (telechargement) =>
+                  new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
               );
           const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 

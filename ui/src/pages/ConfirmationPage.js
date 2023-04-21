@@ -5,6 +5,7 @@ import queryString from "query-string";
 import { Field, Form, Formik } from "formik";
 import {
   Alert,
+  AlertIcon,
   Box,
   Button,
   Center,
@@ -27,7 +28,7 @@ function ServerErrorMessage() {
   return (
     <Alert status="error">
       <Box>
-        <Text mb={4}>
+        <Text>
           Une erreur est survenue, merci de prendre contact avec un administrateur en précisant votre identifiant via :{" "}
           <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
             {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
@@ -43,9 +44,10 @@ function StatusErrorMessage({ error, username }) {
   if (error) {
     if (error.statusCode === 401) {
       return (
-        <Alert status="error">
+        <Alert status="error" variant="left-accent">
+          <AlertIcon />
           <Box>
-            <Text mb={4}>
+            <Text>
               Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre
               Identifiant ({username}) via :{" "}
               <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
@@ -58,15 +60,16 @@ function StatusErrorMessage({ error, username }) {
       );
     } else if (error.statusCode === 400) {
       return (
-        <Alert status="info">
+        <Alert status="info" variant="left-accent">
+          <AlertIcon />
           <Box>
             <Text mb={4}>
               L’adresse courriel a déjà été confirmée pour votre établissement (Identifiant {username}).
             </Text>
             <Text mb={4}>
-              C’est à cette adresse que les listes de vœux seront transmises, à partir de la semaine du 6 juin.
+              C’est à cette adresse que les listes de candidats seront transmises, à partir de la semaine du 6 juin.
             </Text>
-            <Text mb={4}>
+            <Text>
               Si vous pensez qu’il s’agit d’une erreur, veuillez le signaler en envoyant un courriel à :{" "}
               <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                 {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
@@ -89,33 +92,17 @@ const ConfirmationPage = () => {
   const [data, loading, error] = useFetch(`/api/confirmation/status?username=${username}&token=${actionToken}`);
   const [message, setMessage] = useState();
 
+  const [title, setTitle] = useState(<>Confirmation de l'email pour le compte {username}</>);
   const accept = async (values) => {
     try {
       await _post("/api/confirmation/accept", { ...values, actionToken });
+      setTitle(<>Dernière étape : définir votre mot de passe de connexion.</>);
       setMessage(
-        <Alert status="info">
+        <Alert status="success" variant="left-accent">
+          <AlertIcon />
           <Box>
-            <Text mb={4}>Merci, nous avons pris en compte votre confirmation.</Text>
-            <Text mb={4}>
-              La transmission de listes de vœux s’effectuera en 3 temps : dans la semaine du 6 juin, dans la semaine du
-              20 juin et dans la semaine du 4 juillet. Des courriels seront envoyés à chacune de ces dates à l’adresse
-              indiquée, uniquement si des vœux sont exprimés sur votre établissement et/ou l’un des établissements dont
-              vous avez la charge.
-            </Text>
-            <Text mb={4}>
-              Le premier courriel invitera à définir un mot de passe pour accès à l’espace de téléchargement.
-            </Text>
-            <Text mb={4}>
-              Si votre établissement est responsable d’autres établissements d’accueil, la connexion au compte permettra
-              de télécharger les listes pour chaque établissement sur lequel des vœux ont été exprimés.
-            </Text>
-            <Text mb={4}>
-              Pour toute question, vous pouvez prendre contact avec un administrateur en précisant votre numéro{" "}
-              {data.type === "Gestionnaire" ? <>Siret</> : <>UAI</>} ({username}) via :{" "}
-              <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
-              </Link>
-              .
+            <Text>
+              Un nouveau message vient de vous être envoyé, avec un lien vous permettant de définir votre mot de passe.
             </Text>
           </Box>
         </Alert>
@@ -132,7 +119,7 @@ const ConfirmationPage = () => {
     <Center height="100vh" verticalAlign="center">
       <Box width={["auto", "28rem"]}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          Confirmation de l'email pour le compte <strong>{username}</strong>
+          {title}
         </Heading>
         <Box mt={8}>
           {message}
@@ -141,19 +128,20 @@ const ConfirmationPage = () => {
           {showForm && (
             <Box>
               <Text mb={4}>
-                Afin d’accéder au téléchargement des vœux en apprentissage exprimés via Affelnet, veuillez confirmer{" "}
+                Afin d’accéder au téléchargement des candidats en apprentissage exprimés via Affelnet, veuillez
+                confirmer{" "}
                 {data.type === "Gestionnaire" ? (
                   <>l’adresse courriel du directeur général de votre établissement (Siret: {username})</>
                 ) : (
                   <>
                     l'adresse courriel renseignée par le directeur général de l'établissement responsable pour
-                    délégation des droits de téléchargements des listes de vœux à votre compte (UAI: {username})
+                    délégation des droits de téléchargements des listes de candidats à votre compte (UAI: {username})
                   </>
                 )}
               </Text>
               <Text mb={8}>
-                Cette étape est indispensable pour vous permettre de recevoir les listes de vœux qui seront diffusées à
-                partir de la semaine du 6 juin.
+                Cette étape est indispensable pour vous permettre de recevoir les listes de candidats qui seront
+                diffusées à partir de la semaine du 6 juin.
               </Text>
 
               <Formik

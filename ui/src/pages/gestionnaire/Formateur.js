@@ -92,18 +92,20 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
   const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
     ? !!voeuxTelechargementsGestionnaire.find(
-        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
+        (telechargement) =>
+          new Date(telechargement.date).getTime() >= new Date(etablissement.first_date_voeux).getTime()
       )
     : !!voeuxTelechargementsFormateur?.find(
-        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.first_date_voeux)
+        (telechargement) =>
+          new Date(telechargement.date).getTime() >= new Date(etablissement.first_date_voeux).getTime()
       );
 
   const voeuxTelecharges = !isDiffusionAutorisee
     ? !!voeuxTelechargementsGestionnaire.find(
-        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+        (telechargement) => new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
       )
     : !!voeuxTelechargementsFormateur.find(
-        (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+        (telechargement) => new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
       );
   const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
@@ -232,7 +234,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
             )}
           </Heading>
 
-          {hasVoeux && (
+          {hasVoeux ? (
             <>
               <Text mb={4}>
                 Date de mise à disposition : {new Date(etablissement.first_date_voeux).toLocaleDateString()}{" "}
@@ -293,6 +295,24 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   )}
                 </>
               )}
+            </>
+          ) : (
+            <>
+              <Text mb={4}>
+                Aucun vœu n’a été exprimé pour cet organisme sur la période de formulation des demandes (du 9 au 30
+                mai).
+              </Text>
+              <Text mb={4}>
+                Si vous pensez qu’il s’agit d’une anomalie, vous pouvez{" "}
+                <Link href="/anomalie" variant="action">
+                  transmettre un signalement
+                </Link>
+                .
+              </Text>
+              <Text mb={4}>
+                Une mise à jour pourra être communiquée la semaine du 3 juillet, pour prendre les éventuels ajouts. Une
+                notification courriel sera alors envoyée.
+              </Text>
             </>
           )}
         </Box>

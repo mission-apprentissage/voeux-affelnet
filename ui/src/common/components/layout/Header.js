@@ -18,6 +18,15 @@ import { Logo } from "./Logo";
 import { AccountFill, LockFill } from "../../../theme/components/icons";
 import useAuth from "../../hooks/useAuth";
 
+const getAuthTypeLibelle = (type) => {
+  switch (type) {
+    case "Gestionnaire":
+      return "Responsable";
+    default:
+      return type;
+  }
+};
+
 const Header = () => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
@@ -60,7 +69,7 @@ const Header = () => {
                       <Text color="bluefrance" textStyle="sm">
                         {auth.sub}{" "}
                         <Text color="grey.600" as="span">
-                          ({auth.permissions?.isAdmin ? "admin" : auth.type})
+                          ({auth.permissions?.isAdmin ? "admin" : getAuthTypeLibelle(auth.type)})
                         </Text>
                       </Text>
                     </Box>
@@ -79,16 +88,6 @@ const Header = () => {
                 </MenuList>
               </Menu>
             )}
-            {/*
-            <Box>
-              <Text float={"right"} variant="slight" mb={4}>
-                Connecté en tant que {auth?.sub}
-              </Text>
-              <br />
-              <Button float={"right"} variant="pill" onClick={logout}>
-                Déconnexion
-              </Button>
-            </Box> */}
           </Flex>
         </Container>
       </Container>

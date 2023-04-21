@@ -30,10 +30,12 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
       switch (true) {
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromGestionnaire.first_date_voeux) !==
-            new Date(etablissementFromGestionnaire.last_date_voeux) &&
+          new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
+            new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
           !!voeuxTelechargementsFormateur.find(
-            (telechargement) => new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            (telechargement) =>
+              new Date(telechargement.date).getTime() >
+              new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
           return (
             <>
@@ -43,12 +45,14 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromGestionnaire.first_date_voeux) !==
-            new Date(etablissementFromGestionnaire.last_date_voeux) &&
+          new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
+            new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
           !!voeuxTelechargementsFormateur.find(
             (telechargement) =>
-              new Date(telechargement.date) <= new Date(etablissementFromGestionnaire.last_date_voeux) &&
-              new Date(telechargement.date) > new Date(etablissementFromGestionnaire.first_date_voeux)
+              new Date(telechargement.date).getTime() <=
+                new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+              new Date(telechargement.date).getTime() >
+                new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
           ): {
           return (
             <>
@@ -59,10 +63,12 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromGestionnaire.first_date_voeux) ===
-            new Date(etablissementFromGestionnaire.last_date_voeux) &&
+          new Date(etablissementFromGestionnaire.first_date_voeux).getTime() ===
+            new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
           !!voeuxTelechargementsFormateur.find(
-            (telechargement) => new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            (telechargement) =>
+              new Date(telechargement.date).getTime() >
+              new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
           return (
             <>
@@ -75,7 +81,8 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
           (!voeuxTelechargementsFormateur.length ||
             !voeuxTelechargementsFormateur.find(
               (telechargement) =>
-                new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+                new Date(telechargement.date).getTime() >
+                new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
             )): {
           return (
             <>
@@ -118,10 +125,12 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
       switch (true) {
         case UserStatut.ACTIVE === gestionnaire.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromGestionnaire.first_date_voeux) !==
-            new Date(etablissementFromGestionnaire.last_date_voeux) &&
+          new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
+            new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
           !!voeuxTelechargementsGestionnaire.find(
-            (telechargement) => new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            (telechargement) =>
+              new Date(telechargement.date).getTime() >
+              new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
           return (
             <>
@@ -131,12 +140,14 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
         }
         case UserStatut.ACTIVE === gestionnaire.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromGestionnaire.first_date_voeux) !==
-            new Date(etablissementFromGestionnaire.last_date_voeux) &&
+          new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
+            new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
           !!voeuxTelechargementsGestionnaire.find(
             (telechargement) =>
-              new Date(telechargement.date) <= new Date(etablissementFromGestionnaire.last_date_voeux) &&
-              new Date(telechargement.date) > new Date(etablissementFromGestionnaire.first_date_voeux)
+              new Date(telechargement.date).getTime() <=
+                new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+              new Date(telechargement.date).getTime() >
+                new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
           ): {
           return (
             <>
@@ -146,10 +157,12 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
         }
         case UserStatut.ACTIVE === gestionnaire.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromGestionnaire.first_date_voeux) ===
-            new Date(etablissementFromGestionnaire.last_date_voeux) &&
+          new Date(etablissementFromGestionnaire.first_date_voeux).getTime() ===
+            new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
           !!voeuxTelechargementsGestionnaire.find(
-            (telechargement) => new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+            (telechargement) =>
+              new Date(telechargement.date).getTime() >
+              new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
           return (
             <>
@@ -162,7 +175,8 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
           (!voeuxTelechargementsGestionnaire.length ||
             !voeuxTelechargementsGestionnaire.find(
               (telechargement) =>
-                new Date(telechargement.date) > new Date(etablissementFromGestionnaire.last_date_voeux)
+                new Date(telechargement.date).getTime() >
+                new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
             )): {
           return (
             <>

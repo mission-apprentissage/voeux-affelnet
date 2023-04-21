@@ -8,7 +8,7 @@ const Alert = {
     _focus: { boxShadow: "none", outlineColor: "none" },
     _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
     container: {
-      // border: "4px solid #000091",
+      borderColor: "#000091",
       background: "#F0F0F0",
     },
   },

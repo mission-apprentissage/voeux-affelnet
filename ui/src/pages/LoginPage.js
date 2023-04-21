@@ -101,7 +101,7 @@ function LoginPage() {
                           return (
                             <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                               <FormLabel name={field.name}>Identifiant</FormLabel>
-                              <Input {...field} id={field.name} placeholder="Votre identifiant (Siret)..." />
+                              <Input {...field} id={field.name} placeholder="Votre identifiant..." />
                               <FormErrorMessage>{meta.error || "Identifiant invalide"}</FormErrorMessage>
                             </FormControl>
                           );

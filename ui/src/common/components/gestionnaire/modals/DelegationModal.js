@@ -47,7 +47,7 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
   );
 
   const voeuxTelecharges = !!voeuxTelechargementsGestionnaire.find(
-    (telechargement) => new Date(telechargement.date) >= new Date(etablissement.last_date_voeux)
+    (telechargement) => new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
   );
 
   return (
@@ -162,7 +162,7 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
             Valider
           </Button>
           <Button variant="ghost" onClick={onClose}>
-            Annulé
+            Annuler
           </Button>
         </ModalFooter>
       </ModalContent>
