@@ -115,6 +115,8 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
   const isResponsableFormateur = !!(formateur.uai === gestionnaire.uai || formateur.siret === gestionnaire.siret);
 
+  const lastEmailDate = new Date(formateur.emails.findLast(() => true)?.sendDates?.findLast(() => true));
+
   return (
     <>
       <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
@@ -337,11 +339,8 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   <Text mb={4}>
                     Prenez contact avec la personne destinataire pour l'inviter à télécharger la liste. Si la personne
                     n'a pas reçu d'email de notification invitez-la à consulter ses spam, en lui communiquant la date à
-                    laquelle la dernière notification lui a été envoyée (
-                    {new Date(
-                      formateur.emails.findLast(() => true)?.sendDates?.findLast(() => true)
-                    )?.toLocaleDateString()}
-                    ) et l'expéditeur des notifications ({process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
+                    laquelle la dernière notification lui a été envoyée ({lastEmailDate?.toLocaleDateString()}) et
+                    l'expéditeur des notifications ({process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
                   </Text>
                   <Text mb={4}>
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
@@ -406,8 +405,9 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                     La liste restera considérée comme non téléchargée jusqu'à ce que {etablissement.email} procède au
                     téléchargement : prenez contact avec la personne destinataire pour l'inviter à télécharger la liste.
                     Si la personne n'a pas reçu d'email de notification invitez-la à consulter ses spam, en lui
-                    communiquant la date à laquelle la dernière notification lui a été envoyée (JJ/MM/AAAA, hh:mm) et
-                    l'expéditeur des notifications ({process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
+                    communiquant la date à laquelle la dernière notification lui a été envoyée (
+                    {lastEmailDate?.toLocaleDateString()}) et l'expéditeur des notifications (
+                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
                   </Text>
                   <Text mb={4}>
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
