@@ -8,6 +8,7 @@ const { parseCsv } = require("../common/utils/csvUtils");
 const { pick } = require("lodash");
 const { arrayOf } = require("../common/validators");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
+const { findAcademieByUai } = require("../common/academies");
 
 const schema = Joi.object({
   siret: Joi.string().pattern(siretFormat).required(),
@@ -24,6 +25,8 @@ async function buildEtablissements(sirets, formateur) {
       return {
         siret,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
+
+        // academie: findAcademie
       };
     })
   );
@@ -148,6 +151,7 @@ async function importFormateurs(
             adresse: adresse[0],
             cp: cp[0],
             commune: commune[0],
+            academie: pick(findAcademieByUai(uai), ["code", "nom"]),
 
             // raison_sociale: organisme?.raison_sociale || "Inconnue",
             // academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),

@@ -1,6 +1,7 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 const { UserStatut } = require("../constants/UserStatut");
+const { academieSchema } = require("./schemas/academieSchema");
 
 const User = model(
   "User",
@@ -88,6 +89,10 @@ const User = model(
             },
           }),
         ],
+      },
+
+      academie: {
+        type: academieSchema,
       },
       _meta: {
         default: {},

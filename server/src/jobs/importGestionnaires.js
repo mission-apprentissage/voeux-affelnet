@@ -2,7 +2,7 @@ const { oleoduc, transformData, writeData } = require("oleoduc");
 const { pick } = require("lodash");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
-const { findAcademieByCode } = require("../common/academies");
+const { findAcademieByUai } = require("../common/academies");
 const {
   Gestionnaire,
   // Voeu
@@ -30,6 +30,7 @@ async function buildEtablissements(uais, gestionnaire) {
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
         email: existingEtablissement?.email || undefined,
         diffusionAutorisee: existingEtablissement?.diffusionAutorisee || false,
+        academie: pick(findAcademieByUai(uai), ["code", "nom"]),
       };
     })
   );
@@ -86,7 +87,7 @@ async function importGestionnaires(relationCsv, options = {}) {
             uai: organisme?.uai,
             etablissements: formateurs,
             raison_sociale: organisme?.raison_sociale,
-            academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),
+            academie: pick(findAcademieByUai(organisme?.uai), ["code", "nom"]),
             adresse: organisme?.adresse?.label,
             libelle_ville: organisme?.adresse?.localite,
           });

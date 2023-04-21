@@ -109,6 +109,21 @@ module.exports = ({ sendEmail, resendEmail }) => {
   }
 
   /**
+   * USER (ADMIN & ACADEMIE)
+   */
+  router.get(
+    "/api/admin",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { username } = req.user;
+      const user = await User.findOne({ username }).lean();
+
+      res.json(user);
+    })
+  );
+
+  /**
    * USERS (GESTIONNAIRES & FORMATEURS)
    */
   /**
@@ -119,6 +134,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
+      const { username } = req.user;
+      const user = await User.findOne({ username }).lean();
+      const defaultAcademie = user?.academie?.code;
+
       const { academie, text, type, page, items_par_page, sort } = await Joi.object({
         academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
         text: Joi.string(),
@@ -128,36 +147,93 @@ module.exports = ({ sendEmail, resendEmail }) => {
         sort: Joi.string().default(`{ "username": 1 }`),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const regex = ".*" + text?.trim() + ".*";
+      const regex = ".*" + text + ".*";
       const regexQuery = { $regex: regex, $options: "i" };
+      console.log({ text, regex, regexQuery });
       const { find, pagination } = await paginate(
         User,
         {
-          // ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+          // ...(text ?  $text: { $search: `"${text.trim()}"` } } : {}),
           $and: [
-            {
-              ...(type ? { type } : {}),
-            },
+            ...(type ? [{ type }] : []),
+
             {
               $or: [
                 {
                   type: "Formateur",
-                  ...(text
-                    ? {
-                        $or: [{ uai: regexQuery }, { raison_sociale: regexQuery }, { email: regexQuery }],
-                      }
-                    : {}),
-                  // TODO :
-                  // ...(academie ? { academie. } : {}),
+                  $and: [
+                    {},
+                    ...(text
+                      ? [
+                          {
+                            $or: [
+                              { siret: regexQuery },
+                              { uai: regexQuery },
+                              { raison_sociale: regexQuery },
+                              { email: regexQuery },
+                              {
+                                etablissements: {
+                                  $elemMatch: { siret: regexQuery },
+                                },
+                              },
+                            ],
+                          },
+                        ]
+                      : []),
+
+                    ...(defaultAcademie ?? academie
+                      ? [
+                          {
+                            $or: [
+                              { "academie.code": defaultAcademie ?? academie },
+                              {
+                                etablissements: {
+                                  $elemMatch: { "academie.code": defaultAcademie ?? academie },
+                                },
+                              },
+                            ],
+                          },
+                        ]
+                      : []),
+                  ],
                 },
                 {
                   type: "Gestionnaire",
-                  ...(text
-                    ? {
-                        $or: [{ siret: regexQuery }, { raison_sociale: regexQuery }, { email: regexQuery }],
-                      }
-                    : {}),
-                  ...(academie ? { "academie.code": academie } : {}),
+                  $and: [
+                    {},
+                    ...(text
+                      ? [
+                          {
+                            $or: [
+                              { siret: regexQuery },
+                              { uai: regexQuery },
+                              { raison_sociale: regexQuery },
+                              { email: regexQuery },
+                              {
+                                etablissements: {
+                                  $elemMatch: { uai: regexQuery },
+                                },
+                              },
+                            ],
+                          },
+                        ]
+                      : []),
+
+                    ...(defaultAcademie ?? academie
+                      ? [
+                          {
+                            $or: [
+                              { "academie.code": defaultAcademie ?? academie },
+                              {
+                                etablissements: {
+                                  $elemMatch: { "academie.code": defaultAcademie ?? academie },
+                                },
+                              },
+                            ],
+                          },
+                        ]
+                      : []),
+                  ],
                 },
               ],
             },
@@ -240,47 +316,47 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * =============
    */
 
-  /**
-   * Permet de récupérer la liste des gestionnaires
-   */
-  router.get(
-    "/api/admin/gestionnaires",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      const { text, page, items_par_page } = await Joi.object({
-        text: Joi.string(),
-        page: Joi.number().default(1),
-        items_par_page: Joi.number().default(10),
-      }).validateAsync(req.query, { abortEarly: false });
+  // /**
+  //  * Permet de récupérer la liste des gestionnaires
+  //  */
+  // router.get(
+  //   "/api/admin/gestionnaires",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     const { text, page, items_par_page } = await Joi.object({
+  //       text: Joi.string(),
+  //       page: Joi.number().default(1),
+  //       items_par_page: Joi.number().default(10),
+  //     }).validateAsync(req.query, { abortEarly: false });
 
-      const { find, pagination } = await paginate(
-        Gestionnaire,
-        {
-          ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
-          type: "Gestionnaire",
-        },
-        {
-          page,
-          items_par_page,
-          select: { _id: 0, password: 0 },
-        }
-      );
+  //     const { find, pagination } = await paginate(
+  //       Gestionnaire,
+  //       {
+  //         ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+  //         type: "Gestionnaire",
+  //       },
+  //       {
+  //         page,
+  //         items_par_page,
+  //         select: { _id: 0, password: 0 },
+  //       }
+  //     );
 
-      const stream = oleoduc(
-        find.sort({ siret: 1 }).cursor(),
-        transformData(fillGestionnaire),
-        transformIntoJSON({
-          arrayWrapper: {
-            pagination,
-          },
-          arrayPropertyName: "gestionnaires",
-        })
-      );
+  //     const stream = oleoduc(
+  //       find.sort({ siret: 1 }).cursor(),
+  //       transformData(fillGestionnaire),
+  //       transformIntoJSON({
+  //         arrayWrapper: {
+  //           pagination,
+  //         },
+  //         arrayPropertyName: "gestionnaires",
+  //       })
+  //     );
 
-      return sendJsonStream(stream, res);
-    })
-  );
+  //     return sendJsonStream(stream, res);
+  //   })
+  // );
 
   router.get(
     "/api/admin/gestionnaires/:siret",
@@ -443,47 +519,47 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * =============
    */
 
-  /**
-   * Permet de récupérer la liste des formateurs
-   */
-  router.get(
-    "/api/admin/formateurs",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      const { text, page, items_par_page } = await Joi.object({
-        text: Joi.string(),
-        page: Joi.number().default(1),
-        items_par_page: Joi.number().default(10),
-      }).validateAsync(req.query, { abortEarly: false });
+  // /**
+  //  * Permet de récupérer la liste des formateurs
+  //  */
+  // router.get(
+  //   "/api/admin/formateurs",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     const { text, page, items_par_page } = await Joi.object({
+  //       text: Joi.string(),
+  //       page: Joi.number().default(1),
+  //       items_par_page: Joi.number().default(10),
+  //     }).validateAsync(req.query, { abortEarly: false });
 
-      const { find, pagination } = await paginate(
-        Formateur,
-        {
-          ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
-          type: "Formateur",
-        },
-        {
-          page,
-          items_par_page,
-          select: { _id: 0, password: 0 },
-        }
-      );
+  //     const { find, pagination } = await paginate(
+  //       Formateur,
+  //       {
+  //         ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
+  //         type: "Formateur",
+  //       },
+  //       {
+  //         page,
+  //         items_par_page,
+  //         select: { _id: 0, password: 0 },
+  //       }
+  //     );
 
-      const stream = oleoduc(
-        find.sort({ siret: 1 }).cursor(),
-        transformData(fillFormateur),
-        transformIntoJSON({
-          arrayWrapper: {
-            pagination,
-          },
-          arrayPropertyName: "formateurs",
-        })
-      );
+  //     const stream = oleoduc(
+  //       find.sort({ siret: 1 }).cursor(),
+  //       transformData(fillFormateur),
+  //       transformIntoJSON({
+  //         arrayWrapper: {
+  //           pagination,
+  //         },
+  //         arrayPropertyName: "formateurs",
+  //       })
+  //     );
 
-      return sendJsonStream(stream, res);
-    })
-  );
+  //     return sendJsonStream(stream, res);
+  //   })
+  // );
 
   router.get(
     "/api/admin/formateurs/:uai",

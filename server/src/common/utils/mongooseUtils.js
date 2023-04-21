@@ -9,6 +9,7 @@ function raw(Model) {
 }
 
 async function paginate(Model, query, options = {}) {
+  console.log(JSON.stringify(query));
   const total = await Model.count(query);
   const page = options.page || 1;
   const limit = options.items_par_page || 10;

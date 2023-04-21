@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Box, Button, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Tag } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import * as queryString from "query-string";
@@ -14,110 +14,87 @@ import { FormateurStatut } from "../../../common/components/admin/fields/Formate
 import { GestionnaireStatut } from "../../../common/components/admin/fields/GestionnaireStatut";
 import { useGet } from "../../../common/hooks/httpHooks";
 
-// const iconProps = {
-//   width: "16px",
-//   height: "16px",
-//   margin: "auto",
-//   marginTop: "2px",
-//   display: "flex",
-// };
-
-// function getStatutVoeux(gestionnaire) {
-//   let statut;
-
-//   switch (true) {
-//     case !gestionnaire.etablissements?.find((e) => e.voeux_date):
-//       statut = "Pas de voeux";
-//       break;
-//     case !!gestionnaire.etablissements?.find((e) => e.voeux_date) && !gestionnaire.voeux_telechargements?.length:
-//       statut = "Pas encore téléchargés";
-//       break;
-
-//     case !!gestionnaire.etablissements?.find((e) => e.voeux_date) &&
-//       !!gestionnaire.etablissements?.find(
-//         (etablissement) =>
-//           etablissement?.voeux_date &&
-//           !gestionnaire?.voeux_telechargements
-//             ?.sort((a, b) => sortDescending(a.date, b.date))
-//             .find((v) => etablissement?.uai === v.uai && v.date > etablissement?.voeux_date)
-//       ):
-//       statut = "En partie téléchargés";
-//       break;
-//     case !!gestionnaire.etablissements?.find((e) => e.voeux_date) &&
-//       !gestionnaire.etablissements?.find(
-//         (etablissement) =>
-//           etablissement?.voeux_date &&
-//           !gestionnaire?.voeux_telechargements
-//             ?.sort((a, b) => sortDescending(a.date, b.date))
-//             .find((v) => etablissement?.uai === v.uai && v.date > etablissement?.voeux_date)
-//       ):
-//       statut = "Téléchargés";
-//       break;
-//     default:
-//       statut = "Inconnu";
-//       break;
-//   }
-//   return statut;
-// }
-
 export const Users = () => {
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
   const [query, setQuery] = useState();
-  const [data, setData] = useState({
-    users: [],
-    pagination: {
-      page: 0,
-      items_par_page: 0,
-      nombre_de_page: 0,
-      total: 0,
-    },
+  const [data, setData] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    items_par_page: 0,
+    nombre_de_page: 0,
+    total: 0,
   });
-  const [academies, setAcademie] = useGet("/api/admin/academies", []);
 
-  async function search(values) {
-    try {
-      setQuery(values);
-      const params = queryString.stringify(
-        { ...values, sort: JSON.stringify({ type: -1, nombre_voeux: -1 }) },
-        { skipNull: true, skipEmptyString: true }
-      );
-      const data = await _get(`/api/admin/users${params ? `?${params}` : ""}`);
-      setLoading(false);
-      setData(data);
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-      setError(e);
-    }
-  }
+  const [academies] = useGet("/api/admin/academies", []);
+  const [self] = useGet("/api/admin", null);
+
+  const search = useCallback(
+    async (values) => {
+      try {
+        setQuery(values);
+        const params = queryString.stringify(
+          {
+            ...values,
+            sort: JSON.stringify({ type: -1, nombre_voeux: -1 }),
+            ...(self?.academie ? { academie: self?.academie.code } : {}),
+          },
+          { skipNull: true, skipEmptyString: true }
+        );
+        const response = await _get(`/api/admin/users${params ? `?${params}` : ""}`);
+        console.log(data);
+        setLoading(false);
+        setData(response.users);
+        setPagination(response.pagination);
+        setError(undefined);
+      } catch (e) {
+        console.error(e);
+        setLoading(false);
+        setError(e);
+      }
+    },
+    [self]
+  );
 
   useEffect(() => {
-    async function runAsync() {
-      return search();
-    }
-    runAsync();
-  }, []);
+    const run = async () => {
+      await search();
+    };
+
+    run();
+  }, [search]);
+
+  if (!self) {
+    return;
+  }
 
   return (
     <>
       <Formik
+        enableReinitialize
         initialValues={{
           text: "",
+          academie: self.academie?.code,
         }}
         validationSchema={Yup.object().shape({
           text: Yup.string(),
         })}
         onSubmit={(values) => search({ page: 1, ...values })}
       >
-        {({ status = {} }) => {
+        {({ handleSubmit, handleChange, handleBlur, values, errors, status = {} }) => {
           return (
             <Form id="search">
               <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
                 <Field name="academie">
                   {({ field, meta }) => {
                     return (
-                      <Select placeholder={"Académie (toutes)"} style={{ margin: 0 }} {...field}>
+                      <Select
+                        placeholder={"Académie (toutes)"}
+                        style={{ margin: 0 }}
+                        {...field}
+                        disabled={self.academie}
+                        onChange={handleChange}
+                      >
                         {academies.map((academie) => (
                           <option key={academie.code} value={academie.code}>
                             {academie.nom}
@@ -137,7 +114,7 @@ export const Users = () => {
                 <Field name="type">
                   {({ field, meta }) => {
                     return (
-                      <Select placeholder={"Type (tous)"} style={{ margin: 0 }} {...field}>
+                      <Select placeholder={"Type (tous)"} style={{ margin: 0 }} onChange={handleChange} {...field}>
                         <option value="Gestionnaire">Organisme responsable</option>
                         <option value="Formateur">Organisme formateur</option>
                       </Select>
@@ -153,6 +130,7 @@ export const Users = () => {
                       <Input
                         placeholder={"Chercher un Siret, un UAI, une raison sociale, un email"}
                         style={{ margin: 0 }}
+                        onChange={handleChange}
                         {...field}
                       />
                     );
@@ -183,12 +161,12 @@ export const Users = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {loading || data.users.length === 0 ? (
+          {loading || data.length === 0 ? (
             <Tr>
               <Td colSpan={4}>{loading ? "Chargement..." : "Pas de résultats"}</Td>
             </Tr>
           ) : (
-            data.users.map((user) => {
+            data.map((user) => {
               return (
                 <Tr key={user.username}>
                   {
@@ -262,7 +240,7 @@ export const Users = () => {
         </Tbody>
       </Table>
       <Box mt={4} mb={4} ml="auto" mr="auto">
-        <Pagination pagination={data.pagination} onClick={(page) => search({ ...query, page })} />
+        <Pagination pagination={pagination} onClick={(page) => search({ ...query, page })} />
       </Box>
     </>
   );

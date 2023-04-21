@@ -62,12 +62,12 @@ cli
   )
   .option(
     "--outRelations <outputRelationsFile",
-    "Fichier cible dans lequel sera stocké l'export (defaut: stdout)",
+    "Fichier cible dans lequel sera stocké l'export (défaut: stdout)",
     createWriteStream
   )
   .option(
     "--outInvalids <outputInvalidsFile>",
-    "Fichier cible dans lequel sera stocké l'export (defaut: stdout)",
+    "Fichier cible dans lequel sera stocké l'export (défaut: stdout)",
     createWriteStream
   )
   .action(({ outRelations, outInvalids, ...rest }) => {
@@ -195,10 +195,12 @@ cli
 
 cli
   .command("createAdmin")
-  .arguments("<username> <email>")
-  .action((username, email) => {
+  .argument("<username>", "Le nom de l'utilisateur")
+  .argument("<email>", "Le email de l'utilisateur")
+  .argument("[academie]", "Le code d'une académie -- crée un utilisateur académique'")
+  .action((username, email, academie) => {
     runScript(() => {
-      return createAdmin(username, email);
+      return createAdmin(username, email, academie);
     });
   });
 
@@ -236,7 +238,7 @@ cli
 cli
   .command("exportGestionnaires")
   .option("--filter <filter>", "Filtre au format json", JSON.parse)
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
       const output = out || writeToStdout();
@@ -248,7 +250,7 @@ cli
 cli
   .command("exportStatutVoeux")
   .option("--filter <filter>", "Filtre au format json", JSON.parse)
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
       const output = out || writeToStdout();
@@ -283,7 +285,7 @@ cli
 
 cli
   .command("getFormateurEmails")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out }) => {
     runScript(async () => {
       const output = out || writeToStdout();
@@ -332,7 +334,7 @@ cli
 
 cli
   .command("getGestionnaireEmails")
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (defaut: stdout)", createWriteStream)
+  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out }) => {
     runScript(async () => {
       const output = out || writeToStdout();
