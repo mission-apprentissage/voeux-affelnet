@@ -1,66 +1,3 @@
-function findAcademieByName(name) {
-  if (!name) {
-    return null;
-  }
-
-  const found = ACADEMIES.find((academie) => academie.nom === name || academie.alias === name);
-
-  return found || null;
-}
-
-function findAcademieByCode(code) {
-  if (!code) {
-    return null;
-  }
-
-  const found = ACADEMIES.find((academie) => academie.code === code);
-
-  return found || null;
-}
-
-function findAcademieByUai(uai) {
-  if (!uai) {
-    return null;
-  }
-
-  const metropole = ["0", "6", "7"].includes(uai.substring(0, 1));
-  const found = ACADEMIES.find((academie) => {
-    const code = metropole ? uai.substring(1, 3) : uai.substring(0, 3);
-    return academie.departements.map((d) => d.code).includes(code);
-  });
-
-  return found || null;
-}
-
-function findAcademieByDepartement(code) {
-  if (!code) {
-    return null;
-  }
-
-  return ACADEMIES.find((academie) => academie.departements.find((d) => d.code === code)) || null;
-}
-
-function findAcademieByCodeInsee(code) {
-  if (!code) {
-    return null;
-  }
-
-  return ACADEMIES.find((academie) => academie.departements.find((d) => code.startsWith(d.code))) || null;
-}
-
-function getAcademies() {
-  return ACADEMIES;
-}
-
-module.exports = {
-  findAcademieByName,
-  findAcademieByUai,
-  findAcademieByCode,
-  findAcademieByDepartement,
-  findAcademieByCodeInsee,
-  getAcademies,
-};
-
 const ACADEMIES = [
   { code: "00", nom: "Étranger", departements: [{ code: "984", nom: "Terres australes et antarctiques françaises" }] },
   { code: "01", nom: "Paris", departements: [{ code: "75", nom: "Paris" }] },
@@ -328,3 +265,66 @@ const ACADEMIES = [
   { code: "77", nom: "Saint-Barthélemy", departements: [{ code: "977", nom: "Saint-Barthélemy" }] },
   { code: "78", nom: "Saint-Martin", departements: [{ code: "978", nom: "Saint-Martin" }] },
 ];
+
+function findAcademieByName(name) {
+  if (!name) {
+    return null;
+  }
+
+  const found = ACADEMIES.find((academie) => academie.nom === name || academie.alias === name);
+
+  return found || null;
+}
+
+function findAcademieByCode(code) {
+  if (!code) {
+    return null;
+  }
+
+  const found = ACADEMIES.find((academie) => academie.code === code);
+
+  return found || null;
+}
+
+function findAcademieByUai(uai) {
+  if (!uai) {
+    return null;
+  }
+
+  const metropole = ["0", "6", "7"].includes(uai.substring(0, 1));
+  const found = ACADEMIES.find((academie) => {
+    const code = metropole ? uai.substring(1, 3) : uai.substring(0, 3);
+    return academie.departements.map((d) => d.code).includes(code);
+  });
+
+  return found || null;
+}
+
+function findAcademieByDepartement(code) {
+  if (!code) {
+    return null;
+  }
+
+  return ACADEMIES.find((academie) => academie.departements.find((d) => d.code === code)) || null;
+}
+
+function findAcademieByCodeInsee(code) {
+  if (!code) {
+    return null;
+  }
+
+  return ACADEMIES.find((academie) => academie.departements.find((d) => code.startsWith(d.code))) || null;
+}
+
+function getAcademies() {
+  return ACADEMIES;
+}
+
+module.exports = {
+  findAcademieByName,
+  findAcademieByUai,
+  findAcademieByCode,
+  findAcademieByDepartement,
+  findAcademieByCodeInsee,
+  getAcademies,
+};

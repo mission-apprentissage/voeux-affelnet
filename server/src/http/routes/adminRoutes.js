@@ -4,7 +4,7 @@ const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
 const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { User, Gestionnaire, Log, Voeu, Formateur } = require("../../common/model");
+const { User, Gestionnaire, /*Log,*/ Voeu, Formateur } = require("../../common/model");
 const { getAcademies } = require("../../common/academies");
 const { paginate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -119,7 +119,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { text, type, page, items_par_page, sort } = await Joi.object({
+      const { academie, text, type, page, items_par_page, sort } = await Joi.object({
+        academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
         text: Joi.string(),
         type: Joi.string(),
         page: Joi.number().default(1),
@@ -146,6 +147,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
                         $or: [{ uai: regexQuery }, { raison_sociale: regexQuery }, { email: regexQuery }],
                       }
                     : {}),
+                  // TODO :
+                  // ...(academie ? { academie. } : {}),
                 },
                 {
                   type: "Gestionnaire",
@@ -154,6 +157,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                         $or: [{ siret: regexQuery }, { raison_sociale: regexQuery }, { email: regexQuery }],
                       }
                     : {}),
+                  ...(academie ? { "academie.code": academie } : {}),
                 },
               ],
             },
@@ -596,28 +600,28 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const results = await Log.aggregate([
-        {
-          $match: {
-            "request.url.path": "/api/stats/computeStats/now",
-            "request.url.parameters.academies": { $exists: true },
-          },
-        },
-        {
-          $group: {
-            _id: "$request.url.parameters.academies",
-            count: { $sum: 1 },
-          },
-        },
-      ]);
+      // const results = await Log.aggregate([
+      //   {
+      //     $match: {
+      //       "request.url.path": "/api/stats/computeStats/now",
+      //       "request.url.parameters.academies": { $exists: true },
+      //     },
+      //   },
+      //   {
+      //     $group: {
+      //       _id: "$request.url.parameters.academies",
+      //       count: { $sum: 1 },
+      //     },
+      //   },
+      // ]);
 
       res.json(
         sortBy(getAcademies(), (a) => a.nom).map((academie) => {
-          const found = results.find((r) => r._id === academie.code) || {};
+          // const found = results.find((r) => r._id === academie.code) || {};
           return {
             code: academie.code,
             nom: academie.nom,
-            nbConsultationStats: found.count || 0,
+            // nbConsultationStats: found.count || 0,
           };
         })
       );

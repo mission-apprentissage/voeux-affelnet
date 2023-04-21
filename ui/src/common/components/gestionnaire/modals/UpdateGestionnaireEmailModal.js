@@ -110,7 +110,7 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
             Valider
           </Button>
           <Button variant="ghost" onClick={onClose}>
-            Annulé
+            Annuler
           </Button>
         </ModalFooter>
       </ModalContent>

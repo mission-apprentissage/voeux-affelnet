@@ -12,6 +12,7 @@ import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fie
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { GestionnaireStatut } from "../../../common/components/admin/fields/GestionnaireStatut";
+import { useGet } from "../../../common/hooks/httpHooks";
 
 // const iconProps = {
 //   width: "16px",
@@ -72,6 +73,7 @@ export const Users = () => {
       total: 0,
     },
   });
+  const [academies, setAcademie] = useGet("/api/admin/academies", []);
 
   async function search(values) {
     try {
@@ -111,28 +113,18 @@ export const Users = () => {
         {({ status = {} }) => {
           return (
             <Form id="search">
-              <Box style={{ display: "inline-flex", width: "100%" }}>
-                <Field name="text">
-                  {({ field, meta }) => {
-                    return (
-                      <Input
-                        placeholder={"Chercher un Siret, un UAI, une raison sociale, un email"}
-                        style={{ margin: 0 }}
-                        {...field}
-                      />
-                    );
-                  }}
-                </Field>
-
-                <Button variant="primary" type="submit" form="search">
-                  Rechercher
-                </Button>
-              </Box>
-
-              <Box style={{ display: "inline-flex", width: "100%" }}>
+              <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
                 <Field name="academie">
                   {({ field, meta }) => {
-                    return <Select placeholder={"Académie (toutes)"} style={{ margin: 0 }} {...field} />;
+                    return (
+                      <Select placeholder={"Académie (toutes)"} style={{ margin: 0 }} {...field}>
+                        {academies.map((academie) => (
+                          <option key={academie.code} value={academie.code}>
+                            {academie.nom}
+                          </option>
+                        ))}
+                      </Select>
+                    );
                   }}
                 </Field>
 
@@ -153,6 +145,25 @@ export const Users = () => {
                   }}
                 </Field>
               </Box>
+
+              <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
+                <Field name="text">
+                  {({ field, meta }) => {
+                    return (
+                      <Input
+                        placeholder={"Chercher un Siret, un UAI, une raison sociale, un email"}
+                        style={{ margin: 0 }}
+                        {...field}
+                      />
+                    );
+                  }}
+                </Field>
+
+                <Button variant="primary" type="submit" form="search">
+                  Rechercher
+                </Button>
+              </Box>
+
               {status.message && <SuccessMessage>{status.message}</SuccessMessage>}
               {error && <ErrorMessage>Une erreur est survenue</ErrorMessage>}
             </Form>

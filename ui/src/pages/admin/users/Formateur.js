@@ -122,7 +122,7 @@ export const Formateur = () => {
 
   const hasOnlyOneResponsable = gestionnaires.length === 1;
 
-  // TODO :
+  // TODO : Gérer le multi-responsable
   const gestionnaire = gestionnaires[0];
 
   const isResponsableFormateurCheck = isResponsableFormateur({
