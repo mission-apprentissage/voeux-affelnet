@@ -1,3 +1,7 @@
+// TODO :
+// - Appeler referentiel pour récupérer raison_sociale / adresse / cp, etc...
+// - Récupérer UAI formateur à la place du lieu de formation
+
 const { oleoduc, filterData, writeData, accumulateData, flattenArray } = require("oleoduc");
 const Joi = require("@hapi/joi");
 

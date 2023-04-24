@@ -6,6 +6,7 @@ import { _get } from "../../../common/httpClient";
 import { Page } from "../../../common/components/layout/Page";
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
 import { isResponsableFormateur } from "../../../common/utils/getUserType";
+import { useDownloadVoeux } from "../../../common/hooks/adminHooks";
 
 // const EtablissementEmail = ({ gestionnaire, etablissement, callback }) => {
 //   const [enableForm, setEnableForm] = useState(false);
@@ -65,7 +66,7 @@ import { isResponsableFormateur } from "../../../common/utils/getUserType";
 
 export const Formateur = () => {
   const { siret, uai } = useParams();
-
+  const downloadVoeux = useDownloadVoeux();
   const [gestionnaires, setGestionnaires] = useState(undefined);
   const [formateur, setFormateur] = useState(undefined);
   const mounted = useRef(false);
@@ -252,10 +253,10 @@ export const Formateur = () => {
         <Heading as="h4" size="sm" mb={4}>
           Nombre de candidats: {gestionnaire.nombre_voeux ?? formateur.nombre_voeux}
         </Heading>
-        {/*
-        <Link variant="action" onClick={downloadVoeux}>
+
+        <Link variant="action" onClick={() => downloadVoeux({ gestionnaire, formateur })}>
           Télécharger la liste
-        </Link> */}
+        </Link>
       </Box>
 
       <Box mb={12}>

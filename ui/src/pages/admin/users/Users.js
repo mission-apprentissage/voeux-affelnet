@@ -42,7 +42,7 @@ export const Users = () => {
           { skipNull: true, skipEmptyString: true }
         );
         const response = await _get(`/api/admin/users${params ? `?${params}` : ""}`);
-        console.log(data);
+
         setLoading(false);
         setData(response.users);
         setPagination(response.pagination);

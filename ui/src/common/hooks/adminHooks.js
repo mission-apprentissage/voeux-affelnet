@@ -6,7 +6,7 @@ export const useDownloadVoeux = () => {
   return useCallback(async ({ gestionnaire, formateur }) => {
     const filename = `${gestionnaire.siret}-${formateur.uai}.csv`;
 
-    const content = await fetch(`/api/admin/gestionnaires/${gestionnaire.siret}/formateurs/${formateur}/voeux`, {
+    const content = await fetch(`/api/admin/gestionnaires/${gestionnaire.siret}/formateurs/${formateur.uai}/voeux`, {
       method: "GET",
       headers: getHeaders(),
     });

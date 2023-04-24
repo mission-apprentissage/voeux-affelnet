@@ -1,5 +1,5 @@
 const express = require("express");
-const { oleoduc, transformIntoJSON, transformData } = require("oleoduc");
+const { oleoduc, transformIntoJSON, transformData, compose, transformIntoCSV } = require("oleoduc");
 const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
 const { sendJsonStream } = require("../utils/httpUtils");
@@ -8,6 +8,13 @@ const { User, Gestionnaire, /*Log,*/ Voeu, Formateur } = require("../../common/m
 const { getAcademies } = require("../../common/academies");
 const { paginate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { changeEmail } = require("../../common/actions/changeEmail");
+const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
+const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
+const { dateAsString } = require("../../common/utils/stringUtils.js");
+const { siretFormat, uaiFormat } = require("../../common/utils/format");
+const { UserStatut } = require("../../common/constants/UserStatut");
+const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const exportGestionnaires = require("../../jobs/exportGestionnaires");
 const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissementsInconnus.js");
 const { exportStatutVoeux } = require("../../jobs/exportStatutVoeux.js");
@@ -15,12 +22,6 @@ const { exportVoeuxRecensement } = require("../../jobs/exportVoeuxRecensement.js
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
-const { changeEmail } = require("../../common/actions/changeEmail");
-const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
-const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
-const { dateAsString } = require("../../common/utils/stringUtils.js");
-const { siretFormat, uaiFormat } = require("../../common/utils/format");
-const { UserStatut } = require("../../common/constants/UserStatut");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 
 const filterForAcademie = (etablissement, user) => {
@@ -220,6 +221,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
                               {
                                 etablissements: {
                                   $elemMatch: { uai: regexQuery },
+                                },
+                              },
+                              {
+                                etablissements: {
+                                  $elemMatch: { email: regexQuery },
                                 },
                               },
                             ],
@@ -458,6 +464,27 @@ module.exports = ({ sendEmail, resendEmail }) => {
             })
         )
       );
+    })
+  );
+
+  /**
+   * Retourne la liste des voeux pour un formateur donné sous forme d'un CSV.
+   */
+  router.get(
+    "/api/admin/gestionnaires/:siret/formateurs/:uai/voeux",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { siret, uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+        siret: Joi.string().pattern(siretFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const filename = `${siret}-${uai}.csv`;
+
+      res.setHeader("Content-disposition", `attachment; filename=${filename}`);
+      res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
+      return compose(getVoeuxStream({ siret, uai }), transformIntoCSV({ mapper: (v) => `"${v || ""}"` }), res);
     })
   );
 
