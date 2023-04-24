@@ -3,7 +3,7 @@ const Joi = require("@hapi/joi");
 
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
-const { Formation, Formateur } = require("../common/model");
+const { Formation, Formateur, Gestionnaire } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { pick } = require("lodash");
 const { arrayOf } = require("../common/validators");
@@ -20,13 +20,18 @@ async function buildEtablissements(sirets, formateur) {
     [...new Set(sirets)].map(async (siret) => {
       // const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
 
+      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+
+      if (!gestionnaire) {
+        console.warn(`Gestionnaire ${siret} non trouvé`);
+      }
       // eslint-disable-next-line
       const existingEtablissement = formateur?.etablissements?.find((etablissement) => etablissement === siret);
       return {
         siret,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
 
-        // academie: findAcademie
+        academie: gestionnaire?.academie,
       };
     })
   );

@@ -2,7 +2,7 @@ import { createGlobalState } from "react-hooks-global-state";
 import { subscribeToHttpEvent } from "./httpClient";
 import decodeJWT from "./utils/decodeJWT";
 
-const anonymous = { sub: "anonymous", permissions: {} };
+export const anonymous = { sub: "anonymous", permissions: {} };
 const token = localStorage.getItem("voeux-affelnet:token");
 
 const { useGlobalState, getGlobalState, setGlobalState } = createGlobalState({
@@ -19,4 +19,3 @@ subscribeToHttpEvent("http:error", (response) => {
 
 export const getAuth = () => getGlobalState("auth");
 export const useAuthState = () => useGlobalState("auth");
-export { anonymous };
