@@ -30,7 +30,7 @@ module.exports = ({ users }) => {
         nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": uai }),
 
         etablissements: await Promise.all(
-          formateur.etablissements?.map(async (etablissement) => {
+          formateur?.etablissements?.map(async (etablissement) => {
             const voeuxFilter = {
               "etablissement_accueil.uai": uai,
               "etablissement_gestionnaire.siret": etablissement.siret,
@@ -90,13 +90,13 @@ module.exports = ({ users }) => {
       const { uai } = req.user;
       const formateur = await Formateur.findOne({ uai }).lean();
 
-      if (!formateur.etablissements.filter((e) => e.voeux_date).length === 0) {
+      if (!formateur?.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
       res.json(
         await Promise.all(
-          formateur.etablissements.map(async (etablissement) => {
+          formateur?.etablissements.map(async (etablissement) => {
             return await Gestionnaire.findOne({ siret: etablissement.siret }).lean();
           })
         )
@@ -124,7 +124,7 @@ module.exports = ({ users }) => {
       // TODO : filtrer sur les délégation autorisées.
 
       // await Promise.all(
-      //   formateur.etablissements?.map(
+      //   formateur?.etablissements?.map(
       //     async (etablissement) => await markVoeuxAsDownloadedByFormateur(etablissement.siret, uai)
       //   )
       // );

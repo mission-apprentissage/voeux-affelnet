@@ -35,7 +35,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": siret }),
 
         etablissements: await Promise.all(
-          gestionnaire.etablissements?.map(async (etablissement) => {
+          gestionnaire?.etablissements?.map(async (etablissement) => {
             const voeuxFilter = {
               "etablissement_accueil.uai": etablissement.uai,
               "etablissement_gestionnaire.siret": siret,
@@ -91,13 +91,13 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       const { siret } = req.user;
       const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      if (!gestionnaire.etablissements.filter((e) => e.voeux_date).length === 0) {
+      if (!gestionnaire?.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
       res.json(
         await Promise.all(
-          gestionnaire.etablissements.map(async (etablissement) => {
+          gestionnaire?.etablissements.map(async (etablissement) => {
             return await Formateur.findOne({ uai: etablissement.uai }).lean();
           })
         )
@@ -119,11 +119,11 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
       const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      if (!gestionnaire.etablissements.filter((etablissements) => etablissements.uai === uai).length === 0) {
+      if (!gestionnaire?.etablissements.filter((etablissements) => etablissements.uai === uai).length === 0) {
         throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
       }
 
-      const etablissements = gestionnaire.etablissements.map((etablissement) => {
+      const etablissements = gestionnaire?.etablissements.map((etablissement) => {
         if (etablissement.uai === uai) {
           typeof req.body.email !== "undefined" && (etablissement.email = req.body.email);
           typeof req.body.diffusionAutorisee !== "undefined" &&
@@ -167,11 +167,11 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       const filename = `${siret}-${uai}.csv`;
 
-      if (!req.user.etablissements.find((e) => e.uai === uai)) {
+      if (!req.user?.etablissements.find((e) => e.uai === uai)) {
         throw Boom.notFound();
       }
 
-      if (!gestionnaire.etablissements.find((etablissement) => etablissement.uai === uai)?.diffusionAutorisee) {
+      if (!gestionnaire?.etablissements.find((etablissement) => etablissement.uai === uai)?.diffusionAutorisee) {
         await markVoeuxAsDownloadedByGestionnaire(siret, uai);
       }
 

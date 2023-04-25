@@ -39,7 +39,7 @@ const fillGestionnaire = async (gestionnaire, admin) => {
     nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
 
     etablissements: await Promise.all(
-      gestionnaire.etablissements
+      gestionnaire?.etablissements
         .filter((etablissement) => filterForAcademie(etablissement, admin))
         .map(async (etablissement) => {
           const voeuxFilter = {
@@ -78,7 +78,7 @@ const fillFormateur = async (formateur, admin) => {
     nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
 
     etablissements: await Promise.all(
-      formateur.etablissements
+      formateur?.etablissements
         .filter((etablissement) => filterForAcademie(etablissement, admin))
         .map(async (etablissement) => {
           const voeuxFilter = {
@@ -274,7 +274,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                     (
                       await Formateur.find({
                         uai: {
-                          $in: user.etablissements
+                          $in: user?.etablissements
                             .filter((etablissement) => filterForAcademie(etablissement, admin))
                             .map((etablissement) => etablissement.uai),
                         },
@@ -283,7 +283,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                   ),
 
                   etablissements: await Promise.all(
-                    user.etablissements
+                    user?.etablissements
                       .filter((etablissement) => filterForAcademie(etablissement, admin))
                       .map(async (etablissement) => ({
                         ...etablissement,
@@ -302,7 +302,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                     (
                       await Gestionnaire.find({
                         siret: {
-                          $in: user.etablissements
+                          $in: user?.etablissements
                             .filter((etablissement) => filterForAcademie(etablissement, admin))
                             .map((etablissement) => etablissement.siret),
                         },
@@ -311,7 +311,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                   ),
 
                   etablissements: await Promise.all(
-                    user.etablissements
+                    user?.etablissements
                       .filter((etablissement) => filterForAcademie(etablissement, admin))
                       .map(async (etablissement) => ({
                         ...etablissement,
@@ -416,13 +416,13 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const gestionnaire = await Gestionnaire.findOne({ siret });
 
-      if (!gestionnaire.etablissements.filter((e) => e.voeux_date).length === 0) {
+      if (!gestionnaire?.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
       res.json(
         await Promise.all(
-          gestionnaire.etablissements
+          gestionnaire?.etablissements
             .filter((etablissement) => filterForAcademie(etablissement, admin))
             .map(async (etablissement) => {
               const formateur = await Formateur.findOne({ uai: etablissement.uai }).lean();
@@ -431,7 +431,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                 ...formateur,
 
                 etablissements: await Promise.all(
-                  formateur.etablissements
+                  formateur?.etablissements
                     .filter((etablissement) => filterForAcademie(etablissement, admin))
                     .map(async (etablissement) => {
                       const voeuxFilter = {
@@ -654,13 +654,13 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const formateur = await Formateur.findOne({ uai });
 
-      if (!formateur.etablissements.filter((e) => e.voeux_date).length === 0) {
+      if (!formateur?.etablissements.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
       res.json(
         await Promise.all(
-          formateur.etablissements
+          formateur?.etablissements
             .filter((etablissement) => filterForAcademie(etablissement, admin))
             .map(async (etablissement) => {
               const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret });
@@ -699,7 +699,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
           statut: (data) => data.statut,
           nb_voeux: async (data) => {
             const count = await Voeu.countDocuments({
-              "etablissement_accueil.uai": { $in: data.etablissements.map((e) => e.uai) },
+              "etablissement_accueil.uai": { $in: data?.etablissements.map((e) => e.uai) },
             });
             return count ? count : "0";
           },
