@@ -82,7 +82,7 @@ function StatsPage() {
                 </Button>
               </div>
               {showRapport && (
-                <Alert type={"info"}>
+                <Alert type="info">
                   <div>
                     <p>
                       Nous avons rencontré un problème technique lors du chargement des listes de vœux (mise à jour 2/3

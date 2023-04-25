@@ -8,28 +8,8 @@
         <mj-column>
           <mj-text> Madame, Monsieur, </mj-text>
           <mj-text>
-            Une délégation de droit au téléchargement des listes de vœux exprimés sur Affelnet vous a été accordée pour
-            l'établissement <%= data.formateur.uai %>.
-          </mj-text>
-
-          <%- include('./common/arrete.ejs'); %>
-
-          <mj-text>
-            Les vœux exprimés via le service en ligne Affelnet pour des formations en apprentissage dans votre
-            établissement (UAI : <%= data.formateur.uai %>) seront communiqués à partir de la semaine du 6 juin.
-          </mj-text>
-          <mj-text>
-            <ul>
-              <li>
-                Étape 1 : <strong>dès réception de ce courriel</strong>, renseignez ou confirmez votre adresse email
-                (obligatoire pour la suite des étapes), en cliquant sur le bouton ci-dessous.
-              </li>
-              <li>
-                Étape 2 : à partir de la semaine du 6 juin 2022, lorsque des vœux sont exprimés pour cet établissement,
-                un courriel vous notifiera de la mise à disposition de la liste de vœux disponible pour téléchargement.
-                <i>Voir ci-dessous le planning de diffusion.</i>
-              </li>
-            </ul>
+            Une délégation de droit au téléchargement des listes de candidats ayant exprimé des vœux sur le service en
+            ligne affectation vous a été accordée pour l'établissement <%= data.formateur.uai %>.
           </mj-text>
 
           <mj-button
@@ -37,10 +17,11 @@
             background-color="#0e4194"
             color="white"
           >
-            Renseigner ou confirmer votre adresse email
+            Confirmer ou modifier votre adresse courriel
           </mj-button>
 
-          <%- include('./common/procedure.ejs'); %> <%- include('./common/signature.ejs'); %>
+          <%- include('./common/procedure_formateur.ejs'); %> <%- include('./common/arrete.ejs'); %> <%-
+          include('./common/signature.ejs'); %>
         </mj-column>
       </mj-section>
     </mj-wrapper>

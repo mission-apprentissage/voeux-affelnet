@@ -37,7 +37,7 @@ export const Formateurs = ({ gestionnaire, formateurs, callback }) => {
           )}
         </Box>
 
-        <Alert status={"info"} variant="left-accent">
+        <Alert status="info" variant="left-accent">
           <AlertIcon />
           <Text fontStyle="italic">
             Nouveauté pour 2023 : vous avez maintenant la possibilité de déléguer les droits de réception des listes de

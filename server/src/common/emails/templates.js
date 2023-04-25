@@ -5,49 +5,55 @@ function getTemplateFile(name) {
   return path.join(__dirname, `${name}.mjml.ejs`);
 }
 
+const voeux_email = process.env.VOEUX_AFFELNET_EMAIL;
+
 module.exports = {
   confirmation_gestionnaire: (gestionnaire, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2023 (SIRET : ${gestionnaire.siret})`,
+      subject: `${prefix}Affelnet 2023 : Action requise pour la transmission des listes de candidats (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("confirmation_gestionnaire"),
       data: {
         gestionnaire,
         token,
         actionToken: createActionToken(gestionnaire.username),
+        voeux_email,
       },
     };
   },
   confirmation_formateur: (formateur, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2023 (UAI : ${formateur.uai})`,
+      subject: `${prefix}Affelnet 2023 : Action requise pour la transmission des listes de candidats (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("confirmation_formateur"),
       data: {
         formateur,
         token,
         actionToken: createActionToken(formateur.username),
+        voeux_email,
       },
     };
   },
   confirmed: (user) => {
     return {
-      subject: `Vœux Affelnet : l'adresse du destinataire des vœux a bien été enregistrée`,
+      subject: `Affelnet 2023 : Confirmation de votre adresse courriel`,
       templateFile: getTemplateFile("confirmed"),
       data: {
         user,
+        voeux_email,
       },
     };
   },
   activation_user: (user, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Activation de votre compte`,
+      subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte administrateur`,
       templateFile: getTemplateFile("activation_user"),
       data: {
         user,
         token,
         actionToken: createActionToken(user.username),
+        voeux_email,
       },
     };
   },
@@ -60,6 +66,7 @@ module.exports = {
         gestionnaire,
         token,
         actionToken: createActionToken(gestionnaire.username),
+        voeux_email,
       },
     };
   },
@@ -72,6 +79,7 @@ module.exports = {
         formateur,
         token,
         actionToken: createActionToken(formateur.username),
+        voeux_email,
       },
     };
   },
@@ -84,6 +92,7 @@ module.exports = {
         csaio,
         token,
         actionToken: createActionToken(csaio.username),
+        voeux_email,
       },
     };
   },
@@ -95,6 +104,7 @@ module.exports = {
         gestionnaire,
         token,
         actionToken: createActionToken(gestionnaire.username),
+        voeux_email,
       },
     };
   },
@@ -106,6 +116,7 @@ module.exports = {
         formateur,
         token,
         actionToken: createActionToken(formateur.username),
+        voeux_email,
       },
     };
   },
@@ -117,6 +128,7 @@ module.exports = {
         user,
         token,
         resetPasswordToken: createResetPasswordToken(user.username),
+        voeux_email,
       },
     };
   },

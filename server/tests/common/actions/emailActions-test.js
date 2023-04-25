@@ -16,7 +16,10 @@ describe("emails", () => {
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
     assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "Activation de votre compte");
+    assert.strictEqual(
+      emailsSent[0].subject,
+      "Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
+    );
     const found = await User.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.strictEqual(found.emails.length, 1);
     assert.strictEqual(found.emails[0].sendDates.length, 1);
@@ -48,7 +51,10 @@ describe("emails", () => {
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
     assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "[Rappel] Activation de votre compte");
+    assert.strictEqual(
+      emailsSent[0].subject,
+      "[Rappel] Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
+    );
     const found = await User.findOne().lean();
     assert.strictEqual(found.emails.length, 1);
     assert.strictEqual(found.emails[0].sendDates.length, 2);

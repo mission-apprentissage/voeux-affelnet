@@ -484,7 +484,7 @@ describe("adminRoutes", () => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      "[Rappel] Affelnet apprentissage – Information requise pour la transmission des vœux 2023 (SIRET : 11111111100006)"
+      "[Rappel] Affelnet 2023 : Action requise pour la transmission des listes de candidats (Siret : 11111111100006)"
     );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
