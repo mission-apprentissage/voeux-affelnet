@@ -17,7 +17,7 @@ export const Gestionnaire = () => {
   const { siret } = useParams();
 
   const [gestionnaire, setGestionnaire] = useState(undefined);
-  const [formateurs, setFormateurs] = useState(undefined);
+  const [, setFormateurs] = useState(undefined);
   const mounted = useRef(false);
 
   const getGestionnaire = useCallback(async () => {
