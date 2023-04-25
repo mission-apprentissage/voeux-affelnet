@@ -72,7 +72,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
     onClose: onCloseUpdateGestionnaireEmailModal,
   } = useDisclosure();
 
-  if (!formateur) {
+  if (!gestionnaire || !formateur) {
     return;
   }
 
@@ -109,15 +109,12 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
       );
   const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
-  if (!formateur) {
-    return;
-  }
-
   const isResponsableFormateur = !!(formateur.uai === gestionnaire.uai || formateur.siret === gestionnaire.siret);
 
-  const lastEmailDate = formateur.emails
-    ? new Date(formateur.emails?.findLast(() => true)?.sendDates?.findLast(() => true))
-    : null;
+  const lastEmailDate =
+    formateur.emails && typeof formateur.emails.findLast === "function"
+      ? new Date(formateur.emails?.findLast(() => true)?.sendDates?.findLast(() => true))
+      : null;
 
   return (
     <>
