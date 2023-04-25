@@ -115,7 +115,9 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
   const isResponsableFormateur = !!(formateur.uai === gestionnaire.uai || formateur.siret === gestionnaire.siret);
 
-  const lastEmailDate = new Date(formateur.emails.findLast(() => true)?.sendDates?.findLast(() => true));
+  const lastEmailDate = formateur.emails
+    ? new Date(formateur.emails?.findLast(() => true)?.sendDates?.findLast(() => true))
+    : null;
 
   return (
     <>

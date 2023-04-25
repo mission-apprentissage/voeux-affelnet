@@ -62,7 +62,7 @@ const fillGestionnaire = async (gestionnaire, admin) => {
               ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
               : null,
           };
-        })
+        }) ?? []
     ),
   };
 };
@@ -101,7 +101,7 @@ const fillFormateur = async (formateur, admin) => {
               ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
               : null,
           };
-        })
+        }) ?? []
     ),
   };
 };
@@ -274,9 +274,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
                     (
                       await Formateur.find({
                         uai: {
-                          $in: user?.etablissements
-                            .filter((etablissement) => filterForAcademie(etablissement, admin))
-                            .map((etablissement) => etablissement.uai),
+                          $in:
+                            user?.etablissements
+                              .filter((etablissement) => filterForAcademie(etablissement, admin))
+                              .map((etablissement) => etablissement.uai) ?? [],
                         },
                       }).lean()
                     ).map((etablissement) => fillFormateur(etablissement, admin))
@@ -292,7 +293,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                           "etablissement_gestionnaire.siret": user.siret,
                           "etablissement_accueil.uai": etablissement.uai,
                         }),
-                      }))
+                      })) ?? []
                   ),
                 }
               : {
@@ -302,9 +303,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
                     (
                       await Gestionnaire.find({
                         siret: {
-                          $in: user?.etablissements
-                            .filter((etablissement) => filterForAcademie(etablissement, admin))
-                            .map((etablissement) => etablissement.siret),
+                          $in:
+                            user?.etablissements
+                              .filter((etablissement) => filterForAcademie(etablissement, admin))
+                              .map((etablissement) => etablissement.siret) ?? [],
                         },
                       }).lean()
                     ).map((gestionnaire) => fillGestionnaire(gestionnaire, admin))
@@ -320,7 +322,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                           "etablissement_gestionnaire.siret": etablissement.siret,
                           "etablissement_accueil.uai": user.uai,
                         }),
-                      }))
+                      })) ?? []
                   ),
                 }),
           };
@@ -458,7 +460,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                               .sort((a, b) => new Date(b) - new Date(a))[0]
                           : null,
                       };
-                    })
+                    }) ?? []
                 ),
               };
             })

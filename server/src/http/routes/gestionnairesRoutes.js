@@ -56,7 +56,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
                 ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
                 : null,
             };
-          })
+          }) ?? []
         ),
       });
     })
@@ -99,7 +99,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         await Promise.all(
           gestionnaire?.etablissements.map(async (etablissement) => {
             return await Formateur.findOne({ uai: etablissement.uai }).lean();
-          })
+          }) ?? []
         )
       );
     })

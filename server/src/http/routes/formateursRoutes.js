@@ -54,7 +54,7 @@ module.exports = ({ users }) => {
                 ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
                 : null,
             };
-          })
+          }) ?? []
         ),
       });
     })
@@ -98,7 +98,7 @@ module.exports = ({ users }) => {
         await Promise.all(
           formateur?.etablissements.map(async (etablissement) => {
             return await Gestionnaire.findOne({ siret: etablissement.siret }).lean();
-          })
+          }) ?? []
         )
       );
     })
