@@ -52,17 +52,20 @@ function ActivationPage() {
   const username = decodeJWT(actionToken).sub;
   const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
 
-  const activation = useCallback(async (values) => {
-    try {
-      const { token } = await _post("/api/activation", { ...values, actionToken });
-      setAuth(token);
-      navigate("/");
-    } catch (e) {
-      console.error(e);
+  const activation = useCallback(
+    async (values) => {
+      try {
+        const { token } = await _post("/api/activation", { ...values, actionToken });
+        setAuth(token);
+        navigate("/");
+      } catch (e) {
+        console.error(e);
 
-      setMessage(<StatusErrorMessage error={e} username={username} />);
-    }
-  });
+        setMessage(<StatusErrorMessage error={e} username={username} />);
+      }
+    },
+    [actionToken, navigate, setAuth, username]
+  );
 
   const showForm = !loading && !message && !error;
   const title = `Activation de votre compte ${username}`;

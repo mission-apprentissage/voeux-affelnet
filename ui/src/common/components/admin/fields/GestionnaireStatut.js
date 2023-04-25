@@ -1,9 +1,12 @@
-import { Tag, Text } from "@chakra-ui/react";
 import { UserStatut } from "../../../constants/UserStatut";
 import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
 import { WarningFill } from "../../../../theme/components/icons/WarningFill";
 
 export const GestionnaireStatut = ({ gestionnaire }) => {
+  if (!gestionnaire) {
+    return;
+  }
+
   switch (true) {
     case UserStatut.ACTIVE === gestionnaire.statut: {
       return (

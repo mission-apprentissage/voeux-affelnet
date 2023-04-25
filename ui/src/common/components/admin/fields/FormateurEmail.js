@@ -1,6 +1,10 @@
 import { Tag, Text } from "@chakra-ui/react";
 
 export const FormateurEmail = ({ gestionnaire, formateur }) => {
+  if (!gestionnaire || !formateur) {
+    return;
+  }
+
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 
   const diffusionAutorisee = etablissement?.diffusionAutorisee;

@@ -3,6 +3,10 @@ import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
 import { WarningFill } from "../../../../theme/components/icons/WarningFill";
 
 export const FormateurStatut = ({ gestionnaire, formateur }) => {
+  if (!gestionnaire || !formateur) {
+    return;
+  }
+
   const etablissementFromGestionnaire = gestionnaire.etablissements?.find(
     (etablissement) => formateur.uai === etablissement.uai
   );
@@ -14,14 +18,14 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
   const diffusionAutorisee = etablissementFromGestionnaire?.diffusionAutorisee;
 
   const voeuxDisponible = diffusionAutorisee
-    ? etablissementFromFormateur.nombre_voeux > 0
-    : etablissementFromGestionnaire.nombre_voeux > 0;
+    ? etablissementFromFormateur?.nombre_voeux > 0
+    : etablissementFromGestionnaire?.nombre_voeux > 0;
 
-  const voeuxTelechargementsFormateur = formateur.voeux_telechargements.filter(
+  const voeuxTelechargementsFormateur = formateur.voeux_telechargements?.filter(
     (telechargement) => telechargement.siret === gestionnaire.siret
   );
 
-  const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
+  const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements?.filter(
     (telechargement) => telechargement.uai === formateur.uai
   );
 

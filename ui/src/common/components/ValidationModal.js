@@ -16,7 +16,7 @@ export const ValidationModal = ({ isOpen, onClose, callback, title, children }) 
       await callback();
       onClose(event);
     },
-    [callback]
+    [callback, onClose]
   );
 
   return (

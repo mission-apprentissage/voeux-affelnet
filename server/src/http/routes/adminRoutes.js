@@ -418,7 +418,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const gestionnaire = await Gestionnaire.findOne({ siret });
 
-      if (!gestionnaire?.etablissements.filter((e) => e.voeux_date).length === 0) {
+      if (
+        !gestionnaire?.etablissements
+          .filter((etablissement) => filterForAcademie(etablissement, admin))
+          .filter((e) => e.voeux_date).length === 0
+      ) {
         return res.json([]);
       }
 
@@ -656,7 +660,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const formateur = await Formateur.findOne({ uai });
 
-      if (!formateur?.etablissements.filter((e) => e.voeux_date).length === 0) {
+      if (
+        !formateur?.etablissements
+          .filter((etablissement) => filterForAcademie(etablissement, admin))
+          .filter((e) => e.voeux_date).length === 0
+      ) {
         return res.json([]);
       }
 
