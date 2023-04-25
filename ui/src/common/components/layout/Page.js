@@ -2,7 +2,7 @@ import { Box, Heading, Text } from "@chakra-ui/react";
 
 export const Page = ({ title, children }) => {
   return (
-    <Box py={12}>
+    <Box pb={12}>
       <Heading as="h2" size="lg" mb={8}>
         {title}
       </Heading>

@@ -145,7 +145,7 @@ export const Formateur = () => {
       }
     >
       {!hasOnlyOneResponsable && (
-        <Alert status="danger">
+        <Alert status="error">
           Plusieurs responsables ont été trouvés pour cet organisme, seules les informations liées à un seul de ces
           responsables sont listées ici. Merci de contacter le support.
         </Alert>

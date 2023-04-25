@@ -69,7 +69,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
           ): {
           return (
             <>
-              <WarningFill verticalAlign="text-bottom" />
+              <WarningFill color="#fcc63a" verticalAlign="text-bottom" />
               Mise à jour non téléchargée
             </>
           );
@@ -99,7 +99,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
             )): {
           return (
             <>
-              <WarningFill verticalAlign="text-bottom" />
+              <WarningFill color="#fcc63a" verticalAlign="text-bottom" />
               Compte créé, liste non téléchargée
             </>
           );
@@ -114,21 +114,21 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
         case UserStatut.CONFIRME === formateur.statut: {
           return (
             <>
-              <WarningFill verticalAlign="text-bottom" /> Email confirmé, compte non créé
+              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Email confirmé, compte non créé
             </>
           );
         }
         case UserStatut.EN_ATTENTE === formateur.statut: {
           return (
             <>
-              <WarningFill verticalAlign="text-bottom" /> En attente de confirmation d'email
+              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> En attente de confirmation d'email
             </>
           );
         }
         default: {
           return (
             <>
-              <WarningFill verticalAlign="text-bottom" /> Etat inconnu
+              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
             </>
           );
         }
@@ -229,7 +229,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
         default: {
           return (
             <>
-              <WarningFill verticalAlign="text-bottom" /> Etat inconnu
+              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
             </>
           );
         }
@@ -238,7 +238,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
     default: {
       return (
         <>
-          <WarningFill verticalAlign="text-bottom" /> Etat inconnu
+          <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
         </>
       );
     }

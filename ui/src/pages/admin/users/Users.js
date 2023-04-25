@@ -156,8 +156,8 @@ export const Users = () => {
             <Th width="450px">Raison sociale / Ville</Th>
             <Th width="350px">Courriel habilité</Th>
 
-            <Th width={"80px"}>Candidats 2023</Th>
-            <Th width={"150px"}>Statut d'avancement</Th>
+            <Th width={"80px"}>Candidats</Th>
+            <Th>Statut</Th>
           </Tr>
         </Thead>
         <Tbody>

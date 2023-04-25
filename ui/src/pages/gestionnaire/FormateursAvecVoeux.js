@@ -26,8 +26,8 @@ export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
           <Th width="100px"></Th>
           <Th width="400px">Raison sociale / Ville</Th>
           <Th width="450px">Courriel habilité</Th>
-          <Th>Candidats 2023</Th>
-          <Th>Statut d'avancement</Th>
+          <Th>Candidats</Th>
+          <Th>Statut</Th>
         </Tr>
       </Thead>
       <Tbody>

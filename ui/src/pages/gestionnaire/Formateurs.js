@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Text, Box, Link, Alert, AlertIcon } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
@@ -7,6 +8,14 @@ import { FormateursAvecVoeux } from "./FormateursAvecVoeux";
 import { FormateursSansVoeux } from "./FormateursSansVoeux";
 
 export const Formateurs = ({ gestionnaire, formateurs, callback }) => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (gestionnaire?.etablissements.length === 1 && gestionnaire.etablissements[0].uai === gestionnaire.uai) {
+      navigate(`/gestionnaire/formateurs/${gestionnaire.uai}`, { replace: true });
+    }
+  }, [gestionnaire?.etablissements, gestionnaire?.uai, navigate]);
+
   if (!gestionnaire) {
     return;
   }

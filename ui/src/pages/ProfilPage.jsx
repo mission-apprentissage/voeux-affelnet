@@ -41,8 +41,8 @@ export const ProfilPage = () => {
     <>
       {
         {
-          Gestionnaire: <Redirect to={"/gestionnaire"} />,
-          Formateur: <Redirect to={"/formateur"} />,
+          Gestionnaire: <Redirect to={"/gestionnaire"} replace />,
+          Formateur: <Redirect to={"/formateur"} replace />,
         }[self?.type]
       }
     </>

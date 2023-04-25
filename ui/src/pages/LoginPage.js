@@ -8,6 +8,7 @@ import {
   Center,
   FormControl,
   FormErrorMessage,
+  FormHelperText,
   FormLabel,
   Heading,
   HStack,
@@ -101,6 +102,14 @@ function LoginPage() {
                           return (
                             <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                               <FormLabel name={field.name}>Identifiant</FormLabel>
+                              <FormHelperText mb={4}>
+                                Votre identifiant figure dans nos correspondances courriel
+                                <ul style={{ listStyle: "none" }}>
+                                  <li>Organisme responsable : votre numéro de Siret</li>
+                                  <li>Organisme formateur : votre code UAI</li>
+                                  <li>Autres utilisateurs : prenom.nom</li>
+                                </ul>
+                              </FormHelperText>
                               <Input {...field} id={field.name} placeholder="Votre identifiant..." />
                               <FormErrorMessage>{meta.error || "Identifiant invalide"}</FormErrorMessage>
                             </FormControl>
