@@ -15,7 +15,9 @@ const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
 const importGestionnaires = require("./jobs/importGestionnaires");
+const { cleanGestionnaires } = require("./jobs/cleanGestionnaires");
 const importFormateurs = require("./jobs/importFormateurs");
+const { cleanFormateurs } = require("./jobs/cleanFormateurs");
 const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
 const exportGestionnaires = require("./jobs/exportGestionnaires");
@@ -81,7 +83,9 @@ cli
 
 cli
   .command("importGestionnaires <gestionnaireCsv>")
-  .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
+  .description(
+    "Créé les comptes des responsables à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+  )
   .action((gestionnaireCsv) => {
     runScript(() => {
       const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
@@ -91,13 +95,39 @@ cli
   });
 
 cli
+  .command("cleanGestionnaires <gestionnaireCsv>")
+  .description("Supprime les gestionnaires n'apparaissant pas dans le fichier des relations")
+  .option("--proceed", "Permet d'applique la suppression", false)
+  .action((gestionnaireCsv, options) => {
+    runScript(() => {
+      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+
+      return cleanGestionnaires(input, options);
+    });
+  });
+
+cli
   .command("importFormateurs <formateurCsv>")
-  .description("Créé les comptes des CFA à partir d'un fichier csv avec les colonnes suivantes : 'siret,email'")
+  .description(
+    "Créé les comptes des formateurs à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+  )
   .action((formateurCsv) => {
     runScript(() => {
       const input = formateurCsv ? createReadStream(formateurCsv) : process.stdin;
 
       return importFormateurs(input);
+    });
+  });
+
+cli
+  .command("cleanFormateurs <formateurCsv>")
+  .description("Supprime les formateurs n'apparaissant pas dans le fichier des relations")
+  .option("--proceed", "Permet d'applique la suppression", false)
+  .action((gestionnaireCsv, options) => {
+    runScript(() => {
+      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+
+      return cleanFormateurs(input, options);
     });
   });
 
