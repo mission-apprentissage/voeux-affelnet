@@ -1,5 +1,6 @@
 const { Schema } = require("mongoose");
 const { academieSchema } = require("./schemas/academieSchema");
+const { historySchema } = require("./schemas/historySchema");
 const User = require("./User");
 const { nested } = require("../utils/mongooseUtils");
 
@@ -68,6 +69,11 @@ const schema = new Schema({
         },
       }),
     ],
+  },
+
+  histories: {
+    default: [],
+    type: [nested(historySchema)],
   },
 });
 

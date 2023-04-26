@@ -5,6 +5,10 @@ import { FormateurEmail } from "../../common/components/gestionnaire/fields/Form
 import { FormateurStatut } from "../../common/components/gestionnaire/fields/FormateurStatut";
 
 export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
+  if (!formateurs) {
+    return;
+  }
+
   return (
     <Table mt={12}>
       <Thead>
@@ -17,6 +21,9 @@ export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
       </Thead>
       <Tbody>
         {formateurs.map((formateur) => {
+          if (!formateur) {
+            return <></>;
+          }
           return (
             <Tr key={formateur?.uai}>
               <Td>

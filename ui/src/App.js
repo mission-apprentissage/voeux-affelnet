@@ -128,7 +128,7 @@ const App = () => {
           />
           <Route
             exact
-            path="/anomalie"
+            path="/support"
             element={
               <Suspense>
                 <Layout>

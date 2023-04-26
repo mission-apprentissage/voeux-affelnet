@@ -305,7 +305,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
               </Text>
               <Text mb={4}>
                 Si vous pensez qu’il s’agit d’une anomalie, vous pouvez{" "}
-                <Link href="/anomalie" variant="action">
+                <Link href="/support" variant="action">
                   transmettre un signalement
                 </Link>
                 .
@@ -357,7 +357,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   </Text>
                   <Text mb={4}>
                     En cas de problème,{" "}
-                    <Link href="/anomalie" variant="action">
+                    <Link href="/support" variant="action">
                       vous pouvez signaler une anomalie à l'équipe technique
                     </Link>
                     .
@@ -427,7 +427,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   </Button>
                   <Text mb={4}>
                     En cas de problème,{" "}
-                    <Link href="/anomalie" variant="action">
+                    <Link href="/support" variant="action">
                       vous pouvez signaler une anomalie à l'équipe technique
                     </Link>
                     .
@@ -455,7 +455,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
         </Box>
 
         <Box mb={12}>
-          <Link href="/anomalie" variant="action">
+          <Link href="/support" variant="action">
             Signaler une anomalie
           </Link>
         </Box>

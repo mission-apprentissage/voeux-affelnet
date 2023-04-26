@@ -2,6 +2,7 @@ const { Schema } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 const User = require("./User");
 const { academieSchema } = require("./schemas/academieSchema");
+const { historySchema } = require("./schemas/historySchema");
 
 const schema = new Schema({
   uai: {
@@ -64,6 +65,11 @@ const schema = new Schema({
         },
       }),
     ],
+  },
+
+  histories: {
+    default: [],
+    type: [nested(historySchema)],
   },
 });
 

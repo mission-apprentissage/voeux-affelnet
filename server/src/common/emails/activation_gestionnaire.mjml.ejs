@@ -9,12 +9,10 @@
           <mj-text> Madame la directrice, Monsieur le directeur, </mj-text>
 
           <mj-text>
-            Vous pouvez dès à présent activer votre compte permettant le téléchargement les listes de vœux exprimés via
-            le service en ligne Affelnet pour votre établissement (Siret : <%= data.gestionnaire.siret %>) et/ou pour
-            les établissements dont vous êtes responsable.
+            Veuillez dès à présent activer votre compte qui vous permettra le téléchargement des listes de vœux exprimés
+            via le service en ligne Affelnet pour votre établissement (Siret : <%= data.gestionnaire.siret %>) et/ou
+            pour les établissements dont vous êtes responsable.
           </mj-text>
-
-          <%- include('./common/arrete.ejs'); %>
 
           <mj-button
             href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
@@ -24,8 +22,7 @@
             Activer mon compte
           </mj-button>
 
-          <%- include('./common/procedure_gestionnaire.ejs'); %> <%- include('./common/engagement.ejs'); %> <%-
-          include('./common/signature.ejs'); %>
+          <%- include('./common/signature.ejs'); %>
         </mj-column>
       </mj-section>
     </mj-wrapper>

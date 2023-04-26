@@ -11,7 +11,7 @@ module.exports = {
   confirmation_gestionnaire: (gestionnaire, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet 2023 : Action requise pour la transmission des listes de candidats (Siret : ${gestionnaire.siret})`,
+      subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("confirmation_gestionnaire"),
       data: {
         gestionnaire,
@@ -24,7 +24,7 @@ module.exports = {
   confirmation_formateur: (formateur, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet 2023 : Action requise pour la transmission des listes de candidats (UAI : ${formateur.uai})`,
+      subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("confirmation_formateur"),
       data: {
         formateur,
@@ -36,7 +36,7 @@ module.exports = {
   },
   confirmed: (user) => {
     return {
-      subject: `Affelnet 2023 : Confirmation de votre adresse courriel`,
+      subject: `Affelnet 2023 – Confirmation de votre adresse courriel`,
       templateFile: getTemplateFile("confirmed"),
       data: {
         user,
@@ -60,7 +60,7 @@ module.exports = {
   activation_gestionnaire: (gestionnaire, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Des vœux Affelnet sont téléchargeables (SIRET : ${gestionnaire.siret})`,
+      subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("activation_gestionnaire"),
       data: {
         gestionnaire,
@@ -73,8 +73,9 @@ module.exports = {
   activation_formateur: (formateur, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Activation de votre compte`,
+      subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("activation_formateur"),
+      // TODO : Passer le mail gestionnaire ayant procédé à la délégation ??
       data: {
         formateur,
         token,
@@ -98,7 +99,7 @@ module.exports = {
   },
   notification_gestionnaire: (gestionnaire, token) => {
     return {
-      subject: `De nouveaux vœux Affelnet sont téléchargeables`,
+      subject: `Affelnet 2023 – Des listes de candidats sont téléchargeables (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("notification_gestionnaire"),
       data: {
         gestionnaire,
@@ -110,7 +111,7 @@ module.exports = {
   },
   notification_formateur: (formateur, token) => {
     return {
-      subject: `De nouveaux vœux Affelnet sont téléchargeables`,
+      subject: `Affelnet 2023 – Des listes de candidats sont téléchargeables (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("notification_formateur"),
       data: {
         formateur,

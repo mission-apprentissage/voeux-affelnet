@@ -19,6 +19,10 @@ const FormateurVoeuxDisponibles = ({ gestionnaire, formateur, callback }) => {
 };
 
 export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
+  if (!formateurs) {
+    return;
+  }
+
   return (
     <Table mt={12}>
       <Thead>
@@ -32,6 +36,10 @@ export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
       </Thead>
       <Tbody>
         {formateurs.map((formateur) => {
+          if (!formateur) {
+            return <></>;
+          }
+
           return (
             <Tr key={formateur?.uai}>
               <Td>

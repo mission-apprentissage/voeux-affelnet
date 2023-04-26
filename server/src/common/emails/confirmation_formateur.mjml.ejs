@@ -12,6 +12,11 @@
             ligne affectation vous a été accordée pour l'établissement <%= data.formateur.uai %>.
           </mj-text>
 
+          <mj-text>
+            Dès réception de ce courriel, veuillez confirmer ou modifier votre adresse email en cliquant sur le bouton
+            ci-dessous.
+          </mj-text>
+
           <mj-button
             href="<%= utils.getPublicUrl(`/confirmation?actionToken=${data.actionToken}`) %>"
             background-color="#0e4194"
@@ -20,8 +25,7 @@
             Confirmer ou modifier votre adresse courriel
           </mj-button>
 
-          <%- include('./common/procedure_formateur.ejs'); %> <%- include('./common/arrete.ejs'); %> <%-
-          include('./common/signature.ejs'); %>
+          <%- include('./common/procedure.ejs'); %> <%- include('./common/signature.ejs'); %>
         </mj-column>
       </mj-section>
     </mj-wrapper>

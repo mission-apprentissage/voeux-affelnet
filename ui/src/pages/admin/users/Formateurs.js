@@ -128,7 +128,7 @@ export const Formateurs = ({}) => {
         </Box>
 
         <Box mb={12}>
-          <Link href="/anomalie" variant="action">
+          <Link href="/support" variant="action">
             Signaler une anomalie
           </Link>
         </Box>

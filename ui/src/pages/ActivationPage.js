@@ -78,56 +78,64 @@ function ActivationPage() {
         </Heading>
 
         <Box mt={8}>
-          {error && <StatusErrorMessage error={error} username={username} />}
-          {loading && <div>En cours de chargement...</div>}
-          {showForm && (
-            <Box>
-              <Text mb={8}>
-                Afin d’accéder au service de téléchargement des listes de vœux exprimés via Affelnet, nous vous prions
-                d’activer votre compte en créant un mot de passe.
-              </Text>
-              <Formik
-                initialValues={{
-                  password: "",
-                }}
-                validationSchema={Yup.object().shape({
-                  password: Yup.string()
-                    .required("Veuillez saisir un mot de passe")
-                    .matches(
-                      "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[ !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~])[A-Za-z\\d !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]{8,}$",
-                      "Le mot de passe doit contenir au moins 8 caractères, une lettre en majuscule, un chiffre et un caractère spécial"
-                    ),
-                })}
-                onSubmit={activation}
-              >
-                {({ status = {} }) => {
-                  return (
-                    <Form>
-                      <Field name="password">
-                        {({ field, meta }) => {
-                          return (
-                            <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                              <FormLabel name={field.name}>Mot de passe</FormLabel>
-                              <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." />
-                              <FormErrorMessage>{meta.error || "Mot de passe invalide"}</FormErrorMessage>
-                            </FormControl>
-                          );
-                        }}
-                      </Field>
-                      <Button variant="primary" type="submit">
-                        Activer le compte
-                      </Button>
-                      {status.error && (
-                        <Text color="error" mt={2}>
-                          {status.error}
-                        </Text>
-                      )}
-                    </Form>
-                  );
-                }}
-              </Formik>
-            </Box>
-          )}
+          <Box mb={8}>
+            {error && <StatusErrorMessage error={error} username={username} />}
+            {loading && <div>En cours de chargement...</div>}
+            {showForm && (
+              <Box>
+                <Text mb={8}>
+                  Afin d’accéder au service de téléchargement des listes de vœux exprimés via Affelnet, nous vous prions
+                  d’activer votre compte en créant un mot de passe.
+                </Text>
+                <Formik
+                  initialValues={{
+                    password: "",
+                  }}
+                  validationSchema={Yup.object().shape({
+                    password: Yup.string()
+                      .required("Veuillez saisir un mot de passe")
+                      .matches(
+                        "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[ !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~])[A-Za-z\\d !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]{8,}$",
+                        "Le mot de passe doit contenir au moins 8 caractères, une lettre en majuscule, un chiffre et un caractère spécial"
+                      ),
+                  })}
+                  onSubmit={activation}
+                >
+                  {({ status = {} }) => {
+                    return (
+                      <Form>
+                        <Field name="password">
+                          {({ field, meta }) => {
+                            return (
+                              <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
+                                <FormLabel name={field.name}>Mot de passe</FormLabel>
+                                <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." />
+                                <FormErrorMessage>{meta.error || "Mot de passe invalide"}</FormErrorMessage>
+                              </FormControl>
+                            );
+                          }}
+                        </Field>
+                        <Button variant="primary" type="submit">
+                          Activer le compte
+                        </Button>
+                        {status.error && (
+                          <Text color="error" mt={2}>
+                            {status.error}
+                          </Text>
+                        )}
+                      </Form>
+                    );
+                  }}
+                </Formik>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        <Box mb={4}>
+          <Link href="/support" variant="action">
+            Besoin d'assistance ?
+          </Link>
         </Box>
       </Box>
     </Center>

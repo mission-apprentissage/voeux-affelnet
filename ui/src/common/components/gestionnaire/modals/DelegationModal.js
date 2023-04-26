@@ -156,6 +156,12 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
               </Box>
             </Form>
           </Formik>
+
+          <Box mb={4}>
+            <Link href="/support" variant="action">
+              Besoin d'assistance ?
+            </Link>
+          </Box>
         </ModalBody>
         <ModalFooter>
           <Button variant="primary" type="submit" form="delegation-form">

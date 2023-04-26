@@ -9,12 +9,9 @@
           <mj-text> Madame, Monsieur, </mj-text>
 
           <mj-text>
-            Vous pouvez dès à présent activer votre compte afin de vous permettre de télécharger la liste de vœux
-            exprimés via le service en ligne Affelnet pour l'établissement pour lequel vous avez obtenu une délégation
-            de droit (UAI : <%= data.formateur.uai %>) par votre établissement responsable.
+            Veuillez dès à présent activer votre compte qui vous permettra le téléchargement des listes de vœux exprimés
+            via le service en ligne Affelnet.
           </mj-text>
-
-          <%- include('./common/arrete.ejs'); %>
 
           <mj-button
             href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
@@ -24,8 +21,7 @@
             Activer mon compte
           </mj-button>
 
-          <%- include('./common/procedure_formateur.ejs'); %> <%- include('./common/engagement.ejs'); %> <%-
-          include('./common/signature.ejs'); %>
+          <%- include('./common/signature.ejs'); %>
         </mj-column>
       </mj-section>
     </mj-wrapper>
