@@ -111,7 +111,7 @@ describe("adminRoutes", () => {
     assert.deepStrictEqual(response.data.gestionnaires.filter((c) => c.siret === "13002271800014").length, 0);
   });
 
-  xit("Vérifie qu'on peut filtrer les gestionnaires", async () => {
+  it("Vérifie qu'on peut filtrer les utilisateurs", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     await insertGestionnaire({
@@ -121,15 +121,15 @@ describe("adminRoutes", () => {
       email: "contact@organisme2.fr",
     });
 
-    const response = await httpClient.get("/api/admin/gestionnaires?text=contact@organisme.fr", {
+    const response = await httpClient.get("/api/admin/users?text=contact@organisme.fr", {
       headers: {
         ...auth,
       },
     });
 
     assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.gestionnaires.length, 1);
-    assert.strictEqual(response.data.gestionnaires[0].email, "contact@organisme.fr");
+    assert.strictEqual(response.data.users.length, 1);
+    assert.strictEqual(response.data.users[0].email, "contact@organisme.fr");
   });
 
   xit("Vérifie qu'on peut exporter les gestionnaires injoinables", async () => {
