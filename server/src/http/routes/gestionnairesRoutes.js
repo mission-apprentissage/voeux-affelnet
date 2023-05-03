@@ -143,8 +143,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         const previousConfirmationEmail = formateur.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
         previousConfirmationEmail
-          ? await resendConfirmationEmails(resendEmail, { username: uai, force: true })
-          : await sendConfirmationEmails(sendEmail, { username: uai });
+          ? await resendConfirmationEmails(resendEmail, { username: uai, force: true, sender: req.user })
+          : await sendConfirmationEmails(sendEmail, { username: uai, sender: req.user });
       }
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });

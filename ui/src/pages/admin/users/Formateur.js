@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { Text, Link, Heading, Box, Alert } from "@chakra-ui/react";
+import { Text, Link, Heading, Box, Alert, useDisclosure, Button } from "@chakra-ui/react";
 
 import { _get } from "../../../common/httpClient";
 import { Page } from "../../../common/components/layout/Page";
@@ -8,6 +8,9 @@ import { FormateurLibelle } from "../../../common/components/formateur/fields/Fo
 import { isResponsableFormateur } from "../../../common/utils/getUserType";
 import { useDownloadVoeux } from "../../../common/hooks/adminHooks";
 import { History } from "../../gestionnaire/History";
+import { UpdateDelegationModal } from "../../../common/components/admin/modals/UpdateDelegationModal";
+import { DelegationModal } from "../../../common/components/admin/modals/DelegationModal";
+import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
 
 // const EtablissementEmail = ({ gestionnaire, etablissement, callback }) => {
 //   const [enableForm, setEnableForm] = useState(false);
@@ -66,6 +69,24 @@ import { History } from "../../gestionnaire/History";
 // };
 
 export const Formateur = () => {
+  const {
+    onOpen: onOpenUpdateGestionnaireEmailModal,
+    isOpen: isOpenUpdateGestionnaireEmailModal,
+    onClose: onCloseUpdateGestionnaireEmailModal,
+  } = useDisclosure();
+
+  const {
+    onOpen: onOpenUpdateDelegationModal,
+    isOpen: isOpenUpdateDelegationModal,
+    onClose: onCloseUpdateDelegationModal,
+  } = useDisclosure();
+
+  const {
+    onOpen: onOpenDelegationModal,
+    isOpen: isOpenDelegationModal,
+    onClose: onCloseDelegationModal,
+  } = useDisclosure();
+
   const { siret, uai } = useParams();
   const downloadVoeux = useDownloadVoeux();
   const [gestionnaires, setGestionnaires] = useState(undefined);
@@ -103,20 +124,24 @@ export const Formateur = () => {
     }
   }, [uai]);
 
+  const callback = useCallback(async () => {
+    await getFormateur();
+    if (siret) {
+      await getGestionnaire();
+    } else {
+      await getGestionnaires();
+    }
+  }, [siret, getFormateur, getGestionnaire, getGestionnaires]);
+
   useEffect(() => {
     const run = async () => {
       if (!mounted.current) {
-        await getFormateur();
-        if (siret) {
-          await getGestionnaire();
-        } else {
-          await getGestionnaires();
-        }
         mounted.current = true;
+        callback();
       }
     };
     run();
-  }, [siret, getGestionnaires, getGestionnaire, getFormateur]);
+  }, [callback]);
 
   if (!formateur || !gestionnaires?.[0]) {
     return;
@@ -213,18 +238,18 @@ export const Formateur = () => {
                 La délégation des droits de réception des listes de candidats a été activée pour cet organisme
                 formateur. Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
                 {formateur?.email ?? etablissement?.email}{" "}
-                {/* <Link variant="action" onClick={onOpenUpdateDelegationModal}>
+                <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                   (modifier)
-                </Link> */}
+                </Link>
               </Text>
 
-              {/* <UpdateDelegationModal
+              <UpdateDelegationModal
                 gestionnaire={gestionnaire}
                 formateur={formateur}
                 callback={callback}
                 isOpen={isOpenUpdateDelegationModal}
                 onClose={onCloseUpdateDelegationModal}
-              /> */}
+              />
             </>
           ) : (
             <>
@@ -232,17 +257,18 @@ export const Formateur = () => {
                 La délégation des droits de réception des listes de candidats n'a pas été activée pour cet organisme
                 formateur. Seul le responsable peut les réceptionner.
               </Text>
-              {/* <Button variant="primary" mb={4} onClick={onOpenDelegationModal}>
-                Définir une délégation de droits pour cet organisme
-              </Button> */}
 
-              {/* <DelegationModal
+              <Button variant="primary" mb={4} onClick={onOpenDelegationModal}>
+                Définir une délégation de droits pour cet organisme
+              </Button>
+
+              <DelegationModal
                 gestionnaire={gestionnaire}
                 formateur={formateur}
                 callback={callback}
                 isOpen={isOpenDelegationModal}
                 onClose={onCloseDelegationModal}
-              /> */}
+              />
             </>
           )}
         </Box>
@@ -269,7 +295,7 @@ export const Formateur = () => {
           Historique des actions
         </Heading>
 
-        <History gestionnaire={gestionnaire} formateur={formateur} />
+        <History formateur={formateur} />
       </Box>
 
       <Box mb={12}>

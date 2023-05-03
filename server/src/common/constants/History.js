@@ -12,8 +12,8 @@ const FormateurActions = {
   ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT: "FORMATEUR_ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT",
   ACCOUNT_EMAIL_UPDATED_BY_ADMIN: "FORMATEUR_ACCOUNT_EMAIL_UPDATED_BY_ADMIN",
 
-  DELEGATION_CANCELED_BY_ADMIN: "DELEGATION_CANCELED_BY_ADMIN",
-  DELEGATION_CANCELED_BY_RESPONSABLE: "DELEGATION_CANCELED_BY_RESPONSABLE",
+  DELEGATION_CANCELLED_BY_ADMIN: "DELEGATION_CANCELLED_BY_ADMIN",
+  DELEGATION_CANCELLED_BY_RESPONSABLE: "DELEGATION_CANCELLED_BY_RESPONSABLE",
   DELEGATION_CREATED_BY_ADMIN: "DELEGATION_CREATED_BY_ADMIN",
   DELEGATION_CREATED_BY_RESPONSABLE: "DELEGATION_CREATED_BY_RESPONSABLE",
   DELEGATION_UPDATED_BY_ADMIN: "DELEGATION_UPDATED_BY_ADMIN",
@@ -45,8 +45,8 @@ const FormateurActions = {
 //   [FormateurActions.ACCOUNT_CONFIRMED, { fields: {} }],
 //   [FormateurActions.ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT, { fields: {} }],
 //   [FormateurActions.ACCOUNT_EMAIL_UPDATED_BY_ADMIN, { fields: {} }],
-//   [FormateurActions.DELEGATION_CANCELED_BY_ADMIN, { fields: {} }],
-//   [FormateurActions.DELEGATION_CANCELED_BY_RESPONSABLE, { fields: {} }],
+//   [FormateurActions.DELEGATION_CANCELLED_BY_ADMIN, { fields: {} }],
+//   [FormateurActions.DELEGATION_CANCELLED_BY_RESPONSABLE, { fields: {} }],
 //   [FormateurActions.DELEGATION_CREATED_BY_ADMIN, { fields: {} }],
 //   [FormateurActions.DELEGATION_CREATED_BY_RESPONSABLE, { fields: {} }],
 //   [FormateurActions.DELEGATION_UPDATED_BY_ADMIN, { fields: {} }],
@@ -106,8 +106,8 @@ const ResponsableActions = {
 // "LIST_AVAILABLE_EMAIL_MANUAL_SENT";"Formateur";"[Email super admin ou Email responsable] a généré l'envoi d'un rappel à [mail délégué] pour téléchargement de la liste de vœux"
 // "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT";"Formateur";"Action automatique – Un courriel de rappel a été envoyé à [mail délégué si existant, sinon mail admin responsable] pour téléchargement de la liste de vœux"
 // "LIST_AVAILABLE";"Formateur";"Une liste de vœux est disponible, en attente de téléchargement par [mail délégué si existant, sinon mail admin responsable]"
-// "DELEGATION_CANCELED_BY_ADMIN";"Formateur";"[Email super-admin] a annulé la délégation de droits qui avait été accordée à [mail délégué]. Le responsable a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme."
-// "DELEGATION_CANCELED_BY_RESPONSABLE";"Formateur";"[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme"
+// "DELEGATION_CANCELLED_BY_ADMIN";"Formateur";"[Email super-admin] a annulé la délégation de droits qui avait été accordée à [mail délégué]. Le responsable a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme."
+// "DELEGATION_CANCELLED_BY_RESPONSABLE";"Formateur";"[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme"
 // "DELEGATION_UPDATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"
 // "DELEGATION_UPDATED_BY_RESPONSABLE";"Formateur";"[Email responsable] a modifié la délégation de droits pour cet organisme. Nouvelle adresse : [email] (ancienne adesse : [email]). La nouvelle personne a été notifiée par courriel pour confirmer son adresse."
 // "DELEGATION_CREATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"

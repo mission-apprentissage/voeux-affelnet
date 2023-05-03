@@ -24,6 +24,9 @@ const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history/responsable");
+const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/formateur");
+const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/formateur");
+const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/formateur");
 
 const filterForAcademie = (etablissement, user) => {
   return user.academie ? etablissement.academie?.code === user.academie?.code : true;
@@ -487,6 +490,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
         throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
       }
 
+      const etablissement = gestionnaire?.etablissements.find((e) => e.uai === uai);
+
       const etablissements = gestionnaire?.etablissements.map((etablissement) => {
         if (etablissement.uai === uai) {
           typeof req.body.email !== "undefined" && (etablissement.email = req.body.email);
@@ -498,14 +503,21 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { etablissements });
 
+      const formateur = await Formateur.findOne({ uai }).lean();
+
       if (typeof req.body.email !== "undefined" && req.body.diffusionAutorisee === true) {
-        const formateur = await Formateur.findOne({ uai });
+        etablissement?.diffusionAutorisee
+          ? await saveDelegationUpdatedByAdmin({ ...formateur, email: req.body.email }, req.user)
+          : await saveDelegationCreatedByAdmin({ ...formateur, email: req.body.email }, req.user);
+
         await Formateur.updateOne({ uai }, { $set: { statut: UserStatut.EN_ATTENTE } });
         const previousConfirmationEmail = formateur.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
         previousConfirmationEmail
           ? await resendConfirmationEmails(resendEmail, { username: uai, force: true })
           : await sendConfirmationEmails(sendEmail, { username: uai });
+      } else if (req.body.diffusionAutorisee === false) {
+        await saveDelegationCancelledByAdmin(formateur, req.user);
       }
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });
@@ -555,8 +567,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const previousConfirmationEmail = gestionnaire.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
       previousConfirmationEmail
-        ? await resendConfirmationEmails(resendEmail, { username: siret, force: true })
-        : await sendConfirmationEmails(sendEmail, { username: siret });
+        ? await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user })
+        : await sendConfirmationEmails(sendEmail, { username: siret, sender: req.user });
 
       return res.json({});
     })

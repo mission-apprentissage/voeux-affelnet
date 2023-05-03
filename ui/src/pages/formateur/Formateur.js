@@ -8,6 +8,7 @@ import { FormateurLibelle } from "../../common/components/formateur/fields/Forma
 import { GestionnaireLibelle } from "../../common/components/gestionnaire/fields/GestionnaireLibelle";
 import { GestionnaireEmail } from "../../common/components/formateur/fields/GestionnaireEmail";
 import { FormateurEmail } from "../../common/components/formateur/fields/FormateurEmail";
+import { History } from "../gestionnaire/History";
 
 export const Formateur = ({ formateur, gestionnaires, callback }) => {
   const downloadVoeux = useDownloadVoeux({ formateur });
@@ -201,12 +202,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           <Heading as="h3" size="md" mb={4}>
             Historique des actions
           </Heading>
-          <List>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-          </List>
+          <History /*gestionnaire={gestionnaire}*/ formateur={formateur} />
         </Box>
 
         <Box mb={12}>

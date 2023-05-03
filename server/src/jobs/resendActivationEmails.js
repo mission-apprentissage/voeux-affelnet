@@ -68,12 +68,12 @@ async function resendActivationEmails(resendEmail, options = {}) {
         switch (user.type) {
           case UserType.GESTIONNAIRE:
             options.username
-              ? await saveAccountActivationEmailManualResentAsResponsable(user)
+              ? await saveAccountActivationEmailManualResentAsResponsable(user, options.admin)
               : await saveAccountActivationEmailAutomaticResentAsResponsable(user);
             break;
           case UserType.FORMATEUR:
             options.username
-              ? await saveAccountActivationEmailManualResentAsFormateur(user)
+              ? await saveAccountActivationEmailManualResentAsFormateur(user, options.admin)
               : await saveAccountActivationEmailAutomaticResentAsFormateur(user);
             break;
           default:

@@ -64,6 +64,14 @@ export const Users = () => {
     run();
   }, [search]);
 
+  const callback = useCallback(
+    async (values) => {
+      console.log(values);
+      await search({ page: 1, ...values });
+    },
+    [search]
+  );
+
   if (!self) {
     return;
   }
@@ -79,32 +87,36 @@ export const Users = () => {
         validationSchema={Yup.object().shape({
           text: Yup.string(),
         })}
-        onSubmit={(values) => search({ page: 1, ...values })}
-        onChange={(values) => search({ page: 1, ...values })}
+        onSubmit={callback}
+        onChange={callback}
       >
-        {({ handleSubmit, handleChange, handleBlur, values, errors, status = {} }) => {
+        {({ handleSubmit, handleChange, values, submitForm }) => {
           return (
             <Form id="search">
               <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
-                <Field name="academie">
-                  {({ field, meta }) => {
-                    return (
-                      <Select
-                        placeholder={"Académie (toutes)"}
-                        style={{ margin: 0 }}
-                        {...field}
-                        disabled={self.academie}
-                        onChange={handleSubmit}
-                      >
-                        {academies.map((academie) => (
-                          <option key={academie.code} value={academie.code}>
-                            {academie.nom}
-                          </option>
-                        ))}
-                      </Select>
-                    );
-                  }}
-                </Field>
+                <Box w="50%" pr={4}>
+                  <Field name="academie">
+                    {({ field, setFieldValue, meta }) => {
+                      return (
+                        <Select
+                          placeholder={"Académie (toutes)"}
+                          disabled={self.academie}
+                          {...field}
+                          onChange={(value) => {
+                            handleChange(value);
+                            handleSubmit();
+                          }}
+                        >
+                          {academies.map((academie) => (
+                            <option key={academie.code} value={academie.code}>
+                              {academie.nom}
+                            </option>
+                          ))}
+                        </Select>
+                      );
+                    }}
+                  </Field>
+                </Box>
 
                 {/* <Field name="statut">
                   {({ field, meta }) => {
@@ -112,22 +124,25 @@ export const Users = () => {
                   }}
                 </Field> */}
 
-                <Field name="type">
-                  {({ field, meta }) => {
-                    return (
-                      <Select
-                        placeholder={"Type (tous)"}
-                        style={{ margin: 0 }}
-                        onChange={handleSubmit}
-                        onSelect={handleSubmit}
-                        {...field}
-                      >
-                        <option value="Gestionnaire">Organisme responsable</option>
-                        <option value="Formateur">Organisme formateur</option>
-                      </Select>
-                    );
-                  }}
-                </Field>
+                <Box w="50%" pl={4}>
+                  <Field name="type">
+                    {({ field, setFieldValue, meta }) => {
+                      return (
+                        <Select
+                          placeholder={"Type d'organisme (tous)"}
+                          {...field}
+                          onChange={(value) => {
+                            handleChange(value);
+                            handleSubmit();
+                          }}
+                        >
+                          <option value="Gestionnaire">Organisme responsable</option>
+                          <option value="Formateur">Organisme formateur</option>
+                        </Select>
+                      );
+                    }}
+                  </Field>
+                </Box>
               </Box>
 
               <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
@@ -144,13 +159,12 @@ export const Users = () => {
                     );
                   }}
                 </Field>
-
+                {/*
                 <Button variant="primary" type="submit" form="search">
                   Rechercher
-                </Button>
+                </Button> */}
               </Box>
 
-              {status.message && <SuccessMessage>{status.message}</SuccessMessage>}
               {error && <ErrorMessage>Une erreur est survenue</ErrorMessage>}
             </Form>
           );
@@ -194,7 +208,7 @@ export const Users = () => {
                               {user.email} <Tag>R</Tag>
                             </Text>
                           </Td>
-                          <Td></Td>
+                          <Td>{user.nombre_voeux}</Td>
                           <Td>
                             <GestionnaireStatut gestionnaire={user} />{" "}
                           </Td>

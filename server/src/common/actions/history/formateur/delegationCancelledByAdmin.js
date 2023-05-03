@@ -1,15 +1,14 @@
 const { FormateurActions } = require("../../../constants/History");
 const { Formateur } = require("../../../model");
 
-const saveAccountConfirmationEmailManualResent = async ({ uai, email }, admin) => {
+const saveDelegationCancelledByAdmin = async ({ uai }, admin) => {
   await Formateur.updateOne(
     { uai },
     {
       $push: {
         histories: {
-          action: FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_MANUAL_RESENT,
+          action: FormateurActions.DELEGATION_CANCELLED_BY_ADMIN,
           variables: {
-            email,
             admin: admin.email,
           },
         },
@@ -19,5 +18,5 @@ const saveAccountConfirmationEmailManualResent = async ({ uai, email }, admin) =
 };
 
 module.exports = {
-  saveAccountConfirmationEmailManualResent,
+  saveDelegationCancelledByAdmin,
 };

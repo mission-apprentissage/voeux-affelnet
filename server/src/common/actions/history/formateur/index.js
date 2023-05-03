@@ -8,8 +8,8 @@ const { saveAccountConfirmationEmailManualResent } = require("./accountConfirmat
 const { saveAccountConfirmed } = require("./accountConfirmed");
 const { saveAccountEmailUpdatedByAccount } = require("./accountEmailUpdatedByAccount");
 const { saveAccountEmailUpdatedByAdmin } = require("./accountEmailUpdatedByAdmin");
-const { saveDelegationCanceledByAdmin } = require("./delegationCanceledByAdmin");
-const { saveDelegationCanceledByResponsable } = require("./delegationCanceledByResponsable");
+const { saveDelegationCancelledByAdmin } = require("./delegationCancelledByAdmin");
+const { saveDelegationCancelledByResponsable } = require("./delegationCancelledByResponsable");
 const { saveDelegationCreatedByAdmin } = require("./delegationCreatedByAdmin");
 const { saveDelegationCreatedByResponsable } = require("./delegationCreatedByResponsable");
 const { saveDelegationUpdatedByAdmin } = require("./delegationUpdatedByAdmin");
@@ -38,8 +38,8 @@ module.exports = {
   saveAccountConfirmed,
   saveAccountEmailUpdatedByAccount,
   saveAccountEmailUpdatedByAdmin,
-  saveDelegationCanceledByAdmin,
-  saveDelegationCanceledByResponsable,
+  saveDelegationCancelledByAdmin,
+  saveDelegationCancelledByResponsable,
   saveDelegationCreatedByAdmin,
   saveDelegationCreatedByResponsable,
   saveDelegationUpdatedByAdmin,

@@ -12,8 +12,8 @@ export const FormateurActions = {
   ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT: "FORMATEUR_ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT",
   ACCOUNT_EMAIL_UPDATED_BY_ADMIN: "FORMATEUR_ACCOUNT_EMAIL_UPDATED_BY_ADMIN",
 
-  DELEGATION_CANCELED_BY_ADMIN: "DELEGATION_CANCELED_BY_ADMIN",
-  DELEGATION_CANCELED_BY_RESPONSABLE: "DELEGATION_CANCELED_BY_RESPONSABLE",
+  DELEGATION_CANCELLED_BY_ADMIN: "DELEGATION_CANCELLED_BY_ADMIN",
+  DELEGATION_CANCELLED_BY_RESPONSABLE: "DELEGATION_CANCELLED_BY_RESPONSABLE",
   DELEGATION_CREATED_BY_ADMIN: "DELEGATION_CREATED_BY_ADMIN",
   DELEGATION_CREATED_BY_RESPONSABLE: "DELEGATION_CREATED_BY_RESPONSABLE",
   DELEGATION_UPDATED_BY_ADMIN: "DELEGATION_UPDATED_BY_ADMIN",
@@ -35,22 +35,102 @@ export const FormateurActions = {
 };
 
 export const FormateurHistoryItems = new Map([
-  [FormateurActions.ACCOUNT_ACTIVATED, { component: () => `` }],
-  [FormateurActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT, { component: () => `` }],
-  [FormateurActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_SENT, { component: () => `` }],
-  [FormateurActions.ACCOUNT_ACTIVATION_EMAIL_MANUAL_RESENT, { component: () => `` }],
-  [FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_RESENT, { component: () => `` }],
-  [FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_SENT, { component: () => `` }],
-  [FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_MANUAL_RESENT, { component: () => `` }],
-  [FormateurActions.ACCOUNT_CONFIRMED, { component: () => `` }],
+  [
+    FormateurActions.ACCOUNT_ACTIVATED,
+    { component: ({ email }) => `${email} a créé son mot de passe de connexion au service.` },
+  ],
+  [
+    FormateurActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT,
+    {
+      component: ({ email }) =>
+        `Action automatique – ${email} a reçu un rappel de demande de création de mot de passe.`,
+    },
+  ],
+  [
+    FormateurActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_SENT,
+    {
+      component: ({ email }) => `Action automatique – ${email} a reçu une demande de création de mot de passe.`,
+    },
+  ],
+  [
+    FormateurActions.ACCOUNT_ACTIVATION_EMAIL_MANUAL_RESENT,
+    {
+      component: ({ email, admin }) =>
+        `${admin} a généré l'envoi d'un rappel à ${email} pour création de son mot de passe.`,
+    },
+  ],
+  [
+    FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_RESENT,
+    {
+      component: ({ email }) =>
+        `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
+    },
+  ],
+  [
+    FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_SENT,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à l'organisme ${email}.`,
+    },
+  ],
+  [
+    FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_MANUAL_RESENT,
+    {
+      component: ({ email, admin }) =>
+        `${admin} a généré l'envoi d'un rappel à ${email} pour confirmation de son adresse courriel.`,
+    },
+  ],
+  [
+    FormateurActions.ACCOUNT_CONFIRMED,
+    {
+      component: ({ email }) =>
+        `${email} a confirmé son adresse courriel. La personne est invitée à cliquer sur un lien pour créer son mot de passe de connexion.`,
+    },
+  ],
   [FormateurActions.ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT, { component: () => `` }],
   [FormateurActions.ACCOUNT_EMAIL_UPDATED_BY_ADMIN, { component: () => `` }],
-  [FormateurActions.DELEGATION_CANCELED_BY_ADMIN, { component: () => `` }],
-  [FormateurActions.DELEGATION_CANCELED_BY_RESPONSABLE, { component: () => `` }],
-  [FormateurActions.DELEGATION_CREATED_BY_ADMIN, { component: () => `` }],
-  [FormateurActions.DELEGATION_CREATED_BY_RESPONSABLE, { component: () => `` }],
-  [FormateurActions.DELEGATION_UPDATED_BY_ADMIN, { component: () => `` }],
-  [FormateurActions.DELEGATION_UPDATED_BY_RESPONSABLE, { component: () => `` }],
+  [
+    FormateurActions.DELEGATION_CANCELLED_BY_ADMIN,
+    {
+      component: ({ admin, email }) =>
+        `${admin} a annulé la délégation de droits qui avait été accordée à ${email}. Le responsable a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme.`,
+    },
+  ],
+  [
+    FormateurActions.DELEGATION_CANCELLED_BY_RESPONSABLE,
+    {
+      component: ({ responsable, email }) =>
+        `[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme.`,
+    },
+  ],
+  [
+    FormateurActions.DELEGATION_CREATED_BY_ADMIN,
+    {
+      component: ({ admin, email }) =>
+        `${admin} a délégué les droits de réception des listes pour cet organisme à ${email}.`,
+    },
+  ],
+  [
+    FormateurActions.DELEGATION_CREATED_BY_RESPONSABLE,
+    {
+      component: ({ responsable, email }) =>
+        `${responsable} a délégué les droits de réception des listes pour cet organisme à ${email}.`,
+    },
+  ],
+  [
+    FormateurActions.DELEGATION_UPDATED_BY_ADMIN,
+    {
+      component: ({ admin, email }) =>
+        `${admin} a délégué les droits de réception des listes pour cet organisme à ${email}.`,
+    },
+  ],
+  [
+    FormateurActions.DELEGATION_UPDATED_BY_RESPONSABLE,
+    {
+      component: ({ responsable, email }) =>
+        `${responsable} a modifié la délégation de droits pour cet organisme. Nouvelle adresse : ${email}. La nouvelle personne a été notifiée par courriel pour confirmer son adresse.`,
+    },
+  ],
   [FormateurActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT, { component: () => `` }],
   [FormateurActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT, { component: () => `` }],
   [FormateurActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT, { component: () => `` }],
@@ -64,6 +144,14 @@ export const FormateurHistoryItems = new Map([
   [FormateurActions.UPDATED_LIST_DOWNLOADED_BY_FORMATEUR, { component: () => `` }],
   [FormateurActions.UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE, { component: () => `` }],
 ]);
+
+// "DELEGATION_CANCELLED_BY_ADMIN";"Formateur";"[Email super-admin] a annulé la délégation de droits qui avait été accordée à [mail délégué]. Le responsable a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme."
+// "DELEGATION_CANCELLED_BY_RESPONSABLE";"Formateur";"[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme"
+// "DELEGATION_UPDATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"
+// "DELEGATION_UPDATED_BY_RESPONSABLE";"Formateur";"[Email responsable] a modifié la délégation de droits pour cet organisme. Nouvelle adresse : [email] (ancienne adesse : [email]). La nouvelle personne a été notifiée par courriel pour confirmer son adresse."
+// "DELEGATION_CREATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"
+// "DELEGATION_CREATED_BY_RESPONSABLE";"Formateur";"[Email responsable] a délégué les droits de réception des listes pour cet organisme à [email]"
+//
 
 export const ResponsableActions = {
   ACCOUNT_ACTIVATED: "RESPONSABLE_ACCOUNT_ACTIVATED",
@@ -162,8 +250,8 @@ export const ResponsableHistoryItems = new Map([
 // "LIST_AVAILABLE_MANUAL_EMAIL_SENT";"Formateur";"[Email super admin ou Email responsable] a généré l'envoi d'un rappel à [mail délégué] pour téléchargement de la liste de vœux"
 // "LIST_AVAILABLE_AUTOMATIC_EMAIL_SENT";"Formateur";"Action automatique – Un courriel de rappel a été envoyé à [mail délégué si existant, sinon mail admin responsable] pour téléchargement de la liste de vœux"
 // "LIST_AVAILABLE";"Formateur";"Une liste de vœux est disponible, en attente de téléchargement par [mail délégué si existant, sinon mail admin responsable]"
-// "DELEGATION_CANCELED_BY_ADMIN";"Formateur";"[Email super-admin] a annulé la délégation de droits qui avait été accordée à [mail délégué]. Le responsable a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme."
-// "DELEGATION_CANCELED_BY_RESPONSABLE";"Formateur";"[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme"
+// "DELEGATION_CANCELLED_BY_ADMIN";"Formateur";"[Email super-admin] a annulé la délégation de droits qui avait été accordée à [mail délégué]. Le responsable a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme."
+// "DELEGATION_CANCELLED_BY_RESPONSABLE";"Formateur";"[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme"
 // "DELEGATION_UPDATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"
 // "DELEGATION_UPDATED_BY_RESPONSABLE";"Formateur";"[Email responsable] a modifié la délégation de droits pour cet organisme. Nouvelle adresse : [email] (ancienne adesse : [email]). La nouvelle personne a été notifiée par courriel pour confirmer son adresse."
 // "DELEGATION_CREATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"
