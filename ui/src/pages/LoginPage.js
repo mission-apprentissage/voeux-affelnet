@@ -14,7 +14,9 @@ import {
   HStack,
   Input,
   Link,
+  ListItem,
   Text,
+  UnorderedList,
 } from "@chakra-ui/react";
 
 import { Yup } from "../common/Yup";
@@ -73,9 +75,46 @@ function LoginPage() {
   };
 
   const title = "Connexion";
+
   return (
-    <Center height="100vh" verticalAlign="center">
-      <Box width={["auto", "28rem"]}>
+    <Center height="100vh" verticalAlign="center" flexDirection={"column"}>
+      <Box width={["auto", "48rem"]} m={8}>
+        <Alert>
+          <Box>
+            <Text mb={4}>
+              <strong>
+                Le service de transmission des listes de candidats aux organismes de formation en apprentissage est
+                actuellement fermé.
+              </strong>
+            </Text>
+            <Text mb={4}>En 2023, la transmission des listes s’effectuera en trois temps :</Text>
+            <Text mb={4}>
+              <UnorderedList>
+                <ListItem>
+                  Mi-mai : une première campagne sera diffusée par courriel pour identifier les directeurs d’organismes
+                  responsables, confirmer l’adresse email de réception, créer le mot de passe de connexion (les mots de
+                  passe créés en 2022 ne seront pas utilisables).
+                </ListItem>
+                <ListItem>
+                  Semaine du 5 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
+                </ListItem>
+                <ListItem>
+                  Semaine du 3 juillet : diffusion des listes mises à jour. Une seule mise à jour sera diffusée (contre
+                  deux en 2022).
+                </ListItem>
+              </UnorderedList>
+            </Text>
+            <Text mb={4}>
+              Pour toute question, vous pouvez contacter l’équipe de diffusion par courriel :{" "}
+              <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+              </Link>
+            </Text>
+          </Box>
+        </Alert>
+      </Box>
+
+      <Box width={["auto", "48rem"]}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
           {title}
         </Heading>
