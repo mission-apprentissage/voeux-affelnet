@@ -36,13 +36,16 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
     [onClose, callback, gestionnaire?.siret]
   );
 
+  const hasDelegation = !!gestionnaire.etablissements?.filter((etablissement) => etablissement.diffusionAutorisee)
+    ?.length;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
           Modifier l'adresse courriel de contact pour l'organisme responsable{" "}
-          <GestionnaireLibelle gestionnaire={gestionnaire} />:
+          <GestionnaireLibelle gestionnaire={gestionnaire} /> :
         </ModalHeader>
 
         <ModalCloseButton />
@@ -64,7 +67,9 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
               <Text mb={4}>
                 <strong>
                   L'interlocuteur dont vous vous apprêtez à modifier l'adresse courriel ({gestionnaire.email}) est
-                  responsable de {gestionnaire.etablissements.length} organismes formateurs (
+                  responsable de {gestionnaire.etablissements.length} organisme
+                  {gestionnaire.etablissements.length > 1 && "s"} formateur
+                  {gestionnaire.etablissements.length > 1 && "s"} (
                   <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateurs`}>
                     voir la liste
                   </Link>
@@ -72,13 +77,15 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
                 </strong>
               </Text>
 
-              <Text mb={4}>
-                <Text as="i">
-                  Le contact actuel a précédemment délégué les droits de réception des listes à tout ou partie des
-                  organismes formateurs dont il est responsable. Ces délégations de droits seront inchangées. Le contact
-                  que vous allez créer aura la possibilité de modifier ou d'annuler ces délégations de droits.
+              {hasDelegation && (
+                <Text mb={4}>
+                  <Text as="i">
+                    Le contact actuel a précédemment délégué les droits de réception des listes à tout ou partie des
+                    organismes formateurs dont il est responsable. Ces délégations de droits seront inchangées. Le
+                    contact que vous allez créer aura la possibilité de modifier ou d'annuler ces délégations de droits.
+                  </Text>
                 </Text>
-              </Text>
+              )}
               <Text mb={4}>
                 Après modification, le nouveau contact sera automatiquement informé par courriel, et devra procéder à la
                 création de son mot de passe pour accéder à son espace de téléchargement. Si la personne ne reçoit pas

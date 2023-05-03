@@ -159,9 +159,13 @@ export const Formateur = () => {
 
   const etablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement.uai === formateur.uai);
 
+  if (!etablissement) {
+    return;
+  }
+
   const isDiffusionAutorisee = !!etablissement?.diffusionAutorisee;
 
-  const hasVoeux = etablissement.nombre_voeux > 0;
+  const hasVoeux = etablissement?.nombre_voeux > 0;
 
   return (
     <Page
@@ -190,16 +194,21 @@ export const Formateur = () => {
         <Box mb={12}>
           <Text mb={4}>
             Cet organisme formateur est également responsable (signataire des conventions de formation), directement
-            habilité à accéder aux listes de candidats. Personne habilitée à réceptionner les listes :{" "}
-            {gestionnaires[0]?.email}.{" "}
+            habilité à accéder aux listes de candidats.
+          </Text>
+          <Text mb={4}>
+            Personne habilitée à réceptionner les listes : {gestionnaires[0]?.email}.{" "}
+            <Link variant="action" onClick={onOpenUpdateGestionnaireEmailModal}>
+              (modifier)
+            </Link>
           </Text>
 
-          {/* <UpdateGestionnaireEmailModal
+          <UpdateGestionnaireEmailModal
             isOpen={isOpenUpdateGestionnaireEmailModal}
             onClose={onCloseUpdateGestionnaireEmailModal}
             callback={callback}
             gestionnaire={gestionnaire}
-          /> */}
+          />
         </Box>
       ) : (
         <Box mb={12}>
