@@ -174,9 +174,9 @@ export const Users = () => {
               <Td colSpan={4}>{loading ? "Chargement..." : "Pas de résultats"}</Td>
             </Tr>
           ) : (
-            data.map((user) => {
+            data.map((user, index) => {
               return (
-                <Tr key={user.username}>
+                <Tr key={index}>
                   {
                     {
                       Gestionnaire: (

@@ -136,6 +136,8 @@ export const Formateur = () => {
 
   const isDiffusionAutorisee = !!etablissement?.diffusionAutorisee;
 
+  const hasVoeux = etablissement.nombre_voeux > 0;
+
   return (
     <Page
       title={
@@ -255,9 +257,11 @@ export const Formateur = () => {
           Nombre de candidats: {gestionnaire.nombre_voeux ?? formateur.nombre_voeux}
         </Heading>
 
-        <Link variant="action" onClick={() => downloadVoeux({ gestionnaire, formateur })}>
-          Télécharger la liste
-        </Link>
+        {hasVoeux && (
+          <Link variant="action" onClick={() => downloadVoeux({ gestionnaire, formateur })}>
+            Télécharger la liste
+          </Link>
+        )}
       </Box>
 
       <Box mb={12}>

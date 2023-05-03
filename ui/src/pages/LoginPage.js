@@ -193,9 +193,9 @@ function LoginPage() {
               <Alert status="info">
                 <p>
                   Besoin d'aide ? Prenez contact avec un administrateur à l'adresse mail{" "}
-                  <a href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                     {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
-                  </a>{" "}
+                  </Link>{" "}
                   en précisant votre identifiant ({username})
                 </p>
               </Alert>

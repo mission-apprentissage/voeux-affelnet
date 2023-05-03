@@ -15,7 +15,7 @@ export const Contact = () => {
         <Box mt={4}>
           <Text>
             Une remarque, un avis, une suggestion d’amélioration ?{" "}
-            <Link href="mailto:catalogue@apprentissage.beta.gouv.fr" textDecoration={"underline"}>
+            <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
               Contactez-nous !
             </Link>
           </Text>

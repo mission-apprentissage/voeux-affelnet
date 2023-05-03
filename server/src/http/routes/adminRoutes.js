@@ -251,11 +251,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
           page,
           items_par_page,
           select: { _id: 0, password: 0 },
+          sort: JSON.parse(sort ?? "{}"),
         }
       );
 
       const stream = oleoduc(
-        find.sort(JSON.parse(sort ?? "{}")).cursor(),
+        find.cursor(),
         transformData(async (user) => {
           return {
             ...user,
