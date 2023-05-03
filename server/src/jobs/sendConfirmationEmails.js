@@ -1,4 +1,11 @@
+const {
+  saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentAsResponsable,
+} = require("../common/actions/history/responsable");
+const {
+  saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentAsFormateur,
+} = require("../common/actions/history/formateur");
 const { UserStatut } = require("../common/constants/UserStatut");
+const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
 const { User, Gestionnaire } = require("../common/model");
 
@@ -46,6 +53,18 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
       try {
         logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
         await sendEmail(user, templateName);
+
+        switch (user.type) {
+          case UserType.GESTIONNAIRE:
+            await saveAccountConfirmationEmailAutomaticSentAsResponsable(user);
+            break;
+          case UserType.FORMATEUR:
+            await saveAccountConfirmationEmailAutomaticSentAsFormateur(user);
+            break;
+          default:
+            break;
+        }
+
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);

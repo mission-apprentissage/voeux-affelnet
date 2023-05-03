@@ -7,6 +7,7 @@ import { Page } from "../../../common/components/layout/Page";
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
 import { isResponsableFormateur } from "../../../common/utils/getUserType";
 import { useDownloadVoeux } from "../../../common/hooks/adminHooks";
+import { History } from "../../gestionnaire/History";
 
 // const EtablissementEmail = ({ gestionnaire, etablissement, callback }) => {
 //   const [enableForm, setEnableForm] = useState(false);
@@ -263,12 +264,8 @@ export const Formateur = () => {
         <Heading as="h3" size="md" mb={4}>
           Historique des actions
         </Heading>
-        {/* <List>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-          </List> */}
+
+        <History gestionnaire={gestionnaire} formateur={formateur} />
       </Box>
 
       <Box mb={12}>

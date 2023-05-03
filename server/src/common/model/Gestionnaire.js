@@ -1,8 +1,9 @@
 const { Schema } = require("mongoose");
 const { academieSchema } = require("./schemas/academieSchema");
-const { historySchema } = require("./schemas/historySchema");
+const { historySchema } = require("./schemas/responsableHistorySchema");
 const User = require("./User");
 const { nested } = require("../utils/mongooseUtils");
+const { UserType } = require("../constants/UserType");
 
 const schema = new Schema({
   siret: {
@@ -73,7 +74,7 @@ const schema = new Schema({
 
   histories: {
     default: [],
-    type: [nested(historySchema)],
+    type: [historySchema],
   },
 });
 
@@ -90,6 +91,6 @@ schema.index(
   { default_language: "french" }
 );
 
-const Gestionnaire = User.discriminator("Gestionnaire", schema);
+const Gestionnaire = User.discriminator(UserType.GESTIONNAIRE, schema);
 
 module.exports = Gestionnaire;

@@ -20,6 +20,8 @@ function convertQueryIntoParams(query, options = {}) {
 }
 
 class CatalogueApi extends RateLimitedApi {
+  #getFormationsCache = new Map();
+
   constructor(options = {}) {
     super("CatalogueApi", { nbRequests: 5, durationInSeconds: 1, ...options });
   }
@@ -51,12 +53,21 @@ class CatalogueApi extends RateLimitedApi {
   }
 
   async getFormations(query, options) {
+    const params = convertQueryIntoParams(query, options);
+
+    if (this.#getFormationsCache.has(JSON.stringify(params))) {
+      return this.#getFormationsCache.get(JSON.stringify(params));
+    }
+
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching formations...`, query);
-      const params = convertQueryIntoParams(query, options);
-      return fetchJson(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`, {
+      const response = fetchJson(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`, {
         headers: { Cookie: this.cookie },
       });
+
+      this.#getFormationsCache.set(JSON.stringify(params), response);
+
+      return response;
     });
   }
 

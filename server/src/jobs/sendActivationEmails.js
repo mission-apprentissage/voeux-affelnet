@@ -1,6 +1,13 @@
 const { UserStatut } = require("../common/constants/UserStatut");
+const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
 const { User } = require("../common/model");
+const {
+  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentAsResponsable,
+} = require("../common/actions/history/responsable");
+const {
+  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentAsFormateur,
+} = require("../common/actions/history/formateur");
 
 async function sendActivationEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -30,6 +37,18 @@ async function sendActivationEmails(sendEmail, options = {}) {
       try {
         logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
         await sendEmail(user, templateName);
+
+        switch (user.type) {
+          case UserType.GESTIONNAIRE:
+            await saveAccountActivationEmailAutomaticSentAsResponsable(user);
+            break;
+          case UserType.FORMATEUR:
+            await saveAccountActivationEmailAutomaticSentAsFormateur(user);
+            break;
+          default:
+            break;
+        }
+
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);

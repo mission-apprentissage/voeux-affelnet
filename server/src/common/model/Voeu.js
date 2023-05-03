@@ -91,6 +91,19 @@ const schema = new Schema({
       },
     }),
   },
+  etablissement_formateur: {
+    required: true,
+    type: nested({
+      uai: {
+        type: String,
+        index: true,
+      },
+      academie: {
+        required: true,
+        type: academieSchema,
+      },
+    }),
+  },
   etablissement_gestionnaire: {
     required: true,
     type: nested({

@@ -23,6 +23,7 @@ const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
+const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history/responsable");
 
 const filterForAcademie = (etablissement, user) => {
   return user.academie ? etablissement.academie?.code === user.academie?.code : true;
@@ -193,14 +194,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                     ...(defaultAcademie ?? academie
                       ? [
                           {
-                            $or: [
-                              { "academie.code": defaultAcademie ?? academie },
-                              {
-                                etablissements: {
-                                  $elemMatch: { "academie.code": defaultAcademie ?? academie },
-                                },
-                              },
-                            ],
+                            $or: [{ "academie.code": defaultAcademie ?? academie }],
                           },
                         ]
                       : []),
@@ -474,6 +468,52 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   /**
+   * Permet au gestionnaire de modifier les paramètres de diffusion à un de ses formateurs associés
+   */
+  router.put(
+    "/api/admin/gestionnaires/:siret/formateurs/:uai",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { siret, uai } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+
+      if (!gestionnaire?.etablissements.filter((etablissements) => etablissements.uai === uai).length === 0) {
+        throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
+      }
+
+      const etablissements = gestionnaire?.etablissements.map((etablissement) => {
+        if (etablissement.uai === uai) {
+          typeof req.body.email !== "undefined" && (etablissement.email = req.body.email);
+          typeof req.body.diffusionAutorisee !== "undefined" &&
+            (etablissement.diffusionAutorisee = req.body.diffusionAutorisee);
+        }
+        return etablissement;
+      });
+
+      await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { etablissements });
+
+      if (typeof req.body.email !== "undefined" && req.body.diffusionAutorisee === true) {
+        const formateur = await Formateur.findOne({ uai });
+        await Formateur.updateOne({ uai }, { $set: { statut: UserStatut.EN_ATTENTE } });
+        const previousConfirmationEmail = formateur.emails.find((e) => e.templateName.startsWith("confirmation_"));
+
+        previousConfirmationEmail
+          ? await resendConfirmationEmails(resendEmail, { username: uai, force: true })
+          : await sendConfirmationEmails(sendEmail, { username: uai });
+      }
+
+      const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });
+
+      res.json(updatedGestionnaire);
+    })
+  );
+
+  /**
    * Retourne la liste des voeux pour un formateur donné sous forme d'un CSV.
    */
   router.get(
@@ -504,9 +544,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
+      const gestionnaire = await Gestionnaire.findOne({ siret });
+
       await changeEmail(siret, email, { auteur: req.user.username });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret });
+      await saveAccountEmailUpdatedByAdmin({ siret, email }, gestionnaire.email, req.user);
+
       await Gestionnaire.updateOne({ siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
       const previousConfirmationEmail = gestionnaire.emails.find((e) => e.templateName.startsWith("confirmation_"));
 

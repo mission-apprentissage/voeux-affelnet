@@ -66,8 +66,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
         ? await resendActivationEmails(resendEmail, { username: user.username, force: true })
         : await sendActivationEmails(sendEmail, { username: user.username });
 
-      await sendActivationEmails(sendEmail, { username: user.username });
-
       return res.json({});
     })
   );

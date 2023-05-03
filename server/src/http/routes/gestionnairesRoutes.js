@@ -13,6 +13,7 @@ const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const { UserStatut } = require("../../common/constants/UserStatut");
 const { changeEmail } = require("../../common/actions/changeEmail");
+const { saveAccountEmailUpdatedByAccount } = require("../../common/actions/history/responsable");
 
 module.exports = ({ users, sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -67,12 +68,14 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
     checkApiToken(),
     ensureIs("Gestionnaire"),
     tryCatch(async (req, res) => {
-      const { siret } = req.user;
+      const { siret, email: old_email } = req.user;
       const { email } = await Joi.object({
         email: Joi.string().email(),
       }).validateAsync(req.body, { abortEarly: false });
 
       email && (await changeEmail(siret, email, { auteur: req.user.username }));
+
+      await saveAccountEmailUpdatedByAccount({ siret, email }, old_email);
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret });
 

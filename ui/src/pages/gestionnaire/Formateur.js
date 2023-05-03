@@ -27,6 +27,7 @@ import { ErrorWarningLine } from "../../theme/components/icons/ErrorWarningLine"
 import { SuccessLine } from "../../theme/components/icons";
 import { UpdateGestionnaireEmailModal } from "../../common/components/gestionnaire/modals/UpdateGestionnaireEmailModal";
 import { GestionnaireEmail } from "../../common/components/gestionnaire/fields/GestionnaireEmail";
+import { History } from "./History";
 
 export const Formateur = ({ gestionnaire, formateurs, callback }) => {
   const { uai } = useParams();
@@ -446,12 +447,8 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           <Heading as="h3" size="md" mb={4}>
             Historique des actions
           </Heading>
-          <List>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-          </List>
+
+          <History gestionnaire={gestionnaire} formateur={formateur} />
         </Box>
 
         <Box mb={12}>

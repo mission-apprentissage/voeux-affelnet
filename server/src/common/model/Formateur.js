@@ -2,7 +2,8 @@ const { Schema } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 const User = require("./User");
 const { academieSchema } = require("./schemas/academieSchema");
-const { historySchema } = require("./schemas/historySchema");
+const { historySchema } = require("./schemas/formateurHistorySchema");
+const { UserType } = require("../constants/UserType");
 
 const schema = new Schema({
   uai: {
@@ -69,7 +70,7 @@ const schema = new Schema({
 
   histories: {
     default: [],
-    type: [nested(historySchema)],
+    type: [historySchema],
   },
 });
 
@@ -83,6 +84,6 @@ schema.index(
   { default_language: "french" }
 );
 
-const Formateur = User.discriminator("Formateur", schema);
+const Formateur = User.discriminator(UserType.FORMATEUR, schema);
 
 module.exports = Formateur;

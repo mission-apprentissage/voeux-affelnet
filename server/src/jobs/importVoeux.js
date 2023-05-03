@@ -11,6 +11,8 @@ const { parseCsv } = require("../common/utils/csvUtils");
 const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
 const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
+const { getGestionnaireSiret } = require("./utils/getGestionnaireSiret");
+const { catalogue } = require("./utils/getRelationsFromOffreDeFormation");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -109,6 +111,8 @@ function pickAcademie(academie) {
 }
 
 function parseVoeuxCsv(source) {
+  const { findFormateurUai } = catalogue();
+
   return oleoduc(
     source,
     parseCsv({
@@ -173,8 +177,18 @@ function parseVoeuxCsv(source) {
           cio: line["UAI CIO de l'établissement d'accueil"],
           academie: academieAccueil || academieDuVoeu,
         },
+        etablissement_formateur: {
+          uai:
+            (
+              await findFormateurUai({
+                uai: uaiEtablissementAccueil,
+                cleMinistereEducatif: line["clé ministère éducatif"],
+                siretGestionnaire: getGestionnaireSiret(line["SIRET UAI gestionnaire"], line["clé ministère éducatif"]),
+              })
+            )?.[0]?.etablissement_formateur_uai ?? uaiEtablissementAccueil,
+        },
         etablissement_gestionnaire: {
-          siret: line["SIRET UAI gestionnaire"],
+          siret: getGestionnaireSiret(line["SIRET UAI gestionnaire"], line["clé ministère éducatif"]),
         },
       });
     }),

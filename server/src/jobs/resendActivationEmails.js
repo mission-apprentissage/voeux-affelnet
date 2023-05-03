@@ -2,6 +2,16 @@ const { DateTime } = require("luxon");
 const logger = require("../common/logger");
 const { User } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
+const { UserType } = require("../common/constants/UserType");
+
+const {
+  saveAccountActivationEmailManualResent: saveAccountActivationEmailManualResentAsResponsable,
+  saveAccountActivationEmailAutomaticResent: saveAccountActivationEmailAutomaticResentAsResponsable,
+} = require("../common/actions/history/responsable");
+const {
+  saveAccountActivationEmailManualResent: saveAccountActivationEmailManualResentAsFormateur,
+  saveAccountActivationEmailAutomaticResent: saveAccountActivationEmailAutomaticResentAsFormateur,
+} = require("../common/actions/history/formateur");
 
 async function resendActivationEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -54,6 +64,22 @@ async function resendActivationEmails(resendEmail, options = {}) {
       try {
         logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);
         await resendEmail(previous.token);
+
+        switch (user.type) {
+          case UserType.GESTIONNAIRE:
+            options.username
+              ? await saveAccountActivationEmailManualResentAsResponsable(user)
+              : await saveAccountActivationEmailAutomaticResentAsResponsable(user);
+            break;
+          case UserType.FORMATEUR:
+            options.username
+              ? await saveAccountActivationEmailManualResentAsFormateur(user)
+              : await saveAccountActivationEmailAutomaticResentAsFormateur(user);
+            break;
+          default:
+            break;
+        }
+
         stats.sent++;
       } catch (e) {
         logger.error(`Unable to resent ${previous.templateName} email to ${user.type} ${user.username}`, e);

@@ -5,6 +5,15 @@ const { changeEmail } = require("./changeEmail");
 const { removePassword } = require("./removePassword");
 const { getUser } = require("./getUser");
 const { UserStatut } = require("../constants/UserStatut");
+const {
+  saveAccountConfirmed: saveAccountConfirmedAsGestionnaire,
+  saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsGestionnaire,
+} = require("./history/responsable");
+const {
+  saveAccountConfirmed: saveAccountConfirmedAsFormateur,
+  saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsFormateur,
+} = require("./history/formateur");
+const { UserType } = require("../constants/UserType");
 
 async function confirm(username, email, options = {}) {
   const user = await getUser(username);
@@ -16,10 +25,30 @@ async function confirm(username, email, options = {}) {
 
   if (isNewEmail) {
     await changeEmail(username, email, { auteur: username });
+
+    switch (user.type) {
+      case UserType.GESTIONNAIRE:
+        await saveAccountEmailUpdatedByAccountAsGestionnaire({ siret: user.username, email }, user.email);
+        break;
+      case UserType.FORMATEUR:
+        await saveAccountEmailUpdatedByAccountAsFormateur({ uai: user.username, email }, user.email);
+        break;
+    }
   }
 
   if (user.password) {
     await removePassword(username);
+  }
+
+  switch (user.type) {
+    case UserType.GESTIONNAIRE:
+      await saveAccountConfirmedAsGestionnaire({ ...user, email });
+      break;
+    case UserType.FORMATEUR:
+      await saveAccountConfirmedAsFormateur({ ...user, email });
+      break;
+    default:
+      break;
   }
 
   return User.findOneAndUpdate(

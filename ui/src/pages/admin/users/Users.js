@@ -80,6 +80,7 @@ export const Users = () => {
           text: Yup.string(),
         })}
         onSubmit={(values) => search({ page: 1, ...values })}
+        onChange={(values) => search({ page: 1, ...values })}
       >
         {({ handleSubmit, handleChange, handleBlur, values, errors, status = {} }) => {
           return (
@@ -93,7 +94,7 @@ export const Users = () => {
                         style={{ margin: 0 }}
                         {...field}
                         disabled={self.academie}
-                        onChange={handleChange}
+                        onChange={handleSubmit}
                       >
                         {academies.map((academie) => (
                           <option key={academie.code} value={academie.code}>
@@ -114,7 +115,13 @@ export const Users = () => {
                 <Field name="type">
                   {({ field, meta }) => {
                     return (
-                      <Select placeholder={"Type (tous)"} style={{ margin: 0 }} onChange={handleChange} {...field}>
+                      <Select
+                        placeholder={"Type (tous)"}
+                        style={{ margin: 0 }}
+                        onChange={handleSubmit}
+                        onSelect={handleSubmit}
+                        {...field}
+                      >
                         <option value="Gestionnaire">Organisme responsable</option>
                         <option value="Formateur">Organisme formateur</option>
                       </Select>
@@ -130,7 +137,8 @@ export const Users = () => {
                       <Input
                         placeholder={"Chercher un Siret, un UAI, une raison sociale, un email"}
                         style={{ margin: 0 }}
-                        onChange={handleChange}
+                        onChange={handleSubmit}
+                        onInput={handleSubmit}
                         {...field}
                       />
                     );
@@ -208,7 +216,7 @@ export const Users = () => {
                                 (etablissement) => etablissement.uai === user.uai
                               );
 
-                              return etablissement.diffusionAutorisee ? (
+                              return etablissement?.diffusionAutorisee ? (
                                 <>
                                   <Text>
                                     {user.email ?? etablissement.email} <Tag>D</Tag>

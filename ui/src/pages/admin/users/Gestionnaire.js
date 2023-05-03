@@ -6,6 +6,7 @@ import { Page } from "../../../common/components/layout/Page";
 import { _get } from "../../../common/httpClient";
 import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
 import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
+import { History } from "../../gestionnaire/History";
 
 export const Gestionnaire = () => {
   const {
@@ -88,14 +89,17 @@ export const Gestionnaire = () => {
             Email de direction enregistré : <strong>{gestionnaire?.email}</strong>.{" "}
           </Text>
 
-          <Text mb={4}>
-            L'organisme est responsable de l'offre de {gestionnaire?.etablissements?.length} organisme
-            {gestionnaire?.etablissements?.length > 1 && "s"} formateur{gestionnaire?.etablissements?.length > 1 && "s"}
-            .{" "}
-            <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateurs`}>
-              Accéder à la liste
-            </Link>
-          </Text>
+          {(gestionnaire?.etablissements?.length === 1 && gestionnaire.etablissements[0].uai !== gestionnaire.uai) ||
+            (gestionnaire?.etablissements?.length > 1 && (
+              <Text mb={4}>
+                L'organisme est responsable de l'offre de {gestionnaire?.etablissements?.length} organisme
+                {gestionnaire?.etablissements?.length > 1 && "s"} formateur
+                {gestionnaire?.etablissements?.length > 1 && "s"}.{" "}
+                <Link variant="action" href={`/admin/gestionnaire/${gestionnaire.siret}/formateurs`}>
+                  Accéder à la liste
+                </Link>
+              </Text>
+            ))}
 
           {isResponsableFormateurForAtLeastOneEtablissement && (
             <Text mb={4}>
@@ -137,12 +141,8 @@ export const Gestionnaire = () => {
           <Heading as="h3" size="md" mb={4}>
             Historique des actions
           </Heading>
-          {/* <List>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-          </List> */}
+
+          <History gestionnaire={gestionnaire} />
         </Box>
 
         <Box mb={12}>

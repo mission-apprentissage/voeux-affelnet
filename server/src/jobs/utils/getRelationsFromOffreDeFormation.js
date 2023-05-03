@@ -1,14 +1,11 @@
-const CatalogueApi = require("../../common/api/CatalogueApi.js");
-const ReferentielApi = require("../../common/api/ReferentielApi.js");
 const logger = require("../../common/logger.js");
-const { uniq } = require("lodash");
 const { compose, transformData, filterData, accumulateData, flattenArray } = require("oleoduc");
 const { Gestionnaire } = require("../../common/model/index.js");
 const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
-
-const referentielApi = new ReferentielApi();
-const catalogueApi = new CatalogueApi();
+const { getGestionnaireSiret } = require("./getGestionnaireSiret.js");
+const { catalogue } = require("./catalogue.js");
+const { referentiel } = require("./referentiel.js");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -27,120 +24,6 @@ async function getOffreDeFormationCsv(csv) {
     })
   );
 }
-
-const referentiel = async () => {
-  const findEmailReferentielCache = new Map();
-  const findSiretResponsableReferentiel = new Map();
-
-  return {
-    findEmailReferentiel: async (siret) => {
-      if (!siret || !siret?.length) {
-        return null;
-      }
-      if (findEmailReferentielCache.has(siret)) {
-        return findEmailReferentielCache.get(siret);
-      }
-
-      try {
-        const result = await (async () => {
-          let organisme = await referentielApi.getOrganisme(siret);
-
-          return organisme?.contacts.find((c) => c.confirmé === true)?.email || organisme?.contacts[0]?.email;
-        })();
-
-        findEmailReferentielCache.set(siret, result);
-        return result;
-      } catch (e) {
-        logger.error(e, `Une erreur est survenue lors de l'appel au référentiel pour le siret ${siret}`);
-        return null;
-      }
-    },
-
-    findSiretResponsableReferentiel: async (uai) => {
-      if (!uai || !uai?.length) {
-        return null;
-      }
-      if (findSiretResponsableReferentiel.has(uai)) {
-        return findSiretResponsableReferentiel.get(uai);
-      }
-
-      try {
-        const result = await (async () => {
-          let { organismes } = await referentielApi.searchOrganismes({ uais: uai });
-
-          if (organismes.length === 0) {
-            logger.warn(`Impossible de trouver l'organisme ${uai} dans le référentiel`);
-            return null;
-          }
-
-          const responsable = organismes.find((o) => o.nature !== "formateur");
-          if (!responsable) {
-            return organismes
-              .flatMap((o) => o.relations)
-              .filter((r) => r.type === "formateur->responsable")
-              .map((r) => r.siret)[0];
-          }
-
-          return responsable.siret;
-        })();
-
-        findSiretResponsableReferentiel.set(uai, result);
-
-        return result;
-      } catch (e) {
-        logger.error(e, `Une erreur est survenue lors de l'appel au référentiel pour l'UAI ${uai}`);
-        return null;
-      }
-    },
-  };
-};
-
-const catalogue = async () => {
-  await catalogueApi.connect();
-
-  return {
-    findFormations: async (uai, cleMinistereEducatif, siretGestionnaire) => {
-      try {
-        const { formations } = await catalogueApi.getFormations(
-          {
-            published: true,
-            ...(cleMinistereEducatif ? { cle_ministere_educatif: cleMinistereEducatif } : {}),
-            ...(siretGestionnaire ? { etablissement_gestionnaire_siret: siretGestionnaire } : {}),
-            $or: [
-              // { etablissement_formateur_uai: uai },
-              // { etablissement_gestionnaire_uai: uai },
-              { uai_formation: uai, affelnet_published_date: { $ne: null } }, //Evite les collisions avec les uai de formation ParcourSup
-            ],
-          },
-          {
-            limit: 100,
-            select: {
-              etablissement_gestionnaire_courriel: 1,
-              etablissement_gestionnaire_siret: 1,
-            },
-          }
-        );
-
-        const alternatives = {
-          sirets: uniq(formations.map((f) => f.etablissement_gestionnaire_siret)).filter((siret) => !!siret),
-          emails: uniq(formations.flatMap((f) => f.etablissement_gestionnaire_courriel?.split("##"))).filter(
-            (email) => !!email
-          ),
-        };
-
-        return { formations, alternatives };
-      } catch (e) {
-        logger.error(
-          e,
-          `Une erreur est survenue lors de l'appel au catalogue pour les valeurs ${uai} /
-        ${cleMinistereEducatif} /
-        ${siretGestionnaire}`
-        );
-        return null;
-      }
-    },
-  };
-};
 
 function filterConflicts(onConflict = () => ({})) {
   const memo = [];
@@ -165,25 +48,55 @@ function filterConflicts(onConflict = () => ({})) {
 }
 
 async function getRelationsFromOffreDeFormation(options = {}) {
+  const { findFormateurUai, findGestionnaireSiretAndEmail } = await catalogue();
   const { findEmailReferentiel, findSiretResponsableReferentiel } = await referentiel();
-  const { findFormations } = await catalogue();
   const { onConflict = () => ({}), affelnet } = options;
 
-  async function searchSiretAndEmail(uai, cleMinistereEducatif, siretGestionnaire) {
-    const { formations, alternatives } = await findFormations(uai, cleMinistereEducatif, siretGestionnaire);
+  async function searchGestionnaireSiretAndEmail({ uai, cleMinistereEducatif, siretGestionnaire }) {
+    const { formations, alternatives } = await findGestionnaireSiretAndEmail({
+      uai,
+      cleMinistereEducatif,
+      siretGestionnaire,
+    });
 
     const siret =
-      siretGestionnaire ||
-      formations[0]?.etablissement_gestionnaire_siret ||
+      siretGestionnaire ??
+      formations[0]?.etablissement_gestionnaire_siret ??
       (await findSiretResponsableReferentiel(uai));
 
     const email =
       formations[0]?.etablissement_gestionnaire_courriel?.split("##")[0] || (await findEmailReferentiel(siret));
 
-    // console.log({ uai, siret, email, alternatives });
+    if (alternatives.length) {
+      logger.warn({ uai, cleMinistereEducatif, siretGestionnaire, formations, alternatives });
+    }
+
     return {
       siret,
       email,
+      alternatives,
+    };
+  }
+
+  async function searchFormateurUai({ uai, cleMinistereEducatif, siretGestionnaire }) {
+    const { formations, alternatives } = await findFormateurUai({
+      uai,
+      cleMinistereEducatif,
+      siretGestionnaire,
+    });
+
+    const uai_formateur = formations[0]?.etablissement_formateur_uai ?? uai;
+
+    if (alternatives.length) {
+      logger.warn({ uai, cleMinistereEducatif, siretGestionnaire, formations, alternatives });
+    }
+
+    if (uai_formateur !== uai) {
+      logger.info(`${uai_formateur} trouvé à la place de ${uai}`);
+    }
+
+    return {
+      uai_formateur,
       alternatives,
     };
   }
@@ -196,22 +109,24 @@ async function getRelationsFromOffreDeFormation(options = {}) {
       async (accumulator, data) => {
         const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
 
-        const uai = data["UAI"]?.toUpperCase();
         const cleMinistereEducatif = data["CLE_MINISTERE_EDUCATIF"]?.toUpperCase();
         const siretGestionnaire = ![
-          "RECTORAT ET SERVICES RECTORAUX",
           "SERVICE ACAD ET CENTRES INFO ET ORIENTAT",
+          "RECTORAT ET SERVICES RECTORAUX",
           "SERVICES DEPARTEMENTAUX DE L'EN",
         ].includes(libelleTypeEtablissement)
-          ? data["SIRET_UAI_GESTIONNAIRE"]
+          ? getGestionnaireSiret(data["SIRET_UAI_GESTIONNAIRE"], cleMinistereEducatif)
           : SIRET_RECENSEMENT;
+        const uai = data["UAI"]?.toUpperCase();
+
+        const { uai_formateur } = await searchFormateurUai({ cleMinistereEducatif, siretGestionnaire, uai });
 
         if (!libelleTypeEtablissement?.length || typeof libelleTypeEtablissement !== "string") {
           logger.error(`${libelleTypeEtablissement} - ${typeof libelleTypeEtablissement}`);
         }
 
         const existingRelations = accumulator.filter(
-          (acc) => acc.uai === uai && acc.siretGestionnaire !== siretGestionnaire
+          (acc) => acc.uai === uai_formateur && acc.siretGestionnaire !== siretGestionnaire
         );
 
         const uniqueSirets = [
@@ -219,7 +134,7 @@ async function getRelationsFromOffreDeFormation(options = {}) {
         ];
 
         if (uniqueSirets.length > 1) {
-          logger.warn(`UAI ${uai} on multiple SIRET : ${uniqueSirets.join(" / ")}`);
+          logger.warn(`UAI ${uai_formateur} on multiple SIRET : ${uniqueSirets.join(" / ")}`);
 
           // return accumulator;
         }
@@ -227,12 +142,12 @@ async function getRelationsFromOffreDeFormation(options = {}) {
         if (
           !accumulator.filter(
             (acc) =>
-              acc.uai === uai &&
+              acc.uai === uai_formateur &&
               acc.cleMinistereEducatif === cleMinistereEducatif &&
               acc.siretGestionnaire === siretGestionnaire
           ).length
         ) {
-          accumulator.push({ uai, cleMinistereEducatif, siretGestionnaire });
+          accumulator.push({ uai: uai_formateur, cleMinistereEducatif, siretGestionnaire });
         }
 
         return accumulator;
@@ -275,11 +190,11 @@ async function getRelationsFromOffreDeFormation(options = {}) {
             }
           }
 
-          const { siret, email, alternatives } = await searchSiretAndEmail(
+          const { siret, email, alternatives } = await searchGestionnaireSiretAndEmail({
             uai,
             cleMinistereEducatif,
-            siretGestionnaire
-          );
+            siretGestionnaire,
+          });
 
           return {
             uai_etablissement: uai?.toUpperCase(),
@@ -294,7 +209,7 @@ async function getRelationsFromOffreDeFormation(options = {}) {
           );
         }
       },
-      { parallel: 5 }
+      { parallel: 10 }
     ),
     filterConflicts(onConflict)
   );

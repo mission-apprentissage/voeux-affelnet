@@ -4,6 +4,7 @@ import { UpdateGestionnaireEmailModal } from "../../common/components/gestionnai
 import { Page } from "../../common/components/layout/Page";
 import { GestionnaireLibelle } from "../../common/components/gestionnaire/fields/GestionnaireLibelle";
 import { GestionnaireEmail } from "../../common/components/gestionnaire/fields/GestionnaireEmail";
+import { History } from "./History";
 
 export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
   const { onOpen, isOpen, onClose } = useDisclosure();
@@ -79,12 +80,8 @@ export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
           <Heading as="h3" size="md" mb={4}>
             Historique des actions
           </Heading>
-          <List>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-            <ListItem>-</ListItem>
-          </List>
+
+          <History gestionnaire={gestionnaire} />
         </Box>
 
         <Box mb={12}>

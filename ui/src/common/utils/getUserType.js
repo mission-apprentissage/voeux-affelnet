@@ -1,3 +1,5 @@
+import { UserType } from "../constants/UserType";
+
 export const getUserType = (auth) => {
   return auth?.permissions?.isAdmin ? "admin" : auth?.type?.toLowerCase();
 };
@@ -6,20 +8,20 @@ export const isAdmin = (auth) => {
   return getUserType(auth) === "admin";
 };
 
-export const isAcademie = (auth) => {
-  return getUserType(auth) === "Academie";
-};
+// export const isAcademie = (auth) => {
+//   return getUserType(auth) === "admin";
+// };
 
 export const isCsaio = (auth) => {
-  return getUserType(auth) === "Csaio";
+  return getUserType(auth) === UserType.CSAIO;
 };
 
 export const isFormateur = (auth) => {
-  return getUserType(auth) === "Formateur";
+  return getUserType(auth) === UserType.FORMATEUR;
 };
 
 export const isGestionnaire = (auth) => {
-  return getUserType(auth) === "Gestionnaire";
+  return getUserType(auth) === UserType.GESTIONNAIRE;
 };
 
 export const isResponsableFormateur = ({ gestionnaire, formateur }) => {
