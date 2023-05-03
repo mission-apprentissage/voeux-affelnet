@@ -78,8 +78,12 @@ function LoginPage() {
 
   return (
     <Center height="100vh" verticalAlign="center" flexDirection={"column"}>
-      <Box width={["auto", "48rem"]} m={8}>
-        <Alert>
+      <Box width={["auto", "48rem"]}>
+        <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
+          {title}
+        </Heading>
+
+        <Alert mt={8}>
           <Box>
             <Text mb={4}>
               <strong>
@@ -112,12 +116,6 @@ function LoginPage() {
             </Text>
           </Box>
         </Alert>
-      </Box>
-
-      <Box width={["auto", "48rem"]}>
-        <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          {title}
-        </Heading>
 
         <Box mt={8}>
           <Formik
