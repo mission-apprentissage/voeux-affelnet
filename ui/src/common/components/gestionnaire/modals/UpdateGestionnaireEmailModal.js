@@ -53,7 +53,7 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
             }}
             validationSchema={Yup.object().shape({
               email: Yup.string().required("Requis"),
-              emailValidation: Yup.string()
+              email_confirmation: Yup.string()
                 .required("Requis")
                 .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
             })}
@@ -83,7 +83,7 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
                   }}
                 </Field>
 
-                <Field name="emailValidation" required>
+                <Field name="email_confirmation" required>
                   {({ field, meta }) => {
                     return (
                       <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">

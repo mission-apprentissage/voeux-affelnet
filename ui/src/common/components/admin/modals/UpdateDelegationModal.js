@@ -125,19 +125,19 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
                   }}
                   validationSchema={Yup.object().shape({
                     email: Yup.string().required("Requis"),
-                    emailValidation: Yup.string()
+                    email_confirmation: Yup.string()
                       .required("Requis")
                       .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
                   })}
                   onSubmit={(form) => updateDelegationEmail({ form })}
                 >
                   <Form style={{ width: "100%" }} id="update-email-form">
-                    <Text mb={4}>
+                    {/* <Text mb={4}>
                       <strong>
                         La personne à laquelle vous allez déléguer le droit de réception des listes doit impérativement
                         exercer au sein de l'établissement formateur.
                       </strong>
-                    </Text>
+                    </Text> */}
                     <Text mb={4}>
                       Après validation de cette délégation, le destinataire sera automatiquement informé par courriel,
                       et devra procéder à la création de son mot de passe pour accéder à son espace de téléchargement.
@@ -163,7 +163,7 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
                         }}
                       </Field>
 
-                      <Field name="emailValidation" required>
+                      <Field name="email_confirmation" required>
                         {({ field, meta }) => {
                           return (
                             <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">

@@ -91,11 +91,12 @@ const ConfirmationPage = () => {
   const username = decodeJWT(actionToken).sub;
   const [data, loading, error] = useFetch(`/api/confirmation/status?username=${username}&token=${actionToken}`);
   const [message, setMessage] = useState();
+  const [inputDisabled, setInputDisabled] = useState(true);
 
   const [title, setTitle] = useState(<>Confirmation de l'email</>);
   const accept = async (values) => {
     try {
-      await _post("/api/confirmation/accept", { ...values, actionToken });
+      await _post("/api/confirmation/accept", { email: values.email, actionToken });
       setTitle(<>Dernière étape : définir votre mot de passe de connexion.</>);
       setMessage(
         <Alert status="success" variant="left-accent">
@@ -148,9 +149,13 @@ const ConfirmationPage = () => {
                 <Formik
                   initialValues={{
                     email: data?.email,
+                    email_validation: data?.email,
                   }}
                   validationSchema={Yup.object().shape({
                     email: Yup.string().email().required(),
+                    email_confirmation: Yup.string()
+                      .required("Requis")
+                      .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
                   })}
                   onSubmit={accept}
                 >
@@ -163,16 +168,45 @@ const ConfirmationPage = () => {
                               <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                                 <FormLabel name={field.name}>Email</FormLabel>
                                 <Input
+                                  mb={2}
                                   {...field}
                                   id={field.name}
                                   type="email"
-                                  placeholder="Nouvelle adresse email..."
+                                  placeholder="Nouvelle adresse courriel..."
+                                  disabled={inputDisabled}
                                 />
-                                <FormErrorMessage>{meta.error || "Email invalide"}</FormErrorMessage>
+
+                                {inputDisabled && (
+                                  <Link variant="action" mb={4} float="right" onClick={() => setInputDisabled(false)}>
+                                    Modifier l'adresse courriel
+                                  </Link>
+                                )}
+                                <FormErrorMessage>{meta.error || "Adresse invalide"}</FormErrorMessage>
                               </FormControl>
                             );
                           }}
                         </Field>
+
+                        {!inputDisabled && (
+                          <Field name="email_confirmation">
+                            {({ field, meta }) => {
+                              return (
+                                <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
+                                  <FormLabel name={field.name}>Confirmation de l'email</FormLabel>
+                                  <Input
+                                    mb={2}
+                                    {...field}
+                                    id={field.name}
+                                    type="email"
+                                    placeholder="Veuillez confirmer la nouvelle adresse..."
+                                    disabled={inputDisabled}
+                                  />
+                                  <FormErrorMessage>{meta.error || "Adresse invalide"}</FormErrorMessage>
+                                </FormControl>
+                              );
+                            }}
+                          </Field>
+                        )}
 
                         <Button variant="primary" type="submit" mb={4}>
                           Confirmer l'email pour l'établissement {username}

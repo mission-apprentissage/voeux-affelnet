@@ -75,7 +75,6 @@ module.exports = {
     return {
       subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("activation_formateur"),
-      // TODO : Passer le mail gestionnaire ayant procédé à la délégation ??
       data: {
         formateur,
         token,
