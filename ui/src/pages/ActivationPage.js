@@ -68,7 +68,7 @@ function ActivationPage() {
   );
 
   const showForm = !loading && !message && !error;
-  const title = `Activation du compte`;
+  const title = `Activation de votre compte ${username}`;
 
   return (
     <Center height="100vh" verticalAlign="center">

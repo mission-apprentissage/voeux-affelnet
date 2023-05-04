@@ -93,7 +93,8 @@ const ConfirmationPage = () => {
   const [message, setMessage] = useState();
   const [inputDisabled, setInputDisabled] = useState(true);
 
-  const [title, setTitle] = useState(<>Confirmation de l'email</>);
+  const [title, setTitle] = useState(<>{`Confirmation de l'email pour votre compte ${username}`}</>);
+
   const accept = async (values) => {
     try {
       await _post("/api/confirmation/accept", { email: values.email, actionToken });
