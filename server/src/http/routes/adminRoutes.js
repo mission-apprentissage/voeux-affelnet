@@ -28,6 +28,7 @@ const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history
 const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/formateur");
 const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/formateur");
 const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/formateur");
+const { UserType } = require("../../common/constants/UserType");
 
 const filterForAcademie = (etablissement, user) => {
   return user.academie ? etablissement.academie?.code === user.academie?.code : true;
@@ -72,6 +73,7 @@ const fillGestionnaire = async (gestionnaire, admin) => {
   };
 };
 
+/* eslint-disable-next-line no-unused-vars*/
 const fillFormateur = async (formateur, admin) => {
   const voeuxFilter = {
     "etablissement_accueil.uai": formateur.uai,
@@ -84,7 +86,7 @@ const fillFormateur = async (formateur, admin) => {
 
     etablissements: await Promise.all(
       formateur?.etablissements
-        .filter((etablissement) => filterForAcademie(etablissement, admin))
+        // .filter((etablissement) => filterForAcademie(etablissement, admin))
         .map(async (etablissement) => {
           const voeuxFilter = {
             "etablissement_accueil.uai": formateur.uai,
@@ -265,7 +267,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
           return {
             ...user,
 
-            ...(user.type === "Gestionnaire"
+            ...(user.type === UserType.GESTIONNAIRE
               ? {
                   nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": user.siret }),
 
@@ -304,7 +306,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                         siret: {
                           $in:
                             user?.etablissements
-                              .filter((etablissement) => filterForAcademie(etablissement, admin))
+                              // .filter((etablissement) => filterForAcademie(etablissement, admin))
                               .map((etablissement) => etablissement.siret) ?? [],
                         },
                       }).lean()
@@ -313,7 +315,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
                   etablissements: await Promise.all(
                     user?.etablissements
-                      .filter((etablissement) => filterForAcademie(etablissement, admin))
+                      // .filter((etablissement) => filterForAcademie(etablissement, admin))
                       .map(async (etablissement) => ({
                         ...etablissement,
 
@@ -722,23 +724,18 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const formateur = await Formateur.findOne({ uai });
 
-      if (
-        !formateur?.etablissements
-          .filter((etablissement) => filterForAcademie(etablissement, admin))
-          .filter((e) => e.voeux_date).length === 0
-      ) {
-        return res.json([]);
-      }
-
       res.json(
         await Promise.all(
-          formateur?.etablissements
-            .filter((etablissement) => filterForAcademie(etablissement, admin))
-            .map(async (etablissement) => {
-              const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret });
+          formateur?.etablissements.map(async (etablissement) => {
+            const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret }).lean();
 
-              return gestionnaire;
-            })
+            return {
+              ...gestionnaire,
+              etablissements: gestionnaire.etablissements.filter((etablissement) =>
+                filterForAcademie(etablissement, admin)
+              ),
+            };
+          })
         )
       );
     })
