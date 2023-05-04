@@ -13,8 +13,6 @@ import {
   Button,
   Heading,
   Link,
-  List,
-  ListItem,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -121,7 +119,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
     <>
       <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
         <Box mb={4}>
-          <Heading as="h3" size="md" display="flex" mb={4}>
+          <Heading as="h3" size="md" mb={4}>
             {isResponsableFormateur ? <>Organisme responsable-formateur</> : <>Organisme formateur</>} :&nbsp;
             <FormateurLibelle formateur={formateur} />
           </Heading>
@@ -448,7 +446,11 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
             Historique des actions
           </Heading>
 
-          <History gestionnaire={gestionnaire} formateur={formateur} />
+          {isResponsableFormateur ? (
+            <History gestionnaire={gestionnaire} formateur={formateur} />
+          ) : (
+            <History formateur={formateur} />
+          )}
         </Box>
 
         <Box mb={12}>

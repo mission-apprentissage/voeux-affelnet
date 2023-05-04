@@ -1,9 +1,9 @@
 const { FormateurActions } = require("../../../constants/History");
 const { Formateur } = require("../../../model");
 
-const saveAccountActivationEmailManualResent = async ({ siret, email }, admin) => {
+const saveAccountActivationEmailManualResent = async ({ uai, email }, admin) => {
   await Formateur.updateOne(
-    { siret },
+    { uai },
     {
       $push: {
         histories: {

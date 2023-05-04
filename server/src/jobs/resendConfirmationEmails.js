@@ -62,11 +62,14 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
       if (user.type === UserType.FORMATEUR) {
         const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
 
-        const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === user.username);
+        const etablissement = gestionnaire.etablissements?.find(
+          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+        );
 
-        if (!etablissement.diffusionAutorisee) {
+        if (!etablissement) {
           return;
         }
+
         user.email = etablissement?.email;
       }
 

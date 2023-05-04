@@ -8,18 +8,9 @@
         <mj-column>
           <mj-text> Madame, Monsieur, </mj-text>
           <mj-text>
-            Nous avons enregistré cette adresse email comme adresse de contact pour votre organisme de formation en
-            apprentissage.
-          </mj-text>
-
-          <mj-text>
-            Les vœux exprimés via le service en ligne Affelnet pour des formations en apprentissage dans votre
-            établissement (Siret : <%= data.gestionnaire.siret %>) et/ou pour les établissements dont vous êtes
-            responsable seront communiqués à partir de la semaine du 5 juin.
-          </mj-text>
-
-          <mj-text>
-            Dès réception de ce courriel, veuillez confirmer ou modifier votre adresse email en cliquant sur le bouton
+            Afin que nous puissions transmettre à votre organisme de formation en apprentissage (OFA), les candidatures
+            exprimées via le service en ligne affectation, nous vous invitons à confirmer ou modifier l’adresse courriel
+            de contact de votre organisme (Siret : <%= data.gestionnaire.siret %>), en cliquant sur le bouton
             ci-dessous.
           </mj-text>
 
@@ -30,6 +21,11 @@
           >
             Confirmer ou modifier votre adresse courriel
           </mj-button>
+
+          <mj-text>
+            Les listes des candidats aux formations que vous proposez vous seront communiquées à partir de la semaine du
+            5 juin 2023.
+          </mj-text>
 
           <%- include('./common/procedure.ejs'); %> <%- include('./common/signature.ejs'); %>
         </mj-column>

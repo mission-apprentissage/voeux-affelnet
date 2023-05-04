@@ -92,7 +92,7 @@ const ConfirmationPage = () => {
   const [data, loading, error] = useFetch(`/api/confirmation/status?username=${username}&token=${actionToken}`);
   const [message, setMessage] = useState();
 
-  const [title, setTitle] = useState(<>Confirmation de l'email pour le compte {username}</>);
+  const [title, setTitle] = useState(<>Confirmation de l'email</>);
   const accept = async (values) => {
     try {
       await _post("/api/confirmation/accept", { ...values, actionToken });
@@ -180,7 +180,7 @@ const ConfirmationPage = () => {
 
                         <Box mb={4}>{status?.error && <ErrorMessage>{status?.error}</ErrorMessage>}</Box>
 
-                        <Text mb={4}>
+                        {/* <Text mb={4}>
                           <Text as="i">
                             L’
                             <Link href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000035274717/2020-11-09/">
@@ -192,7 +192,7 @@ const ConfirmationPage = () => {
                             d'organismes responsables de déléguer les droits de réception directe des listes de
                             candidats à d'autres personnes.
                           </Text>
-                        </Text>
+                        </Text> */}
                       </Form>
                     );
                   }}

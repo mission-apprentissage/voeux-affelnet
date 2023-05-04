@@ -109,10 +109,17 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
             </>
           );
         }
-        case UserStatut.EN_ATTENTE === formateur.statut: {
+        case !!formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
           return (
             <>
               <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> En attente de confirmation d'email
+            </>
+          );
+        }
+        case !formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
+          return (
+            <>
+              <SuccessFill verticalAlign="text-bottom" /> En attente de diffusion de campagne
             </>
           );
         }
@@ -202,10 +209,17 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
             </>
           );
         }
-        case UserStatut.EN_ATTENTE === gestionnaire.statut: {
+        case !!gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
           return (
             <>
               <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> En attente de confirmation d'email
+            </>
+          );
+        }
+        case !gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
+          return (
+            <>
+              <SuccessFill verticalAlign="text-bottom" /> En attente de diffusion de campagne
             </>
           );
         }

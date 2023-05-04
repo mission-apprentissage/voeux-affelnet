@@ -9,8 +9,8 @@ const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Gestionnaire, Formateur, Voeu } = require("../../common/model");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const { uaiFormat } = require("../../common/utils/format");
-const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
-const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
+const sendActivationEmails = require("../../jobs/sendActivationEmails");
+const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { UserStatut } = require("../../common/constants/UserStatut");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { saveAccountEmailUpdatedByAccount } = require("../../common/actions/history/responsable");
@@ -139,12 +139,15 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       if (typeof req.body.email !== "undefined" && req.body.diffusionAutorisee === true) {
         const formateur = await Formateur.findOne({ uai });
-        await Formateur.updateOne({ uai }, { $set: { statut: UserStatut.EN_ATTENTE } });
-        const previousConfirmationEmail = formateur.emails.find((e) => e.templateName.startsWith("confirmation_"));
+        await Formateur.updateOne(
+          { uai },
+          { $set: { statut: UserStatut.CONFIRME, email: req.body.email, password: null } }
+        );
+        const previousActivationEmail = formateur.emails.find((e) => e.templateName.startsWith("activation_"));
 
-        previousConfirmationEmail
-          ? await resendConfirmationEmails(resendEmail, { username: uai, force: true, sender: req.user })
-          : await sendConfirmationEmails(sendEmail, { username: uai, sender: req.user });
+        previousActivationEmail
+          ? await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user })
+          : await sendActivationEmails(sendEmail, { username: uai, sender: req.user });
       }
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });

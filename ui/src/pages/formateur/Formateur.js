@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { Box, Text, Heading, Link, List, ListItem, Alert, Button } from "@chakra-ui/react";
+import React, { useCallback } from "react";
+import { Box, Text, Heading, Link, Alert, Button } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../common/hooks/formateurHooks";
 import { SuccessLine } from "../../theme/components/icons";
@@ -40,11 +40,11 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           </Text>
         </Box>
 
-        {formateur.etablissements.map((etablissement) => {
+        {formateur.etablissements.map((etablissement, index) => {
           const gestionnaire = gestionnaires?.find((gestionnaire) => gestionnaire.siret === etablissement.siret);
 
           if (!gestionnaire) {
-            return <></>;
+            return <React.Fragment key={index}></React.Fragment>;
           }
 
           const hasVoeux = etablissement.nombre_voeux > 0;
@@ -81,7 +81,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
           return (
-            <>
+            <React.Fragment key={index}>
               <Alert status="info" variant="left-accent" my={6}>
                 <Box>
                   <Text mb={2}>
@@ -194,7 +194,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                   </>
                 )}
               </Box>
-            </>
+            </React.Fragment>
           );
         })}
 

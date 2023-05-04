@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 const logger = require("../common/logger");
-const { User } = require("../common/model");
+const { User, Gestionnaire } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 
@@ -61,19 +61,33 @@ async function resendActivationEmails(resendEmail, options = {}) {
     .eachAsync(async (user) => {
       const previous = user.emails.find((e) => e.templateName.startsWith("activation_"));
 
+      if (user.type === UserType.FORMATEUR) {
+        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+
+        const etablissement = gestionnaire.etablissements?.find(
+          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+        );
+
+        if (!etablissement) {
+          return;
+        }
+
+        user.email = etablissement?.email;
+      }
+
       try {
         logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);
         await resendEmail(previous.token);
 
         switch (user.type) {
           case UserType.GESTIONNAIRE:
-            options.username
-              ? await saveAccountActivationEmailManualResentAsResponsable(user, options.admin)
+            options.sender
+              ? await saveAccountActivationEmailManualResentAsResponsable(user, options.sender)
               : await saveAccountActivationEmailAutomaticResentAsResponsable(user);
             break;
           case UserType.FORMATEUR:
-            options.username
-              ? await saveAccountActivationEmailManualResentAsFormateur(user, options.admin)
+            options.sender
+              ? await saveAccountActivationEmailManualResentAsFormateur(user, options.sender)
               : await saveAccountActivationEmailAutomaticResentAsFormateur(user);
             break;
           default:

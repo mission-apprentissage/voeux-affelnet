@@ -37,7 +37,10 @@ export const FormateurActions = {
 export const FormateurHistoryItems = new Map([
   [
     FormateurActions.ACCOUNT_ACTIVATED,
-    { component: ({ email }) => `${email} a créé son mot de passe de connexion au service.` },
+    {
+      component: ({ email } = { email: "Email inconnu" }) =>
+        `${email} a créé son mot de passe de connexion au service.`,
+    },
   ],
   [
     FormateurActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT,

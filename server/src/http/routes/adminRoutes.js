@@ -23,6 +23,7 @@ const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
+const sendActivationEmails = require("../../jobs/sendActivationEmails");
 const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history/responsable");
 const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/formateur");
 const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/formateur");
@@ -510,14 +511,19 @@ module.exports = ({ sendEmail, resendEmail }) => {
           ? await saveDelegationUpdatedByAdmin({ ...formateur, email: req.body.email }, req.user)
           : await saveDelegationCreatedByAdmin({ ...formateur, email: req.body.email }, req.user);
 
-        await Formateur.updateOne({ uai }, { $set: { statut: UserStatut.EN_ATTENTE } });
-        const previousConfirmationEmail = formateur.emails.find((e) => e.templateName.startsWith("confirmation_"));
+        await Formateur.updateOne(
+          { uai },
+          { $set: { statut: UserStatut.CONFIRME, email: req.body.email, password: null } }
+        );
+        const previousActivationEmail = formateur.emails.find((e) => e.templateName.startsWith("activation_"));
 
-        previousConfirmationEmail
-          ? await resendConfirmationEmails(resendEmail, { username: uai, force: true })
-          : await sendConfirmationEmails(sendEmail, { username: uai });
+        console.log(
+          previousActivationEmail
+            ? await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user })
+            : await sendActivationEmails(sendEmail, { username: uai, force: true, sender: req.user })
+        );
       } else if (req.body.diffusionAutorisee === false) {
-        await saveDelegationCancelledByAdmin(formateur, req.user);
+        await saveDelegationCancelledByAdmin({ ...formateur, email: formateur.email ?? etablissement.email }, req.user);
       }
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });

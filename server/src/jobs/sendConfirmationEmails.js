@@ -14,21 +14,24 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
 
   const query = {
-    unsubscribe: false,
-    statut: UserStatut.EN_ATTENTE,
-
-    "emails.templateName": { $not: { $regex: "^confirmation_.*$" } },
-
-    // TODO : Définir les règles pour trouver les utilisateurs à qui envoyer les mails de confirmations (User de type formateur ou gestionnaire,
-    // mais également qui ont des voeux et qui sont destinataires de ces voeux - diffusion autorisée ou gestionnaire sans délégation)
-
-    $or: [
-      { type: "Gestionnaire" /*, "etablissements.voeux_date": { $exists: true } */ },
-      { type: "Formateur" /*, "etablissements.voeux_date": { $exists: true } */ },
-      // { type: { $nin: ["Gestionnaire", "Formateur"] } },
-    ],
-
     ...(options.username ? { username: options.username } : {}),
+    ...(options.force
+      ? {}
+      : {
+          unsubscribe: false,
+          statut: UserStatut.EN_ATTENTE,
+
+          "emails.templateName": { $not: { $regex: "^confirmation_.*$" } },
+
+          // TODO : Définir les règles pour trouver les utilisateurs à qui envoyer les mails de confirmations (User de type formateur ou gestionnaire,
+          // mais également qui ont des voeux et qui sont destinataires de ces voeux - diffusion autorisée ou gestionnaire sans délégation)
+
+          $or: [
+            { type: UserType.GESTIONNAIRE /*, "etablissements.voeux_date": { $exists: true } */ },
+            { type: UserType.FORMATEUR /*, "etablissements.voeux_date": { $exists: true } */ },
+            // { type: { $nin: ["Gestionnaire", "Formateur"] } },
+          ],
+        }),
   };
 
   await User.find(query)
@@ -36,14 +39,17 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      if (user.type === "Formateur") {
+      if (user.type === UserType.FORMATEUR) {
         const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
 
-        const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === user.username);
+        const etablissement = gestionnaire.etablissements?.find(
+          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+        );
 
-        if (!etablissement.diffusionAutorisee) {
+        if (!etablissement) {
           return;
         }
+
         user.email = etablissement?.email;
       }
 

@@ -1,7 +1,7 @@
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
-const { User } = require("../common/model");
+const { User, Gestionnaire } = require("../common/model");
 const {
   saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentAsResponsable,
 } = require("../common/actions/history/responsable");
@@ -14,16 +14,20 @@ async function sendActivationEmails(sendEmail, options = {}) {
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
 
   const query = {
-    unsubscribe: false,
-    password: { $exists: false },
-    statut: UserStatut.CONFIRME,
-    "emails.templateName": { $not: { $regex: "^activation_.*$" } },
-    $or: [
-      { type: "Gestionnaire" /*, "etablissements.voeux_date": { $exists: true } */ },
-      { type: "Formateur" /*, "etablissements.voeux_date": { $exists: true } */ },
-      { type: { $nin: ["Gestionnaire", "Formateur"] } },
-    ],
     ...(options.username ? { username: options.username } : {}),
+    ...(options.force
+      ? {}
+      : {
+          unsubscribe: false,
+          password: { $exists: false },
+          statut: UserStatut.CONFIRME,
+          "emails.templateName": { $not: { $regex: "^activation_.*$" } },
+          $or: [
+            { type: UserType.GESTIONNAIRE /*, "etablissements.voeux_date": { $exists: true } */ },
+            { type: UserType.FORMATEUR /*, "etablissements.voeux_date": { $exists: true } */ },
+            { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
+          ],
+        }),
   };
 
   await User.find(query)
@@ -33,6 +37,20 @@ async function sendActivationEmails(sendEmail, options = {}) {
     .eachAsync(async (user) => {
       const templateName = `activation_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
       stats.total++;
+
+      if (user.type === UserType.FORMATEUR) {
+        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+
+        const etablissement = gestionnaire.etablissements?.find(
+          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+        );
+
+        if (!etablissement) {
+          return;
+        }
+
+        user.email = etablissement?.email;
+      }
 
       try {
         logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);

@@ -1,4 +1,5 @@
 const { UserStatut } = require("../common/constants/UserStatut");
+const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
 const { User } = require("../common/model");
 const { every } = require("lodash");
@@ -17,15 +18,18 @@ async function sendNotificationEmails(sendEmail, options = {}) {
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
 
   const query = {
-    unsubscribe: false,
-    statut: UserStatut.ACTIVE,
-
-    "etablissements.voeux_date": { $exists: true },
-    "emails.templateName": { $not: { $regex: "^notification_.*$" } },
-
-    $or: [{ type: "Gestionnaire" }, { type: "Formateur" }],
-
     ...(options.username ? { username: options.username } : {}),
+    ...(options.force
+      ? {}
+      : {
+          unsubscribe: false,
+          statut: UserStatut.ACTIVE,
+
+          "etablissements.voeux_date": { $exists: true },
+          "emails.templateName": { $not: { $regex: "^notification_.*$" } },
+
+          $or: [{ type: UserType.GESTIONNAIRE }, { type: UserType.FORMATEUR }],
+        }),
   };
 
   await User.find(query)
