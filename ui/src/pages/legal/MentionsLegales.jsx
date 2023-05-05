@@ -11,7 +11,7 @@ export const MentionsLegales = () => {
   return (
     <Page title={title}>
       <Box>
-        <Text mb={8}>Dernière mise à jour le : 09/03/2023</Text>
+        <Text mb={8}>Dernière mise à jour le : 04/05/2023</Text>
 
         <Text mb={8}>
           <strong>
