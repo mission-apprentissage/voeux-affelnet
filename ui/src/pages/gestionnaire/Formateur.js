@@ -71,8 +71,12 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
     onClose: onCloseUpdateGestionnaireEmailModal,
   } = useDisclosure();
 
-  if (!gestionnaire || !formateur) {
-    return;
+  if (!gestionnaire) {
+    return <>Un problème est survenu lors de la récupération du responsable</>;
+  }
+
+  if (!formateur) {
+    return <>Nous n'avons pas trouvé le formateur. </>;
   }
 
   const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === formateur.uai);

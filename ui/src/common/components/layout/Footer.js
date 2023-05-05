@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Container, Flex, Link, List, ListItem, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 import { Logo } from "./Logo";
+import { ExternalLinkLine } from "../../../theme/components/icons";
 
 const Footer = () => {
   return (
@@ -13,37 +14,35 @@ const Footer = () => {
           </Link>
           <Box alignSelf="center" flex="1">
             <Text>
-              Mandatée par les ministres en charge de l’éducation nationale, de l’enseignement supérieur, du travail et
-              de la transformation publique, la{" "}
+              Développé par la{" "}
               <Link
                 href={"https://beta.gouv.fr/startups/?incubateur=mission-apprentissage"}
                 textDecoration={"underline"}
                 isExternal
               >
                 Mission interministérielle pour l'apprentissage
-              </Link>{" "}
-              développe plusieurs services destinés à faciliter les entrées en apprentissage.
+              </Link>
+              , le service a été pérennisé et repris en 2023 par la Direction du numérique pour l'éducation. Il est
+              alimenté par les candidatures exprimées sur le service en ligne affectation ainsi que par les données
+              issues du catalogue national des formations en apprentissage.
             </Text>
             <br />
             <List textStyle="sm" fontWeight="700" flexDirection={"row"} flexWrap={"wrap"} mb={[3, 3, 0]} display="flex">
               <ListItem>
-                <Link href="https://www.legifrance.gouv.fr/" mr={4} isExternal>
-                  legifrance.gouv.fr
+                <Link href="https://beta.gouv.fr/startups/?incubateur=mission-apprentissage" mr={4} isExternal>
+                  beta.gouv.fr
                 </Link>
               </ListItem>
+
               <ListItem>
-                <Link href="https://www.gouvernement.fr/" mr={4} isExternal>
-                  gouvernement.fr
+                <Link href="https://affectation3e.phm.education.gouv.fr/pna-public/" mr={4} isExternal>
+                  service en ligne affectation
                 </Link>
               </ListItem>
+
               <ListItem>
-                <Link href="https://www.service-public.fr/" mr={4} isExternal>
-                  service-public.fr
-                </Link>
-              </ListItem>
-              <ListItem>
-                <Link href="https://www.data.gouv.fr/fr/" isExternal>
-                  data.gouv.fr
+                <Link href="https://catalogue-apprentissage.intercariforef.org/" mr={4} isExternal>
+                  catalogue apprentissage
                 </Link>
               </ListItem>
             </List>
@@ -61,9 +60,9 @@ const Footer = () => {
               flex="1"
               css={{ "li:not(:last-child):after": { content: "'|'", marginLeft: "0.5rem", marginRight: "0.5rem" } }}
             >
-              <ListItem>
+              {/* <ListItem>
                 <Link href={`${process.env.PUBLIC_URL}/sitemap.xml`}>Plan du site</Link>
-              </ListItem>
+              </ListItem> */}
               <ListItem>
                 <Link as={NavLink} to={"/accessibilite"}>
                   Accessibilité : Non conforme
@@ -84,16 +83,16 @@ const Footer = () => {
                   Gestion des cookies
                 </Link>
               </ListItem>
-              <ListItem>
+              {/* <ListItem>
                 <Link as={NavLink} to={"/stats"}>
                   Statistiques
                 </Link>
-              </ListItem>
-              <ListItem>
+              </ListItem> */}
+              {/* <ListItem>
                 <Link href="https://mission-apprentissage.gitbook.io/" isExternal>
                   Documentation
                 </Link>
-              </ListItem>
+              </ListItem> */}
               <ListItem>
                 <Link href="https://github.com/mission-apprentissage/voeux-affelnet" isExternal>
                   Code source

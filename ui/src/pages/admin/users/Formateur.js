@@ -143,14 +143,32 @@ export const Formateur = () => {
     run();
   }, [callback]);
 
-  if (!formateur || !gestionnaires?.[0]) {
-    return;
+  // TODO : Gérer le multi-responsable
+  const gestionnaire = gestionnaires?.[0];
+
+  if (!gestionnaire) {
+    return (
+      <>
+        Un problème est survenu lors de la récupération du responsable.{" "}
+        <Link variant="action" href="/support">
+          Signaler un problème
+        </Link>
+      </>
+    );
+  }
+
+  if (!formateur) {
+    return (
+      <>
+        Nous n'avons pas trouvé le formateur.{" "}
+        <Link variant="action" href="/support">
+          Signaler un problème
+        </Link>
+      </>
+    );
   }
 
   const hasOnlyOneResponsable = gestionnaires.length === 1;
-
-  // TODO : Gérer le multi-responsable
-  const gestionnaire = gestionnaires[0];
 
   const isResponsableFormateurCheck = isResponsableFormateur({
     gestionnaire,

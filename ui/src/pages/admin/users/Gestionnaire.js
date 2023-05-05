@@ -7,6 +7,8 @@ import { _get } from "../../../common/httpClient";
 import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
 import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
 import { History } from "../../gestionnaire/History";
+// import { UserType } from "../../../common/constants/UserType";
+// import { UserStatut } from "../../../common/constants/UserStatut";
 
 export const Gestionnaire = () => {
   const {
@@ -132,9 +134,37 @@ export const Gestionnaire = () => {
           </Text>
 
           {/* TODO: Définir quel est le mail à renvoyer fonction du statut du User (comparer avec UserStatut.XXXX) */}
-          {/* <Button variant="primary" onClick={}>
-            Renvoyer l'email de notification
-          </Button> */}
+          {/* {UserType.GESTIONNAIRE === gestionnaire.type &&
+            (() => {
+              switch (true) {
+                case UserStatut.EN_ATTENTE === gestionnaire.statut:
+                  return (
+                    <Button variant="primary" onClick={resendConfirmationEmail}>
+                      {gestionnaire.emails?.find((email) => email.templateName.startsWith("confirmation_"))
+                        ? "Renvoyer l'email de confirmation de l'adresse courriel"
+                        : "Envoyer l'email de confirmation de l'adresse courriel"}
+                    </Button>
+                  );
+                case UserStatut.CONFIRME === gestionnaire.statut:
+                  return (
+                    <Button variant="primary" onClick={resendActivationEmail}>
+                      {gestionnaire.emails?.find((email) => email.templateName.startsWith("activation_"))
+                        ? "Renvoyer l'email d'activation du compte"
+                        : "Envoyer l'email d'activation du compte"}
+                    </Button>
+                  );
+                case UserStatut.ACTIVE === gestionnaire.statut:
+                  return (
+                    <Button variant="primary" onClick={resendNotificationEmail}>
+                      {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
+                        ? "Renvoyer l'email de notification de disponibilité des listes"
+                        : "Envoyer l'email de notification de disponibilité des listes"}
+                    </Button>
+                  );
+                default:
+                  return <></>;
+              }
+            })()} */}
         </Box>
 
         <Box mb={12}>

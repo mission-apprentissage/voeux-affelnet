@@ -28,7 +28,7 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
 
           $or: [
             { type: UserType.GESTIONNAIRE /*, "etablissements.voeux_date": { $exists: true } */ },
-            { type: UserType.FORMATEUR /*, "etablissements.voeux_date": { $exists: true } */ },
+            // { type: UserType.FORMATEUR /*, "etablissements.voeux_date": { $exists: true } */ },
             // { type: { $nin: ["Gestionnaire", "Formateur"] } },
           ],
         }),

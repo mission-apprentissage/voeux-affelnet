@@ -39,6 +39,10 @@ const fillGestionnaire = async (gestionnaire, admin) => {
     "etablissement_gestionnaire.siret": gestionnaire.siret,
   };
 
+  if (!gestionnaire) {
+    return gestionnaire;
+  }
+
   return {
     ...gestionnaire,
 
@@ -75,6 +79,10 @@ const fillGestionnaire = async (gestionnaire, admin) => {
 
 /* eslint-disable-next-line no-unused-vars*/
 const fillFormateur = async (formateur, admin) => {
+  if (!formateur) {
+    return formateur;
+  }
+
   const voeuxFilter = {
     "etablissement_accueil.uai": formateur.uai,
   };
