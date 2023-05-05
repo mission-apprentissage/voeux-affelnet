@@ -128,8 +128,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
             <FormateurLibelle formateur={formateur} />
           </Heading>
           <Text mb={4}>
-            Adresse : {formateur.adresse} {formateur.cp} {formateur.commune} – Siret : {formateur.siret ?? "Inconnu"} –
-            UAI : {formateur.uai ?? "Inconnu"}
+            Adresse : {formateur.adresse} – Siret : {formateur.siret ?? "Inconnu"} – UAI : {formateur.uai ?? "Inconnu"}
           </Text>
         </Box>
 

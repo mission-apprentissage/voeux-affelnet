@@ -29,8 +29,8 @@ export const Gestionnaire = ({ gestionnaire, formateurs, callback }) => {
       >
         <Box mb={12}>
           <Text mb={4}>
-            Adresse : {gestionnaire.adresse} {gestionnaire.cp} {gestionnaire.commune} - Siret :{" "}
-            {gestionnaire.siret ?? "Inconnu"} - UAI : {gestionnaire.uai ?? "Inconnu"}
+            Adresse : {gestionnaire.adresse} - Siret : {gestionnaire.siret ?? "Inconnu"} - UAI :{" "}
+            {gestionnaire.uai ?? "Inconnu"}
           </Text>
 
           <Text mb={4}>
