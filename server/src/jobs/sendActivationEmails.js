@@ -35,7 +35,10 @@ async function sendActivationEmails(sendEmail, options = {}) {
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      const templateName = `activation_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
+      const templateName =
+        user.isAdmin && user.academie?.code
+          ? `activation_academie`
+          : `activation_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
       stats.total++;
 
       if (user.type === UserType.FORMATEUR) {

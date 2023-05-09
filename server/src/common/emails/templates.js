@@ -57,6 +57,19 @@ module.exports = {
       },
     };
   },
+  activation_academie: (user, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+    return {
+      subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte académique`,
+      templateFile: getTemplateFile("activation_academie"),
+      data: {
+        user,
+        token,
+        actionToken: createActionToken(user.username),
+        voeux_email,
+      },
+    };
+  },
   activation_gestionnaire: (gestionnaire, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
