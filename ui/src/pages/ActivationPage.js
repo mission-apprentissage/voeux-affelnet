@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import queryString from "query-string";
 import { Field, Form, Formik } from "formik";
@@ -24,7 +24,13 @@ import { useFetch } from "../common/hooks/useFetch";
 
 function StatusErrorMessage({ error, username }) {
   const navigate = useNavigate();
-  console.log(error);
+
+  useEffect(() => {
+    if (error.statusCode === 400) {
+      navigate(`/login?alreadyActivated=true&username=${username}`);
+    }
+  }, [error?.statusCode, username, navigate]);
+
   if (error.statusCode === 401) {
     return (
       <Alert status="error">
@@ -37,9 +43,8 @@ function StatusErrorMessage({ error, username }) {
         </Text>
       </Alert>
     );
-  } else if (error.statusCode === 400) {
-    navigate(`/login?alreadyActivated=true&username=${username}`);
   }
+
   return <div />;
 }
 
@@ -51,8 +56,6 @@ function ActivationPage() {
   const [message, setMessage] = useState();
   const username = decodeJWT(actionToken).sub;
   const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
-
-  console.log(loading, error);
 
   const activation = useCallback(
     async (values) => {

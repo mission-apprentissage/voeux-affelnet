@@ -17,15 +17,6 @@ function ResetPasswordPage() {
   const { resetPasswordToken } = queryString.parse(location.search);
   const username = decodeJWT(resetPasswordToken).sub;
 
-  const showError = (meta) => {
-    return meta.touched && meta.error
-      ? {
-          feedback: meta.error,
-          invalid: true,
-        }
-      : {};
-  };
-
   const changePassword = async (values, { setStatus }) => {
     try {
       const { token } = await _post("/api/password/reset-password", { ...values, resetPasswordToken });
