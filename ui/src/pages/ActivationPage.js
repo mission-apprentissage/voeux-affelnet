@@ -52,6 +52,8 @@ function ActivationPage() {
   const username = decodeJWT(actionToken).sub;
   const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
 
+  console.log(loading, error);
+
   const activation = useCallback(
     async (values) => {
       try {
