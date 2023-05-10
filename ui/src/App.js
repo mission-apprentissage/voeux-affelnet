@@ -12,7 +12,7 @@ const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
 
 const GestionnaireRoutes = lazy(() => import("./pages/gestionnaire/Routes"));
 const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
-const AdminPage = lazy(() => import("./pages/admin/Page"));
+const AdminRoutes = lazy(() => import("./pages/admin/Routes"));
 const CsaioPage = lazy(() => import("./pages/CsaioPage.js"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
@@ -65,7 +65,7 @@ const App = () => {
             element={
               <Suspense>
                 <RequireAuth allowed={["admin"]}>
-                  <AdminPage />
+                  <AdminRoutes />
                 </RequireAuth>
               </Suspense>
             }

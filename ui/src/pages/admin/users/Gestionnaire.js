@@ -113,7 +113,7 @@ export const Gestionnaire = () => {
           )}
 
           <Button variant="primary" onClick={onOpenUpdateGestionnaireEmailModal}>
-            Modifier l'email
+            Modifier l'adresse courriel
           </Button>
         </Box>
 

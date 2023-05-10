@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Text, Link, Heading, Box, Alert, useDisclosure, Button } from "@chakra-ui/react";
 
 import { _get } from "../../../common/httpClient";
@@ -12,63 +12,9 @@ import { UpdateDelegationModal } from "../../../common/components/admin/modals/U
 import { DelegationModal } from "../../../common/components/admin/modals/DelegationModal";
 import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
 
-// const EtablissementEmail = ({ gestionnaire, etablissement, callback }) => {
-//   const [enableForm, setEnableForm] = useState(false);
-
-//   const setEtablissementEmail = useCallback(async ({ form, etablissement }) => {
-//     try {
-//       await _put(`/api/gestionnaire/formateurs/${etablissement.uai}`, { email: form.email, diffusionAutorisee: true });
-//       setEnableForm(false);
-//       callback();
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   });
-
-//   return (
-//     <>
-//       {!etablissement.email || enableForm ? (
-//         <Formik
-//           initialValues={{
-//             email: etablissement.email, // formateur.mel ?
-//           }}
-//           validationSchema={Yup.object().shape({
-//             email: Yup.string().required("Requis"),
-//           })}
-//           onSubmit={(form) => setEtablissementEmail({ form, etablissement })}
-//         >
-//           <Form style={{ display: "inline-flex", width: "100%" }}>
-//             <Field name="email">
-//               {({ field, meta }) => {
-//                 return (
-//                   <Input
-//                     type="email"
-//                     role="presentation"
-//                     placeholder="Renseigner l'email"
-//                     style={{ margin: 0 }}
-//                     {...field}
-//                   />
-//                 );
-//               }}
-//             </Field>
-//             <Button variant="primary" type="submit">
-//               OK
-//             </Button>
-//           </Form>
-//         </Formik>
-//       ) : (
-//         <>
-//           {etablissement.email}{" "}
-//           <Link fontSize={"zeta"} textDecoration={"underline"} onClick={() => setEnableForm(true)}>
-//             Modifier
-//           </Link>
-//         </>
-//       )}
-//     </>
-//   );
-// };
-
 export const Formateur = () => {
+  const navigate = useNavigate();
+
   const {
     onOpen: onOpenUpdateGestionnaireEmailModal,
     isOpen: isOpenUpdateGestionnaireEmailModal,
@@ -89,29 +35,19 @@ export const Formateur = () => {
 
   const { siret, uai } = useParams();
   const downloadVoeux = useDownloadVoeux();
-  const [gestionnaires, setGestionnaires] = useState(undefined);
+  const [gestionnaire, setGestionnaire] = useState(undefined);
   const [formateur, setFormateur] = useState(undefined);
   const mounted = useRef(false);
 
   const getGestionnaire = useCallback(async () => {
     try {
       const response = await _get(`/api/admin/gestionnaires/${siret}`);
-      setGestionnaires([response]);
+      setGestionnaire(response);
     } catch (error) {
-      setGestionnaires(undefined);
+      setGestionnaire(undefined);
       throw Error;
     }
   }, [siret]);
-
-  const getGestionnaires = useCallback(async () => {
-    try {
-      const response = await _get(`/api/admin/formateurs/${uai}/gestionnaires`);
-      setGestionnaires(response);
-    } catch (error) {
-      setGestionnaires(undefined);
-      throw Error;
-    }
-  }, [uai]);
 
   const getFormateur = useCallback(async () => {
     try {
@@ -126,12 +62,8 @@ export const Formateur = () => {
 
   const callback = useCallback(async () => {
     await getFormateur();
-    if (siret) {
-      await getGestionnaire();
-    } else {
-      await getGestionnaires();
-    }
-  }, [siret, getFormateur, getGestionnaire, getGestionnaires]);
+    await getGestionnaire();
+  }, [getFormateur, getGestionnaire]);
 
   useEffect(() => {
     const run = async () => {
@@ -143,8 +75,14 @@ export const Formateur = () => {
     run();
   }, [callback]);
 
-  // TODO : Gérer le multi-responsable
-  const gestionnaire = gestionnaires?.[0];
+  useEffect(() => {
+    if (!siret) {
+      navigate(`/admin/formateur/${uai}/gestionnaires`, { replace: true });
+    }
+  }, [siret, navigate, uai]);
+
+  if (!siret) {
+  }
 
   if (!gestionnaire) {
     return (
@@ -167,8 +105,6 @@ export const Formateur = () => {
       </>
     );
   }
-
-  const hasOnlyOneResponsable = gestionnaires.length === 1;
 
   const isResponsableFormateurCheck = isResponsableFormateur({
     gestionnaire,
@@ -194,13 +130,6 @@ export const Formateur = () => {
         </>
       }
     >
-      {!hasOnlyOneResponsable && (
-        <Alert status="error">
-          Plusieurs responsables ont été trouvés pour cet organisme, seules les informations liées à un seul de ces
-          responsables sont listées ici. Merci de contacter le support.
-        </Alert>
-      )}
-
       <Box my={6}>
         <Text mb={4}>
           Adresse : {formateur.adresse} – Siret : {formateur.siret ?? "Inconnu"} – UAI : {formateur.uai ?? "Inconnu"}
@@ -214,7 +143,7 @@ export const Formateur = () => {
             habilité à accéder aux listes de candidats.
           </Text>
           <Text mb={4}>
-            Personne habilitée à réceptionner les listes : {gestionnaires[0]?.email}.{" "}
+            Personne habilitée à réceptionner les listes : {gestionnaire.email}.{" "}
             <Link variant="action" onClick={onOpenUpdateGestionnaireEmailModal}>
               (modifier)
             </Link>

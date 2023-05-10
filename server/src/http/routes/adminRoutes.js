@@ -29,6 +29,7 @@ const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/f
 const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/formateur");
 const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/formateur");
 const { UserType } = require("../../common/constants/UserType");
+// const { download } = require("../../jobs/download");
 
 const filterForAcademie = (etablissement, user) => {
   return user.academie ? etablissement.academie?.code === user.academie?.code : true;
@@ -347,6 +348,202 @@ module.exports = ({ sendEmail, resendEmail }) => {
       return sendJsonStream(stream, res);
     })
   );
+
+  // router.get(
+  //   "/api/admin/users/download",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     const { username } = req.user;
+  //     const admin = await User.findOne({ username }).lean();
+  //     const defaultAcademie = admin?.academie?.code;
+
+  //     const { academie, text, type, page, items_par_page, sort } = await Joi.object({
+  //       academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
+  //       text: Joi.string(),
+  //       type: Joi.string(),
+  //       page: Joi.number().default(1),
+  //       items_par_page: Joi.number().default(10),
+  //       sort: Joi.string().default(`{ "username": 1 }`),
+  //     }).validateAsync(req.query, { abortEarly: false });
+
+  //     const regex = ".*" + text + ".*";
+  //     const regexQuery = { $regex: regex, $options: "i" };
+
+  //     const { find, pagination } = await paginate(
+  //       User,
+  //       {
+  //         // ...(text ?  $text: { $search: `"${text.trim()}"` } } : {}),
+  //         $and: [
+  //           ...(type ? [{ type }] : []),
+
+  //           {
+  //             $or: [
+  //               {
+  //                 type: "Formateur",
+  //                 $and: [
+  //                   {},
+  //                   ...(text
+  //                     ? [
+  //                         {
+  //                           $or: [
+  //                             { siret: regexQuery },
+  //                             { uai: regexQuery },
+  //                             { raison_sociale: regexQuery },
+  //                             { email: regexQuery },
+  //                             {
+  //                               etablissements: {
+  //                                 $elemMatch: { siret: regexQuery },
+  //                               },
+  //                             },
+  //                           ],
+  //                         },
+  //                       ]
+  //                     : []),
+
+  //                   ...(defaultAcademie ?? academie
+  //                     ? [
+  //                         {
+  //                           $or: [{ "academie.code": defaultAcademie ?? academie }],
+  //                         },
+  //                       ]
+  //                     : []),
+  //                 ],
+  //               },
+  //               {
+  //                 type: "Gestionnaire",
+  //                 $and: [
+  //                   {},
+  //                   ...(text
+  //                     ? [
+  //                         {
+  //                           $or: [
+  //                             { siret: regexQuery },
+  //                             { uai: regexQuery },
+  //                             { raison_sociale: regexQuery },
+  //                             { email: regexQuery },
+  //                             {
+  //                               etablissements: {
+  //                                 $elemMatch: { uai: regexQuery },
+  //                               },
+  //                             },
+  //                             {
+  //                               etablissements: {
+  //                                 $elemMatch: { email: regexQuery },
+  //                               },
+  //                             },
+  //                           ],
+  //                         },
+  //                       ]
+  //                     : []),
+
+  //                   ...(defaultAcademie ?? academie
+  //                     ? [
+  //                         {
+  //                           $or: [
+  //                             { "academie.code": defaultAcademie ?? academie },
+  //                             {
+  //                               etablissements: {
+  //                                 $elemMatch: { "academie.code": defaultAcademie ?? academie },
+  //                               },
+  //                             },
+  //                           ],
+  //                         },
+  //                       ]
+  //                     : []),
+  //                 ],
+  //               },
+  //             ],
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         page,
+  //         items_par_page,
+  //         select: { _id: 0, password: 0 },
+  //         sort: JSON.parse(sort ?? "{}"),
+  //       }
+  //     );
+
+  //     const stream = oleoduc(
+  //       find.cursor(),
+  //       transformData(async (user) => {
+  //         return {
+  //           ...user,
+
+  //           ...(user.type === UserType.GESTIONNAIRE
+  //             ? {
+  //                 nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": user.siret }),
+
+  //                 formateurs: await Promise.all(
+  //                   (
+  //                     await Formateur.find({
+  //                       uai: {
+  //                         $in:
+  //                           user?.etablissements
+  //                             .filter((etablissement) => filterForAcademie(etablissement, admin))
+  //                             .map((etablissement) => etablissement.uai) ?? [],
+  //                       },
+  //                     }).lean()
+  //                   ).map((etablissement) => fillFormateur(etablissement, admin))
+  //                 ),
+
+  //                 etablissements: await Promise.all(
+  //                   user?.etablissements
+  //                     .filter((etablissement) => filterForAcademie(etablissement, admin))
+  //                     .map(async (etablissement) => ({
+  //                       ...etablissement,
+
+  //                       nombre_voeux: await Voeu.countDocuments({
+  //                         "etablissement_gestionnaire.siret": user.siret,
+  //                         "etablissement_accueil.uai": etablissement.uai,
+  //                       }),
+  //                     })) ?? []
+  //                 ),
+  //               }
+  //             : {
+  //                 nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": user.uai }),
+
+  //                 gestionnaires: await Promise.all(
+  //                   (
+  //                     await Gestionnaire.find({
+  //                       siret: {
+  //                         $in:
+  //                           user?.etablissements
+  //                             // .filter((etablissement) => filterForAcademie(etablissement, admin))
+  //                             .map((etablissement) => etablissement.siret) ?? [],
+  //                       },
+  //                     }).lean()
+  //                   ).map((gestionnaire) => fillGestionnaire(gestionnaire, admin))
+  //                 ),
+
+  //                 etablissements: await Promise.all(
+  //                   user?.etablissements
+  //                     // .filter((etablissement) => filterForAcademie(etablissement, admin))
+  //                     .map(async (etablissement) => ({
+  //                       ...etablissement,
+
+  //                       nombre_voeux: await Voeu.countDocuments({
+  //                         "etablissement_gestionnaire.siret": etablissement.siret,
+  //                         "etablissement_accueil.uai": user.uai,
+  //                       }),
+  //                     })) ?? []
+  //                 ),
+  //               }),
+  //         };
+  //       }),
+  //       transformIntoJSON({
+  //         arrayWrapper: {
+  //           pagination,
+  //         },
+  //         arrayPropertyName: "users",
+  //       })
+  //     );
+
+  //     // return sendJsonStream(stream, res);
+  //     return download(asCsvResponse("statut-téléchargements", res));
+  //   })
+  // );
 
   /**
    * GESTIONNAIRES

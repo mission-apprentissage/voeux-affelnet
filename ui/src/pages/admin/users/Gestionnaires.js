@@ -1,47 +1,48 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Text, Box, Link, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
 
 import { Page } from "../../../common/components/layout/Page";
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
 import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
-import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
-import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { _get } from "../../../common/httpClient";
-import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
+import { OrganismeResponsableTag } from "../../../common/components/tags/OrganismeResponsable";
+import { GestionnaireEmail } from "../../../common/components/admin/fields/GestionnaireEmail";
+import { GestionnaireStatut } from "../../../common/components/admin/fields/GestionnaireStatut";
 
-export const Formateurs = ({}) => {
-  const { siret } = useParams();
+export const Gestionnaires = () => {
+  const { uai } = useParams();
+  const navigate = useNavigate();
 
-  const [gestionnaire, setGestionnaire] = useState(undefined);
-  const [formateurs, setFormateurs] = useState(undefined);
+  const [formateur, setFormateur] = useState(undefined);
+  const [gestionnaires, setGestionnaires] = useState(undefined);
   const mounted = useRef(false);
 
-  const getGestionnaire = useCallback(async () => {
+  const getFormateur = useCallback(async () => {
     try {
-      const response = await _get(`/api/admin/gestionnaires/${siret}`);
-      setGestionnaire(response);
+      const response = await _get(`/api/admin/formateurs/${uai}`);
+      setFormateur(response);
     } catch (error) {
-      setGestionnaire(undefined);
+      setFormateur(undefined);
       throw Error;
     }
-  }, [siret]);
+  }, [uai]);
 
-  const getFormateurs = useCallback(async () => {
+  const getGestionnaires = useCallback(async () => {
     try {
-      const response = await _get(`/api/admin/gestionnaires/${siret}/formateurs`);
+      const response = await _get(`/api/admin/formateurs/${uai}/gestionnaires`);
 
-      setFormateurs(response);
+      setGestionnaires(response);
     } catch (error) {
-      setFormateurs(undefined);
+      setGestionnaires(undefined);
       throw Error;
     }
-  }, [siret, setFormateurs]);
+  }, [uai, setGestionnaires]);
 
   const reload = useCallback(async () => {
-    await getGestionnaire();
-    await getFormateurs();
-  }, [getGestionnaire, getFormateurs]);
+    await getFormateur();
+    await getGestionnaires();
+  }, [getFormateur, getGestionnaires]);
 
   useEffect(() => {
     const run = async () => {
@@ -57,7 +58,14 @@ export const Formateurs = ({}) => {
     };
   }, [reload]);
 
-  if (!gestionnaire) {
+  useEffect(() => {
+    if (gestionnaires?.length === 1) {
+      const gestionnaire = gestionnaires[0];
+      navigate(`/admin/gestionnaire/${gestionnaire.siret}/formateur/${formateur.uai}`, { replace: true });
+    }
+  }, [gestionnaires, navigate, formateur?.uai]);
+
+  if (!formateur) {
     return;
   }
 
@@ -66,21 +74,21 @@ export const Formateurs = ({}) => {
       <Page
         title={
           <>
-            Organisme responsable :&nbsp;
-            <GestionnaireLibelle gestionnaire={gestionnaire} /> / liste des organismes formateurs associés
+            Organisme formateur :&nbsp;
+            <FormateurLibelle formateur={formateur} /> / liste des organismes responsables associés
           </>
         }
       >
         <Box mb={12}>
           <Text mb={4}>
             <strong>
-              Voici la listes des organismes formateurs pour lesquels l'organisme a été identifié comme responsable.
+              Voici la listes des organismes responsables pour lesquels l'organisme dispense des formations.
             </strong>
           </Text>
         </Box>
 
         <Box mb={12}>
-          {formateurs && (
+          {gestionnaires && (
             <Table mt={12}>
               <Thead>
                 <Tr>
@@ -94,12 +102,12 @@ export const Formateurs = ({}) => {
                 </Tr>
               </Thead>
               <Tbody>
-                {formateurs.map((formateur) => {
+                {gestionnaires.map((gestionnaire) => {
                   const etablissement = gestionnaire.etablissements?.find(
                     (etablissement) => etablissement.uai === formateur.uai
                   );
                   return (
-                    <Tr key={formateur?.uai}>
+                    <Tr key={gestionnaire?.uai}>
                       <Td>
                         <Link
                           variant="primary"
@@ -109,16 +117,16 @@ export const Formateurs = ({}) => {
                         </Link>
                       </Td>
                       <Td>
-                        <FormateurLibelle formateur={formateur} /> <OrganismeFormateurTag />
+                        <GestionnaireLibelle gestionnaire={gestionnaire} /> <OrganismeResponsableTag />
                       </Td>
                       <Td>
-                        <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={reload} />
+                        <GestionnaireEmail gestionnaire={gestionnaire} formateur={formateur} callback={reload} />
                       </Td>
                       <Td>
                         <Text>{etablissement?.nombre_voeux}</Text>
                       </Td>
                       <Td>
-                        <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />
+                        <GestionnaireStatut gestionnaire={formateur} formateur={formateur} />
                       </Td>
                     </Tr>
                   );
@@ -138,4 +146,4 @@ export const Formateurs = ({}) => {
   );
 };
 
-export default Formateurs;
+export default Gestionnaires;

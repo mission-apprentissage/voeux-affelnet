@@ -4,10 +4,11 @@ import { Route, Routes } from "react-router-dom";
 import { Page } from "../../common/components/layout/Page";
 import { Users } from "./users/Users";
 import { Gestionnaire } from "./users/Gestionnaire";
+import { Gestionnaires } from "./users/Gestionnaires";
 import { Formateurs } from "./users/Formateurs";
 import { Formateur } from "./users/Formateur";
 
-function AdminPage() {
+function AdminRoutes() {
   return (
     <Routes>
       <Route
@@ -24,8 +25,9 @@ function AdminPage() {
       <Route path="/gestionnaire/:siret/formateurs" element={<Formateurs />}></Route>
       <Route path="/gestionnaire/:siret/formateur/:uai" element={<Formateur />}></Route>
       <Route path="/formateur/:uai" element={<Formateur />}></Route>
+      <Route path="/formateur/:uai/gestionnaires" element={<Gestionnaires />}></Route>
     </Routes>
   );
 }
 
-export default AdminPage;
+export default AdminRoutes;

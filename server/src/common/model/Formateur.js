@@ -28,12 +28,6 @@ const schema = new Schema({
   adresse: {
     type: String,
   },
-  cp: {
-    type: String,
-  },
-  commune: {
-    type: String,
-  },
 
   etablissements: {
     required: true,
@@ -43,6 +37,10 @@ const schema = new Schema({
         siret: {
           type: String,
           required: true,
+          index: true,
+        },
+        uai: {
+          type: String,
           index: true,
         },
         academie: academieSchema,

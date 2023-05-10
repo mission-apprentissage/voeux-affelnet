@@ -39,6 +39,10 @@ const schema = new Schema({
           required: true,
           index: true,
         },
+        siret: {
+          type: String,
+          index: true,
+        },
         email: {
           type: String,
         },

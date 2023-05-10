@@ -7,10 +7,10 @@ const {
   saveAccountConfirmationEmailManualResent: saveAccountConfirmationEmailManualResentAsResponsable,
   saveAccountConfirmationEmailAutomaticResent: saveAccountConfirmationEmailAutomaticResentAsResponsable,
 } = require("../common/actions/history/responsable");
-const {
-  saveAccountConfirmationEmailManualResent: saveAccountConfirmationEmailManualResentAsFormateur,
-  saveAccountConfirmationEmailAutomaticResent: saveAccountConfirmationEmailAutomaticResentAsFormateur,
-} = require("../common/actions/history/formateur");
+// const {
+//   saveAccountConfirmationEmailManualResent: saveAccountConfirmationEmailManualResentAsFormateur,
+//   saveAccountConfirmationEmailAutomaticResent: saveAccountConfirmationEmailAutomaticResentAsFormateur,
+// } = require("../common/actions/history/formateur");
 
 async function resendConfirmationEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -83,11 +83,11 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
               ? await saveAccountConfirmationEmailManualResentAsResponsable(user, options.sender)
               : await saveAccountConfirmationEmailAutomaticResentAsResponsable(user);
             break;
-          case UserType.FORMATEUR:
-            options.sender
-              ? await saveAccountConfirmationEmailManualResentAsFormateur(user, options.sender)
-              : await saveAccountConfirmationEmailAutomaticResentAsFormateur(user);
-            break;
+          // case UserType.FORMATEUR:
+          //   options.sender
+          //     ? await saveAccountConfirmationEmailManualResentAsFormateur(user, options.sender)
+          //     : await saveAccountConfirmationEmailAutomaticResentAsFormateur(user);
+          //   break;
           default:
             break;
         }

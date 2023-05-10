@@ -34,6 +34,7 @@ async function buildEtablissements(sirets, formateur) {
       const existingEtablissement = formateur?.etablissements?.find((etablissement) => etablissement === siret);
       return {
         siret,
+        uai: gestionnaire?.uai,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
 
         academie: gestionnaire?.academie,

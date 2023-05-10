@@ -13,6 +13,10 @@ import { FormateurLibelle } from "../../../common/components/formateur/fields/Fo
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { GestionnaireStatut } from "../../../common/components/admin/fields/GestionnaireStatut";
 import { useGet } from "../../../common/hooks/httpHooks";
+import { ContactDelegueTag } from "../../../common/components/tags/ContactDelegue";
+import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
+import { ContactResponsableTag } from "../../../common/components/tags/ContactResponsable";
+import { OrganismeResponsableTag } from "../../../common/components/tags/OrganismeResponsable";
 
 export const Users = () => {
   const [error, setError] = useState();
@@ -201,11 +205,11 @@ export const Users = () => {
                             </Link>
                           </Td>
                           <Td>
-                            <GestionnaireLibelle gestionnaire={user} /> <Tag>Responsable</Tag>
+                            <GestionnaireLibelle gestionnaire={user} /> <OrganismeResponsableTag />
                           </Td>
                           <Td>
                             <Text>
-                              {user.email} <Tag>R</Tag>
+                              {user.email} <ContactResponsableTag />
                             </Text>
                           </Td>
                           <Td>{user.nombre_voeux}</Td>
@@ -222,7 +226,7 @@ export const Users = () => {
                             </Link>
                           </Td>
                           <Td>
-                            <FormateurLibelle formateur={user} /> <Tag>Formateur</Tag>
+                            <FormateurLibelle formateur={user} /> <OrganismeFormateurTag />
                           </Td>
                           <Td>
                             {user.gestionnaires?.map((gestionnaire) => {
@@ -233,13 +237,13 @@ export const Users = () => {
                               return etablissement?.diffusionAutorisee ? (
                                 <>
                                   <Text>
-                                    {user.email ?? etablissement.email} <Tag>D</Tag>
+                                    {user.email ?? etablissement.email} <ContactDelegueTag />
                                   </Text>
                                 </>
                               ) : (
                                 <>
                                   <Text>
-                                    {gestionnaire.email} <Tag>R</Tag>
+                                    {gestionnaire.email} <ContactResponsableTag />
                                   </Text>
                                 </>
                               );

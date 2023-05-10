@@ -2,18 +2,16 @@ import { Text } from "@chakra-ui/react";
 import { ContactResponsableTag } from "../../tags/ContactResponsable";
 import { ContactDelegueTag } from "../../tags/ContactDelegue";
 
-export const FormateurEmail = ({ gestionnaire, formateur }) => {
+export const GestionnaireEmail = ({ gestionnaire, formateur }) => {
   if (!gestionnaire || !formateur) {
     return;
   }
 
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 
-  const diffusionAutorisee = etablissement?.diffusionAutorisee;
-
   return (
     <>
-      {diffusionAutorisee ? (
+      {etablissement ? (
         <Text display={"inline"}>
           {etablissement.email} <ContactDelegueTag />
         </Text>

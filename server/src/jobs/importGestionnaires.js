@@ -5,6 +5,7 @@ const logger = require("../common/logger");
 const { findAcademieByUai } = require("../common/academies");
 const {
   Gestionnaire,
+  Formateur,
   // Voeu
 } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
@@ -24,9 +25,13 @@ async function buildEtablissements(uais, gestionnaire) {
     [...new Set(uais)].map(async (uai) => {
       // const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
 
+      const formateur = await Formateur.findOne({ uai }).lean();
+
       const existingEtablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement === uai);
+
       return {
         uai,
+        siret: formateur?.siret,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
         email: existingEtablissement?.email || undefined,
         diffusionAutorisee: existingEtablissement?.diffusionAutorisee || false,

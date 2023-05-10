@@ -139,7 +139,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
               habilité à accéder aux listes de candidats. Personne habilitée à réceptionner les listes :{" "}
               <GestionnaireEmail gestionnaire={gestionnaire} />.{" "}
               <Link variant="action" onClick={onOpenUpdateGestionnaireEmailModal}>
-                Modifier l'email
+                Modifier l'adresse courriel
               </Link>
             </Text>
 
