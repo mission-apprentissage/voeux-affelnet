@@ -150,7 +150,7 @@ const ConfirmationPage = () => {
                 <Formik
                   initialValues={{
                     email: data?.email,
-                    email_validation: data?.email,
+                    email_confirmation: data?.email,
                   }}
                   validationSchema={Yup.object().shape({
                     email: Yup.string().email().required(),
