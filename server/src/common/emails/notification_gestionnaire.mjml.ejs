@@ -9,8 +9,8 @@
           <mj-text> Madame la directrice, Monsieur le directeur, </mj-text>
 
           <mj-text>
-            Les listes de vœux pour votre établissement (Siret : <%= data.cfa.siret %>) et/ou ceux dont vous êtes
-            responsable ont été mises à jour. Vous pouvez dès à présent les télécharger en cliquant sur le bouton
+            Les listes de vœux pour votre établissement (Siret : <%= data.gestionnaire.siret %>) et/ou ceux dont vous
+            êtes responsable ont été mises à jour. Vous pouvez dès à présent les télécharger en cliquant sur le bouton
             ci-dessous.
           </mj-text>
 
@@ -19,6 +19,8 @@
           <mj-button href="<%= utils.getPublicUrl(`/login`) %>" background-color="#0e4194" color="white">
             Consulter les nouveaux vœux ou les corrections
           </mj-button>
+
+          <mj-text> Votre identifiant de connexion : <strong><%= data.gestionnaire.username %></strong> </mj-text>
 
           <%- include('./common/procedure.ejs'); %> <%- include('./common/engagement.ejs'); %> <%-
           include('./common/signature.ejs'); %>
