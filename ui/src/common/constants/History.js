@@ -103,7 +103,7 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.DELEGATION_CANCELLED_BY_RESPONSABLE,
     {
       component: ({ responsable, email }) =>
-        `[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme.`,
+        `${responsable} a annulé la délégation de droits qui avait été accordée à ${email}, et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme.`,
     },
   ],
   [

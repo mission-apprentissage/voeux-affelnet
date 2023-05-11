@@ -14,6 +14,11 @@ const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const { UserStatut } = require("../../common/constants/UserStatut");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { saveAccountEmailUpdatedByAccount } = require("../../common/actions/history/responsable");
+const {
+  saveDelegationUpdatedByResponsable,
+  saveDelegationCreatedByResponsable,
+  saveDelegationCancelledByResponsable,
+} = require("../../common/actions/history/formateur");
 
 module.exports = ({ users, sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -126,6 +131,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
       }
 
+      const etablissement = gestionnaire?.etablissements.find((e) => e.uai === uai);
+
       const etablissements = gestionnaire?.etablissements.map((etablissement) => {
         if (etablissement.uai === uai) {
           typeof req.body.email !== "undefined" && (etablissement.email = req.body.email);
@@ -137,8 +144,13 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { etablissements });
 
+      const formateur = await Formateur.findOne({ uai }).lean();
+
       if (typeof req.body.email !== "undefined" && req.body.diffusionAutorisee === true) {
-        const formateur = await Formateur.findOne({ uai });
+        etablissement?.diffusionAutorisee
+          ? await saveDelegationUpdatedByResponsable({ ...formateur, email: req.body.email }, req.user)
+          : await saveDelegationCreatedByResponsable({ ...formateur, email: req.body.email }, req.user);
+
         await Formateur.updateOne(
           { uai },
           { $set: { statut: UserStatut.CONFIRME, email: req.body.email, password: null } }
@@ -147,7 +159,12 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
         previousActivationEmail
           ? await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user })
-          : await sendActivationEmails(sendEmail, { username: uai, sender: req.user });
+          : await sendActivationEmails(sendEmail, { username: uai, force: true, sender: req.user });
+      } else if (req.body.diffusionAutorisee === false) {
+        await saveDelegationCancelledByResponsable(
+          { ...formateur, email: formateur.email ?? etablissement.email },
+          req.user
+        );
       }
 
       const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });

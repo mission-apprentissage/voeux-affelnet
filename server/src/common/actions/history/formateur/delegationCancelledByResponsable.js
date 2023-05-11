@@ -1,7 +1,7 @@
 const { FormateurActions } = require("../../../constants/History");
 const { Formateur } = require("../../../model");
 
-const saveDelegationCancelledByResponsable = async ({ uai }, responsable) => {
+const saveDelegationCancelledByResponsable = async ({ uai, email }, responsable) => {
   await Formateur.updateOne(
     { uai },
     {
@@ -9,6 +9,7 @@ const saveDelegationCancelledByResponsable = async ({ uai }, responsable) => {
         histories: {
           action: FormateurActions.DELEGATION_CANCELLED_BY_RESPONSABLE,
           variables: {
+            email,
             responsable: responsable.email,
           },
         },

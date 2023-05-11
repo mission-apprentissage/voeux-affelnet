@@ -724,11 +724,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
         );
         const previousActivationEmail = formateur.emails.find((e) => e.templateName.startsWith("activation_"));
 
-        console.log(
-          previousActivationEmail
-            ? await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user })
-            : await sendActivationEmails(sendEmail, { username: uai, force: true, sender: req.user })
-        );
+        previousActivationEmail
+          ? await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user })
+          : await sendActivationEmails(sendEmail, { username: uai, force: true, sender: req.user });
       } else if (req.body.diffusionAutorisee === false) {
         await saveDelegationCancelledByAdmin({ ...formateur, email: formateur.email ?? etablissement.email }, req.user);
       }
