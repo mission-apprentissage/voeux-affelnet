@@ -22,6 +22,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
       : {
           unsubscribe: false,
           statut: UserStatut.EN_ATTENTE,
+
           ...(options.retry
             ? {
                 emails: {
@@ -47,6 +48,8 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
                   },
                 },
               }),
+
+          $or: [{ type: UserType.GESTIONNAIRE }],
         }),
   };
 

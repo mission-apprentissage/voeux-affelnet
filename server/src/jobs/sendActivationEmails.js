@@ -23,8 +23,8 @@ async function sendActivationEmails(sendEmail, options = {}) {
           statut: UserStatut.CONFIRME,
           "emails.templateName": { $not: { $regex: "^activation_.*$" } },
           $or: [
-            { type: UserType.GESTIONNAIRE /*, "etablissements.voeux_date": { $exists: true } */ },
-            { type: UserType.FORMATEUR /*, "etablissements.voeux_date": { $exists: true } */ },
+            { type: UserType.GESTIONNAIRE },
+            { type: UserType.FORMATEUR },
             { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
           ],
         }),

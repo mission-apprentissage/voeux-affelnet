@@ -26,11 +26,7 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
           // TODO : Définir les règles pour trouver les utilisateurs à qui envoyer les mails de confirmations (User de type formateur ou gestionnaire,
           // mais également qui ont des voeux et qui sont destinataires de ces voeux - diffusion autorisée ou gestionnaire sans délégation)
 
-          $or: [
-            { type: UserType.GESTIONNAIRE /*, "etablissements.voeux_date": { $exists: true } */ },
-            // { type: UserType.FORMATEUR /*, "etablissements.voeux_date": { $exists: true } */ },
-            // { type: { $nin: ["Gestionnaire", "Formateur"] } },
-          ],
+          $or: [{ type: UserType.GESTIONNAIRE }],
         }),
   };
 

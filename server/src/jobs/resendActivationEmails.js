@@ -49,6 +49,11 @@ async function resendActivationEmails(resendEmail, options = {}) {
                   },
                 },
               }),
+          $or: [
+            { type: UserType.GESTIONNAIRE },
+            { type: UserType.FORMATEUR },
+            { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
+          ],
         }),
   };
 
