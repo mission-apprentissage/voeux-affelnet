@@ -1,10 +1,24 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Button, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Tag } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Text,
+  Input,
+  Table,
+  Tbody,
+  Td,
+  Thead,
+  Th,
+  Tr,
+  Link,
+  Select,
+  Tag,
+  Spinner,
+} from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
-import * as queryString from "query-string";
+import queryString from "query-string";
 
 import { Pagination } from "../../../common/components/Pagination";
-import SuccessMessage from "../../../common/components/SuccessMessage";
 import ErrorMessage from "../../../common/components/ErrorMessage";
 import { Yup } from "../../../common/Yup";
 import { _get } from "../../../common/httpClient";
@@ -17,10 +31,13 @@ import { ContactDelegueTag } from "../../../common/components/tags/ContactDelegu
 import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
 import { ContactResponsableTag } from "../../../common/components/tags/ContactResponsable";
 import { OrganismeResponsableTag } from "../../../common/components/tags/OrganismeResponsable";
+import { FileDownloadLine } from "../../../theme/components/icons/FileDownloadLine";
+import { useDownloadStatut } from "../../../common/hooks/adminHooks";
 
 export const Users = () => {
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
+  const [downloading, setDownloading] = useState(false);
   const [query, setQuery] = useState();
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({
@@ -59,6 +76,22 @@ export const Users = () => {
     },
     [self]
   );
+
+  const downloadStatut = useDownloadStatut();
+
+  const downloadStatutToCSV = useCallback(async () => {
+    try {
+      setDownloading(true);
+      const params = {
+        ...(query?.academie ? { academie: query.academie } : {}),
+        ...(self?.academie ? { academie: self?.academie.code } : {}),
+      };
+      await downloadStatut(params);
+    } catch (e) {
+      console.error(e);
+    }
+    setDownloading(false);
+  }, [query, self?.academie, downloadStatut]);
 
   useEffect(() => {
     const run = async () => {
@@ -174,6 +207,14 @@ export const Users = () => {
           );
         }}
       </Formik>
+
+      <Box display="flex" justifyContent={"right"}>
+        <Link onClick={downloadStatutToCSV}>
+          {downloading ? <Spinner size="sm" verticalAlign={"middle"} /> : <FileDownloadLine verticalAlign={"middle"} />}{" "}
+          Exporter (csv)
+        </Link>
+      </Box>
+
       <Table style={{ marginTop: "15px" }}>
         <Thead>
           <Tr>
