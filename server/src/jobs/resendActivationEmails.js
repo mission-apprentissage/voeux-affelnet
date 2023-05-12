@@ -67,7 +67,10 @@ async function resendActivationEmails(resendEmail, options = {}) {
       const previous = user.emails.find((e) => e.templateName.startsWith("activation_"));
 
       if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+        const gestionnaire = await Gestionnaire.findOne({
+          "etablissements.uai": user.username,
+          "etablissements.diffusionAutorisee": true,
+        });
 
         if (!gestionnaire) {
           return;

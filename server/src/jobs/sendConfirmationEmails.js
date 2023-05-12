@@ -36,7 +36,10 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
     .cursor()
     .eachAsync(async (user) => {
       if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+        const gestionnaire = await Gestionnaire.findOne({
+          "etablissements.uai": user.username,
+          "etablissements.diffusionAutorisee": true,
+        });
 
         if (!gestionnaire) {
           return;
