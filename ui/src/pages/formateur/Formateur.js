@@ -129,7 +129,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                   )}
                 </Heading>
 
-                {hasVoeux && (
+                {hasVoeux ? (
                   <>
                     <Text mb={4}>
                       Date de mise à disposition : {new Date(etablissement.first_date_voeux).toLocaleDateString()}{" "}
@@ -190,6 +190,24 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                         )}
                       </>
                     )}
+                  </>
+                ) : (
+                  <>
+                    <Text mb={4}>
+                      La liste des vœux exprimés sera rendue disponible entre le vendredi 2 juin et le lundi 5 juin. Un
+                      courriel de notification vous sera envoyé pour vous notifier de cette mise à disposition
+                      (expéditeur du courriel :{" "}
+                      <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                      </Link>
+                      ). Si après le 5 juin vous n’avez reçu aucun courriel, veuillez vérifier vos spam, ou transmettez
+                      un signalement.
+                    </Text>
+                    <Text mb={4}>
+                      Cette première liste pourra être mise à jour la semaine du 3 juillet, pour prendre en compte les
+                      modifications de vœux, les suppressions et les ajouts. Une notification courriel sera également
+                      envoyée lors de cette mise à jour.
+                    </Text>
                   </>
                 )}
               </Box>
