@@ -1,4 +1,4 @@
-import { Box, Link, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { Box, Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../common/components/gestionnaire/fields/FormateurEmail";
@@ -32,15 +32,21 @@ export const FormateursSansVoeux = ({ gestionnaire, formateurs, callback }) => {
                 </Link>
               </Td>
               <Td>
-                <FormateurLibelle formateur={formateur} />
+                <Text lineHeight={6}>
+                  <FormateurLibelle formateur={formateur} />
+                </Text>
               </Td>
               <Td>
                 <Box display="flex">
-                  <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                  <Text lineHeight={6}>
+                    <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                  </Text>
                 </Box>
               </Td>
               <Td>
-                <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                <Text lineHeight={6}>
+                  <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                </Text>
               </Td>
             </Tr>
           );

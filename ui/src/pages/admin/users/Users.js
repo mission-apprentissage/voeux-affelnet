@@ -246,16 +246,21 @@ export const Users = () => {
                             </Link>
                           </Td>
                           <Td>
-                            <GestionnaireLibelle gestionnaire={user} /> <OrganismeResponsableTag />
+                            <Text lineHeight={6}>
+                              <GestionnaireLibelle gestionnaire={user} />{" "}
+                              <OrganismeResponsableTag verticalAlign="baseline" />
+                            </Text>
                           </Td>
                           <Td>
-                            <Text>
+                            <Text lineHeight={6}>
                               {user.email} <ContactResponsableTag />
                             </Text>
                           </Td>
                           <Td>{user.nombre_voeux}</Td>
                           <Td>
-                            <GestionnaireStatut gestionnaire={user} />{" "}
+                            <Text lineHeight={6}>
+                              <GestionnaireStatut gestionnaire={user} />{" "}
+                            </Text>
                           </Td>
                         </>
                       ),
@@ -267,34 +272,36 @@ export const Users = () => {
                             </Link>
                           </Td>
                           <Td>
-                            <FormateurLibelle formateur={user} /> <OrganismeFormateurTag />
+                            <Text lineHeight={6}>
+                              <FormateurLibelle formateur={user} /> <OrganismeFormateurTag verticalAlign="baseline" />
+                            </Text>
                           </Td>
                           <Td>
-                            {user.gestionnaires?.map((gestionnaire) => {
-                              const etablissement = gestionnaire.etablissements.find(
-                                (etablissement) => etablissement.uai === user.uai
-                              );
+                            <Text lineHeight={6}>
+                              {user.gestionnaires?.map((gestionnaire) => {
+                                const etablissement = gestionnaire.etablissements.find(
+                                  (etablissement) => etablissement.uai === user.uai
+                                );
 
-                              return etablissement?.diffusionAutorisee ? (
-                                <>
-                                  <Text>
+                                return etablissement?.diffusionAutorisee ? (
+                                  <>
                                     {user.email ?? etablissement.email} <ContactDelegueTag />
-                                  </Text>
-                                </>
-                              ) : (
-                                <>
-                                  <Text>
+                                  </>
+                                ) : (
+                                  <>
                                     {gestionnaire.email} <ContactResponsableTag />
-                                  </Text>
-                                </>
-                              );
-                            })}
+                                  </>
+                                );
+                              })}
+                            </Text>
                           </Td>
                           <Td>{user.nombre_voeux}</Td>
                           <Td>
-                            {user.gestionnaires?.map((gestionnaire) => {
-                              return <FormateurStatut gestionnaire={gestionnaire} formateur={user} />;
-                            })}
+                            <Text lineHeight={6}>
+                              {user.gestionnaires?.map((gestionnaire) => {
+                                return <FormateurStatut gestionnaire={gestionnaire} formateur={user} />;
+                              })}
+                            </Text>
                           </Td>
                         </>
                       ),

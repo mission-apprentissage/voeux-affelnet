@@ -1,8 +1,8 @@
 import { Tag } from "@chakra-ui/react";
 
-export const ContactDelegueTag = () => {
+export const ContactDelegueTag = (props) => {
   return (
-    <Tag bgColor="#E3E3FD" title="Contact délégué">
+    <Tag bgColor="#f6f6f6" title="Contact délégué" {...props}>
       D
     </Tag>
   );

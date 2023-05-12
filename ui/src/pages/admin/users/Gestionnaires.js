@@ -80,14 +80,6 @@ export const Gestionnaires = () => {
         }
       >
         <Box mb={12}>
-          <Text mb={4}>
-            <strong>
-              Voici la listes des organismes responsables pour lesquels l'organisme dispense des formations.
-            </strong>
-          </Text>
-        </Box>
-
-        <Box mb={12}>
           {gestionnaires && (
             <Table mt={12}>
               <Thead>
@@ -117,16 +109,22 @@ export const Gestionnaires = () => {
                         </Link>
                       </Td>
                       <Td>
-                        <GestionnaireLibelle gestionnaire={gestionnaire} /> <OrganismeResponsableTag />
+                        <Text lineHeight={6}>
+                          <GestionnaireLibelle gestionnaire={gestionnaire} /> <OrganismeResponsableTag />
+                        </Text>
                       </Td>
                       <Td>
-                        <GestionnaireEmail gestionnaire={gestionnaire} formateur={formateur} callback={reload} />
+                        <Text lineHeight={6}>
+                          <GestionnaireEmail gestionnaire={gestionnaire} formateur={formateur} callback={reload} />
+                        </Text>
                       </Td>
                       <Td>
                         <Text>{etablissement?.nombre_voeux}</Text>
                       </Td>
                       <Td>
-                        <GestionnaireStatut gestionnaire={formateur} formateur={formateur} />
+                        <Text lineHeight={6}>
+                          <GestionnaireStatut gestionnaire={formateur} formateur={formateur} />
+                        </Text>
                       </Td>
                     </Tr>
                   );

@@ -48,16 +48,24 @@ export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
                 </Link>
               </Td>
               <Td>
-                <FormateurLibelle formateur={formateur} />
+                <Text lineHeight={6}>
+                  <FormateurLibelle formateur={formateur} />
+                </Text>
               </Td>
               <Td>
-                <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                <Text lineHeight={6}>
+                  <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                </Text>
               </Td>
               <Td>
-                <FormateurVoeuxDisponibles gestionnaire={gestionnaire} formateur={formateur} />
+                <Text lineHeight={6}>
+                  <FormateurVoeuxDisponibles gestionnaire={gestionnaire} formateur={formateur} />
+                </Text>
               </Td>
               <Td>
-                <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                <Text lineHeight={6}>
+                  <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} callback={callback} />
+                </Text>
               </Td>
             </Tr>
           );

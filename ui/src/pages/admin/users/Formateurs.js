@@ -109,16 +109,22 @@ export const Formateurs = ({}) => {
                         </Link>
                       </Td>
                       <Td>
-                        <FormateurLibelle formateur={formateur} /> <OrganismeFormateurTag />
+                        <Text lineHeight={6}>
+                          <FormateurLibelle formateur={formateur} /> <OrganismeFormateurTag />
+                        </Text>
                       </Td>
                       <Td>
-                        <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={reload} />
+                        <Text lineHeight={6}>
+                          <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} callback={reload} />
+                        </Text>
                       </Td>
                       <Td>
                         <Text>{etablissement?.nombre_voeux}</Text>
                       </Td>
                       <Td>
-                        <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />
+                        <Text lineHeight={6}>
+                          <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />
+                        </Text>
                       </Td>
                     </Tr>
                   );

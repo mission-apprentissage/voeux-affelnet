@@ -1,8 +1,8 @@
 import { Tag } from "@chakra-ui/react";
 
-export const OrganismeFormateurTag = () => {
+export const OrganismeFormateurTag = (props) => {
   return (
-    <Tag bgColor="#E3E3FD" title="Organisme formateur">
+    <Tag bgColor="#f6f6f6" title="Organisme formateur" {...props}>
       Formateur
     </Tag>
   );

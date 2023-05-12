@@ -756,12 +756,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
           formateur?.etablissements.map(async (etablissement) => {
             const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret }).lean();
 
-            return {
-              ...gestionnaire,
-              etablissements: gestionnaire.etablissements.filter((etablissement) =>
-                filterForAcademie(etablissement, admin)
-              ),
-            };
+            return await fillGestionnaire(gestionnaire, admin);
           })
         )
       );

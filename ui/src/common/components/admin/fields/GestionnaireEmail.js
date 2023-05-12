@@ -7,11 +7,13 @@ export const GestionnaireEmail = ({ gestionnaire, formateur }) => {
     return;
   }
 
+  console.log({ gestionnaire, formateur });
+
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 
   return (
     <>
-      {etablissement ? (
+      {etablissement.diffusionAutorisee ? (
         <Text display={"inline"}>
           {etablissement.email} <ContactDelegueTag />
         </Text>
