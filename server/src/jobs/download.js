@@ -85,10 +85,15 @@ async function download(output, options = {}) {
       columns: {
         "Académie de l’organisme responsable": (data) => data.academie?.nom,
         "Siret de l’organisme responsable": (data) => data.siret,
+        "Uai de l'établissement responsable": (data) => data.uai,
+        "Url du responsable": (data) => `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/gestionnaire/${data.siret}`,
         "Raison sociale de l’organisme responsable": (data) => data.raison_sociale,
         "Email de contact de l’organisme responsable": (data) => data.email,
         "Académie de l’organisme formateur": (data) => data.etablissements?.academie?.nom,
+        "Siret de l'établissement formateur": (data) => data.etablissements?.siret,
         "Uai de l'établissement formateur": (data) => data.etablissements?.uai,
+        "Url du formateur": (data) =>
+          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/gestionnaire/${data.siret}/formateur/${data.etablissements?.uai}`,
         "Raison sociale de l’établissement formateur": async (data) =>
           (
             await getFormateur(data.etablissements?.uai)
@@ -243,6 +248,10 @@ async function download(output, options = {}) {
               return "⚠️ Etat inconnu";
             }
           }
+        },
+        "Dernière action [libellé technique]": async (data) => {
+          const formateur = await getFormateur(data.etablissements.uai);
+          return formateur.histories?.[formateur.histories.length - 1]?.action;
         },
         // Vœux: (data) => ouiNon(data.etablissements?.voeux_date),
         // "Nombre de vœux": async (data) =>
