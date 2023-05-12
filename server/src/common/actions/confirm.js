@@ -42,10 +42,10 @@ async function confirm(username, email, options = {}) {
 
   switch (user.type) {
     case UserType.GESTIONNAIRE:
-      await saveAccountConfirmedAsGestionnaire({ ...user, email });
+      await saveAccountConfirmedAsGestionnaire({ siret: user.username, email });
       break;
     case UserType.FORMATEUR:
-      await saveAccountConfirmedAsFormateur({ ...user, email });
+      await saveAccountConfirmedAsFormateur({ uai: user.username, email });
       break;
     default:
       break;
