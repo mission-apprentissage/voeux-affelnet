@@ -4,7 +4,8 @@ export const FormateurLibelle = ({ formateur }) => {
   if (!formateur) return <></>;
   return (
     <Text display={"inline"}>
-      {formateur.raison_sociale ?? "Raison sociale inconnue"} ({formateur.libelle_ville ?? "Ville inconnue"})
+      {formateur.raison_sociale ?? "Raison sociale inconnue"}, {formateur.libelle_ville ?? "Ville inconnue"} (UAI :{" "}
+      {formateur.uai ?? "Inconnu"})
     </Text>
   );
 };
