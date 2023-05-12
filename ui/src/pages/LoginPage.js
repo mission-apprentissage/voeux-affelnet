@@ -2,6 +2,11 @@ import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Alert,
   Box,
   Button,
@@ -87,33 +92,47 @@ function LoginPage() {
           <Box>
             <Text mb={4}>
               <strong>
-                Le service de transmission des listes de candidats aux organismes de formation en apprentissage est
-                actuellement fermé.
+                Un courriel diffusé aux organismes de formation en apprentissage responsables des offres va être diffusé
+                dans la journée du 12 mai. Ce courriel permet aux destinataires de confirmer l'adresse de contact, puis
+                d'activer leur compte pour accéder au service.
               </strong>
             </Text>
-            <Text mb={4}>En 2023, la transmission des listes s’effectuera en trois temps :</Text>
-            <Text mb={4}>
-              <UnorderedList>
-                <ListItem>
-                  Mi-mai : une première campagne sera diffusée par courriel pour identifier les directeurs d’organismes
-                  responsables, confirmer l’adresse email de réception, créer le mot de passe de connexion (les mots de
-                  passe créés en 2022 ne seront pas utilisables).
-                </ListItem>
-                <ListItem>
-                  Semaine du 5 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
-                </ListItem>
-                <ListItem>
-                  Semaine du 3 juillet : diffusion des listes mises à jour. Une seule mise à jour sera diffusée (contre
-                  deux en 2022).
-                </ListItem>
-              </UnorderedList>
-            </Text>
+
             <Text mb={4}>
               Pour toute question, vous pouvez contacter l’équipe de diffusion par courriel :{" "}
               <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                 {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
               </Link>
             </Text>
+
+            <Accordion defaultIndex={[]} allowToggle>
+              <AccordionItem mb={0}>
+                <h2>
+                  <AccordionButton>
+                    <Box as="span" flex="1" textAlign="left">
+                      Planning de diffusion
+                    </Box>
+                    <AccordionIcon />
+                  </AccordionButton>
+                </h2>
+                <AccordionPanel pb={4}>
+                  <Text mb={4}>En 2023, la transmission des listes s’effectuera en trois temps :</Text>
+                  <Text mb={4}>
+                    <UnorderedList>
+                      <ListItem>
+                        Mi-mai : une première campagne sera diffusée par courriel pour identifier les directeurs
+                        d’organismes responsables, confirmer l’adresse email de réception, créer le mot de passe de
+                        connexion (les mots de passe créés en 2022 ne seront pas utilisables).
+                      </ListItem>
+                      <ListItem>
+                        Semaine du 5 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
+                      </ListItem>
+                      <ListItem>Semaine du 3 juillet : diffusion des listes mises à jour.</ListItem>
+                    </UnorderedList>
+                  </Text>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
           </Box>
         </Alert>
 
