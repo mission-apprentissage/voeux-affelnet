@@ -35,6 +35,8 @@ async function sendActivationEmails(sendEmail, options = {}) {
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
+      console.log({ user });
+
       const templateName =
         user.isAdmin && user.academie?.code
           ? `activation_academie`
@@ -42,15 +44,18 @@ async function sendActivationEmails(sendEmail, options = {}) {
       stats.total++;
 
       if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+        const gestionnaire = await Gestionnaire.findOne({
+          "etablissements.uai": user.username,
+          "etablissements.diffusionAutorisee": true,
+        });
+
+        if (!gestionnaire) {
+          return;
+        }
 
         const etablissement = gestionnaire.etablissements?.find(
           (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
         );
-
-        if (!etablissement) {
-          return;
-        }
 
         user.email = etablissement?.email;
       }
