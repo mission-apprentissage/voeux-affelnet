@@ -90,7 +90,7 @@ async function download(output, options = {}) {
         "Raison sociale de l’organisme responsable": (data) => data.raison_sociale,
         "Email de contact de l’organisme responsable": (data) => data.email,
         "Académie de l’organisme formateur": (data) => data.etablissements?.academie?.nom,
-        "Siret de l'établissement formateur": (data) => data.etablissements?.siret,
+        "Siret de l'établissement formateur": async (data) => (await getFormateur(data.etablissements?.uai))?.siret,
         "Uai de l'établissement formateur": (data) => data.etablissements?.uai,
         "Url du formateur": (data) =>
           `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/gestionnaire/${data.siret}/formateur/${data.etablissements?.uai}`,
