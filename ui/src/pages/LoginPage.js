@@ -88,55 +88,7 @@ function LoginPage() {
           {title}
         </Heading>
 
-        <Alert mt={8}>
-          <Box>
-            <Text mb={4}>
-              <strong>
-                Un courriel diffusé aux organismes de formation en apprentissage responsables des offres va être diffusé
-                dans la journée du 12 mai. Ce courriel permet aux destinataires de confirmer l'adresse de contact, puis
-                d'activer leur compte pour accéder au service.
-              </strong>
-            </Text>
-
-            <Text mb={4}>
-              Pour toute question, vous pouvez contacter l’équipe de diffusion par courriel :{" "}
-              <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
-              </Link>
-            </Text>
-
-            <Accordion defaultIndex={[]} allowToggle>
-              <AccordionItem mb={0}>
-                <h2>
-                  <AccordionButton>
-                    <Box as="span" flex="1" textAlign="left">
-                      Planning de diffusion
-                    </Box>
-                    <AccordionIcon />
-                  </AccordionButton>
-                </h2>
-                <AccordionPanel pb={4}>
-                  <Text mb={4}>En 2023, la transmission des listes s’effectuera en trois temps :</Text>
-                  <Text mb={4}>
-                    <UnorderedList>
-                      <ListItem>
-                        Mi-mai : une première campagne sera diffusée par courriel pour identifier les directeurs
-                        d’organismes responsables, confirmer l’adresse email de réception, créer le mot de passe de
-                        connexion (les mots de passe créés en 2022 ne seront pas utilisables).
-                      </ListItem>
-                      <ListItem>
-                        Semaine du 5 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
-                      </ListItem>
-                      <ListItem>Semaine du 3 juillet : diffusion des listes mises à jour.</ListItem>
-                    </UnorderedList>
-                  </Text>
-                </AccordionPanel>
-              </AccordionItem>
-            </Accordion>
-          </Box>
-        </Alert>
-
-        <Box mt={8}>
+        <Box mb={8}>
           <Formik
             initialValues={{
               username: username ?? "",
@@ -206,20 +158,72 @@ function LoginPage() {
               );
             }}
           </Formik>
+        </Box>
+        <Box mb={8}>
+          {alreadyActivated ? (
+            <Alert status="info">
+              <Text mb={4}>
+                Besoin d'aide ? Prenez contact avec un administrateur à l'adresse mail{" "}
+                <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                  {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                </Link>{" "}
+                en précisant votre identifiant ({username})
+              </Text>
+            </Alert>
+          ) : (
+            <Alert display={"flex"} flexDirection={"column"}>
+              <Text mb={4}>
+                <strong>
+                  Les mots de passe utilisés en 2022 ne sont plus valables, de nouveaux comptes doivent être créés. Des
+                  courriels ont été diffusés aux organismes de formation en apprentissage les 12 et 15 mai, pour
+                  permettre de créer leur compte et définir leur mot de passe de connexion. Seuls les organismes
+                  responsables des offres sont destinataires de ces première correspondances.
+                </strong>
+              </Text>
 
-          <Box mt={8}>
-            {alreadyActivated && (
-              <Alert status="info">
-                <p>
-                  Besoin d'aide ? Prenez contact avec un administrateur à l'adresse mail{" "}
-                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
-                  </Link>{" "}
-                  en précisant votre identifiant ({username})
-                </p>
-              </Alert>
-            )}
-          </Box>
+              <Text mb={4}>
+                Pour toute question, vous pouvez consulter notre{" "}
+                <Link variant="action" href={"/support"}>
+                  page support
+                </Link>
+                , ou contacter l’équipe de diffusion par courriel :{" "}
+                <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                  {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                </Link>
+              </Text>
+
+              <Box>
+                <Accordion defaultIndex={[]} allowToggle>
+                  <AccordionItem mb={0}>
+                    <h2>
+                      <AccordionButton>
+                        <Box as="span" flex="1" textAlign="left">
+                          Planning de diffusion
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel pb={4}>
+                      <Text mb={4}>En 2023, la transmission des listes s’effectuera en trois temps :</Text>
+                      <Text mb={4}>
+                        <UnorderedList>
+                          <ListItem>
+                            Mi-mai : une première campagne sera diffusée par courriel pour identifier les directeurs
+                            d’organismes responsables, confirmer l’adresse email de réception, créer le mot de passe de
+                            connexion (les mots de passe créés en 2022 ne seront pas utilisables).
+                          </ListItem>
+                          <ListItem>
+                            Semaine du 5 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
+                          </ListItem>
+                          <ListItem>Semaine du 3 juillet : diffusion des listes mises à jour.</ListItem>
+                        </UnorderedList>
+                      </Text>
+                    </AccordionPanel>
+                  </AccordionItem>
+                </Accordion>
+              </Box>
+            </Alert>
+          )}
         </Box>
       </Box>
     </Center>

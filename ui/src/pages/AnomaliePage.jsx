@@ -35,7 +35,7 @@ export const AnomaliePage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                Le site m’indique m’avoir envoyé un courriel de notification mais je ne l’ai pas reçu.
+                <strong>Le site m’indique m’avoir envoyé un courriel de notification mais je ne l’ai pas reçu.</strong>
               </Box>
               <AccordionIcon />
             </AccordionButton>
@@ -70,8 +70,11 @@ export const AnomaliePage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                Je n'ai pas accès aux listes de tous les organismes formateurs dont je suis responsable. Ou à l’inverse,
-                j’ai accès à des organismes pour lesquels je ne devrais pas être identifié comme responsable.
+                <strong>
+                  Je n'ai pas accès aux listes de tous les organismes formateurs dont je suis responsable. Ou à
+                  l’inverse, j’ai accès à des organismes pour lesquels je ne devrais pas être identifié comme
+                  responsable.
+                </strong>
               </Box>
               <AccordionIcon />
             </AccordionButton>
@@ -92,10 +95,7 @@ export const AnomaliePage = () => {
               Si des relations sont manquantes :
               <UnorderedList>
                 <ListItem>
-                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                    Faites un signalement à l’équipe en charge de la diffusion des listes de candidats
-                  </Link>
-                  , en indiquant :
+                  Faites un signalement à l’équipe en charge de la diffusion des listes de candidats , en indiquant :
                   <UnorderedList>
                     <ListItem>
                       Le numéro Siret figurant dans nos correspondances (numéro Siret qui vous sert d’identifiant de
@@ -124,7 +124,7 @@ export const AnomaliePage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                Mon code UAI et/ou mon numéro de Siret est incorrect.
+                <strong>Mon code UAI et/ou mon numéro de Siret est incorrect.</strong>
               </Box>
               <AccordionIcon />
             </AccordionButton>
@@ -166,8 +166,10 @@ export const AnomaliePage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                D'autres informations (adresse de lieu de formation, raison sociale de l'organisme formateur et/ou
-                responsable, …) sont erronées.
+                <strong>
+                  D'autres informations (adresse de lieu de formation, raison sociale de l'organisme formateur et/ou
+                  responsable, …) sont erronées.
+                </strong>
               </Box>
               <AccordionIcon />
             </AccordionButton>
@@ -218,7 +220,7 @@ export const AnomaliePage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                J'ai un problème d'affichage ou de fonctionnement qui m'empêche d'utiliser le service.
+                <strong>J'ai un problème d'affichage ou de fonctionnement qui m'empêche d'utiliser le service.</strong>
               </Box>
               <AccordionIcon />
             </AccordionButton>
@@ -256,8 +258,10 @@ export const AnomaliePage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                J'ai besoin d'informations générales sur le planning et les modalités de diffusion des listes de
-                candidats.
+                <strong>
+                  J'ai besoin d'informations générales sur le planning et les modalités de diffusion des listes de
+                  candidats.
+                </strong>
               </Box>
               <AccordionIcon />
             </AccordionButton>
@@ -265,46 +269,60 @@ export const AnomaliePage = () => {
           <AccordionPanel pb={4}>
             <Text mb={4}>Le planning de diffusion des listes de candidats est le suivant : </Text>
 
-            <Text mb={4}>
-              Phase 1 : une première campagne courriel est diffusée en première quinzaine de mai, afin d'identifier les
-              directeurs d’organismes responsables, confirmer leur adresse email, et leur permettre de créer leur mot de
-              passe de connexion au service.
-            </Text>
-            <Text mb={4}>
-              L' arrêté du 17 juillet 2017 , au 7e alinéa de l’article 4, précise que seuls les directeurs des
-              organismes responsables des offres de formation sont habilités à recevoir les données transmises
-              mentionnées à l’article 3 de ce même arrêté. En 2023, un arrêté (à paraître) permet aux directeurs
-              d'organismes responsables de déléguer les droits de réception directe des listes de candidats à d'autres
-              personnes.
-            </Text>
+            <UnorderedList>
+              <ListItem>
+                <Text mb={4}>
+                  Phase 1 : une première campagne courriel est diffusée en première quinzaine de mai, afin d'identifier
+                  les directeurs d’organismes responsables, confirmer leur adresse email, et leur permettre de créer
+                  leur mot de passe de connexion au service.
+                </Text>
+                <Box mb={4}>
+                  <Text as="i">
+                    L' arrêté du 17 juillet 2017 , au 7e alinéa de l’article 4, précise que seuls les directeurs des
+                    organismes responsables des offres de formation sont habilités à recevoir les données transmises
+                    mentionnées à l’article 3 de ce même arrêté. En 2023, un arrêté (à paraître) permet aux directeurs
+                    d'organismes responsables de déléguer les droits de réception directe des listes de candidats à
+                    d'autres personnes.
+                  </Text>
+                </Box>
+              </ListItem>
+              <ListItem>
+                <Text mb={4}>
+                  Phase 1bis (optionnelle) : les directeurs d'organismes responsables activent, s’ils le souhaitent, des
+                  délégations de droits permettant à d'autres personnes d'accéder au service de téléchargement des
+                  listes pour les organismes formateurs. Chaque organisme formateur peut faire l'objet d'une délégation
+                  de droits distincte.
+                </Text>
+              </ListItem>
 
-            <Text mb={4}>
-              Phase 1bis (optionnelle) : les directeurs d'organismes responsables activent, s’ils le souhaitent, des
-              délégations de droits permettant à d'autres personnes d'accéder au service de téléchargement des listes
-              pour les organismes formateurs. Chaque organisme formateur peut faire l'objet d'une délégation de droits
-              distincte.
-            </Text>
+              <ListItem>
+                <Text mb={4}>
+                  Phase 2 : dans la semaine du 5 juin, diffusion par courriel des notifications de mise à disposition
+                  des listes de candidats. Cette diffusion est effectuée auprès des personnes habilitées (qui auront
+                  préalablement créé leur compte pour l’accès au service).
+                </Text>
+              </ListItem>
 
-            <Text mb={4}>
-              Phase 2 : dans la semaine du 5 juin, diffusion par courriel des notifications de mise à disposition des
-              listes de candidats. Cette diffusion est effectuée auprès des personnes habilitées (qui auront
-              préalablement créé leur compte pour l’accès au service).
-            </Text>
+              <ListItem>
+                <Text mb={4}>
+                  Phase 3 : dans la semaine du 3 juillet, diffusion par courriel des notifications de mise à jour des
+                  listes de candidats (le cas échéant). Une seule mise à jour sera diffusée en 2023, contre deux en
+                  2022. Les mises à jour peuvent correspondre à des suppressions, ajouts ou modifications de
+                  candidatures.
+                </Text>
+              </ListItem>
 
-            <Text mb={4}>
-              Phase 3 : dans la semaine du 3 juillet, diffusion par courriel des notifications de mise à jour des listes
-              de candidats (le cas échéant). Une seule mise à jour sera diffusée en 2023, contre deux en 2022. Les mises
-              à jour peuvent correspondre à des suppressions, ajouts ou modifications de candidatures.
-            </Text>
-
-            <Text mb={4}>
-              Pour toute autre question relative au planning et aux modalités de diffusion des listes de candidats, vous
-              pouvez{" "}
-              <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                adresser un courriel à l'équipe de diffusion
-              </Link>
-              , en indiquant vos numéros Siret et UAI.
-            </Text>
+              <ListItem>
+                <Text mb={4}>
+                  Pour toute autre question relative au planning et aux modalités de diffusion des listes de candidats,
+                  vous pouvez{" "}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                    adresser un courriel à l'équipe de diffusion
+                  </Link>
+                  , en indiquant vos numéros Siret et UAI.
+                </Text>
+              </ListItem>
+            </UnorderedList>
           </AccordionPanel>
         </AccordionItem>
 
@@ -312,7 +330,7 @@ export const AnomaliePage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                Autres
+                <strong>Autres</strong>
               </Box>
               <AccordionIcon />
             </AccordionButton>
