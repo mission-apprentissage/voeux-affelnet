@@ -41,7 +41,7 @@ async function download(output, options = {}) {
           type: "Gestionnaire",
           // ...(options.filter || {}),
           statut: { $ne: "non concerné" },
-          ...(options.academie
+          ...(options.academies
             ? {
                 $or: [
                   { "academie.code": { $in: options.academies } },

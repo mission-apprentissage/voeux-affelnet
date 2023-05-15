@@ -364,9 +364,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
         token: Joi.string(),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const academies = [academie];
       // return sendJsonStream(stream, res);
-      return download(asCsvResponse("export", res), { academies: academies ?? defaultAcademies });
+      return download(asCsvResponse("export", res), {
+        academies: academie ? [academie] : defaultAcademies.length ? defaultAcademies : null,
+      });
     })
   );
 
