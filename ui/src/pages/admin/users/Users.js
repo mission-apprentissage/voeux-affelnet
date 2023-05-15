@@ -145,7 +145,14 @@ export const Users = () => {
                           }}
                         >
                           {academies.map((academie) => (
-                            <option key={academie.code} value={academie.code}>
+                            <option
+                              key={academie.code}
+                              value={academie.code}
+                              disabled={
+                                self.academies?.length &&
+                                !self.academies.map((academie) => academie.code).includes(academie.code)
+                              }
+                            >
                               {academie.nom}
                             </option>
                           ))}

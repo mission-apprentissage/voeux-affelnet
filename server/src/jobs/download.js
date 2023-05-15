@@ -44,10 +44,10 @@ async function download(output, options = {}) {
           ...(options.academie
             ? {
                 $or: [
-                  { "academie.code": options.academie },
+                  { "academie.code": { $in: options.academies } },
                   {
                     etablissements: {
-                      $elemMatch: { "academie.code": options.academie },
+                      $elemMatch: { "academie.code": { $in: options.academies } },
                     },
                   },
                 ],
@@ -55,7 +55,7 @@ async function download(output, options = {}) {
             : {}),
         },
       },
-      ...(options.academie
+      ...(options.academies
         ? [
             {
               $addFields: {
@@ -63,7 +63,7 @@ async function download(output, options = {}) {
                   $filter: {
                     input: "$etablissements",
                     as: "etablissement",
-                    cond: { $eq: ["$$etablissement.academie.code", options.academie] },
+                    cond: { $in: ["$$etablissement.academie.code", options.academies] },
                   },
                 },
               },

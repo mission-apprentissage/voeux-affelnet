@@ -32,7 +32,7 @@ const { UserType } = require("../../common/constants/UserType");
 const { download } = require("../../jobs/download");
 
 const filterForAcademie = (etablissement, user) => {
-  return user.academie ? etablissement.academie?.code === user.academie?.code : true;
+  return user.academies ? user.academies.map((academie) => academie.code).includes(etablissement.academie?.code) : true;
 };
 
 const fillGestionnaire = async (gestionnaire, admin) => {
@@ -161,7 +161,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
     tryCatch(async (req, res) => {
       const { username } = req.user;
       const admin = await User.findOne({ username }).lean();
-      const defaultAcademie = admin?.academie?.code;
+      const defaultAcademies = admin?.academies?.map((academie) => academie.code);
 
       const { academie, text, type, page, items_par_page, sort } = await Joi.object({
         academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
@@ -206,10 +206,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
                         ]
                       : []),
 
-                    ...(defaultAcademie ?? academie
+                    ...(academie || !!defaultAcademies?.length
                       ? [
                           {
-                            $or: [{ "academie.code": defaultAcademie ?? academie }],
+                            $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
                           },
                         ]
                       : []),
@@ -242,14 +242,14 @@ module.exports = ({ sendEmail, resendEmail }) => {
                         ]
                       : []),
 
-                    ...(defaultAcademie ?? academie
+                    ...(academie || !!defaultAcademies?.length
                       ? [
                           {
                             $or: [
-                              { "academie.code": defaultAcademie ?? academie },
+                              { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
                               {
                                 etablissements: {
-                                  $elemMatch: { "academie.code": defaultAcademie ?? academie },
+                                  $elemMatch: { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
                                 },
                               },
                             ],
@@ -356,7 +356,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
     tryCatch(async (req, res) => {
       const { username } = req.user;
       const admin = await User.findOne({ username }).lean();
-      const defaultAcademie = admin?.academie?.code;
+      const defaultAcademies = admin?.academies?.map((academie) => academie.code);
 
       const { academie /*, text*/ } = await Joi.object({
         academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
@@ -364,8 +364,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
         token: Joi.string(),
       }).validateAsync(req.query, { abortEarly: false });
 
+      const academies = [academie];
       // return sendJsonStream(stream, res);
-      return download(asCsvResponse("export", res), { academie: defaultAcademie ?? academie });
+      return download(asCsvResponse("export", res), { academies: academies ?? defaultAcademies });
     })
   );
 

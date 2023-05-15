@@ -76,6 +76,10 @@ const schema = new Schema({
     ],
   },
 
+  academie: {
+    type: academieSchema,
+  },
+
   histories: {
     default: [],
     type: [historySchema],
