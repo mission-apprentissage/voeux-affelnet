@@ -3,6 +3,7 @@ module.exports = {
   Gestionnaire: require("./Gestionnaire"),
   Csaio: require("./Csaio"),
   Formateur: require("./Formateur"),
+  Academie: require("./Academie"),
   Formation: require("./Formation"),
   Voeu: require("./Voeu"),
   Mef: require("./Mef"),
