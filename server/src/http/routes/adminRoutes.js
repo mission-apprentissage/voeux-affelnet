@@ -366,7 +366,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       // return sendJsonStream(stream, res);
       return download(asCsvResponse("export", res), {
-        academies: academie ? [academie] : defaultAcademies.length ? defaultAcademies : null,
+        academies: academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null,
       });
     })
   );
