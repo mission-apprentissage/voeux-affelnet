@@ -1,0 +1,36 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text> Madame, Monsieur, </mj-text>
+          <mj-text>
+            Une délégation de droit au téléchargement des listes de candidats ayant exprimé des vœux sur le service en
+            ligne affectation vous a été accordée pour l'établissement <%= data.formateur.uai %>.
+          </mj-text>
+
+          <mj-text>
+            Dès réception de ce courriel, veuillez confirmer ou modifier votre adresse email en cliquant sur le bouton
+            ci-dessous.
+          </mj-text>
+
+          <mj-button
+            href="<%= utils.getPublicUrl(`/confirmation?actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            Confirmer ou modifier votre adresse courriel
+          </mj-button>
+
+          <mj-text> Votre identifiant de connexion : <strong><%= data.formateur.username %></strong> </mj-text>
+
+          <%- include('./common/procedure.ejs'); %> <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>

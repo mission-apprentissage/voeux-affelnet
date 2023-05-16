@@ -1,11 +1,13 @@
+const { UserStatut } = require("../common/constants/UserStatut");
+const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
-const { Cfa } = require("../common/model");
+const { User } = require("../common/model");
 const { every } = require("lodash");
 
-function allFilesAsAlreadyBeenDownloaded(cfa) {
-  return !!cfa.voeux_telechargements.find((download) => {
+function allFilesAsAlreadyBeenDownloaded(gestionnaire) {
+  return !!gestionnaire.voeux_telechargements.find((download) => {
     return every(
-      cfa.etablissements.map((e) => e.voeux_date),
+      gestionnaire.etablissements.map((e) => e.voeux_date),
       (date) => download.date > date
     );
   });
@@ -13,33 +15,43 @@ function allFilesAsAlreadyBeenDownloaded(cfa) {
 
 async function sendNotificationEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
-  const templateName = "notification";
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+
   const query = {
-    unsubscribe: false,
-    statut: "activé",
-    "etablissements.voeux_date": { $exists: true },
-    "emails.templateName": { $ne: templateName },
     ...(options.username ? { username: options.username } : {}),
+    ...(options.force
+      ? {}
+      : {
+          unsubscribe: false,
+          statut: UserStatut.ACTIVE,
+
+          "etablissements.voeux_date": { $exists: true },
+          "emails.templateName": { $not: { $regex: "^notification_.*$" } },
+
+          $or: [{ type: UserType.GESTIONNAIRE }, { type: UserType.FORMATEUR }],
+        }),
   };
 
-  await Cfa.find(query)
+  await User.find(query)
     .lean()
+    .limit(limit)
     .cursor()
-    .eachAsync(async (cfa) => {
-      if (allFilesAsAlreadyBeenDownloaded(cfa)) {
+    .eachAsync(async (user) => {
+      if (allFilesAsAlreadyBeenDownloaded(user)) {
         return;
       }
 
+      const templateName = `notification_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
+      stats.total++;
+
       try {
-        stats.total++;
         if (limit > stats.sent) {
-          logger.info(`Sending ${templateName} to user ${cfa.username}...`);
-          await sendEmail(cfa, templateName);
+          logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
+          await sendEmail(user, templateName);
           stats.sent++;
         }
       } catch (e) {
-        logger.error(`Unable to sent email to ${cfa.username}`, e);
+        logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);
         stats.failed++;
       }
     });

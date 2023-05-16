@@ -10,13 +10,17 @@ async function changeEmail(username, newEmail, options = {}) {
       $set: {
         email: newEmail,
       },
-      $push: {
-        anciens_emails: {
-          email: previous.email,
-          modification_date: new Date(),
-          ...(auteur ? { auteur } : {}),
-        },
-      },
+      ...(previous.email
+        ? {
+            $push: {
+              anciens_emails: {
+                email: previous.email,
+                modification_date: new Date(),
+                ...(auteur ? { auteur } : {}),
+              },
+            },
+          }
+        : {}),
     },
     { new: true }
   ).lean();

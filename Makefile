@@ -1,6 +1,6 @@
 install: hooks
-	yarn --cwd server install --frozen-lockfile
-	yarn --cwd ui install --frozen-lockfile
+	cd server && yarn install --frozen-lockfile
+	cd ui && yarn install --frozen-lockfile
 
 start:
 	docker-compose up --build --force-recreate
@@ -19,9 +19,9 @@ hooks:
 	chmod +x misc/git-hooks/*
 
 validate:
-	yarn --cwd server lint
-	yarn --cwd server test
+	cd server && yarn lint
+	cd server && yarn test
 
 ci: install
-	yarn --cwd server coverage
-	yarn --cwd server lint
+	cd server && yarn coverage
+	cd server && yarn lint

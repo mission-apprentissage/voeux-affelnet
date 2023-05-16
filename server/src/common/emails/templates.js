@@ -5,84 +5,131 @@ function getTemplateFile(name) {
   return path.join(__dirname, `${name}.mjml.ejs`);
 }
 
+const voeux_email = process.env.VOEUX_AFFELNET_EMAIL;
+
 module.exports = {
-  confirmation: (cfa, token, options = {}) => {
+  confirmation_gestionnaire: (gestionnaire, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2022 (Siret : ${cfa.siret})`,
-      templateFile: getTemplateFile("confirmation"),
+      subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (Siret : ${gestionnaire.siret})`,
+      templateFile: getTemplateFile("confirmation_gestionnaire"),
       data: {
-        cfa,
+        gestionnaire,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(gestionnaire.username),
+        voeux_email,
       },
     };
   },
-  confirmation_voeux: (cfa, token, options = {}) => {
+  confirmation_formateur: (formateur, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet apprentissage – Information requise pour la transmission des vœux 2022 (Siret : ${cfa.siret})`,
-      templateFile: getTemplateFile("confirmation_voeux"),
+      subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (UAI : ${formateur.uai})`,
+      templateFile: getTemplateFile("confirmation_formateur"),
       data: {
-        cfa,
+        formateur,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(formateur.username),
+        voeux_email,
       },
     };
   },
-  confirmation_accepted: (cfa) => {
+  confirmed: (user) => {
     return {
-      subject: `Vœux Affelnet : l'adresse du directeur de l'établissement a bien été enregistrée`,
-      templateFile: getTemplateFile("confirmation_accepted"),
+      subject: `Affelnet 2023 – Confirmation de votre adresse courriel`,
+      templateFile: getTemplateFile("confirmed"),
       data: {
-        cfa,
+        user,
+        voeux_email,
       },
     };
   },
   activation_user: (user, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Activation de votre compte`,
+      subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte administrateur`,
       templateFile: getTemplateFile("activation_user"),
       data: {
         user,
         token,
         actionToken: createActionToken(user.username),
+        voeux_email,
       },
     };
   },
-  activation_cfa: (cfa, token, options = {}) => {
+  activation_academie: (user, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Des vœux Affelnet sont téléchargeables (Siret : ${cfa.siret})`,
-      templateFile: getTemplateFile("activation_cfa"),
+      subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte académique`,
+      templateFile: getTemplateFile("activation_academie"),
       data: {
-        cfa,
+        user,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(user.username),
+        voeux_email,
       },
     };
   },
-  activation_csaio: (user, token, options = {}) => {
+  activation_gestionnaire: (gestionnaire, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+    return {
+      subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (Siret : ${gestionnaire.siret})`,
+      templateFile: getTemplateFile("activation_gestionnaire"),
+      data: {
+        gestionnaire,
+        token,
+        actionToken: createActionToken(gestionnaire.username),
+        voeux_email,
+      },
+    };
+  },
+  activation_formateur: (formateur, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+    return {
+      subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${formateur.uai})`,
+      templateFile: getTemplateFile("activation_formateur"),
+      data: {
+        formateur,
+        token,
+        actionToken: createActionToken(formateur.username),
+        voeux_email,
+      },
+    };
+  },
+  activation_csaio: (csaio, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
       subject: `${prefix}Activation de votre compte`,
       templateFile: getTemplateFile("activation_csaio"),
       data: {
-        user,
+        csaio,
         token,
-        actionToken: createActionToken(user.username),
+        actionToken: createActionToken(csaio.username),
+        voeux_email,
       },
     };
   },
-  notification: (cfa, token) => {
+  notification_gestionnaire: (gestionnaire, token) => {
     return {
-      subject: `De nouveaux vœux Affelnet sont téléchargeables`,
-      templateFile: getTemplateFile("notification"),
+      subject: `Affelnet 2023 – Des listes de candidats sont téléchargeables (Siret : ${gestionnaire.siret})`,
+      templateFile: getTemplateFile("notification_gestionnaire"),
       data: {
-        cfa,
+        gestionnaire,
         token,
-        actionToken: createActionToken(cfa.username),
+        actionToken: createActionToken(gestionnaire.username),
+        voeux_email,
+      },
+    };
+  },
+  notification_formateur: (formateur, token) => {
+    return {
+      subject: `Affelnet 2023 – Des listes de candidats sont téléchargeables (UAI : ${formateur.uai})`,
+      templateFile: getTemplateFile("notification_formateur"),
+      data: {
+        formateur,
+        token,
+        actionToken: createActionToken(formateur.username),
+        voeux_email,
       },
     };
   },
@@ -94,6 +141,7 @@ module.exports = {
         user,
         token,
         resetPasswordToken: createResetPasswordToken(user.username),
+        voeux_email,
       },
     };
   },

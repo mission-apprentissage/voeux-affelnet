@@ -1,4 +1,4 @@
-const { Cfa, Voeu, Ufa } = require("../common/model");
+const { Gestionnaire, Voeu, Formateur } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date } = require("../common/utils/csvUtils.js");
@@ -20,7 +20,7 @@ async function exportStatutVoeux(output, options = {}) {
   const etablissements = new Map();
   const columns = options.columns || {};
   await oleoduc(
-    Cfa.aggregate([
+    Gestionnaire.aggregate([
       {
         $match: {
           ...(options.filter || {}),
@@ -52,7 +52,7 @@ async function exportStatutVoeux(output, options = {}) {
           }
         },
         "Type de l'établissement d'accueil": async (data) => {
-          const ufa = await Ufa.findOne({ uai: data.etablissements.uai });
+          const ufa = await Formateur.findOne({ uai: data.etablissements.uai });
 
           return ufa?.libelle_type_etablissement ?? "";
         },
@@ -70,7 +70,7 @@ async function exportStatutVoeux(output, options = {}) {
           return ouiNon(!!lastDownloadDate);
         },
         "Téléchargement effectué pour tous les établissements d’accueil liés ?": async (data) => {
-          const cfa = await Cfa.find({ _id: data._id });
+          const cfa = await Gestionnaire.find({ _id: data._id });
           return ouiNon(areTelechargementsTotal(cfa.etablissements, data.voeux_telechargements));
         },
         "Date du dernier téléchargement": (data) => {

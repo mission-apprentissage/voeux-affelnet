@@ -16,7 +16,7 @@ module.exports = () => {
     "/api/stats/:jobName",
     tryCatch(async (req, res) => {
       const { jobName } = await Joi.object({
-        jobName: Joi.string().valid("computeStats", "importCfas", "importVoeux").required(),
+        jobName: Joi.string().valid("computeStats", "importGestionnaires", "importVoeux").required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const stream = oleoduc(

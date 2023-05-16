@@ -18,9 +18,12 @@ class RateLimitedApi {
   }
 
   async execute(callback) {
-    return this.rateLimiter.execute(callback).catch((e) => {
+    const response = this.rateLimiter.execute(callback).catch((e) => {
+      logger.error(e);
       throw new ApiError(this.name, e.message, e.code || e.response?.status, { cause: e });
     });
+
+    return response;
   }
 }
 

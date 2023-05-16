@@ -1,5 +1,7 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
+const { UserStatut } = require("../constants/UserStatut");
+const { academieSchema } = require("./schemas/academieSchema");
 
 const User = model(
   "User",
@@ -13,12 +15,13 @@ const User = model(
       },
       password: {
         type: String,
+        select: false,
       },
       statut: {
         type: String,
         index: true,
         default: "en attente",
-        enum: ["en attente", "confirmé", "activé", "non concerné"],
+        enum: [UserStatut.EN_ATTENTE, UserStatut.CONFIRME, UserStatut.ACTIVE, UserStatut.NON_CONCERNE],
       },
       isAdmin: {
         type: Boolean,
@@ -86,6 +89,10 @@ const User = model(
             },
           }),
         ],
+      },
+
+      academie: {
+        type: academieSchema,
       },
       _meta: {
         default: {},

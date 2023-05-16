@@ -36,7 +36,7 @@ const handleResponse = async (path, response) => {
   return json;
 };
 
-const getHeaders = () => {
+export const getHeaders = () => {
   const auth = getAuth();
 
   return {

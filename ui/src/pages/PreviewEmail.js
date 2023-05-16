@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import Centered from "../common/Centered";
+import Centered from "../common/components/Centered";
 import styled from "styled-components";
 
 const Preview = styled.iframe`

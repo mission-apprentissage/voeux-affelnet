@@ -1,0 +1,60 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text> Madame, Monsieur, </mj-text>
+
+          <mj-text>
+            Le service de diffusion des listes de candidats aux offres de formations en apprentissage diffusées sur le
+            service en ligne affectation, développé en 2022 par la mission interministérielle apprentissage, a été
+            transféré pour 2023 à la Direction du numérique pour l’éducation.
+          </mj-text>
+
+          <mj-text>
+            Le service a évolué en 2023 pour permettre :
+            <ul>
+              <li>
+                Aux directeurs des organismes responsables des offres de déléguer, s’ils le souhaitent, le droit de
+                réception des listes de candidats à d’autres personnes.
+              </li>
+              <li>
+                Aux personnes chargées du suivi de ces diffusions au sein des académies d’accéder à une console
+                d’administration et de suivi des téléchargements des listes par les organismes.
+              </li>
+            </ul>
+          </mj-text>
+
+          <mj-text>
+            Vous recevez ce courriel car vous êtes identifié comme correspondant Affelnet au sein de votre académie. Si
+            vous avez un rôle de suivi de diffusion des listes de candidats, veuillez activer votre compte en cliquant
+            sur le bouton ce-dessous.
+          </mj-text>
+
+          <mj-text> Votre identifiant de connexion : <strong><%= data.user.username %></strong> </mj-text>
+
+          <mj-text>
+            Votre compte vous donnera accès à la liste des organismes responsables et/ou formateurs porteurs d’une offre
+            de formation diffusée sur le service en ligne affectation en 2023. Vous aurez la possibilité d’éditer si
+            besoin les adresses courriel des personnes habilitées au sein des organismes.
+          </mj-text>
+
+          <mj-button
+            href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            Activer mon compte
+          </mj-button>
+
+          <%- include('./common/procedure.ejs'); %> <%- include('./common/support.ejs'); %> <%-
+          include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>

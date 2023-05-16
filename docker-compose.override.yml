@@ -2,6 +2,7 @@
 version: "2.4"
 services:
   reverse_proxy:
+    restart: "no"
     volumes:
       - .local/nginx:/data
       - ./reverse_proxy/optional/includes:/etc/nginx/templates/includes/optional
@@ -9,10 +10,12 @@ services:
       - SERVERNAME=localhost
 
   ui:
+    restart: "no"
     build:
       dockerfile: Dockerfile.dev
       args:
         - VOEUX_AFFELNET_ENV=dev
+        - VOEUX_AFFELNET_EMAIL=voeux-affelnet@apprentissage.beta.gouv.fr
     mem_limit: 1g
     stdin_open: true
     environment:
@@ -21,36 +24,46 @@ services:
       - ./ui:/app #Allows source folders to be watched
 
   server:
-    command: ["yarn", "debug"]
+    restart: "no"
+    build:
+      context: server
+      dockerfile: Dockerfile.dev
     ports:
       - "127.0.0.1:9229:9229" #Allows remote debugging
     volumes:
-      - ./server/src:/app/src #Allows source folders to be watched
-      - .local/server:/data
-      - .local/dne:/dne
+      - ./server:/app:z #Allows source folders to be watched
+      - ./.local/server:/data:z
+      - ./.local/dne:/dne:z
     environment:
+      - VOEUX_AFFELNET_PUBLIC_URL=http://localhost
       - VOEUX_AFFELNET_ENV=dev
       - VOEUX_AFFELNET_AUTH_PASSWORD_HASH_ROUNDS=1000
       - VOEUX_AFFELNET_LOG_LEVEL=debug
       - VOEUX_AFFELNET_SMTP_HOST=smtp
       - VOEUX_AFFELNET_SMTP_PORT=1025
+    env_file: ./server/.env
     depends_on:
       - smtp
 
   mongodb:
+    restart: "no"
     ports:
       - "127.0.0.1:27017:27017"
     volumes:
-      - .local/mongodb/db:/data/db
-      - .local/mongodb/configdb:/data/configdb
+      - .local/mongodb/db:/data/db:z
+      - .local/mongodb/configdb:/data/configdb:z
 
   smtp:
+    restart: "no"
     image: mailhog/mailhog
     container_name: voeux_affelnet_smtp
     mem_limit: 128m
+    volumes:
+      - .local/mailhog:/data
     ports:
       - 1025:1025
     networks:
       - voeux_affelnet_network
     environment:
       - MH_UI_WEB_PATH=smtp
+    # entrypoint: MailHog -auth-file=/data/auth.file

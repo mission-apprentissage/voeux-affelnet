@@ -101,5 +101,14 @@ module.exports = () => {
         }
       };
     },
+    ensureIsOneOf: (types) => {
+      return (req, res, next) => {
+        if (!types.includes(req.user.type)) {
+          next(Boom.forbidden());
+        } else {
+          next();
+        }
+      };
+    },
   };
 };

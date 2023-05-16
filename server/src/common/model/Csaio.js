@@ -1,6 +1,7 @@
 const { Schema } = require("mongoose");
 const User = require("./User");
 const { academieSchema } = require("./schemas/academieSchema.js");
+const { UserType } = require("../constants/UserType");
 
 const schema = new Schema({
   academies: {
@@ -8,6 +9,6 @@ const schema = new Schema({
   },
 });
 
-const Csaio = User.discriminator("Csaio", schema);
+const Csaio = User.discriminator(UserType.CSAIO, schema);
 
 module.exports = Csaio;

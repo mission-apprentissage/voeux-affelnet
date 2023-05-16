@@ -13,6 +13,9 @@ module.exports = ({ sendEmail }) => {
   const { checkResetPasswordToken } = authMiddleware();
   const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 
+  /**
+   * Envoi un mail de récupération de mot de passe
+   */
   router.post(
     "/api/password/forgotten-password",
     tryCatch(async (req, res) => {
@@ -22,6 +25,7 @@ module.exports = ({ sendEmail }) => {
 
       const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
       const user = await getUser(fixed?.replace(/\s/g, "")?.trim());
+      // TODO : à réactiver !
       if (!user || !user.password) {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }
@@ -31,6 +35,9 @@ module.exports = ({ sendEmail }) => {
     })
   );
 
+  /**
+   * Permet la réinitialisation du mot de passe
+   */
   router.post(
     "/api/password/reset-password",
     checkResetPasswordToken(),

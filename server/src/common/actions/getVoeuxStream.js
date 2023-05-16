@@ -1,9 +1,9 @@
 const { Voeu } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
 
-function getVoeuxStream(uai) {
+function getVoeuxStream({ siret, uai }) {
   return compose(
-    Voeu.find({ "etablissement_accueil.uai": uai }).lean().cursor(),
+    Voeu.find({ "etablissement_gestionnaire.siret": siret, "etablissement_accueil.uai": uai }).lean().cursor(),
     transformData((voeu) => {
       return {
         INE_APPRENANT: voeu.apprenant.ine,

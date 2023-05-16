@@ -166,6 +166,10 @@ module.exports = {
   mockCatalogueApi(callback) {
     const client = createNock(CatalogueApi.baseApiUrl);
     callback(client, {
+      login() {
+        return { headers: { Cookie: "test" } };
+      },
+
       formations(array = [{}]) {
         return {
           formations: array.map((custom) => {

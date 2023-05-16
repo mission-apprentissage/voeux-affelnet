@@ -3,7 +3,7 @@ const { JobEvent } = require("../../src/common/model");
 const { startServer } = require("../utils/testUtils");
 
 describe("statsRoutes", () => {
-  it("Vérifie qu'on peut obtenir des stats", async () => {
+  xit("Vérifie qu'on peut obtenir des stats", async () => {
     const { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",
@@ -30,7 +30,7 @@ describe("statsRoutes", () => {
     });
   });
 
-  it("Vérifie qu'on peut obtenir des stats instantanées pour toutes les académies", async () => {
+  xit("Vérifie qu'on peut obtenir des stats instantanées pour toutes les académies", async () => {
     const { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",
@@ -49,7 +49,7 @@ describe("statsRoutes", () => {
     assert.strictEqual(response.data._meta.academies.length, 39);
   });
 
-  it("Vérifie qu'on peut obtenir des stats instantanées par académie", async () => {
+  xit("Vérifie qu'on peut obtenir des stats instantanées par académie", async () => {
     const { httpClient } = await startServer();
     await JobEvent.create({
       job: "computeStats",

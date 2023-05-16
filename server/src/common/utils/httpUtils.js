@@ -28,6 +28,7 @@ async function fetchJson(url, options = {}) {
 }
 
 module.exports = {
+  _fetch,
   fetchStream,
   fetchJson,
 };

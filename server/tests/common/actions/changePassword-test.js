@@ -11,10 +11,12 @@ describe("changePassword", () => {
       email: "user@apprentissage.beta.gouv.fr",
     });
 
-    const user = await activateUser("user", "Password!123456");
-    await changePassword("user", "password");
+    await activateUser("user", "Password!123456");
+    const before = await User.findOne({ username: "user" }).select({ password: 1 });
 
-    const found = await User.findOne({ username: "user" });
-    assert.ok(found.password !== user.password);
+    await changePassword("user", "password");
+    const after = await User.findOne({ username: "user" }).select({ password: 1 });
+
+    assert.ok(after.password !== before.password);
   });
 });

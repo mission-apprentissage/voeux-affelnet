@@ -1,4 +1,4 @@
-const { Cfa, Voeu, Ufa } = require("../common/model");
+const { Gestionnaire, Voeu, Formateur } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon } = require("../common/utils/csvUtils.js");
@@ -7,12 +7,12 @@ const CatalogueApi = require("../common/api/CatalogueApi");
 async function exportVoeuxRecensement(output, options = {}) {
   const catalogueApi = new CatalogueApi();
   const columns = options.columns || {};
-  const cfa = await Cfa.findOne({ siret: "99999999999999" });
+  const cfa = await Gestionnaire.findOne({ siret: "99999999999999" });
 
   console.log(cfa);
 
   await oleoduc(
-    Ufa.find({ uai: { $in: cfa.etablissements?.map((e) => e.uai) ?? [] } }).cursor(),
+    Formateur.find({ uai: { $in: cfa.etablissements?.map((e) => e.uai) ?? [] } }).cursor(),
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {

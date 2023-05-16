@@ -1,7 +1,7 @@
-const { Cfa } = require("../model");
+const { Gestionnaire, Formateur } = require("../model");
 
-function markVoeuxAsDownloaded(siret, uai) {
-  return Cfa.updateOne(
+const markVoeuxAsDownloadedByGestionnaire = async (siret, uai) => {
+  await Gestionnaire.updateOne(
     { siret },
     {
       $push: {
@@ -11,7 +11,22 @@ function markVoeuxAsDownloaded(siret, uai) {
         },
       },
     }
-  ).exec();
-}
+  );
+};
 
-module.exports = { markVoeuxAsDownloaded };
+const markVoeuxAsDownloadedByFormateur = async (siret, uai) => {
+  console.log("markVoeuxAsDownloadedByFormateur", { siret, uai });
+  await Formateur.updateOne(
+    { uai },
+    {
+      $push: {
+        voeux_telechargements: {
+          $each: [{ siret, date: new Date() }],
+          $slice: 500,
+        },
+      },
+    }
+  );
+};
+
+module.exports = { markVoeuxAsDownloadedByGestionnaire, markVoeuxAsDownloadedByFormateur };

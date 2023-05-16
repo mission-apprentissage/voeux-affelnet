@@ -5,50 +5,66 @@ const { confirm } = require("../../common/actions/confirm");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const sendActivationEmails = require("../../jobs/sendActivationEmails");
-const { User } = require("../../common/model");
+const resendActivationEmails = require("../../jobs/resendActivationEmails");
+const { User, Gestionnaire } = require("../../common/model");
 
-module.exports = ({ sendEmail }) => {
+module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkActionToken, ensureIs } = authMiddleware();
+  const { checkActionToken, ensureIsOneOf } = authMiddleware();
 
   router.get(
     "/api/confirmation/status",
     checkActionToken(),
-    ensureIs("Cfa"),
+    ensureIsOneOf(["Gestionnaire", "Formateur"]),
     tryCatch(async (req, res) => {
-      const cfa = req.user;
+      const user = req.user;
 
       await User.findOneAndUpdate(
-        { username: cfa.username },
+        { username: user.username },
         {
           $inc: { "_meta.countConfirmationLinkClick": 1 },
         }
       );
 
-      if (cfa.statut !== "en attente") {
-        throw Boom.badRequest(`Une confirmation a déjà été enregistrée pour le cfa ${cfa.siret}`);
+      if (user.statut !== "en attente") {
+        throw Boom.badRequest(`Une confirmation a déjà été enregistrée pour le compte ${user.username}`);
       }
 
-      return res.json({ email: cfa.email });
+      if (user.type === "Formateur") {
+        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+
+        const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === user.username);
+
+        if (!etablissement.diffusionAutorisee) {
+          throw Boom.badRequest(`Aucune délégation de droit n'a été activée pour votre compte ${user.username}`);
+        }
+        user.email = etablissement?.email;
+      }
+
+      return res.json({ email: user.email, type: user.type });
     })
   );
 
   router.post(
     "/api/confirmation/accept",
     checkActionToken(),
-    ensureIs("Cfa"),
+    ensureIsOneOf(["Gestionnaire", "Formateur"]),
     tryCatch(async (req, res) => {
-      const cfa = req.user;
+      const user = req.user;
       const { email } = await Joi.object({
         actionToken: Joi.string().required(),
         email: Joi.string().email().optional(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      await confirm(cfa.siret, email);
+      await confirm(user.username, email);
 
-      await sendEmail({ ...cfa, email }, "confirmation_accepted");
+      await sendEmail({ ...user, email }, "confirmed");
 
-      await sendActivationEmails(sendEmail, { username: cfa.username });
+      const previousActivationEmail = user.emails?.find((e) => e.templateName.startsWith("activation_"));
+
+      previousActivationEmail
+        ? await resendActivationEmails(resendEmail, { username: user.username, force: true })
+        : await sendActivationEmails(sendEmail, { username: user.username });
 
       return res.json({});
     })
