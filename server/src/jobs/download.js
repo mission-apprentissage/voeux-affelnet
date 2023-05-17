@@ -169,7 +169,7 @@ async function download(output, options = {}) {
                   return "✅ Compte créé";
                 }
                 case UserStatut.CONFIRME === formateur.statut: {
-                  return "⚠️ Email confirmé, compte non créé";
+                  return "⚠️ Délégation activée, compte non créé";
                 }
                 case !!formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
                   return "⚠️ En attente de confirmation d'email";

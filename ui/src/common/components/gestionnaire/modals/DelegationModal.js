@@ -17,6 +17,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
@@ -25,17 +26,32 @@ import { _put } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 
 export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onClose }) => {
+  const toast = useToast();
+
   const activateDelegation = useCallback(
     async ({ form }) => {
       try {
         await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
         onClose();
+        toast({
+          title: "Délégation mise à jour",
+          description: `La délégation de droit a été enregistrée pour le formateur ${formateur.uai} vers l'adresse courriel ${form.email}`,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
         await callback?.();
       } catch (error) {
         console.error(error);
+        toast({
+          title: "Une erreur s'est produite",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
       }
     },
-    [onClose, callback, formateur?.uai]
+    [onClose, callback, formateur?.uai, toast]
   );
 
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);

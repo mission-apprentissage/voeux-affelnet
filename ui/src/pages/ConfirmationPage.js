@@ -30,7 +30,7 @@ function ServerErrorMessage() {
       <Box>
         <Text>
           Une erreur est survenue, merci de prendre contact avec un administrateur en précisant votre identifiant via :{" "}
-          <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+          <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
             {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
           </Link>
           .
@@ -49,8 +49,8 @@ function StatusErrorMessage({ error, username }) {
           <Box>
             <Text>
               Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre
-              Identifiant ({username}) via :{" "}
-              <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+              Identifiant (<strong>{username}</strong>) via :{" "}
+              <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                 {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
               </Link>
               .
@@ -64,14 +64,15 @@ function StatusErrorMessage({ error, username }) {
           <AlertIcon />
           <Box>
             <Text mb={4}>
-              L’adresse courriel a déjà été confirmée pour votre établissement (Identifiant {username}).
+              L’adresse courriel a déjà été confirmée pour votre établissement (Identifiant <strong>{username}</strong>
+              ).
             </Text>
             <Text mb={4}>
               C’est à cette adresse que les listes de candidats seront transmises, à partir de la semaine du 5 juin.
             </Text>
             <Text>
               Si vous pensez qu’il s’agit d’une erreur, veuillez le signaler en envoyant un courriel à :{" "}
-              <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+              <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                 {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
               </Link>
               .

@@ -192,7 +192,7 @@ function LoginPage() {
                 </Link>
               </Text>
 
-              <Box>
+              <Box w="100%">
                 <Accordion defaultIndex={[]} allowToggle>
                   <AccordionItem mb={0}>
                     <h2>

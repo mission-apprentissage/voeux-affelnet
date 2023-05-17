@@ -15,6 +15,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
@@ -23,17 +24,33 @@ import { _put } from "../../../httpClient";
 import { GestionnaireLibelle } from "../../gestionnaire/fields/GestionnaireLibelle";
 
 export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, onClose }) => {
+  const toast = useToast();
+
   const updateEmail = useCallback(
     async ({ form }) => {
       try {
         await _put(`/api/admin/gestionnaires/${gestionnaire.siret}/setEmail`, { email: form.email });
         onClose();
+        toast({
+          title: "L'adresse courriel a été modifiée",
+          description:
+            "C'est à cette adresse que l'établissement recevra les mises à jour des listes de candidats pour les établissements donc il est responsable.",
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
         await callback?.();
       } catch (error) {
         console.error(error);
+        toast({
+          title: "Une erreur s'est produite",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
       }
     },
-    [onClose, callback, gestionnaire?.siret]
+    [onClose, callback, gestionnaire?.siret, toast]
   );
 
   const hasDelegation = !!gestionnaire.etablissements?.filter((etablissement) => etablissement.diffusionAutorisee)

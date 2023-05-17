@@ -114,7 +114,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
         case UserStatut.CONFIRME === formateur.statut: {
           return (
             <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Email confirmé, compte non créé
+              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Délégation activée, compte non créé
             </>
           );
         }

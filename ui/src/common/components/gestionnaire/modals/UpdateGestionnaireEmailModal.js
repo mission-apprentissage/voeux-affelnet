@@ -14,6 +14,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  useToast,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
@@ -21,17 +22,33 @@ import { Yup } from "../../../Yup";
 import { _put } from "../../../httpClient";
 
 export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, onClose }) => {
+  const toast = useToast();
+
   const updateEmail = useCallback(
     async ({ form }) => {
       try {
         await _put(`/api/gestionnaire/setEmail`, { email: form.email });
+        toast({
+          title: "Votre adresse courriel a été modifiée",
+          description:
+            "C'est à cette adresse que vous recevrez les mises à jour des listes de candidats pour les établissements donc vous être responsables.",
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
         onClose();
         await callback?.();
       } catch (error) {
         console.error(error);
+        toast({
+          title: "Une erreur s'est produite",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
       }
     },
-    [callback, onClose]
+    [callback, onClose, toast]
   );
 
   return (

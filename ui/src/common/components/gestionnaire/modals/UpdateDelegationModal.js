@@ -21,6 +21,7 @@ import {
   Text,
   Stack,
   Heading,
+  useToast,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
@@ -30,17 +31,32 @@ import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../gestionnaire/fields/FormateurEmail";
 
 export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpen, onClose }) => {
+  const toast = useToast();
+
   const updateDelegationEmail = useCallback(
     async ({ form }) => {
       try {
         await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
         onClose();
+        toast({
+          title: "Délégation mise à jour",
+          description: `La délégation de droit a été modifiée pour le formateur ${formateur.uai} vers l'adresse courriel ${form.email}`,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
         await callback?.();
       } catch (error) {
         console.error(error);
+        toast({
+          title: "Une erreur s'est produite",
+          status: "error",
+          duration: 9000,
+          isClosable: true,
+        });
       }
     },
-    [callback, onClose, formateur?.uai]
+    [callback, onClose, formateur?.uai, toast]
   );
 
   const cancelDelegation = useCallback(
