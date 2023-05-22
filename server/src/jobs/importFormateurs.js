@@ -31,7 +31,7 @@ async function buildEtablissements(sirets, formateur) {
         console.warn(`Gestionnaire ${siret} non trouvé`);
       }
       // eslint-disable-next-line
-      const existingEtablissement = formateur?.etablissements?.find((etablissement) => etablissement === siret);
+      const existingEtablissement = formateur?.etablissements?.find((etablissement) => etablissement.siret === siret);
       return {
         siret,
         uai: gestionnaire?.uai,

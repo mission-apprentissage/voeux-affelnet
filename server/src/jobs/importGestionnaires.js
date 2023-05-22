@@ -27,7 +27,7 @@ async function buildEtablissements(uais, gestionnaire) {
 
       const formateur = await Formateur.findOne({ uai }).lean();
 
-      const existingEtablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement === uai);
+      const existingEtablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement.uai === uai);
 
       return {
         uai,
