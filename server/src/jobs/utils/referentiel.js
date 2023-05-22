@@ -5,10 +5,12 @@ const referentiel = async () => {
   const referentielApi = new ReferentielApi();
 
   const findEmailReferentielCache = new Map();
-  const findSiretResponsableReferentiel = new Map();
+  const findSiretResponsableReferentielCache = new Map();
 
   return {
     findEmailReferentiel: async (siret) => {
+      logger.debug(`findEmailReferentiel ${siret}`);
+
       if (!siret || !siret?.length) {
         return null;
       }
@@ -32,11 +34,14 @@ const referentiel = async () => {
     },
 
     findSiretResponsableReferentiel: async (uai) => {
+      logger.debug(`findSiretResponsableReferentiel ${uai}`);
+
       if (!uai || !uai?.length) {
         return null;
       }
-      if (findSiretResponsableReferentiel.has(uai)) {
-        return findSiretResponsableReferentiel.get(uai);
+
+      if (findSiretResponsableReferentielCache.has(uai)) {
+        return findSiretResponsableReferentielCache.get(uai);
       }
 
       try {
@@ -59,7 +64,7 @@ const referentiel = async () => {
           return responsable.siret;
         })();
 
-        findSiretResponsableReferentiel.set(uai, result);
+        findSiretResponsableReferentielCache.set(uai, result);
 
         return result;
       } catch (e) {

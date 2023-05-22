@@ -53,16 +53,16 @@ async function getRelationsFromOffreDeFormation(options = {}) {
   const { onConflict = () => ({}), affelnet } = options;
 
   async function searchGestionnaireSiretAndEmail({ uai, cleMinistereEducatif, siretGestionnaire }) {
+    logger.debug(`searchGestionnaireSiretAndEmail '${uai}', '${cleMinistereEducatif}', '${siretGestionnaire}'`);
     const { formations, alternatives } = await findGestionnaireSiretAndEmail({
       uai,
       cleMinistereEducatif,
       siretGestionnaire,
     });
 
-    const siret =
-      siretGestionnaire ??
-      formations[0]?.etablissement_gestionnaire_siret ??
-      (await findSiretResponsableReferentiel(uai));
+    const siret = siretGestionnaire.length
+      ? siretGestionnaire
+      : formations[0]?.etablissement_gestionnaire_siret ?? (await findSiretResponsableReferentiel(uai));
 
     const email =
       formations[0]?.etablissement_gestionnaire_courriel?.split("##")[0] || (await findEmailReferentiel(siret));

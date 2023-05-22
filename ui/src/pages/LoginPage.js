@@ -177,7 +177,7 @@ function LoginPage() {
                   Les mots de passe utilisés en 2022 ne sont plus valables, de nouveaux comptes doivent être créés. Des
                   courriels ont été diffusés aux organismes de formation en apprentissage les 12 et 15 mai, pour
                   permettre de créer leur compte et définir leur mot de passe de connexion. Seuls les organismes
-                  responsables des offres sont destinataires de ces première correspondances.
+                  responsables des offres sont destinataires de ces premières correspondances.
                 </strong>
               </Text>
 

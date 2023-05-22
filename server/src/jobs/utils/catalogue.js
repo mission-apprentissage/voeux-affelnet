@@ -12,8 +12,10 @@ const catalogue = async () => {
 
   return {
     findFormateurUai: async ({ uai, cleMinistereEducatif, siretGestionnaire }) => {
-      if (findFormateurUaiCache.has(JSON.stringify({ uai }))) {
-        return findFormateurUaiCache.get(JSON.stringify({ uai }));
+      const key = JSON.stringify({ uai, siretGestionnaire, cleMinistereEducatif });
+
+      if (findFormateurUaiCache.has(key)) {
+        return findFormateurUaiCache.get(key);
       }
 
       try {
@@ -37,7 +39,10 @@ const catalogue = async () => {
           uais: uniq(formations.map((f) => f.etablissement_formateur_uai)).filter((uai) => !!uai),
         };
 
-        findFormateurUaiCache.set(JSON.stringify({ uai }), { formations, alternatives });
+        findFormateurUaiCache.set(key, {
+          formations,
+          alternatives,
+        });
 
         return { formations, alternatives };
       } catch (e) {
@@ -52,8 +57,10 @@ const catalogue = async () => {
     },
 
     findGestionnaireSiretAndEmail: async ({ uai, cleMinistereEducatif, siretGestionnaire }) => {
-      if (findGestionnaireSiretAndEmailCache.has(JSON.stringify({ uai, siretGestionnaire }))) {
-        return findGestionnaireSiretAndEmailCache.get(JSON.stringify({ uai, siretGestionnaire }));
+      const key = JSON.stringify({ uai, siretGestionnaire });
+
+      if (findGestionnaireSiretAndEmailCache.has(key)) {
+        return findGestionnaireSiretAndEmailCache.get(key);
       }
 
       try {
@@ -80,7 +87,7 @@ const catalogue = async () => {
           ),
         };
 
-        findGestionnaireSiretAndEmailCache.set(JSON.stringify({ uai, siretGestionnaire }), {
+        findGestionnaireSiretAndEmailCache.set(JSON.stringify(key), {
           formations,
           alternatives,
         });
