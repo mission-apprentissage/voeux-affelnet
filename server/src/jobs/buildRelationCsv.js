@@ -53,9 +53,9 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
         .map((uai) => uai.toUpperCase());
 
       return {
-        siret_gestionnaire: sanitized_siret_gestionnaire.length ? sanitized_siret_gestionnaire : undefined,
-        email_gestionnaire: sanitized_email_gestionnaire.length ? sanitized_email_gestionnaire : undefined,
-        uai_etablissement: sanitized_uai_etablissement.length ? sanitized_uai_etablissement : [],
+        siret_gestionnaire: sanitized_siret_gestionnaire?.length ? sanitized_siret_gestionnaire : undefined,
+        email_gestionnaire: sanitized_email_gestionnaire?.length ? sanitized_email_gestionnaire : undefined,
+        uai_etablissement: sanitized_uai_etablissement?.length ? sanitized_uai_etablissement : [],
       };
     }),
     accumulateData(
