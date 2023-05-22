@@ -34,7 +34,7 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
         toast({
           title: "L'adresse courriel a été modifiée",
           description:
-            "C'est à cette adresse que l'établissement recevra les mises à jour des listes de candidats pour les établissements donc il est responsable.",
+            "C'est à cette adresse que l'établissement recevra les mises à jour des listes de candidats pour les établissements dont il est responsable.",
           status: "success",
           duration: 9000,
           isClosable: true,
