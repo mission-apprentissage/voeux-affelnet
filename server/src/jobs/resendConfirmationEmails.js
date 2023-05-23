@@ -22,7 +22,6 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
       : {
           unsubscribe: false,
           statut: UserStatut.EN_ATTENTE,
-
           ...(options.retry
             ? {
                 emails: {

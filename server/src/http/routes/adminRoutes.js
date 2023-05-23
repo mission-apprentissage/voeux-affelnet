@@ -621,7 +621,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      const stats = await resendConfirmationEmails(resendEmail, { username: siret });
+      const stats = await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user });
 
       return res.json(stats);
     })
@@ -637,7 +637,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      const stats = await resendActivationEmails(resendEmail, { username: siret });
+      const stats = await resendActivationEmails(resendEmail, { username: siret, force: true, sender: req.user });
 
       return res.json(stats);
     })
@@ -653,7 +653,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      const stats = await resendNotificationEmails(resendEmail, { username: siret, force: true });
+      const stats = await resendNotificationEmails(resendEmail, { username: siret, force: true, sender: req.user });
 
       return res.json(stats);
     })

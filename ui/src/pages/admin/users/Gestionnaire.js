@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { Text, Link, Heading, Box, useDisclosure, Button } from "@chakra-ui/react";
+import { Text, Link, Heading, Box, useDisclosure, Button, useToast } from "@chakra-ui/react";
 
 import { Page } from "../../../common/components/layout/Page";
-import { _get } from "../../../common/httpClient";
+import { _get, _put } from "../../../common/httpClient";
 import { GestionnaireLibelle } from "../../../common/components/gestionnaire/fields/GestionnaireLibelle";
 import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
 import { History } from "../../gestionnaire/History";
-// import { UserType } from "../../../common/constants/UserType";
-// import { UserStatut } from "../../../common/constants/UserStatut";
+import { UserType } from "../../../common/constants/UserType";
+import { UserStatut } from "../../../common/constants/UserStatut";
 
 export const Gestionnaire = () => {
   const {
@@ -22,6 +22,7 @@ export const Gestionnaire = () => {
   const [gestionnaire, setGestionnaire] = useState(undefined);
   const [, setFormateurs] = useState(undefined);
   const mounted = useRef(false);
+  const toast = useToast();
 
   const getGestionnaire = useCallback(async () => {
     try {
@@ -48,6 +49,54 @@ export const Gestionnaire = () => {
     await getGestionnaire();
     await getFormateurs();
   }, [getGestionnaire, getFormateurs]);
+
+  const resendActivationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/admin/gestionnaires/${siret}/resendActivationEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${gestionnaire.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await reload();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel d'activation. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [siret, gestionnaire, toast, reload]);
+
+  const resendConfirmationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/admin/gestionnaires/${siret}/resendConfirmationEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de confirmation de l'adresse courriel a été renvoyé à l'adresse ${gestionnaire.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await reload();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de confirmation. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [siret, gestionnaire, toast, reload]);
 
   useEffect(() => {
     const run = async () => {
@@ -134,7 +183,7 @@ export const Gestionnaire = () => {
           </Text>
 
           {/* TODO: Définir quel est le mail à renvoyer fonction du statut du User (comparer avec UserStatut.XXXX) */}
-          {/* {UserType.GESTIONNAIRE === gestionnaire.type &&
+          {UserType.GESTIONNAIRE === gestionnaire.type &&
             (() => {
               switch (true) {
                 case UserStatut.EN_ATTENTE === gestionnaire.statut:
@@ -153,18 +202,18 @@ export const Gestionnaire = () => {
                         : "Envoyer l'email d'activation du compte"}
                     </Button>
                   );
-                case UserStatut.ACTIVE === gestionnaire.statut:
-                  return (
-                    <Button variant="primary" onClick={resendNotificationEmail}>
-                      {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
-                        ? "Renvoyer l'email de notification de disponibilité des listes"
-                        : "Envoyer l'email de notification de disponibilité des listes"}
-                    </Button>
-                  );
+                // case UserStatut.ACTIVE === gestionnaire.statut:
+                //   return (
+                //     <Button variant="primary" onClick={resendNotificationEmail}>
+                //       {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
+                //         ? "Renvoyer l'email de notification de disponibilité des listes"
+                //         : "Envoyer l'email de notification de disponibilité des listes"}
+                //     </Button>
+                //   );
                 default:
                   return <></>;
               }
-            })()} */}
+            })()}
         </Box>
 
         <Box mb={12}>
