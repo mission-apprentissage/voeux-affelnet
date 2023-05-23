@@ -447,9 +447,11 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           </Box>
         )}
 
-        {/* <Box mb={12}>
-          <Link variant="action">Utilisateur Ymag ou IGesti ?</Link>
-        </Box> */}
+        <Box mb={12}>
+          <Link variant="action" href="/ymag-ou-igesti">
+            Utilisateur Ymag ou IGesti ?
+          </Link>
+        </Box>
 
         <Box mb={8} id="history">
           <Heading as="h3" size="md" mb={4}>

@@ -216,6 +216,12 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
         })}
 
         <Box mb={12}>
+          <Link variant="action" href="/ymag-ou-igesti">
+            Utilisateur Ymag ou IGesti ?
+          </Link>
+        </Box>
+
+        <Box mb={12}>
           <Heading as="h3" size="md" mb={4}>
             Historique des actions
           </Heading>

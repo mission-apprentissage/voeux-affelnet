@@ -18,6 +18,7 @@ const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
 const ConfirmationPage = lazy(() => import("./pages/ConfirmationPage"));
 const AnomaliePage = lazy(() => import("./pages/AnomaliePage"));
+const YmagPage = lazy(() => import("./pages/YmagPage"));
 
 const Contact = lazy(() => import("./pages/legal/Contact"));
 const Cookies = lazy(() => import("./pages/legal/Cookies"));
@@ -133,6 +134,17 @@ const App = () => {
               <Suspense>
                 <Layout>
                   <AnomaliePage />
+                </Layout>
+              </Suspense>
+            }
+          />
+          <Route
+            exact
+            path="/ymag-ou-igesti"
+            element={
+              <Suspense>
+                <Layout>
+                  <YmagPage />
                 </Layout>
               </Suspense>
             }
