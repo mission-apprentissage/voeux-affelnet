@@ -1,15 +1,27 @@
 import { useCallback } from "react";
-import { Button, useDisclosure } from "@chakra-ui/react";
+import { Box, Button, useDisclosure } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../../hooks/gestionnaireHooks";
 import { UserStatut } from "../../../constants/UserStatut";
-import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
-import { WarningFill } from "../../../../theme/components/icons/WarningFill";
 import { isResponsableFormateur } from "../../../utils/getUserType";
 import { DelegationModal } from "../modals/DelegationModal";
+import { StatutBadge, statuses } from "../../StatutBadge";
+import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
+import { WarningFill } from "../../../../theme/components/icons/WarningFill";
 
 export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const downloadVoeux = useDownloadVoeux({ gestionnaire, formateur });
+
+  const downloadVoeuxAndReload = useCallback(async () => {
+    await downloadVoeux();
+    await callback?.();
+  }, [downloadVoeux, callback]);
+
+  if (!gestionnaire || !formateur) {
+    return;
+  }
 
   const etablissementFromGestionnaire = gestionnaire.etablissements?.find(
     (etablissement) => formateur.uai === etablissement.uai
@@ -22,13 +34,6 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
   const diffusionAutorisee = etablissementFromGestionnaire?.diffusionAutorisee;
 
   const voeuxDisponible = etablissementFromGestionnaire.nombre_voeux > 0;
-
-  const downloadVoeux = useDownloadVoeux({ gestionnaire, formateur });
-
-  const downloadVoeuxAndReload = useCallback(async () => {
-    await downloadVoeux();
-    await callback?.();
-  }, [downloadVoeux, callback]);
 
   const voeuxTelechargementsFormateur = formateur.voeux_telechargements.filter(
     (telechargement) => telechargement.siret === gestionnaire.siret
@@ -50,11 +55,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Mise à jour téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
@@ -67,12 +68,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
               new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" />
-              Mise à jour non téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
@@ -83,11 +79,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Liste téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
@@ -97,40 +89,23 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
                 new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
             )): {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" />
-              Compte créé, liste non téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut && !voeuxDisponible: {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Compte créé
-            </>
-          );
+          return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
         case UserStatut.CONFIRME === formateur.statut: {
           return (
-            <>
+            <Box title="Une délégation de droit a été activée pour cet organisme, mais le destinataire n'a pas encore créé son compte.">
               <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Délégation activée, compte non créé
-            </>
+            </Box>
           );
         }
         case UserStatut.EN_ATTENTE === formateur.statut: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> En attente de confirmation d'email
-            </>
-          );
+          return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
         default: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
-            </>
-          );
+          return <StatutBadge statut={statuses.INCONNU} />;
         }
       }
     }
@@ -166,11 +141,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Mise à jour téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
         case voeuxDisponible &&
           new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
@@ -198,11 +169,7 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Liste téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
         case voeuxDisponible &&
           (!voeuxTelechargementsGestionnaire.length ||
@@ -221,26 +188,18 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
         }
         case !voeuxDisponible: {
           return (
-            <>
+            <Box>
               <SuccessFill verticalAlign="text-bottom" /> Pas de vœux disponibles
-            </>
+            </Box>
           );
         }
         default: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
-            </>
-          );
+          return <StatutBadge statut={statuses.INCONNU} />;
         }
       }
     }
     default: {
-      return (
-        <>
-          <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
-        </>
-      );
+      return <StatutBadge statut={statuses.INCONNU} />;
     }
   }
 };

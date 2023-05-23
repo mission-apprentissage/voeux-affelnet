@@ -1,6 +1,5 @@
 import { UserStatut } from "../../../constants/UserStatut";
-import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
-import { WarningFill } from "../../../../theme/components/icons/WarningFill";
+import { StatutBadge, statuses } from "../../StatutBadge";
 
 export const GestionnaireStatut = ({ gestionnaire }) => {
   if (!gestionnaire) {
@@ -9,41 +8,21 @@ export const GestionnaireStatut = ({ gestionnaire }) => {
 
   switch (true) {
     case UserStatut.ACTIVE === gestionnaire.statut: {
-      return (
-        <>
-          <SuccessFill verticalAlign="text-bottom" /> Compte créé
-        </>
-      );
+      return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
     }
     case UserStatut.CONFIRME === gestionnaire.statut: {
-      return (
-        <>
-          <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Email confirmé, compte non créé
-        </>
-      );
+      return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
     }
 
     case !!gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
-      return (
-        <>
-          <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> En attente de confirmation d'email
-        </>
-      );
+      return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
     }
     case !gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
-      return (
-        <>
-          <SuccessFill verticalAlign="text-bottom" /> En attente de diffusion de campagne
-        </>
-      );
+      return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
     }
 
     default: {
-      return (
-        <>
-          <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
-        </>
-      );
+      return <StatutBadge statut={statuses.INCONNU} />;
     }
   }
 };

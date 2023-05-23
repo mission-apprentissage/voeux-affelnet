@@ -1,6 +1,5 @@
 import { UserStatut } from "../../../constants/UserStatut";
-import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
-import { WarningFill } from "../../../../theme/components/icons/WarningFill";
+import { StatutBadge, statuses } from "../../StatutBadge";
 
 export const FormateurStatut = ({ gestionnaire, formateur }) => {
   if (!gestionnaire || !formateur) {
@@ -41,11 +40,7 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Mise à jour téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
@@ -58,12 +53,7 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
               new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" />
-              Mise à jour non téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
@@ -74,11 +64,7 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Liste téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut &&
           voeuxDisponible &&
@@ -88,47 +74,22 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
                 new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
             )): {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" />
-              Compte créé, liste non téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === formateur.statut && !voeuxDisponible: {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Compte créé
-            </>
-          );
+          return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
         case UserStatut.CONFIRME === formateur.statut: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Email confirmé, compte non créé
-            </>
-          );
+          return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
         }
         case !!formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> En attente de confirmation d'email
-            </>
-          );
+          return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
         case !formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> En attente de diffusion de campagne
-            </>
-          );
+          return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
         }
         default: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
-            </>
-          );
+          return <StatutBadge statut={statuses.INCONNU} />;
         }
       }
     }
@@ -143,11 +104,7 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Mise à jour téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === gestionnaire.statut &&
           voeuxDisponible &&
@@ -160,11 +117,7 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
               new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Mise à jour non téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === gestionnaire.statut &&
           voeuxDisponible &&
@@ -175,11 +128,7 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
               new Date(telechargement.date).getTime() >
               new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
           ): {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Liste téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === gestionnaire.statut &&
           voeuxDisponible &&
@@ -189,56 +138,28 @@ export const FormateurStatut = ({ gestionnaire, formateur }) => {
                 new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
             )): {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Compte créé, liste non téléchargée
-            </>
-          );
+          return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
         case UserStatut.ACTIVE === gestionnaire.statut && !voeuxDisponible: {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> Compte créé
-            </>
-          );
+          return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
         case UserStatut.CONFIRME === gestionnaire.statut: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Email confirmé, compte non créé
-            </>
-          );
+          return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
         }
         case !!gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> En attente de confirmation d'email
-            </>
-          );
+          return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
         case !gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
-          return (
-            <>
-              <SuccessFill verticalAlign="text-bottom" /> En attente de diffusion de campagne
-            </>
-          );
+          return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
         }
 
         default: {
-          return (
-            <>
-              <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
-            </>
-          );
+          return <StatutBadge statut={statuses.INCONNU} />;
         }
       }
     }
     default: {
-      return (
-        <>
-          <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Etat inconnu
-        </>
-      );
+      return <StatutBadge statut={statuses.INCONNU} />;
     }
   }
 };

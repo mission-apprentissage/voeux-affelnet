@@ -1,20 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  Text,
-  Input,
-  Table,
-  Tbody,
-  Td,
-  Thead,
-  Th,
-  Tr,
-  Link,
-  Select,
-  Tag,
-  Spinner,
-} from "@chakra-ui/react";
+import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import queryString from "query-string";
 
@@ -162,15 +147,9 @@ export const Users = () => {
                   </Field>
                 </Box>
 
-                {/* <Field name="statut">
-                  {({ field, meta }) => {
-                    return <Select placeholder={"Statuts (tous)"} style={{ margin: 0 }} {...field} />;
-                  }}
-                </Field> */}
-
                 <Box w="50%" pl={4}>
                   <Field name="type">
-                    {({ field, setFieldValue, meta }) => {
+                    {({ field }) => {
                       return (
                         <Select
                           placeholder={"Type d'organisme (tous)"}
