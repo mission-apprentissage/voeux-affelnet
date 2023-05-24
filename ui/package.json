@@ -39,6 +39,7 @@
     "react-router-dom": "6",
     "react-scripts": "5.0.1",
     "reactjs-popup": "2.0.5",
+    "source-map-explorer": "2.5.3",
     "stream-browserify": "3.0.0",
     "stream-http": "3.2.0",
     "string_decoder": "1.3.0",
@@ -52,6 +53,7 @@
     "yup": "0.32.11"
   },
   "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
