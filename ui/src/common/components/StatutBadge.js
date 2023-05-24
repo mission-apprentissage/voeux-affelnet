@@ -19,14 +19,14 @@ export const statusesDescription = new Map([
     statuses.EN_ATTENTE_DE_DIFFUSION,
     {
       icon: <SuccessFill verticalAlign="text-bottom" />,
-      description: `Le destinataire n'a pas encore reçu d'email l'invitant à confirmer son adresse courriel et créer son compte.`,
+      description: `Le destinataire n'a pas encore reçu de courriel l'invitant à confirmer son adresse courriel et créer son compte.`,
     },
   ],
   [
     statuses.EN_ATTENTE_DE_CONFIRMATION,
     {
       icon: <WarningFill color="#fcc63a" verticalAlign="text-bottom" />,
-      description: `Le destinataire a reçu un email l'invitant à confirmer son adresse courriel, mais n'a pas cliqué sur le lien de confirmation d'adresse.`,
+      description: `Le destinataire a reçu un courriel l'invitant à confirmer son adresse courriel, mais n'a pas cliqué sur le lien de confirmation d'adresse.`,
     },
   ],
   [
@@ -40,7 +40,7 @@ export const statusesDescription = new Map([
     statuses.EMAIL_CONFIRME_COMPTE_CREE,
     {
       icon: <SuccessFill verticalAlign="text-bottom" />,
-      description: `Le destinataire a créé son compte pour l'accès aux listes de vœux. Aucune liste n'est pour l'instant disponible. Une notification email lui sera envoyée lorsqu'une liste sera disponible.`,
+      description: `Le destinataire a créé son compte pour l'accès aux listes de vœux. Aucune liste n'est pour l'instant disponible. Une notification courriel lui sera envoyée lorsqu'une liste sera disponible.`,
     },
   ],
   [
