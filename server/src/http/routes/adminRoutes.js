@@ -590,7 +590,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       const { siret, email } = await Joi.object({
-        siret: Joi.string().required(),
+        siret: Joi.string().pattern(siretFormat).required(),
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
@@ -617,7 +617,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       const { siret } = await Joi.object({
-        siret: Joi.string().required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
@@ -633,7 +633,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       const { siret } = await Joi.object({
-        siret: Joi.string().required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
@@ -649,7 +649,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       const { siret } = await Joi.object({
-        siret: Joi.string().required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
@@ -665,7 +665,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkIsAdmin(),
     tryCatch(async (req, res) => {
       const { siret } = await Joi.object({
-        siret: Joi.string().required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await markAsNonConcerne(siret);
@@ -762,6 +762,38 @@ module.exports = ({ sendEmail, resendEmail }) => {
           })
         )
       );
+    })
+  );
+
+  router.put(
+    "/api/admin/formateurs/:uai/resendActivationEmail",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      await cancelUnsubscription(uai);
+      const stats = await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user });
+
+      return res.json(stats);
+    })
+  );
+
+  router.put(
+    "/api/admin/formateurs/:uai/resendNotificationEmail",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      await cancelUnsubscription(uai);
+      const stats = await resendNotificationEmails(resendEmail, { username: uai, force: true, sender: req.user });
+
+      return res.json(stats);
     })
   );
 

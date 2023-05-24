@@ -204,9 +204,21 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
     })
   );
 
-  /**
-   * TODO : Renvoi l'email de notification
-   */
+  router.put(
+    "/api/gestionnaire/formateurs/:uai/resendActivationEmail",
+    checkApiToken(),
+    ensureIs("Gestionnaire"),
+    tryCatch(async (req, res) => {
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const stats = await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user });
+
+      return res.json(stats);
+    })
+  );
+
   router.put(
     "/api/gestionnaire/formateurs/:uai/resendNotificationEmail",
     checkApiToken(),
@@ -216,7 +228,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const stats = await resendNotificationEmails(resendEmail, { username: uai, force: true });
+      const stats = await resendNotificationEmails(resendEmail, { username: uai, force: true, sender: req.user });
 
       return res.json(stats);
     })
