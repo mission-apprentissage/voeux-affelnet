@@ -25,7 +25,7 @@ export const isGestionnaire = (auth) => {
 };
 
 export const isResponsableFormateur = ({ gestionnaire, formateur }) => {
-  return gestionnaire.siret === formateur.siret || gestionnaire.uai === formateur.uai;
+  return gestionnaire?.siret === formateur?.siret || gestionnaire?.uai === formateur?.uai;
 };
 
 // const userTypes = new Map([

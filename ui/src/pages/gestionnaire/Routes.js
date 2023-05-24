@@ -58,17 +58,17 @@ const GestionnaireRoutes = () => {
       <Routes>
         <Route
           exact
-          path="/"
+          path=""
           element={<Gestionnaire gestionnaire={gestionnaire} formateurs={formateurs} callback={reload} />}
         />
         <Route
           exact
-          path="/formateurs"
+          path="formateurs"
           element={<Formateurs gestionnaire={gestionnaire} formateurs={formateurs} callback={reload} />}
         />
         <Route
           exact
-          path="/formateurs/:uai"
+          path="formateurs/:uai"
           element={<Formateur gestionnaire={gestionnaire} formateurs={formateurs} callback={reload} />}
         />
       </Routes>

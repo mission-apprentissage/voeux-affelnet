@@ -173,42 +173,46 @@ export const Gestionnaire = () => {
           </Heading>
 
           <Box mb={4}>
-            <GestionnaireStatut gestionnaire={gestionnaire} />
-          </Box>
+            <Text display={"inline-flex"}>
+              <Box mr={2} display="inline-flex">
+                <GestionnaireStatut gestionnaire={gestionnaire} />.
+              </Box>
 
-          <Box mb={4}>
-            {/* TODO: Définir quel est le mail à renvoyer fonction du statut du User (comparer avec UserStatut.XXXX) */}
-            {UserType.GESTIONNAIRE === gestionnaire.type &&
-              (() => {
-                switch (true) {
-                  case UserStatut.EN_ATTENTE === gestionnaire.statut:
-                    return (
-                      <Button variant="primary" onClick={resendConfirmationEmail}>
-                        {gestionnaire.emails?.find((email) => email.templateName.startsWith("confirmation_"))
+              {UserType.GESTIONNAIRE === gestionnaire.type &&
+                (() => {
+                  switch (true) {
+                    case UserStatut.EN_ATTENTE === gestionnaire.statut:
+                      return (
+                        <Link variant="action" onClick={resendConfirmationEmail}>
+                          Générer un nouvel envoi de notification
+                          {/* {gestionnaire.emails?.find((email) => email.templateName.startsWith("confirmation_"))
                           ? "Renvoyer l'email de confirmation de l'adresse courriel"
-                          : "Envoyer l'email de confirmation de l'adresse courriel"}
-                      </Button>
-                    );
-                  case UserStatut.CONFIRME === gestionnaire.statut:
-                    return (
-                      <Button variant="primary" onClick={resendActivationEmail}>
-                        {gestionnaire.emails?.find((email) => email.templateName.startsWith("activation_"))
+                          : "Envoyer l'email de confirmation de l'adresse courriel"} */}
+                        </Link>
+                      );
+                    case UserStatut.CONFIRME === gestionnaire.statut:
+                      return (
+                        <Link variant="action" onClick={resendActivationEmail}>
+                          Générer un nouvel envoi de notification
+                          {/* {gestionnaire.emails?.find((email) => email.templateName.startsWith("activation_"))
                           ? "Renvoyer l'email d'activation du compte"
-                          : "Envoyer l'email d'activation du compte"}
-                      </Button>
-                    );
-                  // case UserStatut.ACTIVE === gestionnaire.statut:
-                  //   return (
-                  //     <Button variant="primary" onClick={resendNotificationEmail}>
-                  //       {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
-                  //         ? "Renvoyer l'email de notification de disponibilité des listes"
-                  //         : "Envoyer l'email de notification de disponibilité des listes"}
-                  //     </Button>
-                  //   );
-                  default:
-                    return <></>;
-                }
-              })()}
+                          : "Envoyer l'email d'activation du compte"} */}
+                        </Link>
+                      );
+                    // case UserStatut.ACTIVE === gestionnaire.statut:
+                    //   return (
+                    //     <Link variant="action" onClick={resendNotificationEmail}>
+                    // Générer un nouvel envoi de notification
+                    //       {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
+                    //         ? "Renvoyer l'email de notification de disponibilité des listes"
+                    //         : "Envoyer l'email de notification de disponibilité des listes"}
+                    //     </Link>
+                    //   );
+                    default:
+                      return <></>;
+                  }
+                })()}
+            </Text>
           </Box>
 
           <Heading as="h4" size="sm" mb={4}>

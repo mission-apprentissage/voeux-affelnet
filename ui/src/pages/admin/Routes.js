@@ -12,7 +12,7 @@ function AdminRoutes() {
   return (
     <Routes>
       <Route
-        path="/"
+        path=""
         exact
         element={
           <Page title="Listes de candidats Affelnet : console de pilotage">
@@ -21,11 +21,11 @@ function AdminRoutes() {
         }
       ></Route>
 
-      <Route path="/gestionnaire/:siret" element={<Gestionnaire />}></Route>
-      <Route path="/gestionnaire/:siret/formateurs" element={<Formateurs />}></Route>
-      <Route path="/gestionnaire/:siret/formateur/:uai" element={<Formateur />}></Route>
-      <Route path="/formateur/:uai" element={<Formateur />}></Route>
-      <Route path="/formateur/:uai/gestionnaires" element={<Gestionnaires />}></Route>
+      <Route path="gestionnaire/:siret" element={<Gestionnaire />}></Route>
+      <Route path="gestionnaire/:siret/formateurs" element={<Formateurs />}></Route>
+      <Route path="gestionnaire/:siret/formateur/:uai" element={<Formateur />}></Route>
+      <Route path="formateur/:uai" element={<Formateur />}></Route>
+      <Route path="formateur/:uai/gestionnaires" element={<Gestionnaires />}></Route>
     </Routes>
   );
 }

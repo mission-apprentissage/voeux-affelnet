@@ -15,6 +15,7 @@ import {
   Link,
   Text,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../common/hooks/gestionnaireHooks";
@@ -26,11 +27,18 @@ import { SuccessLine } from "../../theme/components/icons";
 import { UpdateGestionnaireEmailModal } from "../../common/components/gestionnaire/modals/UpdateGestionnaireEmailModal";
 import { GestionnaireEmail } from "../../common/components/gestionnaire/fields/GestionnaireEmail";
 import { History } from "./History";
+import { isResponsableFormateur } from "../../common/utils/getUserType";
+import { FormateurStatut } from "../../common/components/gestionnaire/fields/FormateurStatut";
+import { UserType } from "../../common/constants/UserType";
+import { UserStatut } from "../../common/constants/UserStatut";
 
 export const Formateur = ({ gestionnaire, formateurs, callback }) => {
   const { uai } = useParams();
+  const toast = useToast();
 
-  const formateur = formateurs?.find((formateur) => formateur.uai === uai);
+  const formateur = formateurs?.find((formateur) => formateur?.uai === uai);
+
+  const etablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement.uai === formateur?.uai);
 
   const downloadVoeux = useDownloadVoeux({ gestionnaire, formateur });
 
@@ -38,9 +46,55 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
     await _put(`/api/gestionnaire/formateurs/${formateur.uai}`, { diffusionAutorisee: false });
   }, [formateur]);
 
-  const resendNotification = useCallback(async () => {
-    await _put(`/api/gestionnaire/formateurs/${formateur.uai}/resendNotificationEmail`);
-  }, [formateur]);
+  const resendActivationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/gestionnaire/formateurs/${formateur.uai}/resendActivationEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${
+          formateur.email ?? etablissement.email
+        }`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await callback();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel d'activation. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [formateur, etablissement, toast, callback]);
+
+  const resendNotificationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/gestionnaire/formateurs/${formateur.uai}/resendNotificationEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de liste de candidats disponible a été renvoyé à l'adresse ${formateur.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await callback();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [formateur, toast, callback]);
 
   const cancelDelegationAndDownloadVoeux = useCallback(async () => {
     await cancelDelegation();
@@ -79,8 +133,6 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
     return <>Nous n'avons pas trouvé le formateur. </>;
   }
 
-  const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === formateur.uai);
-
   const isDiffusionAutorisee = etablissement?.diffusionAutorisee;
 
   const hasVoeux = etablissement.nombre_voeux > 0;
@@ -112,7 +164,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
       );
   const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
-  const isResponsableFormateur = !!(formateur.uai === gestionnaire.uai || formateur.siret === gestionnaire.siret);
+  const isResponsableFormateurCheck = isResponsableFormateur({ gestionnaire, formateur });
 
   const lastEmailDate =
     formateur.emails && typeof formateur.emails.findLast === "function"
@@ -124,7 +176,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
       <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
         <Box mb={4}>
           <Heading as="h3" size="md" mb={4}>
-            {isResponsableFormateur ? <>Organisme responsable-formateur</> : <>Organisme formateur</>} :&nbsp;
+            Organisme {isResponsableFormateurCheck ? <>responsable-formateur</> : <>formateur</>} :&nbsp;
             <FormateurLibelle formateur={formateur} />
           </Heading>
           <Text mb={4}>
@@ -132,7 +184,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           </Text>
         </Box>
 
-        {isResponsableFormateur ? (
+        {isResponsableFormateurCheck ? (
           <Box mb={12}>
             <Text mb={4}>
               Cet organisme formateur est également responsable (signataire des conventions de formation), directement
@@ -226,6 +278,36 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           <Heading as="h3" size="md" mb={4}>
             Statut
           </Heading>
+
+          {(isDiffusionAutorisee || isResponsableFormateurCheck) && (
+            <Box mb={4}>
+              <Text display={"inline-flex"}>
+                <Box mr={2} display="inline-flex">
+                  <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />.
+                </Box>
+
+                {UserType.FORMATEUR === formateur.type &&
+                  (() => {
+                    switch (true) {
+                      case UserStatut.CONFIRME === formateur.statut:
+                        return (
+                          <Link variant="action" onClick={resendActivationEmail}>
+                            Générer un nouvel envoi de notification
+                          </Link>
+                        );
+                      // case UserStatut.ACTIVE === formateur.statut:
+                      //   return (
+                      //     <Link variant="action" onClick={resendNotificationEmail}>
+                      //       Générer un nouvel envoi de notification
+                      //     </Link>
+                      //   );
+                      default:
+                        return <></>;
+                    }
+                  })()}
+              </Text>
+            </Box>
+          )}
 
           <Heading as="h4" size="sm" mb={4}>
             {hasUpdatedVoeux ? (
@@ -352,9 +434,24 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   </Text>
                   <Text mb={4}>
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
-                    <Link variant="action" onClick={resendNotification}>
-                      générer un nouvel envoi de notification courriel
-                    </Link>
+                    {(() => {
+                      switch (true) {
+                        case UserStatut.CONFIRME === formateur.statut:
+                          return (
+                            <Link variant="action" onClick={resendActivationEmail}>
+                              générer un nouvel envoi de notification courriel
+                            </Link>
+                          );
+                        case UserStatut.ACTIVE === formateur.statut:
+                          return (
+                            <Link variant="action" onClick={resendNotificationEmail}>
+                              générer un nouvel envoi de notification courriel
+                            </Link>
+                          );
+                        default:
+                          return <></>;
+                      }
+                    })()}
                     .
                   </Text>
                   <Text mb={4}>
@@ -419,9 +516,24 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                   </Text>
                   <Text mb={4}>
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
-                    <Link variant="action" onClick={resendNotification}>
-                      générer un nouvel envoi de notification courriel
-                    </Link>
+                    {(() => {
+                      switch (true) {
+                        case UserStatut.CONFIRME === formateur.statut:
+                          return (
+                            <Link variant="action" onClick={resendActivationEmail}>
+                              générer un nouvel envoi de notification courriel
+                            </Link>
+                          );
+                        case UserStatut.ACTIVE === formateur.statut:
+                          return (
+                            <Link variant="action" onClick={resendNotificationEmail}>
+                              générer un nouvel envoi de notification courriel
+                            </Link>
+                          );
+                        default:
+                          return <></>;
+                      }
+                    })()}
                     .
                   </Text>
                   <Text mb={4}>
@@ -458,7 +570,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
             Historique des actions
           </Heading>
 
-          {isResponsableFormateur ? (
+          {isResponsableFormateurCheck ? (
             <History gestionnaire={gestionnaire} formateur={formateur} />
           ) : (
             <History formateur={formateur} />

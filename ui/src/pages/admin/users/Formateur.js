@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Text, Link, Heading, Box, Alert, useDisclosure, Button } from "@chakra-ui/react";
+import { Text, Link, Heading, Box, Alert, useDisclosure, Button, useToast } from "@chakra-ui/react";
 
-import { _get } from "../../../common/httpClient";
+import { _get, _put } from "../../../common/httpClient";
 import { Page } from "../../../common/components/layout/Page";
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
 import { isResponsableFormateur } from "../../../common/utils/getUserType";
@@ -11,6 +11,9 @@ import { History } from "../../gestionnaire/History";
 import { UpdateDelegationModal } from "../../../common/components/admin/modals/UpdateDelegationModal";
 import { DelegationModal } from "../../../common/components/admin/modals/DelegationModal";
 import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
+import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
+import { UserType } from "../../../common/constants/UserType";
+import { UserStatut } from "../../../common/constants/UserStatut";
 
 export const Formateur = () => {
   const navigate = useNavigate();
@@ -38,6 +41,7 @@ export const Formateur = () => {
   const [gestionnaire, setGestionnaire] = useState(undefined);
   const [formateur, setFormateur] = useState(undefined);
   const mounted = useRef(false);
+  const toast = useToast();
 
   const getGestionnaire = useCallback(async () => {
     try {
@@ -81,8 +85,38 @@ export const Formateur = () => {
     }
   }, [siret, navigate, uai]);
 
-  if (!siret) {
-  }
+  const isResponsableFormateurCheck = isResponsableFormateur({
+    gestionnaire,
+    formateur,
+  });
+
+  const etablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement.uai === formateur.uai);
+
+  const resendActivationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/admin/formateurs/${uai}/resendActivationEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${
+          formateur.email ?? etablissement.email
+        }`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await callback();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel d'activation. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [uai, formateur, etablissement, toast, callback]);
 
   if (!gestionnaire) {
     return (
@@ -106,13 +140,6 @@ export const Formateur = () => {
     );
   }
 
-  const isResponsableFormateurCheck = isResponsableFormateur({
-    gestionnaire,
-    formateur,
-  });
-
-  const etablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement.uai === formateur.uai);
-
   if (!etablissement) {
     return;
   }
@@ -132,7 +159,7 @@ export const Formateur = () => {
     >
       <Box my={6}>
         <Text mb={4}>
-          Adresse : {formateur.adresse} – Siret : {formateur.siret ?? "Inconnu"} – UAI : {formateur.uai ?? "Inconnu"}
+          Adresse : {formateur.adresse} – Siret : {formateur.siret ?? "Inconnu"} – UAI : {formateur.uai ?? "Inconnu"}
         </Text>
       </Box>
 
@@ -233,6 +260,39 @@ export const Formateur = () => {
         <Heading as="h3" size="md" mb={4}>
           Statut
         </Heading>
+
+        {(isDiffusionAutorisee || isResponsableFormateurCheck) && (
+          <Box mb={4}>
+            <Text display={"inline-flex"}>
+              <Box mr={2} display="inline-flex">
+                <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />.
+              </Box>
+
+              {UserType.FORMATEUR === formateur.type &&
+                (() => {
+                  switch (true) {
+                    case UserStatut.CONFIRME === formateur.statut:
+                      return (
+                        <Link variant="action" onClick={resendActivationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+                    // case UserStatut.ACTIVE === formateur.statut:
+                    //   return (
+                    //     <Link variant="action" onClick={resendNotificationEmail}>
+                    // Générer un nouvel envoi de notification
+                    //       {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
+                    //         ? "Renvoyer l'email de notification de disponibilité des listes"
+                    //         : "Envoyer l'email de notification de disponibilité des listes"}
+                    //     </Link>
+                    //   );
+                    default:
+                      return <></>;
+                  }
+                })()}
+            </Text>
+          </Box>
+        )}
 
         <Heading as="h4" size="sm" mb={4}>
           Nombre de candidats: {gestionnaire.nombre_voeux ?? formateur.nombre_voeux}

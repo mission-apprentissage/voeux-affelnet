@@ -21,7 +21,7 @@ export const Formateurs = ({ gestionnaire, formateurs, callback }) => {
   }
 
   const avecVoeux = !!gestionnaire.etablissements.find((etablissement) => etablissement.nombre_voeux);
-  // const avecVoeux = false;
+
   return (
     <>
       <Page title={"Listes de candidats aux formations : console d'administration et de téléchargement"}>

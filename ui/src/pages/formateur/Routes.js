@@ -57,18 +57,18 @@ const FormateurRoutes = () => {
       <Routes>
         <Route
           exact
-          path="/"
+          path=""
           element={<Formateur formateur={formateur} gestionnaires={gestionnaires} callback={reload} />}
         />
 
         {/* <Route
           exact
-          path="/gestionnaires"
+          path="gestionnaires"
           element={<Gestionnaires formateur={formateur} gestionnaires={gestionnaires} callback={reload} />}
         />
         <Route
           exact
-          path="/gestionnaires/:uai"
+          path="gestionnaires/:uai"
           element={<Formateur formateur={formateur} gestionnaires={gestionnaires} callback={reload} />}
         /> */}
       </Routes>

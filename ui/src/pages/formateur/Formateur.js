@@ -80,7 +80,12 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
           return (
-            <React.Fragment key={index}>
+            <Box
+              key={index}
+              my={formateur.etablissements.length > 1 ? 18 : 12}
+              borderLeft={formateur.etablissements.length > 1 ? "2px solid" : "none"}
+              paddingLeft={formateur.etablissements.length > 1 ? 4 : 0}
+            >
               <Alert status="info" variant="left-accent" my={6}>
                 <Box>
                   <Text mb={2}>
@@ -195,13 +200,23 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                   <>
                     <Text mb={4}>
                       La liste des vœux exprimés sera rendue disponible entre le vendredi 2 juin et le lundi 5 juin. Un
-                      courriel de notification vous sera envoyé pour vous notifier de cette mise à disposition
-                      (expéditeur du courriel :{" "}
+                      courriel de notification{" "}
+                      {isDiffusionAutorisee ? (
+                        <>vous sera envoyé pour vous </>
+                      ) : (
+                        <>sera envoyé à votre responsable pour le </>
+                      )}{" "}
+                      notifier de cette mise à disposition (expéditeur du courriel :{" "}
                       <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                         {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
                       </Link>
-                      ). Si après le 5 juin vous n’avez reçu aucun courriel, veuillez vérifier vos spam, ou transmettez
-                      un signalement.
+                      ).{" "}
+                      {isDiffusionAutorisee && (
+                        <>
+                          Si après le 5 juin vous n’avez reçu aucun courriel, veuillez vérifier vos spam, ou transmettez
+                          un signalement.
+                        </>
+                      )}
                     </Text>
                     <Text mb={4}>
                       Cette première liste pourra être mise à jour la semaine du 3 juillet, pour prendre en compte les
@@ -211,7 +226,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                   </>
                 )}
               </Box>
-            </React.Fragment>
+            </Box>
           );
         })}
 
