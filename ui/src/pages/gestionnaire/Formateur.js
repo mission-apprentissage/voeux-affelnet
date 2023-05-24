@@ -188,8 +188,10 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
           <Box mb={12}>
             <Text mb={4}>
               Cet organisme formateur est également responsable (signataire des conventions de formation), directement
-              habilité à accéder aux listes de candidats. Personne habilitée à réceptionner les listes :{" "}
-              <GestionnaireEmail gestionnaire={gestionnaire} />.{" "}
+              habilité à accéder aux listes de candidats.
+            </Text>
+            <Text mb={4}>
+              Personne habilitée à réceptionner les listes : <GestionnaireEmail gestionnaire={gestionnaire} />.{" "}
               <Link variant="action" onClick={onOpenUpdateGestionnaireEmailModal}>
                 Modifier l'adresse courriel
               </Link>
@@ -235,10 +237,12 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
 
             {isDiffusionAutorisee ? (
               <>
-                <Text>
+                <Text mb={4}>
                   La délégation des droits de réception des listes de candidats a été activée pour cet organisme
-                  formateur. Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
-                  {etablissement?.email}{" "}
+                  formateur.{" "}
+                </Text>
+                <Text mb={4}>
+                  Personne habilitée à réceptionner les listes au sein de l'organisme formateur : {etablissement?.email}{" "}
                   <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                     (modifier)
                   </Link>

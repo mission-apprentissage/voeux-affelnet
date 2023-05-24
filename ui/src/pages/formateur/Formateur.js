@@ -199,8 +199,8 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                 ) : (
                   <>
                     <Text mb={4}>
-                      La liste des vœux exprimés sera rendue disponible entre le vendredi 2 juin et le lundi 5 juin. Un
-                      courriel de notification{" "}
+                      La liste des vœux exprimés sera rendue disponible dans la semaine du 5 juin. Un courriel de
+                      notification{" "}
                       {isDiffusionAutorisee ? (
                         <>vous sera envoyé pour vous </>
                       ) : (
@@ -213,8 +213,11 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                       ).{" "}
                       {isDiffusionAutorisee && (
                         <>
-                          Si après le 5 juin vous n’avez reçu aucun courriel, veuillez vérifier vos spam, ou transmettez
-                          un signalement.
+                          Vérifiez vos spam si besoin, ou{" "}
+                          <Link href="/support" variant="action">
+                            transmettez un signalement
+                          </Link>
+                          .
                         </>
                       )}
                     </Text>

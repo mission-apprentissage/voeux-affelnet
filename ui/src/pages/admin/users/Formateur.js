@@ -216,9 +216,12 @@ export const Formateur = () => {
 
           {isDiffusionAutorisee ? (
             <>
-              <Text>
+              <Text mb={4}>
                 La délégation des droits de réception des listes de candidats a été activée pour cet organisme
-                formateur. Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
+                formateur.{" "}
+              </Text>
+              <Text mb={4}>
+                Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
                 {formateur?.email ?? etablissement?.email}{" "}
                 <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                   (modifier)

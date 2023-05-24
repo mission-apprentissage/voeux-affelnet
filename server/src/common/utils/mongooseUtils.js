@@ -12,14 +12,14 @@ async function paginate(Model, query, options = {}) {
   const total = await Model.count(query);
   const page = options.page || 1;
   const limit = options.items_par_page || 10;
-  // const sort = options.sort || {};
+  const sort = options.sort || {};
   const skip = (page - 1) * limit;
 
   return {
     find: Model.find(query, options.select || {})
       .skip(skip)
       .limit(limit)
-      // .sort(sort)
+      .sort(sort)
       .lean(),
     pagination: {
       page,

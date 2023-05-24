@@ -42,7 +42,7 @@ export const Users = () => {
         const params = queryString.stringify(
           {
             ...values,
-            sort: JSON.stringify({ type: -1, nombre_voeux: -1 }),
+            sort: JSON.stringify({ type: -1, nombre_voeux: -1, uai: 1 }),
             ...(self?.academie ? { academie: self?.academie.code } : {}),
           },
           { skipNull: true, skipEmptyString: true }
@@ -270,13 +270,13 @@ export const Users = () => {
                                 );
 
                                 return etablissement?.diffusionAutorisee ? (
-                                  <>
+                                  <Box>
                                     {user.email ?? etablissement.email} <ContactDelegueTag />
-                                  </>
+                                  </Box>
                                 ) : (
-                                  <>
+                                  <Box>
                                     {gestionnaire.email} <ContactResponsableTag />
-                                  </>
+                                  </Box>
                                 );
                               })}
                             </Text>

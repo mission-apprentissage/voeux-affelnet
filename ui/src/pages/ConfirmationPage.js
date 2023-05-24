@@ -101,7 +101,7 @@ const ConfirmationPage = () => {
       await _post("/api/confirmation/accept", { email: values.email, actionToken });
       setTitle(<>Dernière étape : veuillez définir votre mot de passe de connexion.</>);
       setMessage(
-        <Alert status="success" variant="left-accent">
+        <Alert status="warning" variant="left-accent">
           <AlertIcon />
           <Box>
             <Text>

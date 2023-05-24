@@ -6,7 +6,7 @@ export const statuses = {
   EN_ATTENTE_DE_DIFFUSION: "En attente de diffusion de campagne",
   EN_ATTENTE_DE_CONFIRMATION: "En attente de confirmation d'adresse courriel",
   EMAIL_CONFIRME_COMPTE_NON_CREE: "Adresse courriel  confirmé, compte non créé",
-  EMAIL_CONFIRME_COMPTE_CREE: "Adresse courriel confirmé, compte créé",
+  EMAIL_CONFIRME_COMPTE_CREE: "Adresse courriel confirmée, compte créé",
   LISTE_NON_TELECHARGEE: "Compte créé, liste non téléchargée",
   LISTE_TELECHARGEE: "Liste téléchargée",
   MISE_A_JOUR_NON_TELECHARGEE: "Mise à jour non téléchargée",

@@ -169,7 +169,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
         type: Joi.string(),
         page: Joi.number().default(1),
         items_par_page: Joi.number().default(10),
-        sort: Joi.string().default(`{ "username": 1 }`),
+        sort: Joi.string().default(JSON.stringify({ type: -1 })),
       }).validateAsync(req.query, { abortEarly: false });
 
       const regex = ".*" + text + ".*";
@@ -266,7 +266,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
           page,
           items_par_page,
           select: { _id: 0, password: 0 },
-          sort: JSON.parse(sort ?? "{}"),
+          sort: JSON.parse(sort ?? JSON.stringify({ type: -1 })),
         }
       );
 
