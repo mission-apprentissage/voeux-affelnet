@@ -2,6 +2,7 @@ export * from "./AccountFill";
 export * from "./AddCircle";
 export * from "./AddFill";
 export * from "./ArrowDownLine";
+export * from "./ArrowLeftLine";
 export * from "./ArrowDropRightLine";
 export * from "./ArrowRightDownLine";
 export * from "./ArrowRightLine";
