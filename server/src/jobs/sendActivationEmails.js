@@ -19,14 +19,14 @@ async function sendActivationEmails(sendEmail, options = {}) {
       ? {}
       : {
           unsubscribe: false,
-          password: { $exists: false },
+          $or: [{ password: { $exists: false } }, { password: null }],
           statut: UserStatut.CONFIRME,
           "emails.templateName": { $not: { $regex: "^activation_.*$" } },
-          $or: [
-            { type: UserType.GESTIONNAIRE },
-            { type: UserType.FORMATEUR },
-            { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
-          ],
+          // $or: [
+          //   { type: UserType.GESTIONNAIRE },
+          //   { type: UserType.FORMATEUR },
+          //   { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
+          // ],
         }),
   };
 

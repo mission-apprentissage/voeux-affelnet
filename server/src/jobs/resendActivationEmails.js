@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 const logger = require("../common/logger");
-const { User, Gestionnaire } = require("../common/model");
+const { User } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 
@@ -22,7 +22,7 @@ async function resendActivationEmails(resendEmail, options = {}) {
       ? {}
       : {
           unsubscribe: false,
-          password: { $exists: false },
+          $or: [{ password: { $exists: false } }, { password: null }],
           statut: UserStatut.CONFIRME,
           ...(options.retry
             ? {
@@ -49,11 +49,14 @@ async function resendActivationEmails(resendEmail, options = {}) {
                   },
                 },
               }),
-          $or: [
-            { type: UserType.GESTIONNAIRE },
-            { type: UserType.FORMATEUR },
-            // { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
-          ],
+
+          type: { $in: [UserType.FORMATEUR, UserType.GESTIONNAIRE] },
+
+          // $or: [
+          //   { type: UserType.GESTIONNAIRE },
+          //   { type: UserType.FORMATEUR },
+          //   // { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
+          // ],
         }),
   };
 
@@ -66,26 +69,26 @@ async function resendActivationEmails(resendEmail, options = {}) {
     .eachAsync(async (user) => {
       const previous = user.emails.find((e) => e.templateName.startsWith("activation_"));
 
-      if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({
-          "etablissements.uai": user.username,
-          "etablissements.diffusionAutorisee": true,
-        });
+      // if (user.type === UserType.FORMATEUR) {
+      //   const gestionnaire = await Gestionnaire.findOne({
+      //     "etablissements.uai": user.username,
+      //     "etablissements.diffusionAutorisee": true,
+      //   });
 
-        if (!gestionnaire) {
-          return;
-        }
+      //   if (!gestionnaire) {
+      //     return;
+      //   }
 
-        const etablissement = gestionnaire.etablissements?.find(
-          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
-        );
+      //   const etablissement = gestionnaire.etablissements?.find(
+      //     (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+      //   );
 
-        user.email = etablissement?.email;
-      }
+      //   user.email = etablissement?.email;
+      // }
 
       try {
         logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);
-        await resendEmail(previous.token);
+        await resendEmail(previous.token, { retry: options.retry, user });
 
         switch (user.type) {
           case UserType.GESTIONNAIRE:
