@@ -3,11 +3,9 @@ const express = require("express");
 const Joi = require("@hapi/joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { Gestionnaire, Formateur } = require("../../common/model");
-const ReferentielApi = require("../../common/api/ReferentielApi");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const referentielApi = new ReferentielApi();
 
   router.get(
     "/api/relation/rechercheGestionnaire",
@@ -16,47 +14,33 @@ module.exports = () => {
         search: Joi.string().required(),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const cfas = await Gestionnaire.find({ $or: [{ siret: search }, { raison_sociale: search }] }, { _id: 0 })
+      const regex = ".*" + search + ".*";
+      const regexQuery = { $regex: regex, $options: "i" };
+
+      const gestionnaire = await Gestionnaire.findOne(
+        { $or: [{ siret: regexQuery }, { uai: regexQuery }, { raison_sociale: regexQuery }] },
+        { _id: 0 }
+      )
         .sort({ raison_sociale: 1 })
         .lean();
 
-      if (!cfas.length) {
-        throw Boom.notFound(`Aucun établissement trouvé pour la recherche "${search}"`);
+      if (!gestionnaire) {
+        throw Boom.notFound(`Aucun organisme responsable trouvé pour la recherche "${search}"`);
       }
 
-      const results = await Promise.all(
-        cfas?.map(async (cfa) => {
-          let gestionnaire;
-          const defaultGestionnaire = cfa; // { siret: cfa.siret, email: cfa.email, statut: cfa.statut };
-          try {
-            gestionnaire = { ...defaultGestionnaire, ...(await referentielApi.getOrganisme(cfa.siret)) };
-          } catch (error) {
-            console.error(error);
-            gestionnaire = defaultGestionnaire;
-          }
-
-          const formateurs = await Promise.all(
-            cfa?.etablissements?.map(async (etablissement) => {
-              let formateur;
-              const defaultFormateur = { uai: etablissement.uai };
-              try {
-                formateur = (await Formateur.findOne({ uai: etablissement.uai })) ?? defaultFormateur;
-              } catch (error) {
-                console.error(error);
-                formateur = defaultFormateur;
-              }
-              return formateur;
-            }) ?? []
-          );
-
-          return {
-            gestionnaire,
-            formateurs,
-          };
-        }) ?? []
+      const formateurs = await Formateur.find(
+        { uai: { $in: gestionnaire.etablissements.map((etablissement) => etablissement.uai) } },
+        { _id: 0 }
       );
 
-      return res.json({ results });
+      if (!formateurs.length) {
+        throw Boom.notFound(`Aucun organisme formateur trouvé pour cet établissement.`);
+      }
+
+      return res.json({
+        gestionnaire,
+        formateurs,
+      });
     })
   );
 
@@ -67,41 +51,31 @@ module.exports = () => {
         search: Joi.string().required(),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const ufa = await Formateur.findOne({ $or: [{ uai: search }, { libelle_etablissement: search }] }, { _id: 0 });
+      const regex = ".*" + search + ".*";
+      const regexQuery = { $regex: regex, $options: "i" };
 
-      if (!ufa) {
-        throw Boom.notFound(`Aucun établissement trouvé pour la recherche "${search}"`);
-      }
-
-      const cfas = await Gestionnaire.find({ "etablissements.uai": ufa.uai }, { _id: 0 })
-        .sort({ raison_sociale: 1 })
-        .lean();
-
-      if (!cfas.length) {
-        throw Boom.notFound(`Aucun organisme gestionnaire trouvé pour cet établissement.`);
-      }
-
-      const results = await Promise.all(
-        cfas?.map(async (cfa) => {
-          let gestionnaire;
-          const defaultGestionnaire = cfa; // { siret: cfa.siret, email: cfa.email, statut: cfa.statut };
-          try {
-            gestionnaire = { ...defaultGestionnaire, ...(await referentielApi.getOrganisme(cfa.siret)) };
-          } catch (error) {
-            console.error(error);
-            gestionnaire = defaultGestionnaire;
-          }
-
-          const formateur = ufa;
-
-          return {
-            gestionnaire,
-            formateur,
-          };
-        }) ?? []
+      const formateur = await Formateur.findOne(
+        { $or: [{ siret: regexQuery }, { uai: regexQuery }, { raison_sociale: regexQuery }] },
+        { _id: 0 }
       );
 
-      return res.json({ results });
+      if (!formateur) {
+        throw Boom.notFound(`Aucun organisme formateur trouvé pour la recherche "${search}"`);
+      }
+
+      const gestionnaires =
+        (await Gestionnaire.find(
+          { siret: { $in: formateur.etablissements.map((etablissement) => etablissement.siret) } },
+          { _id: 0 }
+        )
+          .sort({ raison_sociale: 1 })
+          .lean()) ?? [];
+
+      if (!gestionnaires.length) {
+        throw Boom.notFound(`Aucun organisme responsable trouvé pour cet établissement.`);
+      }
+
+      return res.json({ gestionnaires, formateur });
     })
   );
 
