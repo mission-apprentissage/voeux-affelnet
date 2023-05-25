@@ -5,6 +5,8 @@ const logger = require("../common/logger");
 const { Formateur } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 
+const SIRET_RECENSEMENT = "99999999999999";
+
 async function cleanFormateurs(formateursCsv, options = {}) {
   const stats = {
     total: 0,
@@ -20,7 +22,11 @@ async function cleanFormateurs(formateursCsv, options = {}) {
       on_record: (record) => omitEmpty(record),
     }),
     accumulateData(
-      async (accumulator, { etablissements }) => {
+      async (accumulator, { siret, etablissements }) => {
+        if (siret === SIRET_RECENSEMENT) {
+          return accumulator;
+        }
+
         accumulator = [...new Set([...accumulator, ...etablissements.split(",")])];
 
         return accumulator;

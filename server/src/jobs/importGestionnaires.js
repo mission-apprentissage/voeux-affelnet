@@ -14,6 +14,8 @@ const Joi = require("@hapi/joi");
 const { arrayOf } = require("../common/validators.js");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
 
+const SIRET_RECENSEMENT = "99999999999999";
+
 const schema = Joi.object({
   siret: Joi.string().pattern(siretFormat).required(),
   email: Joi.string().email().required(),
@@ -69,6 +71,10 @@ async function importGestionnaires(relationCsv, options = {}) {
     }),
     writeData(
       async ({ siret, email, etablissements }) => {
+        if (siret === SIRET_RECENSEMENT) {
+          return;
+        }
+
         try {
           const found = await Gestionnaire.findOne({ siret }).lean();
           const formateurs = await buildEtablissements(etablissements, found);

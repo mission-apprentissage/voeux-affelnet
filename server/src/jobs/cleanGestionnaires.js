@@ -5,6 +5,8 @@ const logger = require("../common/logger");
 const { Gestionnaire } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 
+const SIRET_RECENSEMENT = "99999999999999";
+
 async function cleanGestionnaires(formateursCsv, options = {}) {
   const stats = {
     total: 0,
@@ -21,6 +23,10 @@ async function cleanGestionnaires(formateursCsv, options = {}) {
     }),
     accumulateData(
       async (accumulator, { siret }) => {
+        if (siret === SIRET_RECENSEMENT) {
+          return accumulator;
+        }
+
         accumulator = [...new Set([...accumulator, siret])];
 
         return accumulator;
@@ -38,7 +44,11 @@ async function cleanGestionnaires(formateursCsv, options = {}) {
 
   logger.warn(
     "Les gestionnaires suivants vont être supprimés :",
-    JSON.stringify((await Gestionnaire.find({ siret: { $nin: toKeep } })).map((gestionnaire) => gestionnaire.siret))
+    JSON.stringify(
+      (await Gestionnaire.find({ $or: [{ siret: { $nin: toKeep } }, { siret: SIRET_RECENSEMENT }] })).map(
+        (gestionnaire) => gestionnaire.siret
+      )
+    )
   );
 
   if (options.proceed) {

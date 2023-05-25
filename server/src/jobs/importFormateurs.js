@@ -15,6 +15,8 @@ const { siretFormat, uaiFormat } = require("../common/utils/format");
 const { findAcademieByUai } = require("../common/academies");
 const ReferentielApi = require("../common/api/ReferentielApi");
 
+const SIRET_RECENSEMENT = "99999999999999";
+
 const schema = Joi.object({
   siret: Joi.string().pattern(siretFormat).required(),
   etablissements: arrayOf(Joi.string().pattern(uaiFormat)).required(),
@@ -72,6 +74,10 @@ async function importFormateurs(formateursCsv, options = {}) {
     }),
     accumulateData(
       async (accumulator, { siret, etablissements }) => {
+        if (siret === SIRET_RECENSEMENT) {
+          return accumulator;
+        }
+
         etablissements.split(",").forEach((uai) => {
           if (!accumulator.filter((acc) => acc.uai === uai).length) {
             accumulator.push({ uai, etablissements: [siret] });
@@ -103,8 +109,6 @@ async function importFormateurs(formateursCsv, options = {}) {
             })
           )?.organismes;
 
-          // console.log(organismes);
-
           if (organismes?.length > 1) {
             logger.warn(`Multiples organismes trouvés dans le référentiel pour l'UAI ${uai}`);
           }
@@ -113,86 +117,12 @@ async function importFormateurs(formateursCsv, options = {}) {
 
           const updates = omitEmpty({
             etablissements: gestionnaires,
-            // raison_sociale: organisme.raison_sociale,
-            // libelle_ville: organisme.adresse.ville,
-            // adresse: organisme.adresse,
-            // cp: cp[0],
-            // commune: commune[0],
-            // academie: pick(findAcademieByUai(uai), ["code", "nom"]),
-
             siret: organisme?.siret,
             raison_sociale: organisme?.raison_sociale,
             adresse: organisme?.adresse?.label,
             libelle_ville: organisme?.adresse?.localite,
             academie: pick(findAcademieByUai(uai), ["code", "nom"]),
-
-            // raison_sociale: organisme?.raison_sociale || "Inconnue",
-            // academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),
           });
-
-          // const formations = await Formation.find({ uai, siret_uai_gestionnaires: { $in: etablissements } });
-
-          // // console.log(formations);
-
-          // /** Add unique libelle_etablissement to an aray */
-          // const raison_sociale = formations.reduce((acc, value) => {
-          //   if (!acc.includes(value.libelle_etablissement)) {
-          //     acc.push(value.libelle_etablissement);
-          //   }
-          //   return acc;
-          // }, []);
-
-          // if (raison_sociale.length > 1) {
-          //   logger.error(`Multiple libellés pour l'uai ${uai}`);
-          //   return;
-          // }
-
-          // const libelle_ville = formations.reduce((acc, value) => {
-          //   if (!acc.includes(value.libelle_ville)) {
-          //     acc.push(value.libelle_ville);
-          //   }
-          //   return acc;
-          // }, []);
-
-          // const adresse = formations.reduce((acc, value) => {
-          //   if (!acc.includes(value.adresse)) {
-          //     acc.push(value.adresse);
-          //   }
-          //   return acc;
-          // }, []);
-
-          // const cp = formations.reduce((acc, value) => {
-          //   if (!acc.includes(value.cp)) {
-          //     acc.push(value.cp);
-          //   }
-          //   return acc;
-          // }, []);
-
-          // const commune = formations.reduce((acc, value) => {
-          //   if (!acc.includes(value.commune)) {
-          //     acc.push(value.commune);
-          //   }
-          //   return acc;
-          // }, []);
-
-          // if (gestionnaires.length === 0) {
-          //   stats.failed++;
-          //   logger.error(`Le formateur ${uai} n'a aucun établissement gestionnaire`);
-          //   return;
-          // }
-
-          // const updates = omitEmpty({
-          //   etablissements: gestionnaires,
-          //   raison_sociale: raison_sociale[0],
-          //   libelle_ville: libelle_ville[0],
-          //   adresse: adresse[0],
-          //   cp: cp[0],
-          //   commune: commune[0],
-          //   academie: pick(findAcademieByUai(uai), ["code", "nom"]),
-
-          //   // raison_sociale: organisme?.raison_sociale || "Inconnue",
-          //   // academie: pick(findAcademieByCode(organisme?.adresse?.academie.code), ["code", "nom"]),
-          // });
 
           const res = await Formateur.updateOne(
             { uai },
