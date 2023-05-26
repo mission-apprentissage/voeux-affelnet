@@ -123,7 +123,7 @@ export const Gestionnaires = () => {
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <GestionnaireStatut gestionnaire={formateur} formateur={formateur} />
+                          <GestionnaireStatut gestionnaire={gestionnaire} formateur={formateur} />
                         </Text>
                       </Td>
                     </Tr>
