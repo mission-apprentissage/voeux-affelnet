@@ -29,7 +29,7 @@ async function resendActivationEmails(resendEmail, options = {}) {
                 emails: {
                   $elemMatch: {
                     templateName: /^activation_.*/,
-                    "error.type": "fatal",
+                    "error.type": { $in: ["fatal", "soft_bounce"] },
                   },
                 },
               }

@@ -29,7 +29,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
                 emails: {
                   $elemMatch: {
                     templateName: /^notification_.*/,
-                    "error.type": "fatal",
+                    "error.type": { $in: ["fatal", "soft_bounce"] },
                   },
                 },
               }

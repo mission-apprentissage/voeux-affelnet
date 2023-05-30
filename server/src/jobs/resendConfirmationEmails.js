@@ -27,7 +27,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
                 emails: {
                   $elemMatch: {
                     templateName: /^confirmation_.*/,
-                    "error.type": "fatal",
+                    "error.type": { $in: ["fatal", "soft_bounce"] },
                   },
                 },
               }
