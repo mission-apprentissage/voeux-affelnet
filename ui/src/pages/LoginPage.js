@@ -215,7 +215,7 @@ function LoginPage() {
                           <ListItem>
                             Semaine du 5 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
                           </ListItem>
-                          <ListItem>Semaine du 3 juillet : diffusion des listes mises à jour.</ListItem>
+                          <ListItem>Semaine du 19 juin : diffusion des listes mises à jour.</ListItem>
                         </UnorderedList>
                       </Text>
                     </AccordionPanel>

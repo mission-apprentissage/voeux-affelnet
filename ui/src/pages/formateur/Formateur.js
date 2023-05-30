@@ -222,7 +222,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                       )}
                     </Text>
                     <Text mb={4}>
-                      Cette première liste pourra être mise à jour la semaine du 3 juillet, pour prendre en compte les
+                      Cette première liste pourra être mise à jour la semaine du 19 juin, pour prendre en compte les
                       modifications de vœux, les suppressions et les ajouts. Une notification courriel sera également
                       envoyée lors de cette mise à jour.
                     </Text>

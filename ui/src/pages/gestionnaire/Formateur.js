@@ -406,7 +406,7 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                 .
               </Text>
               <Text mb={4}>
-                Une mise à jour pourra être communiquée la semaine du 3 juillet, pour prendre les éventuels ajouts. Une
+                Une mise à jour pourra être communiquée la semaine du 19 juin, pour prendre les éventuels ajouts. Une
                 notification courriel sera alors envoyée.
               </Text>
             </>

@@ -305,7 +305,7 @@ export const AnomaliePage = () => {
 
               <ListItem>
                 <Text mb={4}>
-                  Phase 3 : dans la semaine du 3 juillet, diffusion par courriel des notifications de mise à jour des
+                  Phase 3 : dans la semaine du 19 juin, diffusion par courriel des notifications de mise à jour des
                   listes de candidats (le cas échéant). Une seule mise à jour sera diffusée en 2023, contre deux en
                   2022. Les mises à jour peuvent correspondre à des suppressions, ajouts ou modifications de
                   candidatures.
