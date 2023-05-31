@@ -53,6 +53,10 @@ const schema = new Schema({
         voeux_date: {
           type: Date,
         },
+        nombre_voeux: {
+          type: Number,
+          default: 0,
+        },
         academie: academieSchema,
       }),
     ],

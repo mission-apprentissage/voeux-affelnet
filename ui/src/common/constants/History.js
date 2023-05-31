@@ -73,7 +73,7 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_SENT,
     {
       component: ({ email }) =>
-        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à l'organisme ${email}.`,
+        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
     },
   ],
   [
@@ -137,24 +137,74 @@ export const FormateurHistoryItems = new Map([
   [FormateurActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT, { component: () => `` }],
   [FormateurActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT, { component: () => `` }],
   [FormateurActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT, { component: () => `` }],
-  [FormateurActions.LIST_AVAILABLE, { component: () => `` }],
-  [FormateurActions.LIST_DOWNLOADED_BY_FORMATEUR, { component: () => `` }],
-  [FormateurActions.LIST_DOWNLOADED_BY_RESPONSABLE, { component: () => `` }],
+  [
+    FormateurActions.LIST_AVAILABLE,
+    {
+      component: ({ responsable, nombre_voeux }) =>
+        `Une liste de ${nombre_voeux} candidat${
+          nombre_voeux > 1 ? "s" : ""
+        } aux formations proposées par l'établissement formateur pour le compte de l'organisme responsable ${
+          responsable?.siret
+        } est disponible.`,
+    },
+  ],
+  [
+    FormateurActions.LIST_DOWNLOADED_BY_FORMATEUR,
+    {
+      component: ({ responsable }) =>
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable ${responsable?.siret} a été téléchargée par l'organisme formateur.`,
+    },
+  ],
+  [
+    FormateurActions.LIST_DOWNLOADED_BY_RESPONSABLE,
+    {
+      component: ({ responsable, formateur }) =>
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable ${responsable?.siret} a été téléchargée par l'organisme responsable.`,
+    },
+  ],
+
   [FormateurActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT, { component: () => `` }],
   [FormateurActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT, { component: () => `` }],
   [FormateurActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT, { component: () => `` }],
-  [FormateurActions.UPDATED_LIST_AVAILABLE, { component: () => `` }],
+  [
+    FormateurActions.UPDATED_LIST_AVAILABLE,
+    {
+      component: ({ responsable, nombre_voeux }) =>
+        `Une liste mise à jour de ${nombre_voeux} candidat${
+          nombre_voeux > 1 ? "s" : ""
+        } aux formations proposées par l'établissement formateur pour le compte de l'organisme responsable ${
+          responsable?.siret
+        } est disponible.`,
+    },
+  ],
   [FormateurActions.UPDATED_LIST_DOWNLOADED_BY_FORMATEUR, { component: () => `` }],
   [FormateurActions.UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE, { component: () => `` }],
+  [
+    FormateurActions.UPDATED_LIST_AVAILABLE,
+    {
+      component: ({ responsable, nombre_voeux }) =>
+        `Une liste mise à jour  de ${nombre_voeux} candidat${
+          nombre_voeux > 1 ? "s" : ""
+        } aux formations proposées par l'établissement formateur pour le compte de l'organisme responsable ${
+          responsable?.siret
+        } est disponible.`,
+    },
+  ],
+  [
+    FormateurActions.UPDATED_LIST_DOWNLOADED_BY_FORMATEUR,
+    {
+      component: ({ responsable }) =>
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable ${responsable?.siret} a été téléchargée par l'organisme formateur.`,
+    },
+  ],
+  [
+    FormateurActions.UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE,
+    {
+      component: ({ responsable, formateur }) =>
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable ${responsable?.siret} a été téléchargée par l'organisme responsable.`,
+    },
+  ],
 ]);
-
-// "DELEGATION_CANCELLED_BY_ADMIN";"Formateur";"[Email super-admin] a annulé la délégation de droits qui avait été accordée à [mail délégué]. Le responsable a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme."
-// "DELEGATION_CANCELLED_BY_RESPONSABLE";"Formateur";"[Email responsable] a annulé la délégation de droits qui avait été accordée à [mail délégué], et a récupéré le rôle exclusif d'accès aux listes de vœux pour cet organisme"
-// "DELEGATION_UPDATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"
-// "DELEGATION_UPDATED_BY_RESPONSABLE";"Formateur";"[Email responsable] a modifié la délégation de droits pour cet organisme. Nouvelle adresse : [email] (ancienne adesse : [email]). La nouvelle personne a été notifiée par courriel pour confirmer son adresse."
-// "DELEGATION_CREATED_BY_ADMIN";"Formateur";"[Email super-admin] a délégué les droits de réception des listes pour cet organisme à [email]"
-// "DELEGATION_CREATED_BY_RESPONSABLE";"Formateur";"[Email responsable] a délégué les droits de réception des listes pour cet organisme à [email]"
-//
 
 export const ResponsableActions = {
   ACCOUNT_ACTIVATED: "RESPONSABLE_ACCOUNT_ACTIVATED",
@@ -209,7 +259,7 @@ export const ResponsableHistoryItems = new Map([
     ResponsableActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_SENT,
     {
       component: ({ email }) =>
-        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à l'organisme ${email}.`,
+        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
     },
   ],
   [

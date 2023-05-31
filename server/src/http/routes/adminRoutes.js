@@ -54,7 +54,7 @@ const fillGestionnaire = async (gestionnaire, admin) => {
         .filter((etablissement) => filterForAcademie(etablissement, admin))
         .map(async (etablissement) => {
           const voeuxFilter = {
-            "etablissement_accueil.uai": etablissement.uai,
+            "etablissement_formateur.uai": etablissement.uai,
             "etablissement_gestionnaire.siret": gestionnaire.siret,
           };
 
@@ -63,7 +63,7 @@ const fillGestionnaire = async (gestionnaire, admin) => {
           return {
             ...etablissement,
 
-            nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+            // nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
 
             first_date_voeux: etablissement.uai
               ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
@@ -85,7 +85,7 @@ const fillFormateur = async (formateur, admin) => {
   }
 
   const voeuxFilter = {
-    "etablissement_accueil.uai": formateur.uai,
+    "etablissement_formateur.uai": formateur.uai,
   };
 
   return {
@@ -98,7 +98,7 @@ const fillFormateur = async (formateur, admin) => {
         // .filter((etablissement) => filterForAcademie(etablissement, admin))
         .map(async (etablissement) => {
           const voeuxFilter = {
-            "etablissement_accueil.uai": formateur.uai,
+            "etablissement_formateur.uai": formateur.uai,
             "etablissement_gestionnaire.siret": etablissement.siret,
           };
 
@@ -107,7 +107,7 @@ const fillFormateur = async (formateur, admin) => {
           return {
             ...etablissement,
 
-            nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+            // nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
 
             first_date_voeux: etablissement.siret
               ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
@@ -299,15 +299,15 @@ module.exports = ({ sendEmail, resendEmail }) => {
                       .map(async (etablissement) => ({
                         ...etablissement,
 
-                        nombre_voeux: await Voeu.countDocuments({
-                          "etablissement_gestionnaire.siret": user.siret,
-                          "etablissement_accueil.uai": etablissement.uai,
-                        }),
+                        // nombre_voeux: await Voeu.countDocuments({
+                        //   "etablissement_gestionnaire.siret": user.siret,
+                        //   "etablissement_formateur.uai": etablissement.uai,
+                        // }),
                       })) ?? []
                   ),
                 }
               : {
-                  nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": user.uai }),
+                  nombre_voeux: await Voeu.countDocuments({ "etablissement_formateur.uai": user.uai }),
 
                   gestionnaires: await Promise.all(
                     (
@@ -328,10 +328,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
                       .map(async (etablissement) => ({
                         ...etablissement,
 
-                        nombre_voeux: await Voeu.countDocuments({
-                          "etablissement_gestionnaire.siret": etablissement.siret,
-                          "etablissement_accueil.uai": user.uai,
-                        }),
+                        // nombre_voeux: await Voeu.countDocuments({
+                        //   "etablissement_gestionnaire.siret": etablissement.siret,
+                        //   "etablissement_formateur.uai": user.uai,
+                        // }),
                       })) ?? []
                   ),
                 }),
@@ -473,7 +473,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                     .filter((etablissement) => filterForAcademie(etablissement, admin))
                     .map(async (etablissement) => {
                       const voeuxFilter = {
-                        "etablissement_accueil.uai": formateur.uai,
+                        "etablissement_formateur.uai": formateur.uai,
                         "etablissement_gestionnaire.siret": etablissement.siret,
                       };
 
@@ -824,7 +824,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
           statut: (data) => data.statut,
           nb_voeux: async (data) => {
             const count = await Voeu.countDocuments({
-              "etablissement_accueil.uai": { $in: data?.etablissements.map((e) => e.uai) },
+              "etablissement_formateur.uai": { $in: data?.etablissements.map((e) => e.uai) },
             });
             return count ? count : "0";
           },

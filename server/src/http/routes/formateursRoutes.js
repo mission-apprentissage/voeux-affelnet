@@ -114,20 +114,12 @@ module.exports = ({ users }) => {
     ensureIs("Formateur"),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
-      // const formateur = await Formateur.findOne({ uai });
 
       const { siret } = await Joi.object({
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const filename = `${siret}-${uai}.csv`;
-      // TODO : filtrer sur les délégation autorisées.
-
-      // await Promise.all(
-      //   formateur?.etablissements?.map(
-      //     async (etablissement) => await markVoeuxAsDownloadedByFormateur(etablissement.siret, uai)
-      //   )
-      // );
 
       await markVoeuxAsDownloadedByFormateur(siret, uai);
 

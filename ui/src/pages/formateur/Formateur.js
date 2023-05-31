@@ -126,8 +126,8 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                 <Heading as="h4" size="sm" mb={4}>
                   {hasUpdatedVoeux ? (
                     <>
-                      Une liste mise à jour de {etablissement.nombre_voeux} candidats est disponible pour cet
-                      établissement.
+                      Une liste mise à jour de {etablissement.nombre_voeux} candidat
+                      {etablissement.nombre_voeux > 1 ? "s" : ""} est disponible pour cet établissement.
                     </>
                   ) : (
                     <>Nombre de candidats: {etablissement.nombre_voeux}</>

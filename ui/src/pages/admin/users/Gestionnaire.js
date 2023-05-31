@@ -99,6 +99,30 @@ export const Gestionnaire = () => {
     }
   }, [siret, gestionnaire, toast, reload]);
 
+  // const resendNotificationEmail = useCallback(async () => {
+  //   try {
+  //     await _put(`/api/admin/gestionnaires/${siret}/resendNotificationEmail`);
+
+  //     toast({
+  //       title: "Courriel envoyé",
+  //       description: `Le courriel de notification de listes téléchargeables a été renvoyé à l'adresse ${gestionnaire.email}`,
+  //       status: "success",
+  //       duration: 9000,
+  //       isClosable: true,
+  //     });
+  //     await reload();
+  //   } catch (error) {
+  //     toast({
+  //       title: "Impossible d'envoyer le courriel",
+  //       description:
+  //         "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de listes téléchargeables . Veuillez contacter le support.",
+  //       status: "error",
+  //       duration: 9000,
+  //       isClosable: true,
+  //     });
+  //   }
+  // }, [siret, gestionnaire, toast, reload]);
+
   useEffect(() => {
     const run = async () => {
       if (!mounted.current) {
@@ -185,27 +209,18 @@ export const Gestionnaire = () => {
                       return (
                         <Link variant="action" onClick={resendConfirmationEmail}>
                           Générer un nouvel envoi de notification
-                          {/* {gestionnaire.emails?.find((email) => email.templateName.startsWith("confirmation_"))
-                          ? "Renvoyer l'email de confirmation de l'adresse courriel"
-                          : "Envoyer l'email de confirmation de l'adresse courriel"} */}
                         </Link>
                       );
                     case UserStatut.CONFIRME === gestionnaire.statut:
                       return (
                         <Link variant="action" onClick={resendActivationEmail}>
                           Générer un nouvel envoi de notification
-                          {/* {gestionnaire.emails?.find((email) => email.templateName.startsWith("activation_"))
-                          ? "Renvoyer l'email d'activation du compte"
-                          : "Envoyer l'email d'activation du compte"} */}
                         </Link>
                       );
                     // case UserStatut.ACTIVE === gestionnaire.statut:
                     //   return (
                     //     <Link variant="action" onClick={resendNotificationEmail}>
-                    // Générer un nouvel envoi de notification
-                    //       {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
-                    //         ? "Renvoyer l'email de notification de disponibilité des listes"
-                    //         : "Envoyer l'email de notification de disponibilité des listes"}
+                    //       Générer un nouvel envoi de notification
                     //     </Link>
                     //   );
                     default:

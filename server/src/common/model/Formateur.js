@@ -43,6 +43,13 @@ const schema = new Schema({
           type: String,
           index: true,
         },
+        voeux_date: {
+          type: Date,
+        },
+        nombre_voeux: {
+          type: Number,
+          default: 0,
+        },
         academie: academieSchema,
       }),
     ],

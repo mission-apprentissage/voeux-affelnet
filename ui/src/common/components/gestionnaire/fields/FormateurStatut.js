@@ -154,11 +154,12 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
                 new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
           ): {
           return (
-            <>
-              <Button variant="primary" onClick={downloadVoeuxAndReload}>
-                Télécharger
-              </Button>
-            </>
+            <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />
+            // <>
+            //   <Button variant="primary" onClick={downloadVoeuxAndReload}>
+            //     Télécharger
+            //   </Button>
+            // </>
           );
         }
         case voeuxDisponible &&
@@ -179,11 +180,13 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
                 new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
             )): {
           return (
-            <>
-              <Button variant="primary" onClick={downloadVoeuxAndReload}>
-                Télécharger
-              </Button>
-            </>
+            <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />
+            // <>
+
+            //   <Button variant="primary" onClick={downloadVoeuxAndReload}>
+            //     Télécharger
+            //   </Button>
+            // </>
           );
         }
         case !voeuxDisponible: {

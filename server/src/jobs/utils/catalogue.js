@@ -21,11 +21,14 @@ const catalogue = async () => {
       try {
         const { formations } = await catalogueApi.getFormations(
           {
-            published: true,
-            ...(cleMinistereEducatif ? { cle_ministere_educatif: cleMinistereEducatif } : {}),
-            ...(siretGestionnaire ? { etablissement_gestionnaire_siret: siretGestionnaire } : {}),
-            uai_formation: uai,
-            affelnet_published_date: { $ne: null },
+            ...(cleMinistereEducatif
+              ? { cle_ministere_educatif: cleMinistereEducatif }
+              : {
+                  published: true,
+                  affelnet_published_date: { $ne: null },
+                  ...(siretGestionnaire ? { etablissement_gestionnaire_siret: siretGestionnaire } : {}),
+                  uai_formation: uai,
+                }),
           },
           {
             limit: 100,

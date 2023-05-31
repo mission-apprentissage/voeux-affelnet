@@ -118,6 +118,32 @@ export const Formateur = () => {
     }
   }, [uai, formateur, etablissement, toast, callback]);
 
+  // const resendNotificationEmail = useCallback(async () => {
+  //   try {
+  //     await _put(`/api/admin/formateurs/${uai}/resendNotificationEmail`);
+
+  //     toast({
+  //       title: "Courriel envoyé",
+  //       description: `Le courriel de notification de listes téléchargeables a été renvoyé à l'adresse ${
+  //         formateur.email ?? etablissement.email
+  //       }`,
+  //       status: "success",
+  //       duration: 9000,
+  //       isClosable: true,
+  //     });
+  //     await callback();
+  //   } catch (error) {
+  //     toast({
+  //       title: "Impossible d'envoyer le courriel",
+  //       description:
+  //         "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de listes téléchargeables . Veuillez contacter le support.",
+  //       status: "error",
+  //       duration: 9000,
+  //       isClosable: true,
+  //     });
+  //   }
+  // }, [uai, formateur, etablissement, toast, callback]);
+
   if (!gestionnaire) {
     return (
       <>
@@ -271,34 +297,30 @@ export const Formateur = () => {
                 <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />.
               </Box>
 
-              {UserType.FORMATEUR === formateur.type &&
-                (() => {
-                  switch (true) {
-                    case UserStatut.CONFIRME === formateur.statut:
-                      return (
-                        <Link variant="action" onClick={resendActivationEmail}>
-                          Générer un nouvel envoi de notification
-                        </Link>
-                      );
-                    // case UserStatut.ACTIVE === formateur.statut:
-                    //   return (
-                    //     <Link variant="action" onClick={resendNotificationEmail}>
-                    // Générer un nouvel envoi de notification
-                    //       {gestionnaire.emails?.find((email) => email.templateName.startsWith("notification_"))
-                    //         ? "Renvoyer l'email de notification de disponibilité des listes"
-                    //         : "Envoyer l'email de notification de disponibilité des listes"}
-                    //     </Link>
-                    //   );
-                    default:
-                      return <></>;
-                  }
-                })()}
+              {(() => {
+                switch (true) {
+                  case UserStatut.CONFIRME === formateur.statut:
+                    return (
+                      <Link variant="action" onClick={resendActivationEmail}>
+                        Générer un nouvel envoi de notification
+                      </Link>
+                    );
+                  // case UserStatut.ACTIVE === formateur.statut && hasVoeux:
+                  //   return (
+                  //     <Link variant="action" onClick={resendNotificationEmail}>
+                  //       Générer un nouvel envoi de notification
+                  //     </Link>
+                  //   );
+                  default:
+                    return <></>;
+                }
+              })()}
             </Text>
           </Box>
         )}
 
         <Heading as="h4" size="sm" mb={4}>
-          Nombre de candidats: {gestionnaire.nombre_voeux ?? formateur.nombre_voeux}
+          Nombre de candidats: {etablissement.nombre_voeux}
         </Heading>
 
         {hasVoeux && (

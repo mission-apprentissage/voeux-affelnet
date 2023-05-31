@@ -12,7 +12,8 @@ const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable
 const { findAcademieByUai } = require("../common/academies.js");
 const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 const { getGestionnaireSiret } = require("./utils/getGestionnaireSiret");
-const { catalogue } = require("./utils/getRelationsFromOffreDeFormation");
+const { catalogue } = require("./utils/catalogue");
+const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/formateur");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -76,20 +77,20 @@ const schema = Joi.object({
   }).required(),
 });
 
-function fixCodePostal(code) {
+const fixCodePostal = (code) => {
   return code && code.length === 4 ? `0${code}` : code;
-}
+};
 
-function fixPhoneNumber(phone) {
+const fixPhoneNumber = (phone) => {
   return phone ? phone.replace(/^\+[0-9]{2}/, "0").replace(/ /, "") : phone;
-}
+};
 
-async function findFormationDiplome(code) {
+const findFormationDiplome = async (code) => {
   const mef = (code || "").substring(0, 10);
   return Mef.findOne({ mef });
-}
+};
 
-function buildAdresseLibelle(line) {
+const buildAdresseLibelle = (line) => {
   return [
     line["Adresse de l'élève - Ligne 1"],
     line["Adresse de l'élève - Ligne 2"],
@@ -103,15 +104,15 @@ function buildAdresseLibelle(line) {
     .join(" ")
     .replace(/\s\s+/g, " ")
     .trim();
-}
+};
 
-function pickAcademie(academie) {
+const pickAcademie = (academie) => {
   const res = pick(academie, ["code", "nom"]);
   return isEmpty(res) ? null : res;
-}
+};
 
-function parseVoeuxCsv(source) {
-  const { findFormateurUai } = catalogue();
+const parseVoeuxCsv = async (source) => {
+  const { findFormateurUai } = await catalogue();
 
   return oleoduc(
     source,
@@ -130,6 +131,17 @@ function parseVoeuxCsv(source) {
       const academieDuVoeu = pickAcademie(findAcademieByName(line["Académie possédant le dossier élève"]));
       const academieOrigine = pickAcademie(findAcademieByUai(uaiCIO || uaiEtablissementOrigine));
       const academieAccueil = pickAcademie(findAcademieByUai(uaiEtablissementAccueil));
+
+      const siretGestionnaire = getGestionnaireSiret(line["SIRET UAI gestionnaire"], line["clé ministère éducatif"]);
+      // const uaiGestionnaire = await Gestionnaire.findOne({ siret: siretGestionnaire })?.lean()?.uai;
+      const uaiFormateur =
+        (
+          await findFormateurUai({
+            uai: uaiEtablissementAccueil,
+            cleMinistereEducatif: line["clé ministère éducatif"],
+            siretGestionnaire: siretGestionnaire,
+          })
+        )?.[0]?.etablissement_formateur_uai ?? uaiEtablissementAccueil;
 
       return deepOmitEmpty({
         academie: academieDuVoeu,
@@ -178,25 +190,18 @@ function parseVoeuxCsv(source) {
           academie: academieAccueil || academieDuVoeu,
         },
         etablissement_formateur: {
-          uai:
-            (
-              await findFormateurUai({
-                uai: uaiEtablissementAccueil,
-                cleMinistereEducatif: line["clé ministère éducatif"],
-                siretGestionnaire: getGestionnaireSiret(line["SIRET UAI gestionnaire"], line["clé ministère éducatif"]),
-              })
-            )?.[0]?.etablissement_formateur_uai ?? uaiEtablissementAccueil,
+          uai: uaiFormateur,
         },
         etablissement_gestionnaire: {
-          siret: getGestionnaireSiret(line["SIRET UAI gestionnaire"], line["clé ministère éducatif"]),
+          siret: siretGestionnaire,
         },
       });
     }),
     { promisify: false }
   );
-}
+};
 
-async function validate(data) {
+const validate = async (data) => {
   try {
     await schema.validateAsync(data, { abortEarly: false });
     return [];
@@ -205,9 +210,9 @@ async function validate(data) {
       return { path: d.path.join("."), type: d.type };
     }, []);
   }
-}
+};
 
-function hasAnomaliesOnMandatoryFields(anomalies) {
+const hasAnomaliesOnMandatoryFields = (anomalies) => {
   return (
     intersection(
       anomalies.flatMap((d) => d.path),
@@ -222,9 +227,9 @@ function hasAnomaliesOnMandatoryFields(anomalies) {
       ]
     ).length > 0
   );
-}
+};
 
-async function importVoeux(voeuxCsvStream, options = {}) {
+const importVoeux = async (voeuxCsvStream, options = {}) => {
   const stats = {
     total: 0,
     created: 0,
@@ -237,10 +242,19 @@ async function importVoeux(voeuxCsvStream, options = {}) {
   const updatedFields = new Set();
   const importDate = options.importDate || new Date();
 
+  logger.info(`Import des listes de candidats...`);
+
+  const relations = new Set();
+
   await oleoduc(
-    parseVoeuxCsv(voeuxCsvStream),
+    await (async () => await parseVoeuxCsv(voeuxCsvStream))(),
     writeData(
       async (data) => {
+        const key = JSON.stringify({
+          siret: data.etablissement_gestionnaire.siret,
+          uai: data.etablissement_formateur.uai,
+        });
+
         stats.total++;
         try {
           const anomalies = await validate(data);
@@ -262,7 +276,6 @@ async function importVoeux(voeuxCsvStream, options = {}) {
           };
           const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
           const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
-          const etablissementAccueilUAI = data.etablissement_accueil.uai;
 
           const res = await Voeu.replaceOne(
             query,
@@ -280,9 +293,13 @@ async function importVoeux(voeuxCsvStream, options = {}) {
           if (res.upsertedCount) {
             logger.info(`Voeu ajouté`, {
               query,
-              etablissement_accueil: etablissementAccueilUAI,
+              etablissement_accueil: data.etablissement_accueil.uai,
             });
             stats.created++;
+          }
+
+          if (!relations.has(key)) {
+            relations.add(key);
           }
 
           if (!isEmpty(differences)) {
@@ -291,7 +308,10 @@ async function importVoeux(voeuxCsvStream, options = {}) {
               Object.keys(differences).forEach((key) => updatedFields.add(key));
             }
 
-            await markVoeuxAsAvailable(etablissementAccueilUAI, importDate);
+            await markVoeuxAsAvailable(
+              { siret: data.etablissement_gestionnaire.siret, uai: data.etablissement_formateur.uai },
+              importDate
+            );
           }
         } catch (e) {
           logger.error(`Import du voeu impossible`, stats.total, e);
@@ -313,10 +333,37 @@ async function importVoeux(voeuxCsvStream, options = {}) {
     );
   }
 
+  await Promise.all(
+    [...relations].map(async (relation) => {
+      const { siret, uai } = JSON.parse(relation);
+
+      // const formateur = await Formateur.findOne({ uai }).lean();
+      // const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+      const nombre_voeux = await Voeu.countDocuments({
+        "etablissement_formateur.uai": uai,
+        "etablissement_gestionnaire.siret": siret,
+      });
+
+      console.log({ siret, uai, nombre_voeux });
+
+      if (
+        await Voeu.countDocuments({
+          "etablissement_formateur.uai": uai,
+          "etablissement_gestionnaire.siret": siret,
+          "_meta.import_dates.1": { $exists: true },
+        })
+      ) {
+        return await saveUpdatedListAvailable({ uai, siret, nombre_voeux });
+      } else {
+        return await saveListAvailable({ uai, siret, nombre_voeux });
+      }
+    })
+  );
+
   return {
     ...stats,
     updated_fields: sortedUniq([...updatedFields]),
   };
-}
+};
 
 module.exports = importVoeux;
