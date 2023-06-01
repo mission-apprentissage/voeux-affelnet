@@ -1,17 +1,15 @@
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
-const { User } = require("../common/model");
-const { every } = require("lodash");
+const { User, Gestionnaire } = require("../common/model");
+const { allFilesAsAlreadyBeenDownloaded } = require("../common/utils/cfaUtils");
 
-function allFilesAsAlreadyBeenDownloaded(gestionnaire) {
-  return !!gestionnaire.voeux_telechargements.find((download) => {
-    return every(
-      gestionnaire.etablissements.map((e) => e.voeux_date),
-      (date) => download.date > date
-    );
-  });
-}
+const {
+  saveListAvailableEmailAutomaticSent: saveAccountNotificationEmailAutomaticSentForResponsable,
+} = require("../common/actions/history/responsable");
+const {
+  saveListAvailableEmailAutomaticSent: saveAccountNotificationEmailAutomaticSentForFormateur,
+} = require("../common/actions/history/formateur");
 
 async function sendNotificationEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -23,12 +21,20 @@ async function sendNotificationEmails(sendEmail, options = {}) {
       ? {}
       : {
           unsubscribe: false,
-          statut: UserStatut.ACTIVE,
+          statut: { $nin: [UserStatut.NON_CONCERNE] },
 
           "etablissements.voeux_date": { $exists: true },
           "emails.templateName": { $not: { $regex: "^notification_.*$" } },
 
-          $or: [{ type: UserType.GESTIONNAIRE }, { type: UserType.FORMATEUR }],
+          $or: [
+            {
+              type: UserType.GESTIONNAIRE,
+              etablissements: {
+                $elemMatch: { diffusionAutorisee: false, voeux_date: { $exists: true }, nombre_voeux: { $gt: 0 } },
+              },
+            },
+            { type: UserType.FORMATEUR },
+          ],
         }),
   };
 
@@ -37,7 +43,24 @@ async function sendNotificationEmails(sendEmail, options = {}) {
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      if (allFilesAsAlreadyBeenDownloaded(user)) {
+      if (user.type === UserType.FORMATEUR) {
+        const gestionnaire = await Gestionnaire.findOne({
+          "etablissements.uai": user.username,
+          "etablissements.diffusionAutorisee": true,
+        });
+
+        if (!gestionnaire) {
+          return;
+        }
+
+        const etablissement = gestionnaire.etablissements?.find(
+          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+        );
+
+        user.email = user.email || etablissement?.email;
+      }
+
+      if (await allFilesAsAlreadyBeenDownloaded(user)) {
         return;
       }
 
@@ -48,6 +71,18 @@ async function sendNotificationEmails(sendEmail, options = {}) {
         if (limit > stats.sent) {
           logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
           await sendEmail(user, templateName);
+
+          switch (user.type) {
+            case UserType.GESTIONNAIRE:
+              await saveAccountNotificationEmailAutomaticSentForResponsable(user);
+              break;
+            case UserType.FORMATEUR:
+              await saveAccountNotificationEmailAutomaticSentForFormateur(user);
+              break;
+            default:
+              break;
+          }
+
           stats.sent++;
         }
       } catch (e) {

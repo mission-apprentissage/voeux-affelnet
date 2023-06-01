@@ -7,7 +7,7 @@ async function markVoeuxAsAvailable({ siret, uai }, voeuxDate) {
     "etablissement_formateur.uai": uai,
   });
 
-  console.log(`${siret} / ${uai} : ${nombre_voeux} voeux`);
+  logger.info(`${siret} / ${uai} : ${nombre_voeux} voeux`);
 
   const { matchedCount: matchedGestionnaireCount } = await Gestionnaire.updateOne(
     { siret, "etablissements.uai": uai },

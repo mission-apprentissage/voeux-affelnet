@@ -206,6 +206,7 @@ cli
 
 cli
   .command("sendNotificationEmails")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .action((options) => {
     runScript(({ sendEmail }) => {
@@ -215,8 +216,10 @@ cli
 
 cli
   .command("resendNotificationEmails")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--retry", "Renvoie les emails en erreur", false)
+  .option("--max <max>", "Nombre de relances maximum", parseInt)
   .action((options) => {
     runScript(({ resendEmail }) => {
       return resendNotificationEmails(resendEmail, options);

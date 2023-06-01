@@ -8,7 +8,7 @@ const { sanitize } = require("../utils/sanitizeUtils");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkUsernameAndPassword } = authMiddleware();
+  const { checkUsernameAndPassword, checkActionToken } = authMiddleware();
 
   router.post(
     "/api/login",
@@ -32,6 +32,24 @@ module.exports = () => {
         throw Boom.notFound(`L'identifiant ${payload.username} n'existe pas`);
       }
       return res.json("L'identifiant existe");
+    })
+  );
+
+  router.get(
+    "/api/login/status",
+    checkActionToken(),
+    // ensureIsOneOf(["Gestionnaire", "Formateur"]),
+    tryCatch(async (req, res) => {
+      const user = req.user;
+
+      await User.findOneAndUpdate(
+        { username: user.username },
+        {
+          $inc: { "_meta.countNotificationLinkClick": 1 },
+        }
+      );
+
+      return res.json({ email: user.email, type: user.type, statut: user.statut });
     })
   );
 

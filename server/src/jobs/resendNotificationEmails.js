@@ -1,17 +1,18 @@
 const logger = require("../common/logger");
 const { DateTime } = require("luxon");
-const { User } = require("../common/model");
-const { every } = require("lodash");
+const { User, Gestionnaire } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
+const { allFilesAsAlreadyBeenDownloaded } = require("../common/utils/cfaUtils");
+const { UserType } = require("../common/constants/UserType");
 
-function allFilesAsAlreadyBeenDownloaded(cfa) {
-  return !!cfa.voeux_telechargements.find((download) => {
-    return every(
-      cfa.etablissements.map((e) => e.voeux_date),
-      (date) => download.date > date
-    );
-  });
-}
+const {
+  saveListAvailableEmailManualResent: saveAccountNotificationEmailManualResentAsResponsable,
+  saveListAvailableEmailAutomaticResent: saveAccountNotificationEmailAutomaticResentAsResponsable,
+} = require("../common/actions/history/responsable");
+const {
+  saveListAvailableEmailManualResent: saveAccountNotificationEmailManualResentAsFormateur,
+  saveListAvailableEmailAutomaticResent: saveAccountNotificationEmailAutomaticResentAsFormateur,
+} = require("../common/actions/history/formateur");
 
 async function resendNotificationEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -22,8 +23,10 @@ async function resendNotificationEmails(resendEmail, options = {}) {
       ? {}
       : {
           unsubscribe: false,
-          statut: UserStatut.ACTIVE,
+          statut: { $nin: [UserStatut.NON_CONCERNE] },
+
           "etablissements.voeux_date": { $exists: true },
+
           ...(options.retry
             ? {
                 emails: {
@@ -52,7 +55,24 @@ async function resendNotificationEmails(resendEmail, options = {}) {
     .lean()
     .cursor()
     .eachAsync(async (user) => {
-      if (allFilesAsAlreadyBeenDownloaded(user) && !options.force) {
+      if (user.type === UserType.FORMATEUR) {
+        const gestionnaire = await Gestionnaire.findOne({
+          "etablissements.uai": user.username,
+          "etablissements.diffusionAutorisee": true,
+        });
+
+        if (!gestionnaire) {
+          return;
+        }
+
+        const etablissement = gestionnaire.etablissements?.find(
+          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+        );
+
+        user.email = user.email || etablissement?.email;
+      }
+
+      if (await allFilesAsAlreadyBeenDownloaded(user)) {
         return;
       }
 
@@ -63,6 +83,22 @@ async function resendNotificationEmails(resendEmail, options = {}) {
         if (limit > stats.sent) {
           logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);
           await resendEmail(previous.token);
+
+          switch (user.type) {
+            case UserType.GESTIONNAIRE:
+              options.sender
+                ? await saveAccountNotificationEmailManualResentAsResponsable(user, options.sender)
+                : await saveAccountNotificationEmailAutomaticResentAsResponsable(user);
+              break;
+            case UserType.FORMATEUR:
+              options.sender
+                ? await saveAccountNotificationEmailManualResentAsFormateur(user, options.sender)
+                : await saveAccountNotificationEmailAutomaticResentAsFormateur(user);
+              break;
+            default:
+              break;
+          }
+
           stats.sent++;
         }
       } catch (e) {

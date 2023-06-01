@@ -1,3 +1,5 @@
+const { UserType } = require("../constants/UserType.js");
+const { Gestionnaire } = require("../model/index.js");
 const { sortDescending } = require("./dateUtils.js");
 
 /**
@@ -108,6 +110,48 @@ const areTelechargementsAucun = (etablissements, voeux_telechargements) => {
   );
 };
 
+const allFilesAsAlreadyBeenDownloaded = async (user) => {
+  switch (user.type) {
+    case UserType.GESTIONNAIRE: {
+      const gestionnaire = user;
+
+      return !gestionnaire.etablissements.filter(
+        (etablissement) =>
+          !etablissement.diffusionAutorisee &&
+          etablissement.nombre_voeux > 0 &&
+          !gestionnaire.voeux_telechargements.find(
+            (telechargement) =>
+              telechargement.uai === etablissement.uai && telechargement.date > etablissement.voeux_date
+          )
+      )?.length;
+    }
+
+    case UserType.FORMATEUR: {
+      const formateur = user;
+
+      const gestionnaires = await Gestionnaire.find({ etablissements: { $elemMatch: { uai: formateur.uai } } });
+
+      const etablissements = gestionnaires.flatMap((gestionnaire) =>
+        gestionnaire.etablissements.filter((etablissement) => etablissement.uai === formateur.uai)
+      );
+
+      return !etablissements.filter(
+        (etablissement) =>
+          etablissement.diffusionAutorisee &&
+          etablissement.nombre_voeux > 0 &&
+          !formateur.voeux_telechargements.find(
+            (telechargement) =>
+              telechargement.siret === etablissement.siret && telechargement.date > etablissement.voeux_date
+          )
+      )?.length;
+    }
+
+    default: {
+      return true;
+    }
+  }
+};
+
 module.exports = {
   getTelechargements,
   isTelechargementTotal,
@@ -116,4 +160,5 @@ module.exports = {
   areTelechargementsTotal,
   areTelechargementsPartiel,
   areTelechargementsAucun,
+  allFilesAsAlreadyBeenDownloaded,
 };

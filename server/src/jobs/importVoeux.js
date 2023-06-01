@@ -285,6 +285,9 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
                 anomalies,
                 jeune_uniquement_en_apprentissage: previous?._meta.jeune_uniquement_en_apprentissage || false,
                 import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
+                // Object.keys(differences).length
+                //   ? uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime())
+                //   : previous?._meta.import_dates,
               },
             },
             { upsert: true }
@@ -298,11 +301,11 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
             stats.created++;
           }
 
-          if (!relations.has(key)) {
-            relations.add(key);
-          }
-
           if (!isEmpty(differences)) {
+            if (!relations.has(key)) {
+              relations.add(key);
+            }
+
             if (res.modifiedCount) {
               stats.updated++;
               Object.keys(differences).forEach((key) => updatedFields.add(key));
@@ -337,8 +340,6 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
     [...relations].map(async (relation) => {
       const { siret, uai } = JSON.parse(relation);
 
-      // const formateur = await Formateur.findOne({ uai }).lean();
-      // const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
       const nombre_voeux = await Voeu.countDocuments({
         "etablissement_formateur.uai": uai,
         "etablissement_gestionnaire.siret": siret,
@@ -350,7 +351,7 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
         await Voeu.countDocuments({
           "etablissement_formateur.uai": uai,
           "etablissement_gestionnaire.siret": siret,
-          "_meta.import_dates.1": { $exists: true },
+          "_meta.import_dates": { $nin: [importDate] },
         })
       ) {
         return await saveUpdatedListAvailable({ uai, siret, nombre_voeux });

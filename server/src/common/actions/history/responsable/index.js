@@ -8,6 +8,12 @@ const { saveAccountConfirmationEmailManualResent } = require("./accountConfirmat
 const { saveAccountConfirmed } = require("./accountConfirmed");
 const { saveAccountEmailUpdatedByAccount } = require("./accountEmailUpdatedByAccount");
 const { saveAccountEmailUpdatedByAdmin } = require("./accountEmailUpdatedByAdmin");
+const { saveListAvailableEmailAutomaticResent } = require("./listAvailableEmailAutomaticResent");
+const { saveListAvailableEmailAutomaticSent } = require("./listAvailableEmailAutomaticSent");
+const { saveListAvailableEmailManualResent } = require("./listAvailableEmailManualResent");
+const { saveUpdatedListAvailableEmailAutomaticResent } = require("./updatedListAvailableEmailAutomaticResent");
+const { saveUpdatedListAvailableEmailAutomaticSent } = require("./updatedListAvailableEmailAutomaticSent");
+const { saveUpdatedListAvailableEmailManualResent } = require("./updatedListAvailableEmailManualResent");
 
 module.exports = {
   saveAccountActivated,
@@ -20,4 +26,10 @@ module.exports = {
   saveAccountConfirmed,
   saveAccountEmailUpdatedByAccount,
   saveAccountEmailUpdatedByAdmin,
+  saveListAvailableEmailAutomaticResent,
+  saveListAvailableEmailAutomaticSent,
+  saveListAvailableEmailManualResent,
+  saveUpdatedListAvailableEmailAutomaticResent,
+  saveUpdatedListAvailableEmailAutomaticSent,
+  saveUpdatedListAvailableEmailManualResent,
 };

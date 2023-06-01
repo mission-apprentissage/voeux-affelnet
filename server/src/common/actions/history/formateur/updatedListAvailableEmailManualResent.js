@@ -1,9 +1,7 @@
-// TODO :
-
 const { FormateurActions } = require("../../../constants/History");
 const { Formateur } = require("../../../model");
 
-const saveUpdatedListAvailableEmailManualResent = async ({ uai, email }) => {
+const saveUpdatedListAvailableEmailManualResent = async ({ uai, email }, admin) => {
   await Formateur.updateOne(
     { uai },
     {

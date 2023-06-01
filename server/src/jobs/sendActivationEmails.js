@@ -2,11 +2,12 @@ const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
 const { User, Gestionnaire } = require("../common/model");
+
 const {
-  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentAsResponsable,
+  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentForResponsable,
 } = require("../common/actions/history/responsable");
 const {
-  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentAsFormateur,
+  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentForFormateur,
 } = require("../common/actions/history/formateur");
 
 async function sendActivationEmails(sendEmail, options = {}) {
@@ -66,10 +67,10 @@ async function sendActivationEmails(sendEmail, options = {}) {
 
         switch (user.type) {
           case UserType.GESTIONNAIRE:
-            await saveAccountActivationEmailAutomaticSentAsResponsable(user);
+            await saveAccountActivationEmailAutomaticSentForResponsable(user);
             break;
           case UserType.FORMATEUR:
-            await saveAccountActivationEmailAutomaticSentAsFormateur(user);
+            await saveAccountActivationEmailAutomaticSentForFormateur(user);
             break;
           default:
             break;

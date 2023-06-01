@@ -113,9 +113,9 @@ const fillFormateur = async (formateur, admin) => {
               ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
               : null,
 
-            last_date_voeux: etablissement.siret
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-              : null,
+            last_date_voeux: etablissement.voeux_date /*etablissement.siret
+                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+                : null*/,
           };
         }) ?? []
     ),
@@ -490,11 +490,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
                               .sort((a, b) => new Date(a) - new Date(b))[0]
                           : null,
 
-                        last_date_voeux: etablissement.siret
-                          ? voeux
-                              .flatMap((voeu) => voeu._meta.import_dates)
-                              .sort((a, b) => new Date(b) - new Date(a))[0]
-                          : null,
+                        last_date_voeux: etablissement.voeux_date /*etablissement.siret
+                        ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+                        : null*/,
                       };
                     }) ?? []
                 ),

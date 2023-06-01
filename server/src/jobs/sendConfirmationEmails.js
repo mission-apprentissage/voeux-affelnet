@@ -1,13 +1,14 @@
-const {
-  saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentAsResponsable,
-} = require("../common/actions/history/responsable");
-const {
-  saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentAsFormateur,
-} = require("../common/actions/history/formateur");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
 const { User, Gestionnaire } = require("../common/model");
+
+const {
+  saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentForResponsable,
+} = require("../common/actions/history/responsable");
+const {
+  saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentForFormateur,
+} = require("../common/actions/history/formateur");
 
 async function sendConfirmationEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -61,10 +62,10 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
 
         switch (user.type) {
           case UserType.GESTIONNAIRE:
-            await saveAccountConfirmationEmailAutomaticSentAsResponsable(user);
+            await saveAccountConfirmationEmailAutomaticSentForResponsable(user);
             break;
           case UserType.FORMATEUR:
-            await saveAccountConfirmationEmailAutomaticSentAsFormateur(user);
+            await saveAccountConfirmationEmailAutomaticSentForFormateur(user);
             break;
           default:
             break;

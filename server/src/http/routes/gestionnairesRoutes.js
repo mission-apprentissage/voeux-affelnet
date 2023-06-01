@@ -58,9 +58,9 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
                 ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
                 : null,
 
-              last_date_voeux: etablissement.uai
+              last_date_voeux: etablissement.voeux_date /*etablissement.uai
                 ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-                : null,
+                : null,*/,
             };
           }) ?? []
         ),

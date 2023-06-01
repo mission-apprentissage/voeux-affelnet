@@ -111,7 +111,7 @@ module.exports = {
   },
   notification_gestionnaire: (gestionnaire, token) => {
     return {
-      subject: `Affelnet 2023 – Des listes de candidats sont téléchargeables (Siret : ${gestionnaire.siret})`,
+      subject: `Affelnet 2023 – Les listes de candidats à l’apprentissage sont téléchargeables (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("notification_gestionnaire"),
       data: {
         gestionnaire,
@@ -123,7 +123,7 @@ module.exports = {
   },
   notification_formateur: (formateur, token) => {
     return {
-      subject: `Affelnet 2023 – Des listes de candidats sont téléchargeables (UAI : ${formateur.uai})`,
+      subject: `Affelnet 2023 – La liste de candidats à l’apprentissage est téléchargeable (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("notification_formateur"),
       data: {
         formateur,

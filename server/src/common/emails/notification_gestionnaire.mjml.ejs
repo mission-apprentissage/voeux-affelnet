@@ -6,24 +6,48 @@
     <mj-wrapper padding="10px 20px">
       <mj-section background-color="#ffffff" padding-top="0">
         <mj-column>
-          <mj-text> Madame la directrice, Monsieur le directeur, </mj-text>
+          <mj-text> Madame, monsieur, </mj-text>
 
           <mj-text>
-            Les listes de vœux pour votre établissement (Siret : <%= data.gestionnaire.siret %>) et/ou ceux dont vous
-            êtes responsable ont été mises à jour. Vous pouvez dès à présent les télécharger en cliquant sur le bouton
-            ci-dessous.
+            Vous pouvez dès à présent télécharger les candidatures exprimées sur le service en ligne affectation pour
+            votre organisme (Siret : <%= data.gestionnaire.siret %>) et/ou pour les établissements dont vous êtes
+            responsable.
           </mj-text>
 
-          <%- include('./common/arrete.ejs'); %>
-
-          <mj-button href="<%= utils.getPublicUrl(`/login`) %>" background-color="#0e4194" color="white">
-            Consulter les nouveaux vœux ou les corrections
+          <mj-button
+            href="<%= utils.getPublicUrl(`/login?actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            Accéder au téléchargement des listes
           </mj-button>
 
           <mj-text> Votre identifiant de connexion : <strong><%= data.gestionnaire.username %></strong> </mj-text>
 
-          <%- include('./common/procedure.ejs'); %> <%- include('./common/engagement.ejs'); %> <%-
-          include('./common/signature.ejs'); %>
+          <mj-text>
+            Si vous n’avez pas encore confirmé votre adresse courriel, vous serez dirigé sur une demande de confirmation
+            d’adresse. Suite à cette opération, un second courriel vous invitera à définir votre mot de passe.
+          </mj-text>
+
+          <mj-text>
+            Si votre organisme de formation en apprentissage est responsable d’autres organismes formateurs, et si vous
+            avez délégué les droits de réception, les personnes désignées ont reçu cette même notification par courriel,
+            qui leur donnera accès au téléchargement des listes pour les organismes correspondants.
+          </mj-text>
+
+          <mj-text>
+            Prochaine et dernière étape : dans la semaine du 19 juin (et non début juillet comme indiqué dans nos
+            précédentes correspondances), une mise à jour de cette liste pourra vous être transmise, pour tenir compte
+            des ajouts, suppressions et/ou modifications de candidatures.
+          </mj-text>
+
+          <mj-text>
+            La réception des candidatures vous engage à une réponse auprès des jeunes concernés. Ceci permettra
+            d’établir plus rapidement avec eux un premier contact et favorisera l’efficacité de l’accompagnement vers
+            l’emploi que vous leur proposerez.
+          </mj-text>
+
+          <%- include('./common/signature.ejs'); %>
         </mj-column>
       </mj-section>
     </mj-wrapper>

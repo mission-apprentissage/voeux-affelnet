@@ -1,5 +1,3 @@
-// TODO :
-
 const { FormateurActions } = require("../../../constants/History");
 const { Formateur } = require("../../../model");
 

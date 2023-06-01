@@ -1,5 +1,5 @@
-import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import {
   Accordion,
@@ -29,6 +29,10 @@ import { _post } from "../common/httpClient";
 import { useQuery } from "../common/hooks/useQuery";
 import useAuth from "../common/hooks/useAuth";
 import { siretFormat, uaiFormat } from "../common/utils/format";
+import decodeJWT from "../common/utils/decodeJWT";
+import * as queryString from "query-string";
+import { useFetch } from "../common/hooks/useFetch";
+import { UserStatut } from "../common/constants/UserStatut";
 
 const mailVoeux = process.env.REACT_APP_VOEUX_AFFELNET_EMAIL;
 
@@ -65,8 +69,27 @@ function LoginPage() {
   const [, setAuth] = useAuth();
   const navigate = useNavigate();
   const query = useQuery();
-  const username = query.get("username");
   const alreadyActivated = query.get("alreadyActivated");
+
+  const location = useLocation();
+  const { actionToken } = queryString.parse(location.search);
+  const username = decodeJWT(actionToken)?.sub || query.get("username");
+  const [data, loading, error] = useFetch(`/api/login/status?username=${username}&token=${actionToken}`);
+
+  console.log({ data, loading, error });
+
+  useEffect(() => {
+    switch (data?.statut) {
+      case UserStatut.EN_ATTENTE:
+        navigate(`/confirmation?actionToken=${actionToken}`, { replace: true });
+        break;
+      case UserStatut.CONFIRME:
+        navigate(`/activation?actionToken=${actionToken}`, { replace: true });
+        break;
+      default:
+        break;
+    }
+  }, [data?.statut, actionToken, navigate]);
 
   const login = async (values, { setStatus }) => {
     try {
