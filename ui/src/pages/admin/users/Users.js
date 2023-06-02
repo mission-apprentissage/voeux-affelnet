@@ -38,6 +38,7 @@ export const Users = () => {
   const search = useCallback(
     async (values) => {
       try {
+        setLoading(true);
         setQuery(values);
         const params = queryString.stringify(
           {
@@ -214,7 +215,7 @@ export const Users = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {loading || data.length === 0 ? (
+          {loading && data.length === 0 ? (
             <Tr>
               <Td colSpan={4}>{loading ? "Chargement..." : "Pas de résultats"}</Td>
             </Tr>

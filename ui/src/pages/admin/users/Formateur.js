@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Text, Link, Heading, Box, Alert, useDisclosure, Button, useToast } from "@chakra-ui/react";
+import { Text, Link, Heading, Box, Alert, useDisclosure, Button, useToast, Spinner } from "@chakra-ui/react";
 
 import { _get, _put } from "../../../common/httpClient";
 import { Page } from "../../../common/components/layout/Page";
@@ -12,7 +12,6 @@ import { UpdateDelegationModal } from "../../../common/components/admin/modals/U
 import { DelegationModal } from "../../../common/components/admin/modals/DelegationModal";
 import { UpdateGestionnaireEmailModal } from "../../../common/components/admin/modals/UpdateGestionnaireEmailModal";
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
-import { UserType } from "../../../common/constants/UserType";
 import { UserStatut } from "../../../common/constants/UserStatut";
 
 export const Formateur = () => {
@@ -39,27 +38,36 @@ export const Formateur = () => {
   const { siret, uai } = useParams();
   const downloadVoeux = useDownloadVoeux();
   const [gestionnaire, setGestionnaire] = useState(undefined);
+  const [loadingGestionnaire, setLoadingGestionnaire] = useState(false);
   const [formateur, setFormateur] = useState(undefined);
+  const [loadingFormateur, setLoadingFormateur] = useState(false);
   const mounted = useRef(false);
   const toast = useToast();
 
   const getGestionnaire = useCallback(async () => {
     try {
+      setLoadingGestionnaire(true);
       const response = await _get(`/api/admin/gestionnaires/${siret}`);
       setGestionnaire(response);
+      setLoadingGestionnaire(false);
     } catch (error) {
       setGestionnaire(undefined);
+      setLoadingGestionnaire(false);
+
       throw Error;
     }
   }, [siret]);
 
   const getFormateur = useCallback(async () => {
     try {
+      setLoadingFormateur(true);
       const response = await _get(`/api/admin/formateurs/${uai}`);
 
+      setLoadingFormateur(false);
       setFormateur(response);
     } catch (error) {
       setFormateur(undefined);
+      setLoadingFormateur(false);
       throw Error;
     }
   }, [uai]);
@@ -143,6 +151,10 @@ export const Formateur = () => {
   //     });
   //   }
   // }, [uai, formateur, etablissement, toast, callback]);
+
+  if (loadingGestionnaire || loadingFormateur) {
+    return <Spinner />;
+  }
 
   if (!gestionnaire) {
     return (

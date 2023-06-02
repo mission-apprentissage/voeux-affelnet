@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { Text, Link, Heading, Box, useDisclosure, Button, useToast } from "@chakra-ui/react";
+import { Text, Link, Heading, Box, useDisclosure, Button, useToast, Spinner } from "@chakra-ui/react";
 
 import { Page } from "../../../common/components/layout/Page";
 import { _get, _put } from "../../../common/httpClient";
@@ -21,35 +21,26 @@ export const Gestionnaire = () => {
   const { siret } = useParams();
 
   const [gestionnaire, setGestionnaire] = useState(undefined);
-  const [, setFormateurs] = useState(undefined);
+  const [loadingGestionnaire, setLoadingGestionnaire] = useState(false);
   const mounted = useRef(false);
   const toast = useToast();
 
   const getGestionnaire = useCallback(async () => {
     try {
+      setLoadingGestionnaire(true);
       const response = await _get(`/api/admin/gestionnaires/${siret}`);
       setGestionnaire(response);
+      setLoadingGestionnaire(false);
     } catch (error) {
       setGestionnaire(undefined);
+      setLoadingGestionnaire(false);
       throw Error;
     }
   }, [siret]);
 
-  const getFormateurs = useCallback(async () => {
-    try {
-      const response = await _get(`/api/admin/gestionnaires/${siret}/formateurs`);
-
-      setFormateurs(response);
-    } catch (error) {
-      setFormateurs(undefined);
-      throw Error;
-    }
-  }, [siret, setFormateurs]);
-
   const reload = useCallback(async () => {
     await getGestionnaire();
-    await getFormateurs();
-  }, [getGestionnaire, getFormateurs]);
+  }, [getGestionnaire]);
 
   const resendActivationEmail = useCallback(async () => {
     try {
@@ -136,6 +127,10 @@ export const Gestionnaire = () => {
       mounted.current = false;
     };
   }, [reload]);
+
+  if (loadingGestionnaire) {
+    return <Spinner />;
+  }
 
   if (!gestionnaire) {
     return;

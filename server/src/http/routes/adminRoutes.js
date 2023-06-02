@@ -63,7 +63,7 @@ const fillGestionnaire = async (gestionnaire, admin) => {
           return {
             ...etablissement,
 
-            // nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+            nombre_voeux: etablissement.nombre_voeux ?? 0, // etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
 
             first_date_voeux: etablissement.uai
               ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
@@ -107,7 +107,7 @@ const fillFormateur = async (formateur, admin) => {
           return {
             ...etablissement,
 
-            // nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+            nombre_voeux: etablissement.nombre_voeux ?? 0, //etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
 
             first_date_voeux: etablissement.siret
               ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
