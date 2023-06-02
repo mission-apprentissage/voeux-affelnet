@@ -271,7 +271,10 @@ function findAcademieByName(name) {
     return null;
   }
 
-  const found = ACADEMIES.find((academie) => academie.nom === name || academie.alias === name);
+  const found = ACADEMIES.find(
+    (academie) =>
+      academie.nom?.toUpperCase() === name?.toUpperCase() || academie.alias?.toUpperCase() === name?.toUpperCase()
+  );
 
   return found || null;
 }
