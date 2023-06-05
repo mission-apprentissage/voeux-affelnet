@@ -131,7 +131,7 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.DELEGATION_UPDATED_BY_RESPONSABLE,
     {
       component: ({ responsable, email }) =>
-        `${responsable} a modifié la délégation de droits pour cet organisme. Nouvelle adresse : ${email}. La nouvelle personne a été notifiée par courriel pour confirmer son adresse.`,
+        `${responsable} a modifié la délégation de droits pour cet organisme. Nouvelle adresse : ${email}. La nouvelle personne a été notifiée par courriel pour définir son mot de passe.`,
     },
   ],
   [
