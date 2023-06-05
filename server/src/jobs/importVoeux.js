@@ -141,7 +141,7 @@ const parseVoeuxCsv = async (source) => {
             cleMinistereEducatif: line["clé ministère éducatif"],
             siretGestionnaire: siretGestionnaire,
           })
-        )?.[0]?.etablissement_formateur_uai ?? uaiEtablissementAccueil;
+        )?.formations?.[0]?.etablissement_formateur_uai ?? uaiEtablissementAccueil;
 
       return deepOmitEmpty({
         academie: academieDuVoeu,
@@ -259,7 +259,7 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
         try {
           const anomalies = await validate(data);
           if (hasAnomaliesOnMandatoryFields(anomalies)) {
-            logger.error(`Voeu invalide`, {
+            logger.warn(`Voeu invalide`, {
               line: stats.total,
               "apprenant.ine": data.apprenant?.ine,
               "formation.code_affelnet": data.formation?.code_affelnet,
@@ -294,7 +294,7 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
           );
 
           if (res.upsertedCount) {
-            logger.info(`Voeu ajouté`, {
+            logger.debug(`Voeu ajouté`, {
               query,
               etablissement_accueil: data.etablissement_accueil.uai,
             });
