@@ -27,12 +27,10 @@ function ResetPasswordPage() {
       setStatus({
         error: (
           <span>
-            Le lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre adresse
-            mail de réception des voeux ou votre siret via :
+            Le lien est expiré.
             <br />
-            <a href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-              {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
-            </a>
+            Veuillez retourner sur la page de connexion puis accéder au lien de perte de mot de passe pour faire une
+            nouvelle demande.
           </span>
         ),
       });
