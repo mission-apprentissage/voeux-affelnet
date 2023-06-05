@@ -41,8 +41,9 @@ export const Formateurs = ({ gestionnaire, formateurs, callback }) => {
           <AlertIcon />
           <Text fontStyle="italic">
             Nouveauté pour 2023 : vous avez maintenant la possibilité de déléguer les droits de réception des listes de
-            candidats aux organismes dont vous êtes responsable. En cas de délégation de droits, vous conserverez un
-            accès à l'ensemble des listes, et vous pourrez visualiser les statuts d'avancement de chaque établissement.
+            candidats aux organismes dont vous êtes responsable, en cliquant sur les boutons "Détail". En cas de
+            délégation de droits, vous conserverez un accès à l'ensemble des listes, et vous pourrez visualiser les
+            statuts d'avancement de chaque établissement.
           </Text>
         </Alert>
 
