@@ -1,5 +1,10 @@
 const ACADEMIES = [
-  { code: "00", nom: "Étranger", departements: [{ code: "984", nom: "Terres australes et antarctiques françaises" }] },
+  {
+    code: "00",
+    nom: "Étranger",
+    alias: "Etranger",
+    departements: [{ code: "984", nom: "Terres australes et antarctiques françaises" }],
+  },
   { code: "01", nom: "Paris", departements: [{ code: "75", nom: "Paris" }] },
   {
     code: "02",
@@ -159,7 +164,7 @@ const ACADEMIES = [
   {
     code: "18",
     nom: "Orléans-Tours",
-    alias: "Orleans",
+    alias: "Orleans-Tours",
     departements: [
       { code: "28", nom: "Eure-et-Loir" },
       { code: "36", nom: "Indre" },
@@ -234,14 +239,20 @@ const ACADEMIES = [
       { code: "2B", nom: "Haute-Corse" },
     ],
   },
-  { code: "28", nom: "La Réunion", alias: "Reunion", departements: [{ code: "974", nom: "La Réunion" }] },
+  { code: "28", nom: "La Réunion", alias: "La Reunion", departements: [{ code: "974", nom: "La Réunion" }] },
   { code: "31", nom: "Martinique", departements: [{ code: "972", nom: "Martinique" }] },
   { code: "32", nom: "Guadeloupe", departements: [{ code: "971", nom: "Guadeloupe" }] },
   { code: "33", nom: "Guyane", departements: [{ code: "973", nom: "Guyane" }] },
-  { code: "40", nom: "Nouvelle-Calédonie", departements: [{ code: "988", nom: "Nouvelle-Calédonie" }] },
+  {
+    code: "40",
+    nom: "Nouvelle-Calédonie",
+    alias: "Nouvelle-Caledonie",
+    departements: [{ code: "988", nom: "Nouvelle-Calédonie" }],
+  },
   {
     code: "41",
     nom: "Polynésie Française",
+    alias: "Polynesie Française",
     departements: [
       { code: "987", nom: "Polynésie Française" },
       { code: "989", nom: "Île de Clipperton" },
@@ -262,7 +273,12 @@ const ACADEMIES = [
       { code: "61", nom: "Orne" },
     ],
   },
-  { code: "77", nom: "Saint-Barthélemy", departements: [{ code: "977", nom: "Saint-Barthélemy" }] },
+  {
+    code: "77",
+    nom: "Saint-Barthélemy",
+    alias: "Saint-Barthelemy",
+    departements: [{ code: "977", nom: "Saint-Barthélemy" }],
+  },
   { code: "78", nom: "Saint-Martin", departements: [{ code: "978", nom: "Saint-Martin" }] },
 ];
 
