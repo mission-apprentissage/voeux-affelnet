@@ -41,7 +41,7 @@ function ResetPasswordPage() {
     <Center height="100vh" verticalAlign="center">
       <Box width={["auto", "28rem"]}>
         <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          Changement du mot de passe pour le CFA {username}
+          Changement du mot de passe pour le compte {username}
         </Heading>
         <Box mt={8}>
           <Formik
