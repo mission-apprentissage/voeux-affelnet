@@ -9,7 +9,7 @@ import { StatutBadge, statuses } from "../../StatutBadge";
 import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
 import { WarningFill } from "../../../../theme/components/icons/WarningFill";
 
-export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
+export const FormateurStatut = ({ gestionnaire, formateur, callback, showDownloadButton }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const downloadVoeux = useDownloadVoeux({ gestionnaire, formateur });
@@ -153,13 +153,12 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
               new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
           ): {
-          return (
+          return showDownloadButton ? (
+            <Button variant="primary" onClick={downloadVoeuxAndReload}>
+              Télécharger
+            </Button>
+          ) : (
             <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />
-            // <>
-            //   <Button variant="primary" onClick={downloadVoeuxAndReload}>
-            //     Télécharger
-            //   </Button>
-            // </>
           );
         }
         case voeuxDisponible &&
@@ -179,14 +178,12 @@ export const FormateurStatut = ({ gestionnaire, formateur, callback }) => {
                 new Date(telechargement.date).getTime() >
                 new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
             )): {
-          return (
+          return showDownloadButton ? (
+            <Button variant="primary" onClick={downloadVoeuxAndReload}>
+              Télécharger
+            </Button>
+          ) : (
             <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />
-            // <>
-
-            //   <Button variant="primary" onClick={downloadVoeuxAndReload}>
-            //     Télécharger
-            //   </Button>
-            // </>
           );
         }
         case !voeuxDisponible: {
