@@ -3,7 +3,7 @@ const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date } = require("../common/utils/csvUtils.js");
 const { sortDescending } = require("../common/utils/dateUtils.js");
-const { areTelechargementsTotal } = require("../common/utils/cfaUtils");
+const { areTelechargementsTotal } = require("../common/utils/dataUtils");
 const CatalogueApi = require("../common/api/CatalogueApi");
 
 const getLastDownloadDate = (data) => {

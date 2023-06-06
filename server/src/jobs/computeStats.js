@@ -5,7 +5,7 @@ const {
   areTelechargementsTotal,
   areTelechargementsPartiel,
   areTelechargementsAucun,
-} = require("../common/utils/cfaUtils");
+} = require("../common/utils/dataUtils");
 
 function computeGestionnairesStats(filter = {}) {
   return promiseAllProps({

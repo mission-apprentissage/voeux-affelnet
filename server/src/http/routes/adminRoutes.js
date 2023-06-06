@@ -30,97 +30,7 @@ const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/f
 const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/formateur");
 const { UserType } = require("../../common/constants/UserType");
 const { download } = require("../../jobs/download");
-
-const filterForAcademie = (etablissement, user) => {
-  return user.academies ? user.academies.map((academie) => academie.code).includes(etablissement.academie?.code) : true;
-};
-
-const fillGestionnaire = async (gestionnaire, admin) => {
-  const voeuxFilter = {
-    "etablissement_gestionnaire.siret": gestionnaire.siret,
-  };
-
-  if (!gestionnaire) {
-    return gestionnaire;
-  }
-
-  return {
-    ...gestionnaire,
-
-    nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
-
-    etablissements: await Promise.all(
-      gestionnaire?.etablissements
-        .filter((etablissement) => filterForAcademie(etablissement, admin))
-        .map(async (etablissement) => {
-          const voeuxFilter = {
-            "etablissement_formateur.uai": etablissement.uai,
-            "etablissement_gestionnaire.siret": gestionnaire.siret,
-          };
-
-          const voeux = await Voeu.find(voeuxFilter);
-
-          return {
-            ...etablissement,
-
-            nombre_voeux: etablissement.nombre_voeux ?? 0, // etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
-
-            first_date_voeux: etablissement.uai
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-              : null,
-
-            last_date_voeux: etablissement.uai
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-              : null,
-          };
-        }) ?? []
-    ),
-  };
-};
-
-/* eslint-disable-next-line no-unused-vars*/
-const fillFormateur = async (formateur, admin) => {
-  if (!formateur) {
-    return formateur;
-  }
-
-  const voeuxFilter = {
-    "etablissement_formateur.uai": formateur.uai,
-  };
-
-  return {
-    ...formateur,
-
-    nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
-
-    etablissements: await Promise.all(
-      formateur?.etablissements
-        // .filter((etablissement) => filterForAcademie(etablissement, admin))
-        .map(async (etablissement) => {
-          const voeuxFilter = {
-            "etablissement_formateur.uai": formateur.uai,
-            "etablissement_gestionnaire.siret": etablissement.siret,
-          };
-
-          const voeux = await Voeu.find(voeuxFilter);
-
-          return {
-            ...etablissement,
-
-            nombre_voeux: etablissement.nombre_voeux ?? 0, //etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
-
-            first_date_voeux: etablissement.siret
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-              : null,
-
-            last_date_voeux: etablissement.voeux_date /*etablissement.siret
-                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-                : null*/,
-          };
-        }) ?? []
-    ),
-  };
-};
+const { fillFormateur, filterForAcademie, fillGestionnaire } = require("../../common/utils/dataUtils");
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -367,6 +277,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       // return sendJsonStream(stream, res);
       return download(asCsvResponse("export", res), {
         academies: academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null,
+        admin,
       });
     })
   );

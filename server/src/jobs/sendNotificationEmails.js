@@ -2,7 +2,7 @@ const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
 const { User, Gestionnaire } = require("../common/model");
-const { allFilesAsAlreadyBeenDownloaded } = require("../common/utils/cfaUtils");
+const { allFilesAsAlreadyBeenDownloaded } = require("../common/utils/dataUtils");
 
 const {
   saveListAvailableEmailAutomaticSent: saveAccountNotificationEmailAutomaticSentForResponsable,

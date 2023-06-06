@@ -2,7 +2,7 @@ const logger = require("../common/logger");
 const { DateTime } = require("luxon");
 const { User, Gestionnaire } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
-const { allFilesAsAlreadyBeenDownloaded } = require("../common/utils/cfaUtils");
+const { allFilesAsAlreadyBeenDownloaded } = require("../common/utils/dataUtils");
 const { UserType } = require("../common/constants/UserType");
 
 const {
