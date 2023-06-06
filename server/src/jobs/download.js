@@ -260,11 +260,30 @@ async function download(output, options = {}) {
             "etablissement_gestionnaire.siret": data.siret,
           })}`,
         "Date du dernier import de vœux": (data) => date(data.etablissements?.voeux_date),
-        // Téléchargement: (data) => {
-        //   const lastDownloadDate = getLastDownloadDate(data);
+        Téléchargement: async (data) => {
+          const gestionnaire = data;
+          const formateur = await getFormateur(data.etablissements.uai);
 
-        //   return ouiNon(!!lastDownloadDate);
-        // },
+          if (gestionnaire.etablissements.diffusionAutorisee) {
+            // const etablissementFromFormateur = formateur.etablissements.find((etablissement) => {
+            //   etablissement.siret === gestionnaire.siret;
+            // });
+
+            return ouiNon(
+              !!formateur.voeux_telechargements.find((telechargement) => telechargement.siret === gestionnaire.siret)
+            );
+          } else {
+            // const etablissementFromGestionnaire = data.etablissements;
+
+            return ouiNon(
+              !!gestionnaire.voeux_telechargements.find((telechargement) => telechargement.uai === formateur.uai)
+            );
+          }
+
+          // const lastDownloadDate = getLastDownloadDate(data);
+
+          // return ouiNon(!!lastDownloadDate);
+        },
         // "Téléchargement effectué pour tous les établissements formateurs liés ?": async (data) => {
         //   try {
         //     if (gestionnaires.get(data.siret)) {
@@ -329,7 +348,8 @@ async function download(output, options = {}) {
         //           "etablissement_formateur.uai": data.etablissements?.uai,
         //           $expr: {
         //             $lte: [lastDownloadDate, { $last: "$_meta.import_dates" }],
-        //           },
+        //           },import { Etablissement } from '../../../../catalogue-apprentissage/server/src/common/model/schema/etablissement.d';
+
         //         })
         //       : await Voeu.countDocuments({
         //           "etablissement_gestionnaire.siret": data.siret,
