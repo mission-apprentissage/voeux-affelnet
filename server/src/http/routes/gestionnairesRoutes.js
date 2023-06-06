@@ -43,7 +43,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         etablissements: await Promise.all(
           gestionnaire?.etablissements?.map(async (etablissement) => {
             const voeuxFilter = {
-              "etablissement_accueil.uai": etablissement.uai,
+              "etablissement_formateur.uai": etablissement.uai,
               "etablissement_gestionnaire.siret": siret,
             };
 
