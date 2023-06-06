@@ -27,12 +27,12 @@ module.exports = ({ users }) => {
       res.json({
         ...formateur,
 
-        nombre_voeux: await Voeu.countDocuments({ "etablissement_accueil.uai": uai }),
+        nombre_voeux: await Voeu.countDocuments({ "etablissement_formateur.uai": uai }),
 
         etablissements: await Promise.all(
           formateur?.etablissements?.map(async (etablissement) => {
             const voeuxFilter = {
-              "etablissement_accueil.uai": uai,
+              "etablissement_formateur.uai": uai,
               "etablissement_gestionnaire.siret": etablissement.siret,
             };
             const voeux = await Voeu.find(voeuxFilter);

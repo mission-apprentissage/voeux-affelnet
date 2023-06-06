@@ -25,7 +25,7 @@ const schema = Joi.object({
 async function buildEtablissements(sirets, formateur) {
   return Promise.all(
     [...new Set(sirets)].map(async (siret) => {
-      // const voeu = await Voeu.findOne({ "etablissement_accueil.uai": uai });
+      // const voeu = await Voeu.findOne({ "etablissement_formateur.uai": uai });
 
       const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
