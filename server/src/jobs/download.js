@@ -1,7 +1,7 @@
-const { Gestionnaire, /*Voeu,*/ Formateur } = require("../common/model");
+const { Gestionnaire, /*Voeu,*/ Formateur, Voeu } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
-const { ouiNon /*, date */ } = require("../common/utils/csvUtils.js");
+const { ouiNon, date } = require("../common/utils/csvUtils.js");
 // const { sortDescending } = require("../common/utils/dateUtils.js");
 // const { areTelechargementsTotal } = require("../common/utils/cfaUtils");
 const { UserStatut } = require("../common/constants/UserStatut");
@@ -253,13 +253,13 @@ async function download(output, options = {}) {
           const formateur = await getFormateur(data.etablissements.uai);
           return formateur.histories?.[formateur.histories.length - 1]?.action;
         },
-        // Vœux: (data) => ouiNon(data.etablissements?.voeux_date),
-        // "Nombre de vœux": async (data) =>
-        //   `${await Voeu.countDocuments({
-        //     "etablissement_formateur.uai": data.etablissements?.uai,
-        //     "etablissement_gestionnaire.siret": data.siret,
-        //   })}`,
-        // "Date du dernier import de vœux": (data) => date(data.etablissements?.voeux_date),
+        Vœux: (data) => ouiNon(data.etablissements?.voeux_date),
+        "Nombre de vœux": async (data) =>
+          `${await Voeu.countDocuments({
+            "etablissement_formateur.uai": data.etablissements?.uai,
+            "etablissement_gestionnaire.siret": data.siret,
+          })}`,
+        "Date du dernier import de vœux": (data) => date(data.etablissements?.voeux_date),
         // Téléchargement: (data) => {
         //   const lastDownloadDate = getLastDownloadDate(data);
 
