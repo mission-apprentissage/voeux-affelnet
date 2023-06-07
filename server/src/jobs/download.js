@@ -217,7 +217,7 @@ async function download(output, options = {}) {
                 case UserStatut.ACTIVE === gestionnaire.statut &&
                   voeuxDisponible &&
                   new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.date_voeux).getTime() &&
+                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsGestionnaire.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
@@ -228,7 +228,7 @@ async function download(output, options = {}) {
                 case UserStatut.ACTIVE === gestionnaire.statut &&
                   voeuxDisponible &&
                   new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.date_voeux).getTime() &&
+                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsGestionnaire.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() <=
@@ -241,7 +241,7 @@ async function download(output, options = {}) {
                 case UserStatut.ACTIVE === gestionnaire.statut &&
                   voeuxDisponible &&
                   new Date(etablissementFromGestionnaire.first_date_voeux).getTime() ===
-                    new Date(etablissementFromGestionnaire.date_voeux).getTime() &&
+                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsGestionnaire.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
@@ -255,7 +255,7 @@ async function download(output, options = {}) {
                     !voeuxTelechargementsGestionnaire.find(
                       (telechargement) =>
                         new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.date_voeux).getTime()
+                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
                     )): {
                   return "⚠️ Compte créé, liste non téléchargée";
                 }
