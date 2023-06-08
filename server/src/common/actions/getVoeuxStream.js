@@ -26,8 +26,13 @@ function getVoeuxStream({ siret, uai }) {
         ID_FORMATION_SOUHAIT1: voeu.formation.code_formation_diplome,
         LIBELLE_FORMATION_SOUHAIT1: voeu.formation.libelle,
         CODE_MEF_10_FORMATION_SOUHAIT1: voeu.formation.mef,
+        CLE_MINISTERE_EDUCATIF_FORMATION_SOUHAIT1: voeu.formation.cle_ministere_educatif,
         ID_ETABLISSEMENT_ORIGINE: voeu.etablissement_origine?.uai,
         NOM_ETAB_ORIGINE: voeu.etablissement_origine?.nom,
+        VILLE_ETAB_ORIGINE: voeu.etablissement_origine?.ville,
+        ID_ETAB_ACCUEIL: voeu.etablissement_accueil?.uai,
+        NOM_ETAB_ACCUEIL: voeu.etablissement_accueil?.nom,
+        VILLE_ETAB_ACCUEIL: voeu.etablissement_accueil?.ville,
       };
     })
   );
