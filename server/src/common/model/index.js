@@ -1,5 +1,6 @@
 module.exports = {
   User: require("./User"),
+  Alert: require("./Alert"),
   Gestionnaire: require("./Gestionnaire"),
   Csaio: require("./Csaio"),
   Formateur: require("./Formateur"),

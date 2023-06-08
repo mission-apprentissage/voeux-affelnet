@@ -1,5 +1,5 @@
-import EventEmitter from "events";
 import { getAuth } from "./auth";
+import { emitter } from "./emitter";
 
 class AuthError extends Error {
   constructor(json, statusCode) {
@@ -19,7 +19,6 @@ class HTTPError extends Error {
   }
 }
 
-const emitter = new EventEmitter();
 const handleResponse = async (path, response) => {
   const statusCode = response.status;
   const json = await response.json();
@@ -69,6 +68,14 @@ export const _put = (path, body = {}) => {
   }).then((res) => handleResponse(path, res));
 };
 
+export const _patch = (path, body = {}, auth = true) => {
+  return fetch(`${path}`, {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify(body),
+  }).then((res) => handleResponse(path, res));
+};
+
 export const _delete = (path) => {
   return fetch(`${path}`, {
     method: "DELETE",
@@ -84,5 +91,3 @@ export const buildLink = (path) => {
   }
   return path;
 };
-
-export const subscribeToHttpEvent = (eventName, callback) => emitter.on(eventName, callback);

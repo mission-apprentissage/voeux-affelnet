@@ -7,6 +7,7 @@ import { Gestionnaire } from "./users/Gestionnaire";
 import { Gestionnaires } from "./users/Gestionnaires";
 import { Formateurs } from "./users/Formateurs";
 import { Formateur } from "./users/Formateur";
+import { Alert } from "./Alert";
 
 function AdminRoutes() {
   return (
@@ -21,6 +22,7 @@ function AdminRoutes() {
         }
       ></Route>
 
+      <Route path="alert" element={<Alert />}></Route>
       <Route path="gestionnaire/:siret" element={<Gestionnaire />}></Route>
       <Route path="gestionnaire/:siret/formateurs" element={<Formateurs />}></Route>
       <Route path="gestionnaire/:siret/formateur/:uai" element={<Formateur />}></Route>

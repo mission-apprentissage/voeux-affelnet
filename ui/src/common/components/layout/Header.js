@@ -16,6 +16,8 @@ import {
 } from "@chakra-ui/react";
 import { Logo } from "./Logo";
 import { AccountFill, LockFill } from "../../../theme/components/icons";
+import { AlertMessage } from "./AlertMessage";
+
 import useAuth from "../../hooks/useAuth";
 
 const getAuthTypeLibelle = (type) => {
@@ -38,6 +40,8 @@ const Header = () => {
 
   return (
     <>
+      <AlertMessage />
+
       <Container maxW="full" borderBottom={"1px solid"} borderColor={"grey.400"} px={[0, 0, 4]}>
         <Container maxW="1280px" py={[0, 0, 2]} px={[0, 0, 4]}>
           <Flex alignItems="center" color="grey.800">
