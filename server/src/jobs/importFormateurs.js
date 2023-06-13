@@ -14,6 +14,7 @@ const { arrayOf } = require("../common/validators");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
 const { findAcademieByUai } = require("../common/academies");
 const ReferentielApi = require("../common/api/ReferentielApi");
+const { getNombreVoeux, getVoeuxDate } = require("./countVoeux");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -34,11 +35,17 @@ async function buildEtablissements(sirets, formateur) {
       }
       // eslint-disable-next-line
       const existingEtablissement = formateur?.etablissements?.find((etablissement) => etablissement.siret === siret);
+
+      const voeux_date = await getVoeuxDate({ uai: formateur.uai, siret });
+
+      const nombre_voeux = await getNombreVoeux({ uai: formateur.uai, siret });
+
       return {
         siret,
         uai: gestionnaire?.uai,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
-
+        nombre_voeux,
+        voeux_date,
         academie: gestionnaire?.academie,
       };
     })

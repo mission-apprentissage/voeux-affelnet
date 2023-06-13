@@ -30,6 +30,7 @@ const { Gestionnaire } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
+const { countVoeux } = require("./jobs/countVoeux.js");
 const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js");
 const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUniquementEnApprentissage.js");
 const { asArray } = require("./common/utils/stringUtils.js");
@@ -179,6 +180,15 @@ cli
       }
 
       return importVoeux(input, { importDate });
+    });
+  });
+
+cli
+  .command("countVoeux")
+  .description("Compte les voeux et ajoute l'information sur les relations")
+  .action(() => {
+    runScript(async () => {
+      return countVoeux();
     });
   });
 

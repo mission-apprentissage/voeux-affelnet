@@ -3,16 +3,13 @@ const { pick } = require("lodash");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
 const { findAcademieByUai } = require("../common/academies");
-const {
-  Gestionnaire,
-  Formateur,
-  // Voeu
-} = require("../common/model");
+const { Gestionnaire, Formateur } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 const ReferentielApi = require("../common/api/ReferentielApi");
 const Joi = require("@hapi/joi");
 const { arrayOf } = require("../common/validators.js");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
+const { getVoeuxDate, getNombreVoeux } = require("./countVoeux");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -25,15 +22,21 @@ const schema = Joi.object({
 async function buildEtablissements(uais, gestionnaire) {
   return Promise.all(
     [...new Set(uais)].map(async (uai) => {
-      // const voeu = await Voeu.findOne({ "etablissement_formateur.uai": uai });
-
       const formateur = await Formateur.findOne({ uai }).lean();
 
       const existingEtablissement = gestionnaire?.etablissements?.find((etablissement) => etablissement.uai === uai);
 
+      const voeux_date = await getVoeuxDate({ uai, siret: gestionnaire.siret });
+
+      const nombre_voeux = await getNombreVoeux({ uai, siret: gestionnaire.siret });
+
+      console.log({ siret: gestionnaire.siret, uai, nombre_voeux, voeux_date });
+
       return {
         uai,
         siret: formateur?.siret,
+        nombre_voeux,
+        voeux_date,
         // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
         email: existingEtablissement?.email || undefined,
         diffusionAutorisee: existingEtablissement?.diffusionAutorisee || false,
