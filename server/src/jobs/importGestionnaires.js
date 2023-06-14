@@ -37,7 +37,6 @@ async function buildEtablissements(uais, gestionnaire) {
         siret: formateur?.siret,
         nombre_voeux,
         voeux_date,
-        // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
         email: existingEtablissement?.email || undefined,
         diffusionAutorisee: existingEtablissement?.diffusionAutorisee || false,
         academie: pick(findAcademieByUai(uai), ["code", "nom"]),
