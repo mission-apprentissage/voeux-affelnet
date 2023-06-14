@@ -23,6 +23,7 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
+import * as queryString from "query-string";
 
 import { Yup } from "../common/Yup";
 import { _post } from "../common/httpClient";
@@ -30,7 +31,6 @@ import { useQuery } from "../common/hooks/useQuery";
 import useAuth from "../common/hooks/useAuth";
 import { siretFormat, uaiFormat } from "../common/utils/format";
 import decodeJWT from "../common/utils/decodeJWT";
-import * as queryString from "query-string";
 import { useFetch } from "../common/hooks/useFetch";
 import { UserStatut } from "../common/constants/UserStatut";
 
@@ -123,7 +123,7 @@ function LoginPage() {
             })}
             onSubmit={login}
           >
-            {({ status = {} }) => {
+            {({ values, status = {} }) => {
               return (
                 <Form>
                   <Box marginBottom="2w">
@@ -167,7 +167,7 @@ function LoginPage() {
                     <Button variant="primary" type="submit">
                       Connexion
                     </Button>
-                    <Link to="/forgotten-password" as={NavLink} color="grey.500">
+                    <Link to={`/forgotten-password?username=${values.username}`} as={NavLink} color="grey.500">
                       Mot de passe oublié
                     </Link>
                   </HStack>

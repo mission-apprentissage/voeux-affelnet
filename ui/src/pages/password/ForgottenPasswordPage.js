@@ -1,6 +1,6 @@
 import React from "react";
-// import { useNavigate } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
+
 import {
   Alert,
   Box,
@@ -14,17 +14,18 @@ import {
   Text,
 } from "@chakra-ui/react";
 
+import { useQuery } from "../../common/hooks/useQuery";
 import { Yup } from "../../common/Yup";
 import { _post } from "../../common/httpClient";
 
 const ForgottenPasswordPage = () => {
-  // const navigate = useNavigate();
+  const query = useQuery();
+  const username = query.get("username");
 
   const resetPassword = async (values, { setStatus }) => {
     try {
       await _post("/api/password/forgotten-password", { ...values });
       setStatus({ message: "Un email vous a été envoyé." });
-      // setTimeout(() => navigate("/"), 3000);
     } catch (e) {
       console.error(e);
       setStatus({ error: "Identifiant invalide ou compte non activé." });
@@ -42,7 +43,7 @@ const ForgottenPasswordPage = () => {
         <Box mt={8}>
           <Formik
             initialValues={{
-              username: "",
+              username: username ?? "",
             }}
             validationSchema={Yup.object().shape({
               username: Yup.string().required("Veuillez saisir un identifiant"),
