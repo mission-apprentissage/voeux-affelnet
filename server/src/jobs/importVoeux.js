@@ -299,10 +299,10 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
               _meta: {
                 anomalies,
                 jeune_uniquement_en_apprentissage: previous?._meta.jeune_uniquement_en_apprentissage || false,
-                import_dates: uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
-                // Object.keys(differences).length
-                //   ? uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime())
-                //   : previous?._meta.import_dates,
+                //uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime()),
+                import_dates: Object.keys(differences).length
+                  ? uniqBy([...(previous?._meta.import_dates || []), importDate], (date) => date.getTime())
+                  : previous?._meta.import_dates,
               },
             },
             { upsert: true }
