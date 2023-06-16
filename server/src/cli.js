@@ -22,7 +22,6 @@ const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
 const exportGestionnaires = require("./jobs/exportGestionnaires");
 const buildRelationCsv = require("./jobs/buildRelationCsv");
-const { exportStatutVoeux } = require("./jobs/exportStatutVoeux");
 const { createAdmin } = require("./jobs/createAdmin.js");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
@@ -290,17 +289,17 @@ cli
     });
   });
 
-cli
-  .command("exportStatutVoeux")
-  .option("--filter <filter>", "Filtre au format json", JSON.parse)
-  .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
-  .action(({ out, filter }) => {
-    runScript(() => {
-      const output = out || writeToStdout();
+// cli
+//   .command("exportStatutVoeux")
+//   .option("--filter <filter>", "Filtre au format json", JSON.parse)
+//   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
+//   .action(({ out, filter }) => {
+//     runScript(() => {
+//       const output = out || writeToStdout();
 
-      return exportStatutVoeux(output, { filter });
-    });
-  });
+//       return exportStatutVoeux(output, { filter });
+//     });
+//   });
 
 cli.command("computeStats").action(() => {
   runScript(() => {

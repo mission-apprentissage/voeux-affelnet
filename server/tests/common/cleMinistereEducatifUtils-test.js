@@ -1,13 +1,13 @@
 const assert = require("assert");
 const {
-  getGestionnaireSiretFromCleMinistereEducatif,
+  getSiretGestionnaireFromCleMinistereEducatif,
   getSiretFormateurFromCleMinistereEducatif,
 } = require("../../src/common/utils/cleMinistereEducatifUtils");
 
 describe("cleMinistereEducatifUtils", () => {
-  it("getGestionnaireSiretFromCleMinistereEducatif", () => {
+  it("getSiretGestionnaireFromCleMinistereEducatif", () => {
     assert.strictEqual(
-      getGestionnaireSiretFromCleMinistereEducatif("077508P01211300217930001813002179300026-27229#L01"),
+      getSiretGestionnaireFromCleMinistereEducatif("077508P01211300217930001813002179300026-27229#L01"),
       "13002179300018"
     );
   });

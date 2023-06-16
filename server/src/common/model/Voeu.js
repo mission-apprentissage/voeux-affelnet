@@ -98,10 +98,6 @@ const schema = new Schema({
         type: String,
         index: true,
       },
-      academie: {
-        required: true,
-        type: academieSchema,
-      },
     }),
   },
   etablissement_gestionnaire: {

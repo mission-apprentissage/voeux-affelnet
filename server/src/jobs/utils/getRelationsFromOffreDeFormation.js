@@ -3,9 +3,9 @@ const { compose, transformData, filterData, accumulateData, flattenArray } = req
 const { Gestionnaire } = require("../../common/model/index.js");
 const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
-const { getGestionnaireSiret } = require("./getGestionnaireSiret.js");
 const { catalogue } = require("./catalogue.js");
 const { referentiel } = require("./referentiel.js");
+const { getSiretGestionnaireFromCleMinistereEducatif } = require("../../common/utils/cleMinistereEducatifUtils.js");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -115,7 +115,7 @@ async function getRelationsFromOffreDeFormation(options = {}) {
           "RECTORAT ET SERVICES RECTORAUX",
           "SERVICES DEPARTEMENTAUX DE L'EN",
         ].includes(libelleTypeEtablissement)
-          ? getGestionnaireSiret(data["SIRET_UAI_GESTIONNAIRE"], cleMinistereEducatif)
+          ? getSiretGestionnaireFromCleMinistereEducatif(cleMinistereEducatif, data["SIRET_UAI_GESTIONNAIRE"])
           : SIRET_RECENSEMENT;
         const uai = data["UAI"]?.toUpperCase();
 

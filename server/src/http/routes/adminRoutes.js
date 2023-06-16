@@ -15,10 +15,10 @@ const { dateAsString } = require("../../common/utils/stringUtils.js");
 const { siretFormat, uaiFormat } = require("../../common/utils/format");
 const { UserStatut } = require("../../common/constants/UserStatut");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
-const exportGestionnaires = require("../../jobs/exportGestionnaires");
-const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissementsInconnus.js");
-const { exportStatutVoeux } = require("../../jobs/exportStatutVoeux.js");
-const { exportVoeuxRecensement } = require("../../jobs/exportVoeuxRecensement.js");
+// const exportGestionnaires = require("../../jobs/exportGestionnaires");
+// const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissementsInconnus.js");
+// const { exportStatutVoeux } = require("../../jobs/exportStatutVoeux.js");
+// const { exportVoeuxRecensement } = require("../../jobs/exportVoeuxRecensement.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
@@ -711,63 +711,63 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * =============
    */
 
-  router.get(
-    "/api/admin/fichiers/injoinables.csv",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      return exportGestionnaires(asCsvResponse("gestionnaires-injoinables", res), {
-        filter: { $or: [{ "emails.error": { $exists: true } }, { unsubscribe: true }] },
-      });
-    })
-  );
+  // router.get(
+  //   "/api/admin/fichiers/injoinables.csv",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     return exportGestionnaires(asCsvResponse("gestionnaires-injoinables", res), {
+  //       filter: { $or: [{ "emails.error": { $exists: true } }, { unsubscribe: true }] },
+  //     });
+  //   })
+  // );
 
-  router.get(
-    "/api/admin/fichiers/relances.csv",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      return exportGestionnaires(asCsvResponse("gestionnaires-relances", res), {
-        filter: { statut: { $in: ["en attente", "confirmé"] }, "etablissements.voeux_date": { $exists: true } },
-        columns: {
-          statut: (data) => data.statut,
-          nb_voeux: async (data) => {
-            const count = await Voeu.countDocuments({
-              "etablissement_formateur.uai": { $in: data?.etablissements.map((e) => e.uai) },
-            });
-            return count ? count : "0";
-          },
-        },
-      });
-    })
-  );
+  // router.get(
+  //   "/api/admin/fichiers/relances.csv",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     return exportGestionnaires(asCsvResponse("gestionnaires-relances", res), {
+  //       filter: { statut: { $in: ["en attente", "confirmé"] }, "etablissements.voeux_date": { $exists: true } },
+  //       columns: {
+  //         statut: (data) => data.statut,
+  //         nb_voeux: async (data) => {
+  //           const count = await Voeu.countDocuments({
+  //             "etablissement_formateur.uai": { $in: data?.etablissements.map((e) => e.uai) },
+  //           });
+  //           return count ? count : "0";
+  //         },
+  //       },
+  //     });
+  //   })
+  // );
 
-  router.get(
-    "/api/admin/fichiers/inconnus.csv",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      return exportEtablissementsInconnus(asCsvResponse("etablissements-inconnus", res));
-    })
-  );
+  // router.get(
+  //   "/api/admin/fichiers/inconnus.csv",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     return exportEtablissementsInconnus(asCsvResponse("etablissements-inconnus", res));
+  //   })
+  // );
 
-  router.get(
-    "/api/admin/fichiers/statut-voeux.csv",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      return exportStatutVoeux(asCsvResponse("statut-voeux", res));
-    })
-  );
+  // router.get(
+  //   "/api/admin/fichiers/statut-voeux.csv",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     return exportStatutVoeux(asCsvResponse("statut-voeux", res));
+  //   })
+  // );
 
-  router.get(
-    "/api/admin/fichiers/voeux-recensement.csv",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      return exportVoeuxRecensement(asCsvResponse("voeux-recensement", res));
-    })
-  );
+  // router.get(
+  //   "/api/admin/fichiers/voeux-recensement.csv",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     return exportVoeuxRecensement(asCsvResponse("voeux-recensement", res));
+  //   })
+  // );
 
   /**
    * ACADEMIES
