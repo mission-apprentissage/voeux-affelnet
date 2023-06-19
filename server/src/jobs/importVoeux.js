@@ -383,7 +383,7 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
         await Voeu.countDocuments({
           "etablissement_formateur.uai": uai,
           "etablissement_gestionnaire.siret": siret,
-          "_meta.import_dates": { $nin: [importDate] },
+          "_meta.import_dates": { $in: [importDate] },
         })
       ) {
         return await saveUpdatedListAvailable({ uai, siret, nombre_voeux });
