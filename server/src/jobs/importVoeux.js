@@ -386,9 +386,17 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
           "_meta.import_dates": { $in: [importDate] },
         })
       ) {
-        return await saveUpdatedListAvailable({ uai, siret, nombre_voeux });
-      } else {
-        return await saveListAvailable({ uai, siret, nombre_voeux });
+        if (
+          await Voeu.countDocuments({
+            "etablissement_formateur.uai": uai,
+            "etablissement_gestionnaire.siret": siret,
+            "_meta.import_dates": { $nin: [importDate] },
+          })
+        ) {
+          return await saveUpdatedListAvailable({ uai, siret, nombre_voeux });
+        } else {
+          return await saveListAvailable({ uai, siret, nombre_voeux });
+        }
       }
     })
   );
