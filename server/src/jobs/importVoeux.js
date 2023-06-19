@@ -73,6 +73,9 @@ const schema = Joi.object({
     cio: Joi.string(),
     academie: academieValidationSchema,
   }).required(),
+  etablissement_formateur: Joi.object({
+    uai: Joi.string().pattern(uaiFormat),
+  }).required(),
   etablissement_gestionnaire: Joi.object({
     siret: Joi.string().pattern(siretFormat),
   }).required(),
