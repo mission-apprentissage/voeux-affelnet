@@ -129,6 +129,7 @@ const parseVoeuxCsv = async (source) => {
       },
     }),
     transformData(async (line) => {
+      // logger.info({ line });
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
       const uaiEtablissementOrigine = line["Code UAI étab. origine"]?.toUpperCase();
       const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase();
@@ -263,37 +264,40 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
   logger.info(`Import des listes de candidats...`);
 
   const relations = new Set();
+  const ids = new Set();
 
   await oleoduc(
     await (async () => await parseVoeuxCsv(voeuxCsvStream))(),
     writeData(
       async (data) => {
+        // logger.info({ data });
         const key = JSON.stringify({
           siret: data.etablissement_gestionnaire.siret,
           uai: data.etablissement_formateur.uai,
         });
 
         stats.total++;
-        try {
-          const anomalies = await validate(data);
-          if (hasAnomaliesOnMandatoryFields(anomalies)) {
-            logger.warn(`Voeu invalide`, {
-              line: stats.total,
-              "apprenant.ine": data.apprenant?.ine,
-              "formation.code_affelnet": data.formation?.code_affelnet,
-              anomalies,
-            });
-            stats.invalid++;
-            return;
-          }
+        const anomalies = await validate(data);
 
-          const query = {
-            "academie.code": data.academie.code,
-            "apprenant.ine": data.apprenant.ine,
-            "formation.code_affelnet": data.formation.code_affelnet,
-          };
-          const previous = await Voeu.findOne(query, { _id: 0, __v: 0 }).lean();
-          const differences = diff(flattenObject(omit(previous, ["_meta"])), flattenObject(data));
+        const query = {
+          "academie.code": data.academie?.code,
+          "apprenant.ine": data.apprenant.ine,
+          "formation.code_affelnet": data.formation.code_affelnet,
+        };
+
+        if (hasAnomaliesOnMandatoryFields(anomalies)) {
+          logger.warn(`Voeu invalide`, {
+            line: stats.total,
+            ...query,
+            anomalies,
+          });
+          stats.invalid++;
+          return;
+        }
+
+        try {
+          const previous = await Voeu.findOne(query, { __v: 0 }).lean();
+          const differences = diff(flattenObject(omit(previous, ["_meta", "_id"])), flattenObject(data));
 
           const res = await Voeu.replaceOne(
             query,
@@ -312,9 +316,8 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
           );
 
           if (res.upsertedCount) {
-            logger.debug(`Voeu ajouté`, {
+            logger.info(`Voeu ajouté`, {
               query,
-              etablissement_accueil: data.etablissement_accueil.uai,
             });
             stats.created++;
           }
@@ -325,6 +328,9 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
             }
 
             if (res.modifiedCount) {
+              logger.info(`Voeu modifié`, {
+                query,
+              });
               stats.updated++;
               Object.keys(differences).forEach((key) => updatedFields.add(key));
             }
@@ -334,8 +340,16 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
               importDate
             );
           }
+
+          ids.add((await Voeu.findOne(query, { _id: 1 }).lean())._id);
         } catch (e) {
-          logger.error(`Import du voeu impossible`, stats.total, e);
+          logger.error(
+            `Import du voeu impossible`,
+            {
+              query,
+            },
+            e
+          );
           stats.failed++;
         }
       },
@@ -343,7 +357,8 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
     )
   );
 
-  const { deletedCount } = await Voeu.deleteMany({ "_meta.import_dates": { $nin: [importDate] } });
+  // const { deletedCount } = await Voeu.deleteMany({ "_meta.import_dates": { $nin: [importDate] } });
+  const { deletedCount } = await Voeu.deleteMany({ _id: { $nin: [...ids] } });
   stats.deleted = deletedCount;
 
   if (manquantes.length > 0) {
