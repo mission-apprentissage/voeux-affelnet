@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner } from "@chakra-ui/react";
+import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner, Heading } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import queryString from "query-string";
 
@@ -25,6 +25,13 @@ export const Users = () => {
   const [downloading, setDownloading] = useState(false);
   const [query, setQuery] = useState();
   const [data, setData] = useState([]);
+  const [stats, setStats] = useState({
+    organisme_count: 0,
+    organisme_count_downloaded: 0,
+    organisme_count_partially_downloaded: 0,
+    organisme_count_not_downloaded: 0,
+  });
+
   const [pagination, setPagination] = useState({
     page: 0,
     items_par_page: 0,
@@ -53,6 +60,7 @@ export const Users = () => {
         setLoading(false);
         setData(response.users);
         setPagination(response.pagination);
+        setStats(response.stats);
         setError(undefined);
       } catch (e) {
         console.error(e);
@@ -202,6 +210,17 @@ export const Users = () => {
         </Link>
       </Box>
 
+      {/* TODO : Bloc de stats */}
+      {/* <Box>
+        <Heading>Pour cette sélection</Heading>
+        <Text fontSize="sm">
+          {stats.organisme_count} organismes, {stats.organisme_count_downloaded} ont téléchargé la liste,{" "}
+          {stats.organisme_count_partially_downloaded} partiellement, {stats.organisme_count_not_downloaded} ne l'ont
+          pas téléchargé (dont X n'a pas confirmé son adresse courriel).
+        </Text>
+        <Text fontSize="sm">X candidatures (pour X apprenants), dont X téléchargés (X%), X non téléchargés (X%).</Text>
+      </Box> */}
+
       <Table style={{ marginTop: "15px" }}>
         <Thead>
           <Tr>
@@ -211,6 +230,7 @@ export const Users = () => {
             <Th width="350px">Courriel habilité</Th>
 
             <Th width={"80px"}>Candidats</Th>
+            <Th width={"80px"}>Restant à télécharger</Th>
             <Th>Statut</Th>
           </Tr>
         </Thead>
@@ -244,6 +264,12 @@ export const Users = () => {
                             </Text>
                           </Td>
                           <Td>{user.nombre_voeux}</Td>
+                          <Td>
+                            {user.etablissements.reduce(
+                              (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
+                              0
+                            )}
+                          </Td>
                           <Td>
                             <Text lineHeight={6}>
                               <GestionnaireStatut gestionnaire={user} />{" "}
@@ -283,6 +309,12 @@ export const Users = () => {
                             </Text>
                           </Td>
                           <Td>{user.nombre_voeux}</Td>
+                          <Td>
+                            {user.etablissements.reduce(
+                              (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
+                              0
+                            )}
+                          </Td>
                           <Td>
                             <Text lineHeight={6}>
                               {user.gestionnaires?.map((gestionnaire) => {

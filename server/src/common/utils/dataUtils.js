@@ -1,5 +1,5 @@
 const { UserType } = require("../constants/UserType.js");
-const { Gestionnaire, Voeu } = require("../model/index.js");
+const { Gestionnaire, Formateur, Voeu } = require("../model/index.js");
 const { sortDescending } = require("./dateUtils.js");
 
 /**
@@ -153,7 +153,9 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
 };
 
 const filterForAcademie = (etablissement, user) => {
-  return user.academies ? user.academies.map((academie) => academie.code).includes(etablissement.academie?.code) : true;
+  return user?.academies
+    ? user.academies.map((academie) => academie.code).includes(etablissement.academie?.code)
+    : true;
 };
 
 const fillGestionnaire = async (gestionnaire, admin) => {
@@ -179,20 +181,50 @@ const fillGestionnaire = async (gestionnaire, admin) => {
             "etablissement_gestionnaire.siret": gestionnaire.siret,
           };
 
+          const formateur = await Formateur.findOne({ uai: etablissement.uai });
+
           const voeux = await Voeu.find(voeuxFilter);
+
+          const first_date_voeux = etablissement.uai
+            ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+            : null;
+
+          const last_date_voeux = etablissement.voeux_date; /*etablissement.uai
+          ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+          : null*/
+
+          const diffusionAutorisee = etablissement.diffusionAutorisee;
+
+          const voeuxTelechargementByGestionnaire = gestionnaire.voeux_telechargements.filter(
+            (vt) => vt.uai === etablissement.uai
+          );
+          const voeuxTelechargementByFormateur = formateur.voeux_telechargements.filter(
+            (vt) => vt.siret === gestionnaire.siret
+          );
+
+          const lastDownloadDate = diffusionAutorisee
+            ? voeuxTelechargementByFormateur[voeuxTelechargementByFormateur.length - 1]?.date
+            : voeuxTelechargementByGestionnaire[voeuxTelechargementByGestionnaire.length - 1]?.date;
 
           return {
             ...etablissement,
 
             nombre_voeux: etablissement.nombre_voeux ?? 0, // etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+            nombre_voeux_restant: etablissement.uai
+              ? await Voeu.countDocuments({
+                  ...voeuxFilter,
+                  ...(lastDownloadDate
+                    ? {
+                        $expr: {
+                          $lte: [new Date(lastDownloadDate), { $last: "$_meta.import_dates" }],
+                        },
+                      }
+                    : {}),
+                }).lean()
+              : 0,
 
-            first_date_voeux: etablissement.uai
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-              : null,
-
-            last_date_voeux: etablissement.uai
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-              : null,
+            first_date_voeux,
+            last_date_voeux,
           };
         }) ?? []
     ),
@@ -225,18 +257,48 @@ const fillFormateur = async (formateur, admin) => {
 
           const voeux = await Voeu.find(voeuxFilter);
 
+          const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret });
+
+          const first_date_voeux = etablissement.siret
+            ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
+            : null;
+
+          const last_date_voeux = etablissement.voeux_date; /*etablissement.uai
+          ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
+          : null*/
+
+          const diffusionAutorisee = etablissement.diffusionAutorisee;
+
+          const voeuxTelechargementByGestionnaire = gestionnaire.voeux_telechargements.filter(
+            (vt) => vt.uai === etablissement.uai
+          );
+          const voeuxTelechargementByFormateur = formateur.voeux_telechargements.filter(
+            (vt) => vt.siret === gestionnaire.siret
+          );
+
+          const lastDownloadDate = diffusionAutorisee
+            ? voeuxTelechargementByFormateur[voeuxTelechargementByFormateur.length - 1]?.date
+            : voeuxTelechargementByGestionnaire[voeuxTelechargementByGestionnaire.length - 1]?.date;
+
           return {
             ...etablissement,
 
             nombre_voeux: etablissement.nombre_voeux ?? 0, //etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+            nombre_voeux_restant: etablissement.siret
+              ? await Voeu.countDocuments({
+                  ...voeuxFilter,
+                  ...(lastDownloadDate
+                    ? {
+                        $expr: {
+                          $lte: [new Date(lastDownloadDate), { $last: "$_meta.import_dates" }],
+                        },
+                      }
+                    : {}),
+                }).lean()
+              : 0,
 
-            first_date_voeux: etablissement.siret
-              ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-              : null,
-
-            last_date_voeux: etablissement.voeux_date /*etablissement.siret
-                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-                : null*/,
+            first_date_voeux,
+            last_date_voeux,
           };
         }) ?? []
     ),

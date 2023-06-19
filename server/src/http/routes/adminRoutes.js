@@ -85,6 +85,43 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const regex = ".*" + text + ".*";
       const regexQuery = { $regex: regex, $options: "i" };
 
+      const stats = {
+        organisme_count:
+          (type !== "Formateur"
+            ? await Gestionnaire.countDocuments(
+                ...(academie || !!defaultAcademies?.length
+                  ? [
+                      {
+                        $or: [
+                          { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
+                          {
+                            etablissements: {
+                              $elemMatch: { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
+                            },
+                          },
+                        ],
+                      },
+                    ]
+                  : [])
+              )
+            : 0) +
+          (type !== "Gestionnaire"
+            ? await Formateur.countDocuments({
+                ...(academie || !!defaultAcademies?.length
+                  ? [
+                      {
+                        $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
+                      },
+                    ]
+                  : []),
+              })
+            : 0),
+
+        organisme_count_downloaded: 0,
+        organisme_count_partially_downloaded: 0,
+        organisme_count_not_downloaded: 0,
+      };
+
       const { find, pagination } = await paginate(
         User,
         {
@@ -184,11 +221,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
         find.cursor(),
         transformData(async (user) => {
           return {
-            ...user,
-
             ...(user.type === UserType.GESTIONNAIRE
               ? {
-                  nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": user.siret }),
+                  ...(await fillGestionnaire(user, admin)),
 
                   formateurs: await Promise.all(
                     (
@@ -202,22 +237,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
                       }).lean()
                     ).map((etablissement) => fillFormateur(etablissement, admin))
                   ),
-
-                  etablissements: await Promise.all(
-                    user?.etablissements
-                      .filter((etablissement) => filterForAcademie(etablissement, admin))
-                      .map(async (etablissement) => ({
-                        ...etablissement,
-
-                        // nombre_voeux: await Voeu.countDocuments({
-                        //   "etablissement_gestionnaire.siret": user.siret,
-                        //   "etablissement_formateur.uai": etablissement.uai,
-                        // }),
-                      })) ?? []
-                  ),
                 }
               : {
-                  nombre_voeux: await Voeu.countDocuments({ "etablissement_formateur.uai": user.uai }),
+                  ...(await fillFormateur(user, admin)),
 
                   gestionnaires: await Promise.all(
                     (
@@ -231,24 +253,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
                       }).lean()
                     ).map((gestionnaire) => fillGestionnaire(gestionnaire, admin))
                   ),
-
-                  etablissements: await Promise.all(
-                    user?.etablissements
-                      // .filter((etablissement) => filterForAcademie(etablissement, admin))
-                      .map(async (etablissement) => ({
-                        ...etablissement,
-
-                        // nombre_voeux: await Voeu.countDocuments({
-                        //   "etablissement_gestionnaire.siret": etablissement.siret,
-                        //   "etablissement_formateur.uai": user.uai,
-                        // }),
-                      })) ?? []
-                  ),
                 }),
           };
         }),
         transformIntoJSON({
           arrayWrapper: {
+            stats,
             pagination,
           },
           arrayPropertyName: "users",

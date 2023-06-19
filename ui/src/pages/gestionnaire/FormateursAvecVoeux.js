@@ -4,7 +4,21 @@ import { FormateurLibelle } from "../../common/components/formateur/fields/Forma
 import { FormateurEmail } from "../../common/components/gestionnaire/fields/FormateurEmail";
 import { FormateurStatut } from "../../common/components/gestionnaire/fields/FormateurStatut";
 
-const FormateurVoeuxDisponibles = ({ gestionnaire, formateur, callback }) => {
+const FormateurVoeuxRestants = ({ gestionnaire, formateur }) => {
+  const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
+
+  if (!etablissement) {
+    return;
+  }
+
+  return (
+    <>
+      <Text>{etablissement?.nombre_voeux_restant}</Text>
+    </>
+  );
+};
+
+const FormateurVoeuxDisponibles = ({ gestionnaire, formateur }) => {
   const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
 
   if (!etablissement) {
@@ -31,6 +45,7 @@ export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
           <Th width="400px">Raison sociale / Ville</Th>
           <Th width="450px">Courriel habilité</Th>
           <Th>Candidats</Th>
+          <Th width={"80px"}>Restant à télécharger</Th>
           <Th>Statut</Th>
         </Tr>
       </Thead>
@@ -62,6 +77,12 @@ export const FormateursAvecVoeux = ({ gestionnaire, formateurs, callback }) => {
                   <FormateurVoeuxDisponibles gestionnaire={gestionnaire} formateur={formateur} />
                 </Text>
               </Td>
+              <Td>
+                <Text lineHeight={6}>
+                  <FormateurVoeuxRestants gestionnaire={gestionnaire} formateur={formateur} />
+                </Text>
+              </Td>
+
               <Td>
                 <Text lineHeight={6}>
                   <FormateurStatut

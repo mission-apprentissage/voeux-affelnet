@@ -330,6 +330,7 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
             if (res.modifiedCount) {
               logger.info(`Voeu modifié`, {
                 query,
+                differences,
               });
               stats.updated++;
               Object.keys(differences).forEach((key) => updatedFields.add(key));

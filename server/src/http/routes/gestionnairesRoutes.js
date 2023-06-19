@@ -6,7 +6,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { markVoeuxAsDownloadedByGestionnaire } = require("../../common/actions/markVoeuxAsDownloaded");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
-const { Gestionnaire, Formateur, Voeu } = require("../../common/model");
+const { Gestionnaire, Formateur } = require("../../common/model");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const { uaiFormat } = require("../../common/utils/format");
 const sendActivationEmails = require("../../jobs/sendActivationEmails");
@@ -19,6 +19,7 @@ const {
   saveDelegationCreatedByResponsable,
   saveDelegationCancelledByResponsable,
 } = require("../../common/actions/history/formateur");
+const { fillGestionnaire } = require("../../common/utils/dataUtils");
 
 module.exports = ({ users, sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -35,36 +36,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       const { siret } = req.user;
       const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
 
-      res.json({
-        ...gestionnaire,
-
-        nombre_voeux: await Voeu.countDocuments({ "etablissement_gestionnaire.siret": siret }),
-
-        etablissements: await Promise.all(
-          gestionnaire?.etablissements?.map(async (etablissement) => {
-            const voeuxFilter = {
-              "etablissement_formateur.uai": etablissement.uai,
-              "etablissement_gestionnaire.siret": siret,
-            };
-
-            const voeux = await Voeu.find(voeuxFilter);
-
-            return {
-              ...etablissement,
-
-              nombre_voeux: etablissement.uai ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
-
-              first_date_voeux: etablissement.uai
-                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
-                : null,
-
-              last_date_voeux: etablissement.voeux_date /*etablissement.uai
-                ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-                : null,*/,
-            };
-          }) ?? []
-        ),
-      });
+      res.json(await fillGestionnaire(gestionnaire));
     })
   );
 
