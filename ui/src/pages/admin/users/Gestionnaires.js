@@ -90,6 +90,7 @@ export const Gestionnaires = () => {
                   <Th width="350px">Courriel habilité</Th>
 
                   <Th width={"80px"}>Candidats</Th>
+                  <Th width={"80px"}>Restant à télécharger</Th>
                   <Th>Statut</Th>
                 </Tr>
               </Thead>
@@ -120,6 +121,9 @@ export const Gestionnaires = () => {
                       </Td>
                       <Td>
                         <Text>{etablissement?.nombre_voeux}</Text>
+                      </Td>
+                      <Td>
+                        <Text>{etablissement?.nombre_voeux_restant}</Text>
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
