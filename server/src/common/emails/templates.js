@@ -133,6 +133,30 @@ module.exports = {
       },
     };
   },
+  update_gestionnaire: (gestionnaire, token) => {
+    return {
+      subject: `Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (Siret : ${gestionnaire.siret})`,
+      templateFile: getTemplateFile("update_gestionnaire"),
+      data: {
+        gestionnaire,
+        token,
+        actionToken: createActionToken(gestionnaire.username),
+        voeux_email,
+      },
+    };
+  },
+  update_formateur: (formateur, token) => {
+    return {
+      subject: `Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (UAI : ${formateur.uai})`,
+      templateFile: getTemplateFile("update_formateur"),
+      data: {
+        formateur,
+        token,
+        actionToken: createActionToken(formateur.username),
+        voeux_email,
+      },
+    };
+  },
   reset_password: (user, token) => {
     return {
       subject: "Réinitialisation du mot de passe (lien valable 1 heure)",

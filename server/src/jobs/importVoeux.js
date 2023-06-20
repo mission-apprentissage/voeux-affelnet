@@ -8,13 +8,14 @@ const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
 const { parseCsv } = require("../common/utils/csvUtils");
-const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
+// const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
 const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 const { getSiretGestionnaireFromCleMinistereEducatif } = require("../common/utils/cleMinistereEducatifUtils");
 const { catalogue } = require("./utils/catalogue");
 const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/formateur");
 const { referentiel } = require("./utils/referentiel");
+const { countVoeux } = require("./countVoeux");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -336,10 +337,10 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
               Object.keys(differences).forEach((key) => updatedFields.add(key));
             }
 
-            await markVoeuxAsAvailable(
-              { siret: data.etablissement_gestionnaire.siret, uai: data.etablissement_formateur.uai },
-              importDate
-            );
+            // await markVoeuxAsAvailable(
+            //   { siret: data.etablissement_gestionnaire.siret, uai: data.etablissement_formateur.uai },
+            //   importDate
+            // );
           }
 
           ids.add((await Voeu.findOne(query, { _id: 1 }).lean())._id);
@@ -369,6 +370,8 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
       )}`
     );
   }
+
+  await countVoeux();
 
   await Promise.all(
     [...relations].map(async (relation) => {

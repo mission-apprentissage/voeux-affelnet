@@ -5,10 +5,10 @@ const { User, Gestionnaire } = require("../common/model");
 const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
 
 const {
-  saveListAvailableEmailAutomaticSent: saveListAvailableEmailAutomaticSentForResponsable,
+  saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForResponsable,
 } = require("../common/actions/history/responsable");
 const {
-  saveListAvailableEmailAutomaticSent: saveListAvailableEmailAutomaticSentForFormateur,
+  saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForFormateur,
 } = require("../common/actions/history/formateur");
 
 async function sendNotificationEmails(sendEmail, options = {}) {
@@ -24,7 +24,7 @@ async function sendNotificationEmails(sendEmail, options = {}) {
           statut: { $nin: [UserStatut.NON_CONCERNE] },
 
           "etablissements.voeux_date": { $exists: true },
-          "emails.templateName": { $not: { $regex: "^notification_.*$" } },
+          "emails.templateName": { $not: { $regex: "^update_.*$" }, $regex: "^notification_.*$" },
 
           $or: [
             {
@@ -64,11 +64,11 @@ async function sendNotificationEmails(sendEmail, options = {}) {
         return;
       }
 
-      if (await filesHaveUpdate(user)) {
+      if (await !filesHaveUpdate(user)) {
         return;
       }
 
-      const templateName = `notification_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
+      const templateName = `update_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
       stats.total++;
 
       try {
@@ -78,10 +78,10 @@ async function sendNotificationEmails(sendEmail, options = {}) {
 
           switch (user.type) {
             case UserType.GESTIONNAIRE:
-              await saveListAvailableEmailAutomaticSentForResponsable(user);
+              await saveUpdatedListAvailableEmailAutomaticSentForResponsable(user);
               break;
             case UserType.FORMATEUR:
-              await saveListAvailableEmailAutomaticSentForFormateur(user);
+              await saveUpdatedListAvailableEmailAutomaticSentForFormateur(user);
               break;
             default:
               break;

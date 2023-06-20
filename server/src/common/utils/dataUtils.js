@@ -152,6 +152,48 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
   }
 };
 
+const filesHaveUpdate = async (user) => {
+  switch (user.type) {
+    case UserType.GESTIONNAIRE: {
+      const gestionnaire = user;
+
+      return !!gestionnaire.etablissements.filter(
+        async (etablissement) =>
+          !etablissement.diffusionAutorisee &&
+          (await Voeu.countDocuments({
+            "etablissement_formateur.uai": etablissement.uai,
+            "etablissement_gestionnaire.siret": gestionnaire.siret,
+            "_meta.import_dates.1": { $exists: true },
+          })) > 0
+      )?.length;
+    }
+
+    case UserType.FORMATEUR: {
+      const formateur = user;
+
+      const gestionnaires = await Gestionnaire.find({ etablissements: { $elemMatch: { uai: formateur.uai } } });
+
+      const etablissements = gestionnaires.flatMap((gestionnaire) =>
+        gestionnaire.etablissements.filter((etablissement) => etablissement.uai === formateur.uai)
+      );
+
+      return !!etablissements.filter(
+        async (etablissement) =>
+          etablissement.diffusionAutorisee &&
+          (await Voeu.countDocuments({
+            "etablissement_formateur.uai": formateur.uai,
+            "etablissement_gestionnaire.siret": etablissement.siret,
+            "_meta.import_dates.1": { $exists: true },
+          })) > 0
+      )?.length;
+    }
+
+    default: {
+      return false;
+    }
+  }
+};
+
 const filterForAcademie = (etablissement, user) => {
   return user?.academies
     ? user.academies.map((academie) => academie.code).includes(etablissement.academie?.code)
@@ -314,6 +356,7 @@ module.exports = {
   areTelechargementsPartiel,
   areTelechargementsAucun,
   allFilesAsAlreadyBeenDownloaded,
+  filesHaveUpdate,
   filterForAcademie,
   fillGestionnaire,
   fillFormateur,

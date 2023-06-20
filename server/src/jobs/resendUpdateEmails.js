@@ -6,15 +6,15 @@ const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/
 const { UserType } = require("../common/constants/UserType");
 
 const {
-  saveListAvailableEmailManualResent: saveListAvailableEmailManualResentAsResponsable,
-  saveListAvailableEmailAutomaticResent: saveListAvailableEmailAutomaticResentAsResponsable,
+  saveUpdatedListAvailableEmailManualResent: saveUpdatedListAvailableEmailManualResentAsResponsable,
+  saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsResponsable,
 } = require("../common/actions/history/responsable");
 const {
-  saveListAvailableEmailManualResent: saveListAvailableEmailManualResentAsFormateur,
-  saveListAvailableEmailAutomaticResent: saveListAvailableEmailAutomaticResentAsFormateur,
+  saveUpdatedListAvailableEmailManualResent: saveUpdatedListAvailableEmailManualResentAsFormateur,
+  saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsFormateur,
 } = require("../common/actions/history/formateur");
 
-async function resendNotificationEmails(resendEmail, options = {}) {
+async function resendUpdateEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const query = {
@@ -31,7 +31,7 @@ async function resendNotificationEmails(resendEmail, options = {}) {
             ? {
                 emails: {
                   $elemMatch: {
-                    templateName: /^notification_.*/,
+                    templateName: /^update_.*/,
                     "error.type": { $in: ["fatal", "soft_bounce"] },
                   },
                 },
@@ -39,10 +39,10 @@ async function resendNotificationEmails(resendEmail, options = {}) {
             : {
                 emails: {
                   $elemMatch: {
-                    templateName: /^notification_.*/,
+                    templateName: /^update_.*/,
                     error: { $exists: false },
                     $and: [
-                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 1 }).toJSDate() } } },
+                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 0 }).toJSDate() } } },
                       { "sendDates.2": { $exists: false } },
                     ],
                   },
@@ -76,11 +76,11 @@ async function resendNotificationEmails(resendEmail, options = {}) {
         return;
       }
 
-      if (await filesHaveUpdate(user)) {
+      if (await !filesHaveUpdate(user)) {
         return;
       }
 
-      const previous = user.emails.find((e) => e.templateName.startsWith("notification_"));
+      const previous = user.emails.find((e) => e.templateName.startsWith("update_"));
 
       try {
         stats.total++;
@@ -91,13 +91,13 @@ async function resendNotificationEmails(resendEmail, options = {}) {
           switch (user.type) {
             case UserType.GESTIONNAIRE:
               options.sender
-                ? await saveListAvailableEmailManualResentAsResponsable(user, options.sender)
-                : await saveListAvailableEmailAutomaticResentAsResponsable(user);
+                ? await saveUpdatedListAvailableEmailManualResentAsResponsable(user, options.sender)
+                : await saveUpdatedListAvailableEmailAutomaticResentAsResponsable(user);
               break;
             case UserType.FORMATEUR:
               options.sender
-                ? await saveListAvailableEmailManualResentAsFormateur(user, options.sender)
-                : await saveListAvailableEmailAutomaticResentAsFormateur(user);
+                ? await saveUpdatedListAvailableEmailManualResentAsFormateur(user, options.sender)
+                : await saveUpdatedListAvailableEmailAutomaticResentAsFormateur(user);
               break;
             default:
               break;
@@ -114,4 +114,4 @@ async function resendNotificationEmails(resendEmail, options = {}) {
   return stats;
 }
 
-module.exports = resendNotificationEmails;
+module.exports = resendUpdateEmails;

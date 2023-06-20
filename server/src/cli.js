@@ -14,6 +14,8 @@ const sendActivationEmails = require("./jobs/sendActivationEmails");
 const resendActivationEmails = require("./jobs/resendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
+const sendUpdateEmails = require("./jobs/sendUpdateEmails");
+const resendUpdateEmails = require("./jobs/resendUpdateEmails");
 const importGestionnaires = require("./jobs/importGestionnaires");
 const { cleanGestionnaires } = require("./jobs/cleanGestionnaires");
 const importFormateurs = require("./jobs/importFormateurs");
@@ -232,6 +234,28 @@ cli
   .action((options) => {
     runScript(({ resendEmail }) => {
       return resendNotificationEmails(resendEmail, options);
+    });
+  });
+
+cli
+  .command("sendUpdateEmails")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .action((options) => {
+    runScript(({ sendEmail }) => {
+      return sendUpdateEmails(sendEmail, options);
+    });
+  });
+
+cli
+  .command("resendUpdateEmails")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--retry", "Renvoie les emails en erreur", false)
+  .option("--max <max>", "Nombre de relances maximum", parseInt)
+  .action((options) => {
+    runScript(({ resendEmail }) => {
+      return resendUpdateEmails(resendEmail, options);
     });
   });
 
