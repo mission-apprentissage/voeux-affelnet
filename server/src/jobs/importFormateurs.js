@@ -108,7 +108,7 @@ async function importFormateurs(formateursCsv, options = {}) {
       async ({ uai, etablissements }) => {
         try {
           const found = await Formateur.findOne({ uai }).lean();
-          const gestionnaires = await buildEtablissements(etablissements, found);
+          const gestionnaires = await buildEtablissements(etablissements, found ?? { uai });
           const organismes = (
             await referentielApi.searchOrganismes({ uais: uai }).catch((error) => {
               logger.warn(error, `Le formateur ${uai} n'est pas dans le référentiel`);

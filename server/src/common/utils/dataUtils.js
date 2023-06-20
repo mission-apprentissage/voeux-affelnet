@@ -237,11 +237,11 @@ const fillGestionnaire = async (gestionnaire, admin) => {
 
           const diffusionAutorisee = etablissement.diffusionAutorisee;
 
-          const voeuxTelechargementByGestionnaire = gestionnaire.voeux_telechargements.filter(
+          const voeuxTelechargementByGestionnaire = gestionnaire?.voeux_telechargements.filter(
             (vt) => vt.uai === etablissement.uai
           );
-          const voeuxTelechargementByFormateur = formateur.voeux_telechargements.filter(
-            (vt) => vt.siret === gestionnaire.siret
+          const voeuxTelechargementByFormateur = formateur?.voeux_telechargements.filter(
+            (vt) => vt.siret === gestionnaire?.siret
           );
 
           const lastDownloadDate = diffusionAutorisee

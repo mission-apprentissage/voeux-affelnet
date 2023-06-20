@@ -30,7 +30,7 @@ async function buildEtablissements(uais, gestionnaire) {
 
       const nombre_voeux = await getNombreVoeux({ uai, siret: gestionnaire.siret });
 
-      console.log({ siret: gestionnaire.siret, uai, nombre_voeux, voeux_date });
+      // console.log({ siret: gestionnaire.siret, uai, nombre_voeux, voeux_date });
 
       return {
         uai,
@@ -79,7 +79,7 @@ async function importGestionnaires(relationCsv, options = {}) {
 
         try {
           const found = await Gestionnaire.findOne({ siret }).lean();
-          const formateurs = await buildEtablissements(etablissements, found);
+          const formateurs = await buildEtablissements(etablissements, found ?? { siret });
           const organisme = await referentielApi.getOrganisme(siret).catch((error) => {
             logger.warn(error, `Le gestionnaire ${siret} n'est pas dans le référentiel`);
             return null;

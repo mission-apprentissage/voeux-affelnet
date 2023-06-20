@@ -15,7 +15,7 @@ const getVoeuxDate = async ({ siret, uai }) => {
 };
 
 const getNombreVoeux = async ({ siret, uai }) => {
-  await Voeu.countDocuments({
+  return await Voeu.countDocuments({
     "etablissement_formateur.uai": uai,
     "etablissement_gestionnaire.siret": siret,
   }).lean();

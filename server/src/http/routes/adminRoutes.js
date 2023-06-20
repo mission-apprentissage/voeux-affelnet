@@ -31,6 +31,7 @@ const { saveDelegationCancelledByAdmin } = require("../../common/actions/history
 const { UserType } = require("../../common/constants/UserType");
 const { download } = require("../../jobs/download");
 const { fillFormateur, filterForAcademie, fillGestionnaire } = require("../../common/utils/dataUtils");
+const logger = require("../../common/logger");
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -283,6 +284,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
         // text: Joi.string(),
         token: Joi.string(),
       }).validateAsync(req.query, { abortEarly: false });
+
+      logger.warn("test", {
+        academies: academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null,
+        admin,
+      });
 
       // return sendJsonStream(stream, res);
       return download(asCsvResponse("export", res), {

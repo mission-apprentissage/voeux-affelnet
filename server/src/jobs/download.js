@@ -1,20 +1,24 @@
-const { Gestionnaire, Formateur, Voeu } = require("../common/model");
+const { User, Gestionnaire, Formateur, Voeu } = require("../common/model");
 const { oleoduc, transformIntoCSV, transformData } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date, number } = require("../common/utils/csvUtils.js");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { fillFormateur, fillGestionnaire } = require("../common/utils/dataUtils");
+const { UserType } = require("../common/constants/UserType");
+const logger = require("../common/logger");
 
 async function download(output, options = {}) {
   const formateurs = new Map();
   const gestionnaires = new Map();
+
+  logger.warn("download", { options });
 
   const getFormateur = async (uai, admin) => {
     try {
       if (formateurs.get(uai)) {
         return formateurs.get(uai);
       } else {
-        const formateur = await fillFormateur(await Formateur.findOne({ uai }).lean(), admin);
+        const formateur = await fillFormateur(await Formateur?.findOne({ uai }).lean(), admin);
         formateurs.set(uai, formateur);
         return formateur;
       }
@@ -39,41 +43,40 @@ async function download(output, options = {}) {
 
   const columns = options.columns || {};
   await oleoduc(
-    Gestionnaire.aggregate([
+    User.aggregate([
       {
         $match: {
-          type: "Gestionnaire",
-          // ...(options.filter || {}),
-          statut: { $ne: "non concerné" },
-          ...(options.academies
-            ? {
-                $or: [
-                  { "academie.code": { $in: options.academies } },
-                  {
-                    etablissements: {
-                      $elemMatch: { "academie.code": { $in: options.academies } },
-                    },
-                  },
-                ],
-              }
-            : {}),
+          type: UserType.GESTIONNAIRE,
+          statut: { $ne: UserStatut.NON_CONCERNE },
+          // ...(options.academies
+          //   ? {
+          //       $or: [
+          //         { "academie.code": { $in: options.academies } },
+          //         {
+          //           etablissements: {
+          //             $elemMatch: { "academie.code": { $in: options.academies } },
+          //           },
+          //         },
+          //       ],
+          //     }
+          //   : {}),
         },
       },
-      ...(options.academies
-        ? [
-            {
-              $addFields: {
-                etablissements: {
-                  $filter: {
-                    input: "$etablissements",
-                    as: "etablissement",
-                    cond: { $in: ["$$etablissement.academie.code", options.academies] },
-                  },
-                },
-              },
-            },
-          ]
-        : []),
+      // ...(options.academies
+      //   ? [
+      //       {
+      //         $addFields: {
+      //           etablissements: {
+      //             $filter: {
+      //               input: "$etablissements",
+      //               as: "etablissement",
+      //               cond: { $in: ["$$etablissement.academie.code", options.academies] },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     ]
+      //   : []),
 
       {
         $unwind: {
@@ -89,23 +92,23 @@ async function download(output, options = {}) {
       const formateur = await getFormateur(data.etablissements?.uai, options?.admin);
       const gestionnaire = await getGestionnaire(data.siret, options?.admin);
 
-      const etablissementFromGestionnaire = gestionnaire.etablissements.find(
-        (etablissement) => etablissement.uai === formateur.uai
+      const etablissementFromGestionnaire = gestionnaire?.etablissements.find(
+        (etablissement) => etablissement.uai === formateur?.uai
       );
 
-      const etablissementFromFormateur = formateur.etablissements.find(
-        (etablissement) => etablissement.siret === gestionnaire.siret
+      const etablissementFromFormateur = formateur?.etablissements.find(
+        (etablissement) => etablissement.siret === gestionnaire?.siret
       );
 
       const lastVoeuxTelechargementDateByGestionnaire = new Date(
-        gestionnaire.voeux_telechargements
-          .filter((voeux_telechargement) => voeux_telechargement.uai === formateur.uai)
+        gestionnaire?.voeux_telechargements
+          .filter((voeux_telechargement) => voeux_telechargement.uai === formateur?.uai)
           .sort()[0]?.date
       );
 
       const lastVoeuxTelechargementDateByFormateur = new Date(
-        formateur.voeux_telechargements
-          .filter((voeux_telechargement) => voeux_telechargement.siret === gestionnaire.siret)
+        formateur?.voeux_telechargements
+          .filter((voeux_telechargement) => voeux_telechargement.siret === gestionnaire?.siret)
           .sort()[0]?.date
       );
 
@@ -148,20 +151,21 @@ async function download(output, options = {}) {
 
         "Délégation autorisée": ({ gestionnaire, formateur }) =>
           ouiNon(
-            gestionnaire.etablissements.find((etablissement) => etablissement.uai === formateur.uai)?.diffusionAutorisee
+            gestionnaire.etablissements.find((etablissement) => etablissement.uai === formateur?.uai)
+              ?.diffusionAutorisee
           ),
 
         "Email de contact de l'organisme formateur": async ({ gestionnaire, formateur }) =>
           formateur?.email ??
-          gestionnaire.etablissements?.find((etablissement) => etablissement.uai === formateur.uai)?.email,
+          gestionnaire.etablissements?.find((etablissement) => etablissement.uai === formateur?.uai)?.email,
 
         "Statut ": async ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          const voeuxTelechargementsFormateur = formateur.voeux_telechargements?.filter(
+          const voeuxTelechargementsFormateur = formateur?.voeux_telechargements?.filter(
             (telechargement) => telechargement.siret === gestionnaire.siret
           );
 
           const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements?.filter(
-            (telechargement) => telechargement.uai === formateur.uai
+            (telechargement) => telechargement.uai === formateur?.uai
           );
 
           const voeuxDisponible = etablissementFromGestionnaire?.nombre_voeux > 0;
@@ -169,61 +173,61 @@ async function download(output, options = {}) {
           switch (etablissementFromGestionnaire?.diffusionAutorisee) {
             case true: {
               switch (true) {
-                case UserStatut.ACTIVE === formateur.statut &&
+                case UserStatut.ACTIVE === formateur?.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsFormateur.find(
+                  new Date(etablissementFromGestionnaire?.first_date_voeux).getTime() !==
+                    new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
+                  !!voeuxTelechargementsFormateur?.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromGestionnaire?.last_date_voeux).getTime()
                   ): {
                   return "✅ Mise à jour téléchargée";
                 }
-                case UserStatut.ACTIVE === formateur.statut &&
+                case UserStatut.ACTIVE === formateur?.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsFormateur.find(
+                  new Date(etablissementFromGestionnaire?.first_date_voeux).getTime() !==
+                    new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
+                  !!voeuxTelechargementsFormateur?.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() <=
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                        new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
                       new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
+                        new Date(etablissementFromGestionnaire?.first_date_voeux).getTime()
                   ): {
                   return "⚠️ Mise à jour non téléchargée";
                 }
-                case UserStatut.ACTIVE === formateur.statut &&
+                case UserStatut.ACTIVE === formateur?.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() ===
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsFormateur.find(
+                  new Date(etablissementFromGestionnaire?.first_date_voeux).getTime() ===
+                    new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
+                  !!voeuxTelechargementsFormateur?.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromGestionnaire?.last_date_voeux).getTime()
                   ): {
                   return "✅ Liste téléchargée";
                 }
-                case UserStatut.ACTIVE === formateur.statut &&
+                case UserStatut.ACTIVE === formateur?.statut &&
                   voeuxDisponible &&
-                  (!voeuxTelechargementsFormateur.length ||
-                    !voeuxTelechargementsFormateur.find(
+                  (!voeuxTelechargementsFormateur?.length ||
+                    !voeuxTelechargementsFormateur?.find(
                       (telechargement) =>
                         new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                        new Date(etablissementFromGestionnaire?.last_date_voeux).getTime()
                     )): {
                   return "⚠️ Compte créé, liste non téléchargée";
                 }
-                case UserStatut.ACTIVE === formateur.statut && !voeuxDisponible: {
+                case UserStatut.ACTIVE === formateur?.statut && !voeuxDisponible: {
                   return "✅ Compte créé";
                 }
-                case UserStatut.CONFIRME === formateur.statut: {
+                case UserStatut.CONFIRME === formateur?.statut: {
                   return "⚠️ Délégation activée, compte non créé";
                 }
-                case !!formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
+                case !!formateur?.emails.length && UserStatut.EN_ATTENTE === formateur?.statut: {
                   return "⚠️ En attente de confirmation d'email";
                 }
-                case !formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
+                case !formateur?.emails.length && UserStatut.EN_ATTENTE === formateur?.statut: {
                   return "✅ En attente de diffusion de campagne";
                 }
                 default: {
@@ -235,36 +239,36 @@ async function download(output, options = {}) {
               switch (true) {
                 case UserStatut.ACTIVE === gestionnaire.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                  new Date(etablissementFromGestionnaire?.first_date_voeux).getTime() !==
+                    new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsGestionnaire.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromGestionnaire?.last_date_voeux).getTime()
                   ): {
                   return "✅ Mise à jour téléchargée";
                 }
                 case UserStatut.ACTIVE === gestionnaire.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                  new Date(etablissementFromGestionnaire?.first_date_voeux).getTime() !==
+                    new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsGestionnaire.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() <=
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                        new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
                       new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
+                        new Date(etablissementFromGestionnaire?.first_date_voeux).getTime()
                   ): {
                   return "⚠️ Mise à jour non téléchargée";
                 }
                 case UserStatut.ACTIVE === gestionnaire.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() ===
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                  new Date(etablissementFromGestionnaire?.first_date_voeux).getTime() ===
+                    new Date(etablissementFromGestionnaire?.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsGestionnaire.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromGestionnaire?.last_date_voeux).getTime()
                   ): {
                   return "✅ Liste téléchargée";
                 }
@@ -274,7 +278,7 @@ async function download(output, options = {}) {
                     !voeuxTelechargementsGestionnaire.find(
                       (telechargement) =>
                         new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                        new Date(etablissementFromGestionnaire?.last_date_voeux).getTime()
                     )): {
                   return "⚠️ Compte créé, liste non téléchargée";
                 }
@@ -303,7 +307,7 @@ async function download(output, options = {}) {
         },
 
         "Dernière action [libellé technique]": async ({ formateur }) => {
-          return formateur.histories?.[formateur.histories.length - 1]?.action;
+          return formateur?.histories?.[formateur?.histories.length - 1]?.action;
         },
 
         Vœux: ({ etablissementFromGestionnaire }) => {
@@ -312,7 +316,7 @@ async function download(output, options = {}) {
 
         "Nombre de vœux": async ({ gestionnaire, formateur }) =>
           `${await Voeu.countDocuments({
-            "etablissement_formateur.uai": formateur?.uai,
+            "etablissement_formateur?.uai": formateur?.uai,
             "etablissement_gestionnaire.siret": gestionnaire.siret,
           })}`,
 
@@ -321,27 +325,27 @@ async function download(output, options = {}) {
         },
 
         Téléchargement: async ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
             return ouiNon(
-              !!formateur.voeux_telechargements.find((telechargement) => telechargement.siret === gestionnaire.siret)
+              !!formateur?.voeux_telechargements.find((telechargement) => telechargement.siret === gestionnaire.siret)
             );
           } else {
             return ouiNon(
-              !!gestionnaire.voeux_telechargements.find((telechargement) => telechargement.uai === formateur.uai)
+              !!gestionnaire.voeux_telechargements.find((telechargement) => telechargement.uai === formateur?.uai)
             );
           }
         },
 
         "Date du dernier téléchargement": ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
-            const voeuxTelechargementsFormateur = formateur.voeux_telechargements?.filter(
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+            const voeuxTelechargementsFormateur = formateur?.voeux_telechargements?.filter(
               (telechargement) => telechargement.siret === gestionnaire.siret
             );
 
-            return date(voeuxTelechargementsFormateur[voeuxTelechargementsFormateur.length - 1]?.date);
+            return date(voeuxTelechargementsFormateur[voeuxTelechargementsFormateur?.length - 1]?.date);
           } else {
             const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements?.filter(
-              (telechargement) => telechargement.uai === formateur.uai
+              (telechargement) => telechargement.uai === formateur?.uai
             );
 
             return date(voeuxTelechargementsGestionnaire[voeuxTelechargementsGestionnaire.length - 1]?.date);
@@ -355,11 +359,11 @@ async function download(output, options = {}) {
           lastVoeuxTelechargementDateByGestionnaire,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_formateur?.uai": formateur?.uai,
                     "etablissement_gestionnaire.siret": gestionnaire.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByFormateur, { $first: "$_meta.import_dates" }],
@@ -371,7 +375,7 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByGestionnaire
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_formateur?.uai": formateur?.uai,
                     "etablissement_gestionnaire.siret": gestionnaire.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByGestionnaire, { $first: "$_meta.import_dates" }],
@@ -388,11 +392,11 @@ async function download(output, options = {}) {
           lastVoeuxTelechargementDateByGestionnaire,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_formateur?.uai": formateur?.uai,
                     "etablissement_gestionnaire.siret": gestionnaire.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByFormateur, { $last: "$_meta.import_dates" }],
@@ -404,7 +408,7 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByGestionnaire
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_formateur?.uai": formateur?.uai,
                     "etablissement_gestionnaire.siret": gestionnaire.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByGestionnaire, { $last: "$_meta.import_dates" }],
@@ -439,7 +443,7 @@ async function download(output, options = {}) {
         //   return `${
         //     lastDownloadDate
         //       ? await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
+        //           "etablissement_formateur?.uai": etablissementFromGestionnaire?.uai,
         //           "etablissement_gestionnaire.siret": data.siret,
         //           $expr: {
         //             $gt: [lastDownloadDate, { $first: "$_meta.import_dates" }],
@@ -454,7 +458,7 @@ async function download(output, options = {}) {
         //   return `${
         //     lastDownloadDate
         //       ? await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
+        //           "etablissement_formateur?.uai": etablissementFromGestionnaire?.uai,
         //           "etablissement_gestionnaire.siret": data.siret,
         //           $nor: [
         //             {
@@ -465,7 +469,7 @@ async function download(output, options = {}) {
         //           ],
         //         })
         //       : await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
+        //           "etablissement_formateur?.uai": etablissementFromGestionnaire?.uai,
         //           "etablissement_gestionnaire.siret": data.siret,
         //         })
         //   }`;
@@ -476,7 +480,7 @@ async function download(output, options = {}) {
         //   return `${
         //     lastDownloadDate
         //       ? await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
+        //           "etablissement_formateur?.uai": etablissementFromGestionnaire?.uai,
         //           $expr: {
         //             $lte: [lastDownloadDate, { $last: "$_meta.import_dates" }],
         //           },import { Etablissement } from '../../../../catalogue-apprentissage/server/src/common/model/schema/etablissement.d';
