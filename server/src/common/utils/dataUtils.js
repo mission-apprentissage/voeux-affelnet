@@ -1,4 +1,5 @@
 const { UserType } = require("../constants/UserType.js");
+const logger = require("../logger.js");
 const { Gestionnaire, Formateur, Voeu } = require("../model/index.js");
 const { sortDescending } = require("./dateUtils.js");
 
@@ -111,19 +112,35 @@ const areTelechargementsAucun = (etablissements, voeux_telechargements) => {
 };
 
 const allFilesAsAlreadyBeenDownloaded = async (user) => {
+  logger.debug("allFilesAsAlreadyBeenDownloaded", user);
+
   switch (user.type) {
     case UserType.GESTIONNAIRE: {
       const gestionnaire = user;
 
-      return !gestionnaire.etablissements.filter(
+      logger.debug(
+        !gestionnaire.etablissements.find(
+          (etablissement) =>
+            !etablissement.diffusionAutorisee &&
+            etablissement.nombre_voeux > 0 &&
+            !gestionnaire.voeux_telechargements.find(
+              (telechargement) =>
+                telechargement.uai === etablissement.uai &&
+                new Date(telechargement.date).getTime() > new Date(etablissement.voeux_date).getTime()
+            )
+        )
+      );
+
+      return !gestionnaire.etablissements.find(
         (etablissement) =>
           !etablissement.diffusionAutorisee &&
           etablissement.nombre_voeux > 0 &&
           !gestionnaire.voeux_telechargements.find(
             (telechargement) =>
-              telechargement.uai === etablissement.uai && telechargement.date > etablissement.voeux_date
+              telechargement.uai === etablissement.uai &&
+              new Date(telechargement.date).getTime() > new Date(etablissement.voeux_date).getTime()
           )
-      )?.length;
+      );
     }
 
     case UserType.FORMATEUR: {
@@ -135,15 +152,16 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
         gestionnaire.etablissements.filter((etablissement) => etablissement.uai === formateur.uai)
       );
 
-      return !etablissements.filter(
+      return !etablissements.find(
         (etablissement) =>
           etablissement.diffusionAutorisee &&
           etablissement.nombre_voeux > 0 &&
           !formateur.voeux_telechargements.find(
             (telechargement) =>
-              telechargement.siret === etablissement.siret && telechargement.date > etablissement.voeux_date
+              telechargement.siret === etablissement.siret &&
+              new Date(telechargement.date).getTime() > new Date(etablissement.voeux_date).getTime()
           )
-      )?.length;
+      );
     }
 
     default: {
@@ -153,11 +171,25 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
 };
 
 const filesHaveUpdate = async (user) => {
+  logger.debug("filesHaveUpdate", user);
+
   switch (user.type) {
     case UserType.GESTIONNAIRE: {
       const gestionnaire = user;
 
-      return !!gestionnaire.etablissements.filter(
+      logger.debug(
+        !!gestionnaire.etablissements.find(
+          async (etablissement) =>
+            !etablissement.diffusionAutorisee &&
+            (await Voeu.countDocuments({
+              "etablissement_formateur.uai": etablissement.uai,
+              "etablissement_gestionnaire.siret": gestionnaire.siret,
+              "_meta.import_dates.1": { $exists: true },
+            })) > 0
+        )
+      );
+
+      return !!gestionnaire.etablissements.find(
         async (etablissement) =>
           !etablissement.diffusionAutorisee &&
           (await Voeu.countDocuments({
@@ -165,7 +197,7 @@ const filesHaveUpdate = async (user) => {
             "etablissement_gestionnaire.siret": gestionnaire.siret,
             "_meta.import_dates.1": { $exists: true },
           })) > 0
-      )?.length;
+      );
     }
 
     case UserType.FORMATEUR: {
@@ -177,7 +209,7 @@ const filesHaveUpdate = async (user) => {
         gestionnaire.etablissements.filter((etablissement) => etablissement.uai === formateur.uai)
       );
 
-      return !!etablissements.filter(
+      return !!etablissements.find(
         async (etablissement) =>
           etablissement.diffusionAutorisee &&
           (await Voeu.countDocuments({
@@ -185,7 +217,7 @@ const filesHaveUpdate = async (user) => {
             "etablissement_gestionnaire.siret": etablissement.siret,
             "_meta.import_dates.1": { $exists: true },
           })) > 0
-      )?.length;
+      );
     }
 
     default: {

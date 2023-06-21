@@ -24,7 +24,7 @@ async function sendNotificationEmails(sendEmail, options = {}) {
           statut: { $nin: [UserStatut.NON_CONCERNE] },
 
           "etablissements.voeux_date": { $exists: true },
-          "emails.templateName": { $not: { $regex: "^update_.*$" }, $regex: "^notification_.*$" },
+          "emails.templateName": { $not: { $regex: "^update_.*$" } },
 
           $or: [
             {
