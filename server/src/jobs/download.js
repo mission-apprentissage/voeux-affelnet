@@ -325,7 +325,7 @@ async function download(output, options = {}) {
         },
 
         Téléchargement: async ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
             return ouiNon(
               !!formateur?.voeux_telechargements.find((telechargement) => telechargement.siret === gestionnaire.siret)
             );
@@ -337,7 +337,7 @@ async function download(output, options = {}) {
         },
 
         "Date du dernier téléchargement": ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
             const voeuxTelechargementsFormateur = formateur?.voeux_telechargements?.filter(
               (telechargement) => telechargement.siret === gestionnaire.siret
             );
@@ -359,7 +359,7 @@ async function download(output, options = {}) {
           lastVoeuxTelechargementDateByGestionnaire,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
@@ -392,7 +392,7 @@ async function download(output, options = {}) {
           lastVoeuxTelechargementDateByGestionnaire,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire.diffusionAutorisee) {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
