@@ -50,9 +50,9 @@ module.exports = ({ users }) => {
                 ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
                 : null,
 
-              last_date_voeux: etablissement.voeux_date /*etablissement.siret
+              last_date_voeux: etablissement.siret
                 ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-                : null*/,
+                : null,
             };
           }) ?? []
         ),
