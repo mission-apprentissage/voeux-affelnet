@@ -356,7 +356,7 @@ async function download(output, options = {}) {
           }
         },
 
-        "Nombre de vœux déjà téléchargés par le destinataire principal": async ({
+        "Vœux téléchargés par le destinataire principal": async ({
           gestionnaire,
           formateur,
           etablissementFromGestionnaire,
@@ -389,7 +389,8 @@ async function download(output, options = {}) {
             );
           }
         },
-        "Nombre de vœux mis à jour téléchargés par le destinataire principal": async ({
+
+        "Vœux à jour téléchargés par le destinataire principal": async ({
           gestionnaire,
           formateur,
           etablissementFromGestionnaire,
@@ -419,6 +420,86 @@ async function download(output, options = {}) {
                     },
                   })
                 : 0
+            );
+          }
+        },
+
+        "Vœux à télécharger par le destinataire principal": async ({
+          gestionnaire,
+          formateur,
+          etablissementFromGestionnaire,
+          lastVoeuxTelechargementDateByGestionnaire,
+          lastVoeuxTelechargementDateByFormateur,
+        }) => {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+            return number(
+              lastVoeuxTelechargementDateByFormateur
+                ? await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    $expr: {
+                      $lte: [lastVoeuxTelechargementDateByFormateur, { $last: "$_meta.import_dates" }],
+                    },
+                  })
+                : await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                  })
+            );
+          } else {
+            return number(
+              lastVoeuxTelechargementDateByGestionnaire
+                ? await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    $expr: {
+                      $lte: [lastVoeuxTelechargementDateByGestionnaire, { $last: "$_meta.import_dates" }],
+                    },
+                  })
+                : await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                  })
+            );
+          }
+        },
+
+        "Vœux jamais téléchargés par le destinataire principal": async ({
+          gestionnaire,
+          formateur,
+          etablissementFromGestionnaire,
+          lastVoeuxTelechargementDateByGestionnaire,
+          lastVoeuxTelechargementDateByFormateur,
+        }) => {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+            return number(
+              lastVoeuxTelechargementDateByFormateur
+                ? await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    $expr: {
+                      $lt: [lastVoeuxTelechargementDateByFormateur, { $first: "$_meta.import_dates" }],
+                    },
+                  })
+                : await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                  })
+            );
+          } else {
+            return number(
+              lastVoeuxTelechargementDateByGestionnaire
+                ? await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    $expr: {
+                      $lt: [lastVoeuxTelechargementDateByGestionnaire, { $first: "$_meta.import_dates" }],
+                    },
+                  })
+                : await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                  })
             );
           }
         },

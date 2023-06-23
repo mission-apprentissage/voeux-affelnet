@@ -51,7 +51,7 @@ export const Users = () => {
           {
             ...values,
             sort: JSON.stringify({ type: -1, nombre_voeux: -1, uai: 1 }),
-            ...(self?.academies.length === 1 ? { academie: self?.academies[0].code } : {}),
+            ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
           },
           { skipNull: true, skipEmptyString: true }
         );
@@ -113,7 +113,7 @@ export const Users = () => {
         enableReinitialize
         initialValues={{
           text: "",
-          ...(self?.academies.length === 1 ? { academie: self?.academies[0].code } : {}),
+          ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
         }}
         validationSchema={Yup.object().shape({
           text: Yup.string(),
