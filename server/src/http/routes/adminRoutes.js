@@ -87,40 +87,18 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const regexQuery = { $regex: regex, $options: "i" };
 
       const stats = {
-        organisme_count:
-          (type !== "Formateur"
-            ? await Gestionnaire.countDocuments(
-                ...(academie || !!defaultAcademies?.length
-                  ? [
-                      {
-                        $or: [
-                          { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
-                          {
-                            etablissements: {
-                              $elemMatch: { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
-                            },
-                          },
-                        ],
-                      },
-                    ]
-                  : [])
-              )
-            : 0) +
-          (type !== "Gestionnaire"
-            ? await Formateur.countDocuments({
-                ...(academie || !!defaultAcademies?.length
-                  ? [
-                      {
-                        $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
-                      },
-                    ]
-                  : []),
-              })
-            : 0),
-
-        organisme_count_downloaded: 0,
-        organisme_count_partially_downloaded: 0,
-        organisme_count_not_downloaded: 0,
+        // organisme_count: await Formateur.countDocuments({
+        //   ...(academie || !!defaultAcademies?.length
+        //     ? [
+        //         {
+        //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
+        //         },
+        //       ]
+        //     : []),
+        // }),
+        // organisme_count_downloaded: 0,
+        // organisme_count_partially_downloaded: 0,
+        // organisme_count_not_downloaded: 0,
       };
 
       const { find, pagination } = await paginate(

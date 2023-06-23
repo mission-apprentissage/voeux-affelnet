@@ -100,16 +100,20 @@ async function download(output, options = {}) {
         (etablissement) => etablissement.siret === gestionnaire?.siret
       );
 
+      const telechargementsByGestionnaire = gestionnaire?.voeux_telechargements.filter(
+        (voeux_telechargement) => voeux_telechargement.uai === formateur?.uai
+      );
+
       const lastVoeuxTelechargementDateByGestionnaire = new Date(
-        gestionnaire?.voeux_telechargements
-          .filter((voeux_telechargement) => voeux_telechargement.uai === formateur?.uai)
-          .sort()[0]?.date
+        telechargementsByGestionnaire[telechargementsByGestionnaire.length - 1]?.date
+      );
+
+      const telechargementsByFormateur = formateur?.voeux_telechargements.filter(
+        (voeux_telechargement) => voeux_telechargement.siret === gestionnaire?.siret
       );
 
       const lastVoeuxTelechargementDateByFormateur = new Date(
-        formateur?.voeux_telechargements
-          .filter((voeux_telechargement) => voeux_telechargement.siret === gestionnaire?.siret)
-          .sort()[0]?.date
+        telechargementsByFormateur[telechargementsByFormateur.length - 1]?.date
       );
 
       return {
