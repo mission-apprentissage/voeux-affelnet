@@ -5,13 +5,10 @@ const { ouiNon, date, number } = require("../common/utils/csvUtils.js");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { fillFormateur, fillGestionnaire } = require("../common/utils/dataUtils");
 const { UserType } = require("../common/constants/UserType");
-const logger = require("../common/logger");
 
 async function download(output, options = {}) {
   const formateurs = new Map();
   const gestionnaires = new Map();
-
-  logger.warn("download", { options });
 
   const getFormateur = async (uai, admin) => {
     try {
@@ -325,7 +322,7 @@ async function download(output, options = {}) {
           })}`,
 
         "Date du dernier import de vœux": ({ etablissementFromGestionnaire }) => {
-          return date(etablissementFromGestionnaire?.voeux_date);
+          return date(etablissementFromGestionnaire?.last_date_voeux);
         },
 
         Téléchargement: async ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
@@ -460,6 +457,58 @@ async function download(output, options = {}) {
                     "etablissement_formateur.uai": formateur?.uai,
                     "etablissement_gestionnaire.siret": gestionnaire.siret,
                   })
+            );
+          }
+        },
+
+        "Vœux à retélécharger pour mise à jour": async ({
+          gestionnaire,
+          formateur,
+          etablissementFromGestionnaire,
+          lastVoeuxTelechargementDateByGestionnaire,
+          lastVoeuxTelechargementDateByFormateur,
+        }) => {
+          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+            return number(
+              lastVoeuxTelechargementDateByFormateur
+                ? await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    $and: [
+                      {
+                        $expr: {
+                          $gt: [lastVoeuxTelechargementDateByFormateur, { $first: "$_meta.import_dates" }],
+                        },
+                      },
+                      {
+                        $expr: {
+                          $lte: [lastVoeuxTelechargementDateByFormateur, { $last: "$_meta.import_dates" }],
+                        },
+                      },
+                    ],
+                  })
+                : 0
+            );
+          } else {
+            return number(
+              lastVoeuxTelechargementDateByGestionnaire
+                ? await Voeu.countDocuments({
+                    "etablissement_formateur.uai": formateur?.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    $and: [
+                      {
+                        $expr: {
+                          $gt: [lastVoeuxTelechargementDateByGestionnaire, { $first: "$_meta.import_dates" }],
+                        },
+                      },
+                      {
+                        $expr: {
+                          $lte: [lastVoeuxTelechargementDateByGestionnaire, { $last: "$_meta.import_dates" }],
+                        },
+                      },
+                    ],
+                  })
+                : 0
             );
           }
         },

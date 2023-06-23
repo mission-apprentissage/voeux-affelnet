@@ -31,7 +31,6 @@ const { saveDelegationCancelledByAdmin } = require("../../common/actions/history
 const { UserType } = require("../../common/constants/UserType");
 const { download } = require("../../jobs/download");
 const { fillFormateur, filterForAcademie, fillGestionnaire } = require("../../common/utils/dataUtils");
-const logger = require("../../common/logger");
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -86,20 +85,137 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const regex = ".*" + text + ".*";
       const regexQuery = { $regex: regex, $options: "i" };
 
-      const stats = {
-        // organisme_count: await Formateur.countDocuments({
-        //   ...(academie || !!defaultAcademies?.length
-        //     ? [
-        //         {
-        //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
-        //         },
-        //       ]
-        //     : []),
-        // }),
-        // organisme_count_downloaded: 0,
-        // organisme_count_partially_downloaded: 0,
-        // organisme_count_not_downloaded: 0,
-      };
+      // const academies = academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null;
+
+      // const data = await User.aggregate([
+      //   {
+      //     $match: {
+      //       $or: [
+      //         {
+      //           type: "Gestionnaire",
+
+      //           ...(academie || !!defaultAcademies?.length
+      //             ? {
+      //                 $or: [
+      //                   { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
+      //                   {
+      //                     etablissements: {
+      //                       $elemMatch: { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
+      //                     },
+      //                   },
+      //                 ],
+      //               }
+      //             : {}),
+      //         },
+      //         // {
+      //         //   type: "Formateur",
+
+      //         //   ...(academie || !!defaultAcademies?.length
+      //         //     ? [
+      //         //         {
+      //         //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
+      //         //         },
+      //         //       ]
+      //         //     : []),
+      //         // },
+      //       ],
+      //     },
+      //   },
+      //   ...(academies
+      //     ? [
+      //         {
+      //           $addFields: {
+      //             etablissements: {
+      //               $filter: {
+      //                 input: "$etablissements",
+      //                 as: "etablissement",
+      //                 cond: { $in: ["$$etablissement.academie.code", academies] },
+      //               },
+      //             },
+      //           },
+      //         },
+      //       ]
+      //     : []),
+
+      //   {
+      //     $unwind: {
+      //       path: "$etablissements",
+      //       preserveNullAndEmptyArrays: false,
+      //     },
+      //   },
+      // ]);
+
+      // const stats = {
+      //   organisme_count: data.length,
+
+      //   organisme_count_downloaded: data.filter(async (data) => {
+      //     const formateur = await getFormateur(data.etablissements?.uai, admin);
+      //     const gestionnaire = await getGestionnaire(data.siret, admin);
+
+      //     const etablissementFromGestionnaire = gestionnaire?.etablissements.find(
+      //       (etablissement) => etablissement.uai === formateur?.uai
+      //     );
+
+      //     const etablissementFromFormateur = formateur?.etablissements.find(
+      //       (etablissement) => etablissement.siret === gestionnaire?.siret
+      //     );
+
+      //     const telechargementsByGestionnaire = gestionnaire?.voeux_telechargements.filter(
+      //       (voeux_telechargement) => voeux_telechargement.uai === formateur?.uai
+      //     );
+
+      //     const lastVoeuxTelechargementDateByGestionnaire = new Date(
+      //       telechargementsByGestionnaire[telechargementsByGestionnaire.length - 1]?.date
+      //     );
+
+      //     const telechargementsByFormateur = formateur?.voeux_telechargements.filter(
+      //       (voeux_telechargement) => voeux_telechargement.siret === gestionnaire?.siret
+      //     );
+
+      //     const lastVoeuxTelechargementDateByFormateur = new Date(
+      //       telechargementsByFormateur[telechargementsByFormateur.length - 1]?.date
+      //     );
+
+      //     return etablissementFromGestionnaire.diffusionAutorisee
+      //       ? lastVoeuxTelechargementDateByFormateur.getTime() >
+      //           new Date(etablissementFromGestionnaire.voeux_date).getTime()
+      //       : lastVoeuxTelechargementDateByGestionnaire.getTime() >
+      //           new Date(etablissementFromGestionnaire.voeux_date).getTime();
+      //   }).length,
+      //   // organisme_count_partially_downloaded: await Formateur.countDocuments({
+      //   //   ...(academie || !!defaultAcademies?.length
+      //   //     ? [
+      //   //         {
+      //   //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
+      //   //         },
+      //   //       ]
+      //   //     : []),
+
+      //   //   voeux_telechargements: {
+      //   //     $elemMatch: {
+      //   //       $exists: true,
+      //   //       siret: "$etablissements.siret",
+      //   //       date: { $gt: "$etablissements.voeux_date" },
+      //   //     },
+      //   //   },
+      //   // }),
+      //   // organisme_count_not_downloaded: await Formateur.countDocuments({
+      //   //   ...(academie || !!defaultAcademies?.length
+      //   //     ? [
+      //   //         {
+      //   //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
+      //   //         },
+      //   //       ]
+      //   //     : []),
+
+      //   //   voeux_telechargements: {
+      //   //     $exists: false,
+      //   //   },
+      //   //   "etablissements.voeux_date": {
+      //   //     $exists: false,
+      //   //   },
+      //   // }),
+      // };
 
       const { find, pagination } = await paginate(
         User,
@@ -237,7 +353,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
         }),
         transformIntoJSON({
           arrayWrapper: {
-            stats,
+            // stats,
             pagination,
           },
           arrayPropertyName: "users",
@@ -262,11 +378,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
         // text: Joi.string(),
         token: Joi.string(),
       }).validateAsync(req.query, { abortEarly: false });
-
-      logger.warn("test", {
-        academies: academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null,
-        admin,
-      });
 
       // return sendJsonStream(stream, res);
       return download(asCsvResponse("export", res), {

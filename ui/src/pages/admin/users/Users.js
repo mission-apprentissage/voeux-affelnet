@@ -25,12 +25,12 @@ export const Users = () => {
   const [downloading, setDownloading] = useState(false);
   const [query, setQuery] = useState();
   const [data, setData] = useState([]);
-  const [stats, setStats] = useState({
-    organisme_count: 0,
-    organisme_count_downloaded: 0,
-    organisme_count_partially_downloaded: 0,
-    organisme_count_not_downloaded: 0,
-  });
+  // const [stats, setStats] = useState({
+  //   organisme_count: 0,
+  //   organisme_count_downloaded: 0,
+  //   organisme_count_partially_downloaded: 0,
+  //   organisme_count_not_downloaded: 0,
+  // });
 
   const [pagination, setPagination] = useState({
     page: 0,
@@ -60,7 +60,7 @@ export const Users = () => {
         setLoading(false);
         setData(response.users);
         setPagination(response.pagination);
-        setStats(response.stats);
+        // setStats(response.stats);
         setError(undefined);
       } catch (e) {
         console.error(e);
@@ -78,7 +78,7 @@ export const Users = () => {
       setDownloading(true);
       const params = {
         ...(query?.academie ? { academie: query.academie } : {}),
-        ...(self?.academies.length === 1 ? { academie: self?.academies[0].code } : {}),
+        ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
       };
       await downloadStatut(params);
     } catch (e) {
