@@ -51,7 +51,7 @@ export const Users = () => {
           {
             ...values,
             sort: JSON.stringify({ type: -1, nombre_voeux: -1, uai: 1 }),
-            ...(self?.academie ? { academie: self?.academie.code } : {}),
+            ...(self?.academies.length === 1 ? { academie: self?.academies[0].code } : {}),
           },
           { skipNull: true, skipEmptyString: true }
         );
@@ -78,14 +78,14 @@ export const Users = () => {
       setDownloading(true);
       const params = {
         ...(query?.academie ? { academie: query.academie } : {}),
-        ...(self?.academie ? { academie: self?.academie.code } : {}),
+        ...(self?.academies.length === 1 ? { academie: self?.academies[0].code } : {}),
       };
       await downloadStatut(params);
     } catch (e) {
       console.error(e);
     }
     setDownloading(false);
-  }, [query, self?.academie, downloadStatut]);
+  }, [query, self?.academies, downloadStatut]);
 
   useEffect(() => {
     const run = async () => {
@@ -113,7 +113,7 @@ export const Users = () => {
         enableReinitialize
         initialValues={{
           text: "",
-          academie: self.academie?.code,
+          ...(self?.academies.length === 1 ? { academie: self?.academies[0].code } : {}),
         }}
         validationSchema={Yup.object().shape({
           text: Yup.string(),
@@ -131,7 +131,7 @@ export const Users = () => {
                       return (
                         <Select
                           placeholder={"Académie (toutes)"}
-                          disabled={self.academie}
+                          disabled={self.academies?.length === 1}
                           {...field}
                           onChange={(value) => {
                             handleChange(value);
