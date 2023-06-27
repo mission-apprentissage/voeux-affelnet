@@ -15,10 +15,6 @@ const { dateAsString } = require("../../common/utils/stringUtils.js");
 const { siretFormat, uaiFormat } = require("../../common/utils/format");
 const { UserStatut } = require("../../common/constants/UserStatut");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
-// const exportGestionnaires = require("../../jobs/exportGestionnaires");
-// const { exportEtablissementsInconnus } = require("../../jobs/exportEtablissementsInconnus.js");
-// const { exportStatutVoeux } = require("../../jobs/exportStatutVoeux.js");
-// const { exportVoeuxRecensement } = require("../../jobs/exportVoeuxRecensement.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
@@ -33,7 +29,7 @@ const { download } = require("../../jobs/download");
 const { fillFormateur, filterForAcademie, fillGestionnaire } = require("../../common/utils/dataUtils");
 
 module.exports = ({ sendEmail, resendEmail }) => {
-  const router = express.Router(); // eslint-disable-line new-cap
+  const router = express.Router();
   const { checkApiToken, checkIsAdmin } = authMiddleware();
 
   function asCsvResponse(name, res) {
@@ -61,8 +57,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
   /**
    * USERS (GESTIONNAIRES & FORMATEURS)
    */
+
   /**
-   * Permet de récupérer la liste des formateurs
+   * Permet de récupérer la liste des utilisateurs
    */
   router.get(
     "/api/admin/users",
@@ -392,48 +389,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * =============
    */
 
-  // /**
-  //  * Permet de récupérer la liste des gestionnaires
-  //  */
-  // router.get(
-  //   "/api/admin/gestionnaires",
-  //   checkApiToken(),
-  //   checkIsAdmin(),
-  //   tryCatch(async (req, res) => {
-  //     const { text, page, items_par_page } = await Joi.object({
-  //       text: Joi.string(),
-  //       page: Joi.number().default(1),
-  //       items_par_page: Joi.number().default(10),
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const { find, pagination } = await paginate(
-  //       Gestionnaire,
-  //       {
-  //         ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
-  //         type: "Gestionnaire",
-  //       },
-  //       {
-  //         page,
-  //         items_par_page,
-  //         select: { _id: 0, password: 0 },
-  //       }
-  //     );
-
-  //     const stream = oleoduc(
-  //       find.sort({ siret: 1 }).cursor(),
-  //       transformData(fillGestionnaire),
-  //       transformIntoJSON({
-  //         arrayWrapper: {
-  //           pagination,
-  //         },
-  //         arrayPropertyName: "gestionnaires",
-  //       })
-  //     );
-
-  //     return sendJsonStream(stream, res);
-  //   })
-  // );
-
   router.get(
     "/api/admin/gestionnaires/:siret",
     checkApiToken(),
@@ -693,48 +648,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * =============
    */
 
-  // /**
-  //  * Permet de récupérer la liste des formateurs
-  //  */
-  // router.get(
-  //   "/api/admin/formateurs",
-  //   checkApiToken(),
-  //   checkIsAdmin(),
-  //   tryCatch(async (req, res) => {
-  //     const { text, page, items_par_page } = await Joi.object({
-  //       text: Joi.string(),
-  //       page: Joi.number().default(1),
-  //       items_par_page: Joi.number().default(10),
-  //     }).validateAsync(req.query, { abortEarly: false });
-
-  //     const { find, pagination } = await paginate(
-  //       Formateur,
-  //       {
-  //         ...(text ? { $text: { $search: `"${text.trim()}"` } } : {}),
-  //         type: "Formateur",
-  //       },
-  //       {
-  //         page,
-  //         items_par_page,
-  //         select: { _id: 0, password: 0 },
-  //       }
-  //     );
-
-  //     const stream = oleoduc(
-  //       find.sort({ siret: 1 }).cursor(),
-  //       transformData(fillFormateur),
-  //       transformIntoJSON({
-  //         arrayWrapper: {
-  //           pagination,
-  //         },
-  //         arrayPropertyName: "formateurs",
-  //       })
-  //     );
-
-  //     return sendJsonStream(stream, res);
-  //   })
-  // );
-
   router.get(
     "/api/admin/formateurs/:uai",
     checkApiToken(),
@@ -812,69 +725,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   /**
-   * FICHIERS
-   * =============
-   */
-
-  // router.get(
-  //   "/api/admin/fichiers/injoinables.csv",
-  //   checkApiToken(),
-  //   checkIsAdmin(),
-  //   tryCatch(async (req, res) => {
-  //     return exportGestionnaires(asCsvResponse("gestionnaires-injoinables", res), {
-  //       filter: { $or: [{ "emails.error": { $exists: true } }, { unsubscribe: true }] },
-  //     });
-  //   })
-  // );
-
-  // router.get(
-  //   "/api/admin/fichiers/relances.csv",
-  //   checkApiToken(),
-  //   checkIsAdmin(),
-  //   tryCatch(async (req, res) => {
-  //     return exportGestionnaires(asCsvResponse("gestionnaires-relances", res), {
-  //       filter: { statut: { $in: ["en attente", "confirmé"] }, "etablissements.voeux_date": { $exists: true } },
-  //       columns: {
-  //         statut: (data) => data.statut,
-  //         nb_voeux: async (data) => {
-  //           const count = await Voeu.countDocuments({
-  //             "etablissement_formateur.uai": { $in: data?.etablissements.map((e) => e.uai) },
-  //           });
-  //           return count ? count : "0";
-  //         },
-  //       },
-  //     });
-  //   })
-  // );
-
-  // router.get(
-  //   "/api/admin/fichiers/inconnus.csv",
-  //   checkApiToken(),
-  //   checkIsAdmin(),
-  //   tryCatch(async (req, res) => {
-  //     return exportEtablissementsInconnus(asCsvResponse("etablissements-inconnus", res));
-  //   })
-  // );
-
-  // router.get(
-  //   "/api/admin/fichiers/statut-voeux.csv",
-  //   checkApiToken(),
-  //   checkIsAdmin(),
-  //   tryCatch(async (req, res) => {
-  //     return exportStatutVoeux(asCsvResponse("statut-voeux", res));
-  //   })
-  // );
-
-  // router.get(
-  //   "/api/admin/fichiers/voeux-recensement.csv",
-  //   checkApiToken(),
-  //   checkIsAdmin(),
-  //   tryCatch(async (req, res) => {
-  //     return exportVoeuxRecensement(asCsvResponse("voeux-recensement", res));
-  //   })
-  // );
-
-  /**
    * ACADEMIES
    * =============
    */
@@ -884,28 +734,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      // const results = await Log.aggregate([
-      //   {
-      //     $match: {
-      //       "request.url.path": "/api/stats/computeStats/now",
-      //       "request.url.parameters.academies": { $exists: true },
-      //     },
-      //   },
-      //   {
-      //     $group: {
-      //       _id: "$request.url.parameters.academies",
-      //       count: { $sum: 1 },
-      //     },
-      //   },
-      // ]);
-
       res.json(
         sortBy(getAcademies(), (a) => a.nom).map((academie) => {
-          // const found = results.find((r) => r._id === academie.code) || {};
           return {
             code: academie.code,
             nom: academie.nom,
-            // nbConsultationStats: found.count || 0,
           };
         })
       );
