@@ -9,6 +9,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Grid,
   Heading,
   Input,
   Text,
@@ -17,6 +18,7 @@ import {
 import { useQuery } from "../../common/hooks/useQuery";
 import { Yup } from "../../common/Yup";
 import { _post } from "../../common/httpClient";
+import { AlertMessage } from "../../common/components/layout/AlertMessage";
 
 const ForgottenPasswordPage = () => {
   const query = useQuery();
@@ -35,63 +37,67 @@ const ForgottenPasswordPage = () => {
   const title = "Mot de passe oublié";
 
   return (
-    <Center height="100vh" verticalAlign="center">
-      <Box width={["auto", "28rem"]}>
-        <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          {title}
-        </Heading>
-        <Box mt={8}>
-          <Formik
-            initialValues={{
-              username: username ?? "",
-            }}
-            validationSchema={Yup.object().shape({
-              username: Yup.string().required("Veuillez saisir un identifiant"),
-            })}
-            onSubmit={resetPassword}
-          >
-            {({ status = {} }) => {
-              return (
-                <Form>
-                  <Field name="username">
-                    {({ field, meta }) => {
-                      return (
-                        <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                          <FormLabel>Identifiant</FormLabel>
-                          <Input {...field} id={field.name} placeholder="Votre identifiant..." />
-                          <FormErrorMessage>{meta.error}</FormErrorMessage>
-                        </FormControl>
-                      );
-                    }}
-                  </Field>
-                  <Button variant="primary" type={"submit"}>
-                    Demander un nouveau mot de passe
-                  </Button>
-                  {status.error && (
-                    <Text color="error" mt={2}>
-                      {status.error}
-                    </Text>
-                  )}
-                  {status.message && (
-                    <Text color="info" mt={2}>
-                      {status.message}
-                    </Text>
-                  )}
-                </Form>
-              );
-            }}
-          </Formik>
-        </Box>
+    <Grid height="100vh" gridTemplateAreas={`'top' 'bottom'`} gridTemplateRows="max-content">
+      <AlertMessage gridArea="top" />
 
-        <Box mt={8}>
-          <Alert status="info">
-            <Box>
-              <Text>Le siret figure dans l'objet du mail que vous avez précédemment reçu.</Text>
-            </Box>
-          </Alert>
+      <Center gridArea="bottom" verticalAlign="center">
+        <Box width={["auto", "28rem"]}>
+          <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
+            {title}
+          </Heading>
+          <Box mt={8}>
+            <Formik
+              initialValues={{
+                username: username ?? "",
+              }}
+              validationSchema={Yup.object().shape({
+                username: Yup.string().required("Veuillez saisir un identifiant"),
+              })}
+              onSubmit={resetPassword}
+            >
+              {({ status = {} }) => {
+                return (
+                  <Form>
+                    <Field name="username">
+                      {({ field, meta }) => {
+                        return (
+                          <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
+                            <FormLabel>Identifiant</FormLabel>
+                            <Input {...field} id={field.name} placeholder="Votre identifiant..." />
+                            <FormErrorMessage>{meta.error}</FormErrorMessage>
+                          </FormControl>
+                        );
+                      }}
+                    </Field>
+                    <Button variant="primary" type={"submit"}>
+                      Demander un nouveau mot de passe
+                    </Button>
+                    {status.error && (
+                      <Text color="error" mt={2}>
+                        {status.error}
+                      </Text>
+                    )}
+                    {status.message && (
+                      <Text color="info" mt={2}>
+                        {status.message}
+                      </Text>
+                    )}
+                  </Form>
+                );
+              }}
+            </Formik>
+          </Box>
+
+          <Box mt={8}>
+            <Alert status="info">
+              <Box>
+                <Text>Le siret figure dans l'objet du mail que vous avez précédemment reçu.</Text>
+              </Box>
+            </Alert>
+          </Box>
         </Box>
-      </Box>
-    </Center>
+      </Center>
+    </Grid>
   );
 };
 

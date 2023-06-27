@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr_FR">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
@@ -25,6 +25,32 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Transmission des listes de candidats 2023</title>
+    <!--
+    <script>
+      if (typeof Node === "function" && Node.prototype) {
+        const originalRemoveChild = Node.prototype.removeChild;
+        Node.prototype.removeChild = function (child) {
+          if (child.parentNode !== this) {
+            if (console) {
+              console.error("Cannot remove a child from a different parent", child, this);
+            }
+            return child;
+          }
+          return originalRemoveChild.apply(this, arguments);
+        };
+
+        const originalInsertBefore = Node.prototype.insertBefore;
+        Node.prototype.insertBefore = function (newNode, referenceNode) {
+          if (referenceNode && referenceNode.parentNode !== this) {
+            if (console) {
+              console.error("Cannot insert before a reference node from a different parent", referenceNode, this);
+            }
+            return newNode;
+          }
+          return originalInsertBefore.apply(this, arguments);
+        };
+      }
+    </script> -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
