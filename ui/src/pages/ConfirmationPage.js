@@ -12,6 +12,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Grid,
   Heading,
   Input,
   Link,
@@ -23,6 +24,7 @@ import { _post } from "../common/httpClient";
 import decodeJWT from "../common/utils/decodeJWT";
 import ErrorMessage from "../common/components/ErrorMessage";
 import { useFetch } from "../common/hooks/useFetch";
+import { AlertMessage } from "../common/components/layout/AlertMessage";
 
 function ServerErrorMessage() {
   return (
@@ -119,132 +121,124 @@ const ConfirmationPage = () => {
   const showForm = !loading && !message && data;
 
   return (
-    <Center height="100vh" verticalAlign="center">
-      <Box width={["auto", "28rem"]}>
-        <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
-          {title}
-        </Heading>
-        <Box mt={8}>
-          <Box mb={8}>
-            {message}
-            {error && <StatusErrorMessage error={error} username={username} />}
-            {loading && <div>En cours de chargement...</div>}
-            {showForm && (
-              <Box>
-                <Text mb={4}>
-                  Afin d’accéder au téléchargement des candidats en apprentissage exprimés via Affelnet, veuillez
-                  confirmer{" "}
-                  {data.type === "Gestionnaire" ? (
-                    <>l’adresse courriel du directeur général de votre établissement (Siret: {username})</>
-                  ) : (
-                    <>
-                      l'adresse courriel renseignée par le directeur général de l'établissement responsable pour
-                      délégation des droits de téléchargements des listes de candidats à votre compte (UAI: {username})
-                    </>
-                  )}
-                </Text>
-                <Text mb={8}>
-                  Cette étape est indispensable pour vous permettre de recevoir les listes de candidats qui seront
-                  diffusées à partir de la semaine du 5 juin.
-                </Text>
+    <Grid height="100vh" gridTemplateAreas={`'top' 'bottom'`} gridTemplateRows="max-content">
+      <AlertMessage gridArea="top" />
 
-                <Formik
-                  initialValues={{
-                    email: data?.email,
-                    email_confirmation: data?.email,
-                  }}
-                  validationSchema={Yup.object().shape({
-                    email: Yup.string().email().required(),
-                    email_confirmation: Yup.string()
-                      .required("Requis")
-                      .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
-                  })}
-                  onSubmit={accept}
-                >
-                  {({ status = {} }) => {
-                    return (
-                      <Form>
-                        <Field name="email">
-                          {({ field, meta }) => {
-                            return (
-                              <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                                <FormLabel name={field.name}>Email</FormLabel>
-                                <Input
-                                  mb={2}
-                                  {...field}
-                                  id={field.name}
-                                  type="email"
-                                  placeholder="Nouvelle adresse courriel..."
-                                  disabled={inputDisabled}
-                                />
+      <Center gridArea="bottom" verticalAlign="center">
+        <Box width={["auto", "28rem"]}>
+          <Heading fontFamily="Marianne" fontWeight="700" marginBottom="2w">
+            {title}
+          </Heading>
+          <Box mt={8}>
+            <Box mb={8}>
+              {message}
+              {error && <StatusErrorMessage error={error} username={username} />}
+              {loading && <div>En cours de chargement...</div>}
+              {showForm && (
+                <Box>
+                  <Text mb={4}>
+                    Afin d’accéder au téléchargement des candidats en apprentissage exprimés via Affelnet, veuillez
+                    confirmer{" "}
+                    {data.type === "Gestionnaire" ? (
+                      <>l’adresse courriel du directeur général de votre établissement (Siret: {username})</>
+                    ) : (
+                      <>
+                        l'adresse courriel renseignée par le directeur général de l'établissement responsable pour
+                        délégation des droits de téléchargements des listes de candidats à votre compte (UAI: {username}
+                        )
+                      </>
+                    )}
+                  </Text>
+                  <Text mb={8}>
+                    Cette étape est indispensable pour vous permettre de recevoir les listes de candidats qui seront
+                    diffusées à partir de la semaine du 5 juin.
+                  </Text>
 
-                                {inputDisabled && (
-                                  <Link variant="action" mb={4} float="right" onClick={() => setInputDisabled(false)}>
-                                    Modifier l'adresse courriel
-                                  </Link>
-                                )}
-                                <FormErrorMessage>{meta.error || "Adresse invalide"}</FormErrorMessage>
-                              </FormControl>
-                            );
-                          }}
-                        </Field>
-
-                        {!inputDisabled && (
-                          <Field name="email_confirmation">
+                  <Formik
+                    initialValues={{
+                      email: data?.email,
+                      email_confirmation: data?.email,
+                    }}
+                    validationSchema={Yup.object().shape({
+                      email: Yup.string().email().required(),
+                      email_confirmation: Yup.string()
+                        .email()
+                        .required("Requis")
+                        .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
+                    })}
+                    onSubmit={accept}
+                  >
+                    {({ status = {} }) => {
+                      return (
+                        <Form>
+                          <Field name="email">
                             {({ field, meta }) => {
                               return (
                                 <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                                  <FormLabel name={field.name}>Confirmation de l'email</FormLabel>
+                                  <FormLabel name={field.name}>Email</FormLabel>
                                   <Input
                                     mb={2}
                                     {...field}
                                     id={field.name}
                                     type="email"
-                                    placeholder="Veuillez confirmer la nouvelle adresse..."
+                                    placeholder="Nouvelle adresse courriel..."
                                     disabled={inputDisabled}
                                   />
+
+                                  {inputDisabled && (
+                                    <Link variant="action" mb={4} float="right" onClick={() => setInputDisabled(false)}>
+                                      Modifier l'adresse courriel
+                                    </Link>
+                                  )}
                                   <FormErrorMessage>{meta.error || "Adresse invalide"}</FormErrorMessage>
                                 </FormControl>
                               );
                             }}
                           </Field>
-                        )}
 
-                        <Button variant="primary" type="submit" mb={4}>
-                          Confirmer l'email pour l'établissement {username}
-                        </Button>
+                          {!inputDisabled && (
+                            <Field name="email_confirmation">
+                              {({ field, meta }) => {
+                                return (
+                                  <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
+                                    <FormLabel name={field.name}>Confirmation de l'email</FormLabel>
+                                    <Input
+                                      mb={2}
+                                      {...field}
+                                      id={field.name}
+                                      type="email"
+                                      placeholder="Veuillez confirmer la nouvelle adresse..."
+                                      disabled={inputDisabled}
+                                    />
+                                    <FormErrorMessage>{meta.error || "Adresse invalide"}</FormErrorMessage>
+                                  </FormControl>
+                                );
+                              }}
+                            </Field>
+                          )}
 
-                        <Box mb={4}>{status?.error && <ErrorMessage>{status?.error}</ErrorMessage>}</Box>
+                          <Button variant="primary" type="submit" mb={4}>
+                            Confirmer l'email pour l'établissement {username}
+                          </Button>
 
-                        {/* <Text mb={4}>
-                          <Text as="i">
-                            L’
-                            <Link href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000035274717/2020-11-09/">
-                              arrêté du 17 juillet 2017
-                            </Link>
-                            , au 7e alinéa de l’article 4, précise que seuls les directeurs des organismes responsables
-                            des offres de formation sont habilités à recevoir les données transmises mentionnées à
-                            l’article 3 de ce même arrêté. En 2023, un arrêté (à paraître) permet aux directeurs
-                            d'organismes responsables de déléguer les droits de réception directe des listes de
-                            candidats à d'autres personnes.
-                          </Text>
-                        </Text> */}
-                      </Form>
-                    );
-                  }}
-                </Formik>
-              </Box>
-            )}
-          </Box>
+                          <Box mb={4}>{status?.error && <ErrorMessage>{status?.error}</ErrorMessage>}</Box>
+                        </Form>
+                      );
+                    }}
+                  </Formik>
+                </Box>
+              )}
+            </Box>
 
-          <Box mb={4}>
-            <Link href="/support" variant="action">
-              Besoin d'assistance ?
-            </Link>
+            <Box mb={4}>
+              <Link href="/support" variant="action">
+                Besoin d'assistance ?
+              </Link>
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </Center>
+      </Center>
+    </Grid>
   );
 };
 

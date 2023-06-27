@@ -144,8 +144,9 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
                     email: etablissement.email,
                   }}
                   validationSchema={Yup.object().shape({
-                    email: Yup.string().required("Requis"),
+                    email: Yup.string().email().required("Requis"),
                     email_confirmation: Yup.string()
+                      .email()
                       .required("Requis")
                       .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
                   })}

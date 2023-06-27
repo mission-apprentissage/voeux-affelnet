@@ -69,18 +69,15 @@ export const UpdateGestionnaireEmailModal = ({ gestionnaire, callback, isOpen, o
               email: gestionnaire.email,
             }}
             validationSchema={Yup.object().shape({
-              email: Yup.string().required("Requis"),
+              email: Yup.string().email().required("Requis"),
               email_confirmation: Yup.string()
+                .email()
                 .required("Requis")
                 .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
             })}
             onSubmit={(form) => updateEmail({ form })}
           >
             <Form style={{ width: "100%" }} id="update-email-form">
-              {/* <Text fontSize="lg" mb={4}> */}
-              {/* TODO :  */}
-              {/* </Text> */}
-
               <Box mb={8}>
                 <Field name="email" required>
                   {({ field, meta }) => {
