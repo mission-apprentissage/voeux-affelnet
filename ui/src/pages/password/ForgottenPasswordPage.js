@@ -91,7 +91,7 @@ const ForgottenPasswordPage = () => {
           <Box mt={8}>
             <Alert status="info">
               <Box>
-                <Text>Le siret figure dans l'objet du mail que vous avez précédemment reçu.</Text>
+                <Text>Votre identifiant figure dans nos correspondances courriel.</Text>
               </Box>
             </Alert>
           </Box>
