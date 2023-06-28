@@ -36,6 +36,7 @@ const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js
 const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUniquementEnApprentissage.js");
 const { asArray } = require("./common/utils/stringUtils.js");
 const { findAcademieByCode } = require("./common/academies.js");
+const { createActionToken } = require("./common/utils/jwtUtils");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -446,6 +447,19 @@ cli
       const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
 
       return importJeunesUniquementEnApprentissage(input);
+    });
+  });
+
+cli
+  .command("generateActionToken")
+  .arguments("<username>")
+  .action((username) => {
+    runScript(() => {
+      logger.info("Génération d'un token pour l'utilisateur", username);
+
+      const token = createActionToken(username);
+
+      logger.info("Token généré", token);
     });
   });
 
