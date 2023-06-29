@@ -42,7 +42,7 @@ async function resendUpdateEmails(resendEmail, options = {}) {
                     templateName: /^update_.*/,
                     error: { $exists: false },
                     $and: [
-                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 0 }).toJSDate() } } },
+                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 3 }).toJSDate() } } },
                       { "sendDates.2": { $exists: false } },
                     ],
                   },

@@ -4,10 +4,12 @@ const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable
 const { Gestionnaire, Voeu } = require("../common/model/index.js");
 
 const getVoeuxDate = async ({ siret, uai }) => {
-  const voeuxDates = await Voeu.find({
-    "etablissement_formateur.uai": uai,
-    "etablissement_gestionnaire.siret": siret,
-  }).map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1]);
+  const voeuxDates = (
+    await Voeu.find({
+      "etablissement_formateur.uai": uai,
+      "etablissement_gestionnaire.siret": siret,
+    })
+  ).map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1]);
 
   return voeuxDates[voeuxDates.length - 1];
 };

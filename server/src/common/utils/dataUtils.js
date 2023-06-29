@@ -116,20 +116,20 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
 
   switch (user.type) {
     case UserType.GESTIONNAIRE: {
-      const gestionnaire = user;
+      const gestionnaire = await fillGestionnaire(user);
 
-      logger.debug(
-        !gestionnaire.etablissements.find(
-          (etablissement) =>
-            !etablissement.diffusionAutorisee &&
-            etablissement.nombre_voeux > 0 &&
-            !gestionnaire.voeux_telechargements.find(
-              (telechargement) =>
-                telechargement.uai === etablissement.uai &&
-                new Date(telechargement.date).getTime() > new Date(etablissement.voeux_date).getTime()
-            )
-        )
-      );
+      // logger.debug(
+      //   !gestionnaire.etablissements.find(
+      //     (etablissement) =>
+      //       !etablissement.diffusionAutorisee &&
+      //       etablissement.nombre_voeux > 0 &&
+      //       !gestionnaire.voeux_telechargements.find(
+      //         (telechargement) =>
+      //           telechargement.uai === etablissement.uai &&
+      //           new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
+      //       )
+      //   )
+      // );
 
       return !gestionnaire.etablissements.find(
         (etablissement) =>
@@ -138,13 +138,13 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
           !gestionnaire.voeux_telechargements.find(
             (telechargement) =>
               telechargement.uai === etablissement.uai &&
-              new Date(telechargement.date).getTime() > new Date(etablissement.voeux_date).getTime()
+              new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
           )
       );
     }
 
     case UserType.FORMATEUR: {
-      const formateur = user;
+      const formateur = await fillFormateur(user);
 
       const gestionnaires = await Gestionnaire.find({ etablissements: { $elemMatch: { uai: formateur.uai } } });
 
@@ -159,7 +159,7 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
           !formateur.voeux_telechargements.find(
             (telechargement) =>
               telechargement.siret === etablissement.siret &&
-              new Date(telechargement.date).getTime() > new Date(etablissement.voeux_date).getTime()
+              new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
           )
       );
     }
@@ -269,16 +269,16 @@ const fillGestionnaire = async (gestionnaire, admin) => {
 
           const diffusionAutorisee = etablissement.diffusionAutorisee;
 
-          const voeuxTelechargementByGestionnaire = gestionnaire?.voeux_telechargements.filter(
-            (vt) => vt.uai === etablissement.uai
+          const downloadsByGestionnaire = gestionnaire?.voeux_telechargements.filter(
+            (download) => download.uai === etablissement.uai
           );
-          const voeuxTelechargementByFormateur = formateur?.voeux_telechargements.filter(
-            (vt) => vt.siret === gestionnaire?.siret
+          const downloadsByFormateur = formateur?.voeux_telechargements.filter(
+            (download) => download.siret === gestionnaire?.siret
           );
 
           const lastDownloadDate = diffusionAutorisee
-            ? voeuxTelechargementByFormateur[voeuxTelechargementByFormateur.length - 1]?.date
-            : voeuxTelechargementByGestionnaire[voeuxTelechargementByGestionnaire.length - 1]?.date;
+            ? downloadsByFormateur[downloadsByFormateur.length - 1]?.date
+            : downloadsByGestionnaire[downloadsByGestionnaire.length - 1]?.date;
 
           return {
             ...etablissement,
@@ -337,22 +337,22 @@ const fillFormateur = async (formateur, admin) => {
             ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
             : null;
 
-          const last_date_voeux = etablissement.uai
+          const last_date_voeux = etablissement.siret
             ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
             : null;
 
           const diffusionAutorisee = etablissement.diffusionAutorisee;
 
-          const voeuxTelechargementByGestionnaire = gestionnaire.voeux_telechargements.filter(
-            (vt) => vt.uai === etablissement.uai
+          const downloadsByGestionnaire = gestionnaire.voeux_telechargements.filter(
+            (download) => download.uai === formateur.uai
           );
-          const voeuxTelechargementByFormateur = formateur.voeux_telechargements.filter(
-            (vt) => vt.siret === gestionnaire.siret
+          const downloadsByFormateur = formateur.voeux_telechargements.filter(
+            (download) => download.siret === etablissement.siret
           );
 
           const lastDownloadDate = diffusionAutorisee
-            ? voeuxTelechargementByFormateur[voeuxTelechargementByFormateur.length - 1]?.date
-            : voeuxTelechargementByGestionnaire[voeuxTelechargementByGestionnaire.length - 1]?.date;
+            ? downloadsByFormateur[downloadsByFormateur.length - 1]?.date
+            : downloadsByGestionnaire[downloadsByGestionnaire.length - 1]?.date;
 
           return {
             ...etablissement,
