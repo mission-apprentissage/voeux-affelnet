@@ -347,7 +347,7 @@ export const Formateur = () => {
           Historique des actions
         </Heading>
 
-        <History formateur={formateur} />
+        <History formateur={formateur} gestionnaire={isResponsableFormateurCheck ? gestionnaire : undefined} />
       </Box>
 
       <Box mb={12}>
