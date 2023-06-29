@@ -109,9 +109,11 @@ module.exports = {
       },
     };
   },
-  notification_gestionnaire: (gestionnaire, token) => {
+  notification_gestionnaire: (gestionnaire, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `Affelnet 2023 – Les listes de candidats à l’apprentissage sont téléchargeables (Siret : ${gestionnaire.siret})`,
+      subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage sont téléchargeables (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("notification_gestionnaire"),
       data: {
         gestionnaire,
@@ -121,9 +123,11 @@ module.exports = {
       },
     };
   },
-  notification_formateur: (formateur, token) => {
+  notification_formateur: (formateur, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `Affelnet 2023 – La liste de candidats à l’apprentissage est téléchargeable (UAI : ${formateur.uai})`,
+      subject: `${prefix}Affelnet 2023 – La liste de candidats à l’apprentissage est téléchargeable (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("notification_formateur"),
       data: {
         formateur,
@@ -133,9 +137,11 @@ module.exports = {
       },
     };
   },
-  update_gestionnaire: (gestionnaire, token) => {
+  update_gestionnaire: (gestionnaire, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (Siret : ${gestionnaire.siret})`,
+      subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("update_gestionnaire"),
       data: {
         gestionnaire,
@@ -145,9 +151,11 @@ module.exports = {
       },
     };
   },
-  update_formateur: (formateur, token) => {
+  update_formateur: (formateur, token, options = {}) => {
+    const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (UAI : ${formateur.uai})`,
+      subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("update_formateur"),
       data: {
         formateur,
