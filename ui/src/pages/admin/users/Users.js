@@ -39,7 +39,7 @@ export const Users = () => {
     total: 0,
   });
 
-  const [academies] = useGet("/api/admin/academies", []);
+  const [academies] = useGet("/api/constant/academies", []);
   const [self] = useGet("/api/admin", null);
 
   const search = useCallback(

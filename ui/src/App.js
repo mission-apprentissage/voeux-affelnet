@@ -116,7 +116,7 @@ const App = () => {
             }
           />
 
-          {/* <Route
+          <Route
             exact
             path="/stats"
             element={
@@ -126,7 +126,7 @@ const App = () => {
                 </Layout>
               </Suspense>
             }
-          /> */}
+          />
           <Route
             exact
             path="/support"

@@ -3,7 +3,7 @@ import React from "react";
 import { Card, CardHeader, CardBody, Heading, Table, Thead, Tbody, Tr, Td } from "@chakra-ui/react";
 
 export const Academies = () => {
-  const [academies, loading] = useGet("/api/admin/academies", []);
+  const [academies, loading] = useGet("/api/constant/academies", []);
 
   return (
     <Card mb={8}>

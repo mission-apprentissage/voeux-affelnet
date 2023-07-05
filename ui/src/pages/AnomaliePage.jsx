@@ -5,24 +5,18 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
-  Alert,
   Box,
-  Button,
   Heading,
   Link,
   Text,
-  useDisclosure,
   UnorderedList,
   ListItem,
-  OrderedList,
 } from "@chakra-ui/react";
 
-import { setTitle } from "../common/utils/pageUtils";
 import { Page } from "../common/components/layout/Page";
 
 export const AnomaliePage = () => {
   const title = "Besoin d'aide ? ";
-  setTitle(title);
 
   return (
     <Page title={title}>

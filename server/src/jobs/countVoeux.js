@@ -11,6 +11,7 @@ const getVoeuxDate = async ({ siret, uai }) => {
     })
   ).map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1]);
 
+  // TODO : Récupérer la plus grande date !
   return voeuxDates[voeuxDates.length - 1];
 };
 

@@ -1,6 +1,5 @@
 const express = require("express");
 const { oleoduc, transformIntoJSON, transformData, compose, transformIntoCSV } = require("oleoduc");
-const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
 const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
@@ -721,27 +720,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const stats = await resendNotificationEmails(resendEmail, { username: uai, force: true, sender: req.user });
 
       return res.json(stats);
-    })
-  );
-
-  /**
-   * ACADEMIES
-   * =============
-   */
-
-  router.get(
-    "/api/admin/academies",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      res.json(
-        sortBy(getAcademies(), (a) => a.nom).map((academie) => {
-          return {
-            code: academie.code,
-            nom: academie.nom,
-          };
-        })
-      );
     })
   );
 

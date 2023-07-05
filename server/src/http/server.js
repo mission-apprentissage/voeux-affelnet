@@ -1,4 +1,5 @@
 const express = require("express");
+const compression = require("compression");
 const bodyParser = require("body-parser");
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
@@ -8,6 +9,7 @@ const passport = require("passport");
 module.exports = async (actions) => {
   const app = express();
 
+  app.use(compression());
   app.use(bodyParser.json());
   app.use(logMiddleware());
   // app.use(corsMiddleware());
@@ -25,6 +27,7 @@ module.exports = async (actions) => {
   app.use(require("./routes/statsRoutes")(actions));
   app.use(require("./routes/alertRoutes")(actions));
   app.use(require("./routes/adminRoutes")(actions));
+  app.use(require("./routes/constantRoutes")(actions));
 
   app.use(errorMiddleware());
   app.use((req, res) => {
