@@ -35,22 +35,8 @@ function computeOrganismesStats(filter = {}) {
       ...filter,
       etablissements: { $exists: true, $not: { $size: 0 } },
     }),
+
     totalFormateur: Formateur.countDocuments({ ...filter, etablissements: { $exists: true, $not: { $size: 0 } } }),
-    // totalAccueil: Voeu.aggregate([
-    //   {
-    //     $match: {
-    //       "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: "$etablissement_accueil.uai",
-    //     },
-    //   },
-    //   {
-    //     $count: "total",
-    //   },
-    // ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
     totalAccueil: Gestionnaire.aggregate([
       {
@@ -401,6 +387,25 @@ async function computeVoeuxStats(filter = {}) {
       },
       {
         $count: "total",
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    nbVoeuxNonDiffusable: Voeu.aggregate([
+      {
+        $match: {
+          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          $or: [
+            { "etablissement_gestionnaire.siret": { $exists: false } },
+            { "etablissement_formateur.uai": { $exists: false } },
+          ],
+          "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+        },
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 

@@ -88,6 +88,7 @@ function StatsPage() {
               <Stat>
                 <StatLabel>Nombre de candidatures</StatLabel>
                 <StatNumber>{voeux.total}</StatNumber>
+                <StatHelpText>et {voeux.nbVoeuxNonDiffusable} non diffusables</StatHelpText>
               </Stat>
 
               <Stat>
