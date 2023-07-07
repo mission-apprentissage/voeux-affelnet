@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner, Heading } from "@chakra-ui/react";
+import { useCallback, useEffect, useState } from "react";
+import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import queryString from "query-string";
 
@@ -25,12 +25,6 @@ export const Users = () => {
   const [downloading, setDownloading] = useState(false);
   const [query, setQuery] = useState();
   const [data, setData] = useState([]);
-  // const [stats, setStats] = useState({
-  //   organisme_count: 0,
-  //   organisme_count_downloaded: 0,
-  //   organisme_count_partially_downloaded: 0,
-  //   organisme_count_not_downloaded: 0,
-  // });
 
   const [pagination, setPagination] = useState({
     page: 0,
@@ -209,17 +203,6 @@ export const Users = () => {
           Exporter (csv)
         </Link>
       </Box>
-
-      {/* TODO : Bloc de stats */}
-      {/* <Box>
-        <Heading>Pour cette sélection</Heading>
-        <Text fontSize="sm">
-          {stats.organisme_count} organismes, {stats.organisme_count_downloaded} ont téléchargé la liste,{" "}
-          {stats.organisme_count_partially_downloaded} partiellement, {stats.organisme_count_not_downloaded} ne l'ont
-          pas téléchargé (dont X n'a pas confirmé son adresse courriel).
-        </Text>
-        <Text fontSize="sm">X candidatures (pour X apprenants), dont X téléchargés (X%), X non téléchargés (X%).</Text>
-      </Box> */}
 
       <Table style={{ marginTop: "15px" }}>
         <Thead>

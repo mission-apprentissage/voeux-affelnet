@@ -1,4 +1,4 @@
-import { Box, Text, Heading, Link, useDisclosure, List, ListItem } from "@chakra-ui/react";
+import { Box, Text, Heading, Link, useDisclosure } from "@chakra-ui/react";
 
 import { UpdateGestionnaireEmailModal } from "../../common/components/gestionnaire/modals/UpdateGestionnaireEmailModal";
 import { Page } from "../../common/components/layout/Page";

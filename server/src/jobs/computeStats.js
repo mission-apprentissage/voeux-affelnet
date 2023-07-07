@@ -31,12 +31,102 @@ function computeOrganismesStats(filter = {}) {
   };
 
   return promiseAllProps({
-    totalGestionnaire: Gestionnaire.countDocuments({
-      ...filter,
-      etablissements: { $exists: true, $not: { $size: 0 } },
-    }),
+    totalGestionnaire: Gestionnaire.aggregate([
+      {
+        $match: {
+          statut: { $ne: "non concerné" },
+        },
+      },
+      {
+        $unwind: "$etablissements",
+      },
+      {
+        $match: {
+          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+        },
+      },
+      {
+        $group: {
+          _id: { siret: "$siret" },
+          siret: { $first: "$siret" },
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    totalGestionnaireAvecDelegation: Gestionnaire.aggregate([
+      {
+        $match: {
+          statut: { $ne: "non concerné" },
+        },
+      },
+      {
+        $unwind: "$etablissements",
+      },
+      {
+        $match: {
+          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          "etablissements.diffusionAutorisee": true,
+        },
+      },
+      {
+        $group: {
+          _id: { siret: "$siret" },
+          siret: { $first: "$siret" },
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
     totalFormateur: Formateur.countDocuments({ ...filter, etablissements: { $exists: true, $not: { $size: 0 } } }),
+
+    totalFormateurAvecDelegation: Gestionnaire.aggregate([
+      {
+        $match: {
+          statut: { $ne: "non concerné" },
+        },
+      },
+      {
+        $unwind: "$etablissements",
+      },
+      {
+        $match: {
+          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          "etablissements.diffusionAutorisee": true,
+        },
+      },
+      {
+        $group: {
+          _id: { uai: "$etablissements.uai" },
+          uai: { $first: "$etablissements.uai" },
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
     totalAccueil: Gestionnaire.aggregate([
       {

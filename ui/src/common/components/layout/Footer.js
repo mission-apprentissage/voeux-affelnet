@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Container, Flex, Link, List, ListItem, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 import { Logo } from "./Logo";

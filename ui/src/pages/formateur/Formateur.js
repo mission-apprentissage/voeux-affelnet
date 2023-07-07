@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { useCallback, Fragment } from "react";
 import { Box, Text, Heading, Link, Alert, Button } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../common/hooks/formateurHooks";
@@ -43,7 +43,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           const gestionnaire = gestionnaires?.find((gestionnaire) => gestionnaire.siret === etablissement.siret);
 
           if (!gestionnaire) {
-            return <React.Fragment key={index}></React.Fragment>;
+            return <Fragment key={index}></Fragment>;
           }
 
           const hasVoeux = etablissement.nombre_voeux > 0;

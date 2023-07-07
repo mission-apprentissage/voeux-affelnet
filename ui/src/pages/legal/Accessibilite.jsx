@@ -1,5 +1,4 @@
-import React from "react";
-import { Box, Container, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
+import { Box, Heading, Link, ListItem, Text, UnorderedList } from "@chakra-ui/react";
 
 import { ExternalLinkLine } from "../../theme/components/icons";
 import { Page } from "../../common/components/layout/Page";

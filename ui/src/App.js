@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Box,
   Center,
@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 import { useFormik } from "formik";
-import { _post, _get, _patch, _put, _delete } from "../../common/httpClient";
+import { _post, _get, _patch, _delete } from "../../common/httpClient";
 import { ArrowDropRightLine } from "../../theme/components/icons";
 import useAuth from "../../common/hooks/useAuth";
 
@@ -28,10 +28,8 @@ export const Alert = () => {
   const getMessagesManuels = useCallback(async () => {
     try {
       const data = await _get("/api/alert");
-      // const hasMessages = data.reduce((acc, item) => acc || item.enabled, false);
-      // if (hasMessages) {
+
       setMessagesManuels(data);
-      // }
     } catch (e) {
       console.error(e);
     }
@@ -137,9 +135,6 @@ export const Alert = () => {
                             <Textarea disabled>{message.msg}</Textarea>
                           </Box>
                           <Box w="20%" alignSelf="right" alignItems="right">
-                            {/* <Button textStyle="sm" variant="outlined" onClick={() => toggleMessage(message)}>
-                              {message.enabled ? "Désactiver" : "Activer"}
-                            </Button> */}
                             <Button textStyle="sm" variant="danger" onClick={() => deleteMessage(message)}>
                               Supprimer
                             </Button>

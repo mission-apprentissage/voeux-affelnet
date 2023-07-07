@@ -1,7 +1,4 @@
-import React, { useState } from "react";
-import { Card, Form, Grid, Table } from "tabler-react";
-import { DateTime } from "luxon";
-import styled from "styled-components";
+import { Form } from "tabler-react";
 import { useFetch } from "../common/hooks/useFetch";
 import { _get } from "../common/httpClient";
 import { Page } from "../common/components/layout/Page";
@@ -82,9 +79,59 @@ function StatsPage() {
 
           <Box>
             <Heading as="h3" size="md" mb={8}>
+              Organismes
+            </Heading>
+            <StatGroup mb={4}>
+              <Stat>
+                <StatLabel>Nombre d'organismes responsables</StatLabel>
+                <StatNumber>{organismes.totalGestionnaire}</StatNumber>
+              </Stat>
+
+              <Stat>
+                <StatLabel>Nombre d'établissements formateurs</StatLabel>
+                <StatNumber>{organismes.totalFormateur}</StatNumber>
+              </Stat>
+
+              <Stat>
+                <StatLabel>Nombre d'établissements d'accueil</StatLabel>
+                <StatNumber>{organismes.totalAccueil}</StatNumber>
+              </Stat>
+            </StatGroup>
+          </Box>
+
+          <Divider m={8} />
+
+          <Box>
+            <Heading as="h3" size="md" mb={8}>
+              Délégations
+            </Heading>
+
+            <StatGroup mb={4}>
+              <Stat>
+                <StatLabel>
+                  Responsables ayant procédé à au moins une <br />
+                  délégation de droit de réception des listes de candidats
+                </StatLabel>
+                <StatNumber>{organismes.totalGestionnaireAvecDelegation}</StatNumber>
+              </Stat>
+
+              <Stat>
+                <StatLabel>
+                  Formateurs ayant reçu une délégation de <br />
+                  droit de réception des listes de candidats
+                </StatLabel>
+                <StatNumber>{organismes.totalFormateurAvecDelegation}</StatNumber>
+              </Stat>
+            </StatGroup>
+          </Box>
+
+          <Divider m={8} />
+
+          <Box>
+            <Heading as="h3" size="md" mb={8}>
               Candidatures
             </Heading>
-            <StatGroup>
+            <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures</StatLabel>
                 <StatNumber>{voeux.total}</StatNumber>
@@ -105,7 +152,17 @@ function StatsPage() {
                 <StatLabel>Formateurs inconnus</StatLabel>
                 <StatNumber>{voeux.formateursInconnus}</StatNumber>
               </Stat>
+            </StatGroup>
+          </Box>
 
+          <Divider m={8} />
+
+          <Box>
+            <Heading as="h3" size="md" mb={8}>
+              Téléchargements
+            </Heading>
+
+            <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées</StatLabel>
                 <StatNumber>{voeux.nbVoeuxDiffusésGestionnaire + voeux.nbVoeuxDiffusésFormateur}</StatNumber>
@@ -145,32 +202,6 @@ function StatsPage() {
               </Stat>
             </StatGroup>
           </Box>
-
-          <Divider m={8} />
-
-          <Box>
-            <Heading as="h3" size="md" mb={8}>
-              Organismes
-            </Heading>
-            <StatGroup>
-              <Stat>
-                <StatLabel>Nombre d'organismes responsables</StatLabel>
-                <StatNumber>{organismes.totalGestionnaire}</StatNumber>
-              </Stat>
-
-              <Stat>
-                <StatLabel>Nombre d'établissements formateurs</StatLabel>
-                <StatNumber>{organismes.totalFormateur}</StatNumber>
-              </Stat>
-
-              <Stat>
-                <StatLabel>Nombre d'établissements d'accueil</StatLabel>
-                <StatNumber>{organismes.totalAccueil}</StatNumber>
-              </Stat>
-            </StatGroup>
-          </Box>
-
-          <Divider m={8} />
         </>
       )}
     </Page>

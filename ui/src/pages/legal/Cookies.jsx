@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Link, Text } from "@chakra-ui/react";
 import { ExternalLinkLine } from "../../theme/components/icons";
 import { Page } from "../../common/components/layout/Page";
