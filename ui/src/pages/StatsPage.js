@@ -143,7 +143,7 @@ function StatsPage() {
                 <StatNumber>{voeux.apprenants}</StatNumber>
               </Stat>
 
-              <Stat>
+              {/* <Stat>
                 <StatLabel>Responsables inconnus</StatLabel>
                 <StatNumber>{voeux.gestionnairesInconnus}</StatNumber>
               </Stat>
@@ -151,7 +151,7 @@ function StatsPage() {
               <Stat>
                 <StatLabel>Formateurs inconnus</StatLabel>
                 <StatNumber>{voeux.formateursInconnus}</StatNumber>
-              </Stat>
+              </Stat> */}
             </StatGroup>
           </Box>
 
