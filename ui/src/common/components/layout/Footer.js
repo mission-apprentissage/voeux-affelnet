@@ -82,11 +82,7 @@ const Footer = () => {
                   Gestion des cookies
                 </Link>
               </ListItem>
-              {/* <ListItem>
-                <Link as={NavLink} to={"/stats"}>
-                  Statistiques
-                </Link>
-              </ListItem> */}
+
               {/* <ListItem>
                 <Link href="https://mission-apprentissage.gitbook.io/" isExternal>
                   Documentation
@@ -95,6 +91,11 @@ const Footer = () => {
               <ListItem>
                 <Link href="https://github.com/mission-apprentissage/voeux-affelnet" isExternal>
                   Code source
+                </Link>
+              </ListItem>
+              <ListItem>
+                <Link as={NavLink} to={"/stats"}>
+                  Statistiques
                 </Link>
               </ListItem>
               <ListItem>
