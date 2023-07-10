@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Route, Routes } from "react-router-dom";
 import { _get } from "../../common/httpClient";
 import { Formateur } from "./Formateur";

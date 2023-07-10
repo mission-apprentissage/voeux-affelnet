@@ -1,4 +1,3 @@
-import React from "react";
 import { Icon } from "@chakra-ui/icons";
 
 import { ReactComponent as SendPlaneLineIcon } from "../../assets/send-plane-line.svg";

@@ -1,4 +1,3 @@
-import React from "react";
 import { Card, Grid, Page, Table } from "tabler-react";
 import { useGet } from "../common/hooks/httpHooks";
 import { buildLink } from "../common/httpClient";

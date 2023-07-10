@@ -1,12 +1,8 @@
-import React from "react";
 import { Box, Heading, Text, Link } from "@chakra-ui/react";
-import { setTitle } from "../../common/utils/pageUtils";
-// import { ExternalLinkLine } from "../../theme/components/icons";
 import { Page } from "../../common/components/layout/Page";
 
 export const MentionsLegales = () => {
   const title = "Mentions Légales";
-  setTitle(title);
 
   return (
     <Page title={title}>

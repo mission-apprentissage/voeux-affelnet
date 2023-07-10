@@ -1,4 +1,3 @@
-import React from "react";
 import { Icon } from "@chakra-ui/icons";
 
 import { ReactComponent as ArrowRightDownLineIcon } from "../../assets/arrow-right-down-line.svg";

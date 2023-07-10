@@ -1,12 +1,9 @@
-import React from "react";
 import { Box, Link, Text } from "@chakra-ui/react";
-import { setTitle } from "../../common/utils/pageUtils";
 import { ExternalLinkLine } from "../../theme/components/icons";
 import { Page } from "../../common/components/layout/Page";
 
 export const Cookies = () => {
   const title = "Gestion des Cookies";
-  setTitle(title);
 
   return (
     <Page title={title}>

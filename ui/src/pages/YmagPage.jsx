@@ -1,11 +1,8 @@
-import React from "react";
-import { Box, Link, List, ListItem, Text, UnorderedList } from "@chakra-ui/react";
-import { setTitle } from "../common/utils/pageUtils";
+import { Box, Link, ListItem, UnorderedList } from "@chakra-ui/react";
 import { Page } from "../common/components/layout/Page";
 
 export const YmagPage = () => {
   const title = "Utilisateur Ymag ou IGesti ?";
-  setTitle(title);
 
   return (
     <Page title={title}>

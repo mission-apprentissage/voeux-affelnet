@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Field, Form, Formik } from "formik";
 import {
   Input,
@@ -20,7 +20,6 @@ import {
 
 import { Yup } from "../common/Yup";
 import { _get } from "../common/httpClient";
-import { sortDescending } from "../common/utils/dateUtils";
 import ErrorMessage from "../common/components/ErrorMessage";
 import { Page } from "../common/components/layout/Page";
 import { FormateurLibelle } from "../common/components/formateur/fields/FormateurLibelle";

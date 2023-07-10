@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Text, Box, Link, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
 
@@ -10,7 +10,7 @@ import { FormateurStatut } from "../../../common/components/admin/fields/Formate
 import { _get } from "../../../common/httpClient";
 import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
 
-export const Formateurs = ({}) => {
+export const Formateurs = () => {
   const { siret } = useParams();
 
   const [gestionnaire, setGestionnaire] = useState(undefined);

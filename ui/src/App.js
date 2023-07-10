@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
@@ -116,7 +116,7 @@ const App = () => {
             }
           />
 
-          {/* <Route
+          <Route
             exact
             path="/stats"
             element={
@@ -126,7 +126,7 @@ const App = () => {
                 </Layout>
               </Suspense>
             }
-          /> */}
+          />
           <Route
             exact
             path="/support"

@@ -1,4 +1,3 @@
-import React from "react";
 import { Icon } from "@chakra-ui/icons";
 
 import { ReactComponent as AddCircleIcon } from "../../assets/add-circle.svg";

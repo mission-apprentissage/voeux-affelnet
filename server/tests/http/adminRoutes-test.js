@@ -367,7 +367,7 @@ describe("adminRoutes", () => {
       },
     });
 
-    const response = await httpClient.get("/api/admin/academies", {
+    const response = await httpClient.get("/api/constant/academies", {
       headers: {
         ...auth,
       },

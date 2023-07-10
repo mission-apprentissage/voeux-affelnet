@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { Redirect } from "react-router-dom";
 
 import useAuth from "../common/hooks/useAuth";
