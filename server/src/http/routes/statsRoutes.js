@@ -1,7 +1,5 @@
 const express = require("express");
-const { sortBy } = require("lodash");
 const Joi = require("@hapi/joi");
-const { getAcademies } = require("../../common/academies");
 const { oleoduc, transformIntoJSON } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { JobEvent } = require("../../common/model");
@@ -42,16 +40,6 @@ module.exports = () => {
 
       return res.json({
         stats,
-        _meta: {
-          academies: [
-            { code: "ALL", nom: "Toutes" },
-            ...sortBy(
-              getAcademies().map((a) => ({ code: a.code, nom: a.nom })),
-              (a) => a.nom
-            ),
-            { code: "UNKNOWN", nom: "Inconnues" },
-          ],
-        },
       });
     })
   );

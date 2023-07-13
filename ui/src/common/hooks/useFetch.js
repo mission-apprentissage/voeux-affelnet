@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { _get } from "../httpClient";
 
-export function useFetch(url, initialState = null) {
+export const useFetch = (url, initialState = null) => {
   const [response, setResponse] = useState(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,8 +24,11 @@ export function useFetch(url, initialState = null) {
     async function fetchData() {
       return _fetch();
     }
+
+    // if (!loading && !error) {
     fetchData();
-  }, [url, _fetch]);
+    // }
+  }, [_fetch]);
 
   return [response, loading, error, setResponse];
-}
+};

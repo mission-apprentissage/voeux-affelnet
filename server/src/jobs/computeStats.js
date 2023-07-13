@@ -94,6 +94,48 @@ function computeOrganismesStats(filter = {}) {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
+    totalGestionnaireMultiOrganismes: Gestionnaire.aggregate([
+      {
+        $match: {
+          statut: { $ne: "non concerné" },
+        },
+      },
+      {
+        $unwind: "$etablissements",
+      },
+      {
+        $match: {
+          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          // $ne: ["$etablissements.uai", "$uai"],
+          $expr: {
+            $and: [
+              {
+                $ne: ["$uai", "$etablissements.uai"],
+              },
+              {
+                $ne: ["$siret", "$etablissements.siret"],
+              },
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { siret: "$siret" },
+          siret: { $first: "$siret" },
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
     totalFormateur: Formateur.countDocuments({ ...filter, etablissements: { $exists: true, $not: { $size: 0 } } }),
 
     totalFormateurAvecDelegation: Gestionnaire.aggregate([
@@ -190,114 +232,6 @@ function computeOrganismesStats(filter = {}) {
         },
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
-
-    // enAttente: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: "en attente",
-    //   etablissements: { $exists: true, $not: { $size: 0 } },
-    // }),
-
-    // enAttenteAvecVoeux: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: "en attente",
-    //   etablissements: { $exists: true, $not: { $size: 0 } },
-    //   "etablissements.voeux_date": { $exists: true },
-    // }),
-
-    // confirmés: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: "confirmé",
-    //   etablissements: { $exists: true, $not: { $size: 0 } },
-    // }),
-
-    // confirmésAvecVoeux: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: "confirmé",
-    //   etablissements: { $exists: true, $not: { $size: 0 } },
-    //   "etablissements.voeux_date": { $exists: true },
-    // }),
-
-    // activés: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: "activé",
-    //   etablissements: { $exists: true, $not: { $size: 0 } },
-    // }),
-
-    // activésAvecVoeux: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: "activé",
-    //   etablissements: { $exists: true, $not: { $size: 0 } },
-    //   "etablissements.voeux_date": { $exists: true },
-    // }),
-
-    // téléchargésVoeux: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: "activé",
-    //   etablissements: { $exists: true, $not: { $size: 0 } },
-    //   "etablissements.voeux_date": { $exists: true },
-    //   voeux_telechargements: { $exists: true, $not: { $size: 0 } },
-    // }),
-
-    // téléchargésVoeuxTotal: (async () => {
-    //   const cfas = await Gestionnaire.find({
-    //     ...filter,
-    //     statut: "activé",
-    //     etablissements: { $exists: true, $not: { $size: 0 } },
-    //     "etablissements.voeux_date": { $exists: true },
-    //     voeux_telechargements: { $exists: true, $not: { $size: 0 } },
-    //   });
-
-    //   return cfas.filter((cfa) => areTelechargementsTotal(cfa.etablissements, cfa.voeux_telechargements)).length;
-    // })(),
-
-    // téléchargésVoeuxPartiel: (async () => {
-    //   const cfas = await Gestionnaire.find({
-    //     ...filter,
-    //     statut: "activé",
-    //     etablissements: { $exists: true, $not: { $size: 0 } },
-    //     "etablissements.voeux_date": { $exists: true },
-    //     voeux_telechargements: { $exists: true, $not: { $size: 0 } },
-    //   });
-
-    //   return cfas.filter((cfa) => areTelechargementsPartiel(cfa.etablissements, cfa.voeux_telechargements)).length;
-    // })(),
-
-    // téléchargésVoeuxAucun: (async () => {
-    //   const cfas = await Gestionnaire.find({
-    //     ...filter,
-    //     statut: "activé",
-    //     etablissements: { $exists: true, $not: { $size: 0 } },
-    //     "etablissements.voeux_date": { $exists: true },
-    //   });
-
-    //   return cfas.filter((cfa) => areTelechargementsAucun(cfa.etablissements, cfa.voeux_telechargements)).length;
-    // })(),
-
-    // désinscrits: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: { $ne: "non concerné" },
-    //   $or: [{ unsubscribe: true }, { "emails.error.type": { $eq: "blocked" } }],
-    // }),
-
-    // désinscritsAvecVoeux: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   "etablissements.voeux_date": { $exists: true },
-    //   statut: { $ne: "non concerné" },
-    //   $or: [{ unsubscribe: true }, { "emails.error.type": { $eq: "blocked" } }],
-    // }),
-
-    // injoinables: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: { $ne: "non concerné" },
-    //   $and: [{ "emails.error": { $exists: true } }, { "emails.error.type": { $ne: "blocked" } }],
-    // }),
-
-    // injoinablesAvecVoeux: Gestionnaire.countDocuments({
-    //   ...filter,
-    //   statut: { $ne: "non concerné" },
-    //   "etablissements.voeux_date": { $exists: true },
-    //   $and: [{ "emails.error": { $exists: true } }, { "emails.error.type": { $ne: "blocked" } }],
-    // }),
   });
 }
 

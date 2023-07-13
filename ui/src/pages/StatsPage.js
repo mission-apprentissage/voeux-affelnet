@@ -1,32 +1,57 @@
-import { Form } from "tabler-react";
+import { useCallback, useEffect, useState } from "react";
+import { Field, Form, Formik } from "formik";
+// import { Form } from "tabler-react";
 import { useFetch } from "../common/hooks/useFetch";
-import { _get } from "../common/httpClient";
 import { Page } from "../common/components/layout/Page";
-import { Box, Heading, Select, Stat, StatGroup, StatHelpText, StatLabel, StatNumber, Divider } from "@chakra-ui/react";
-import { Field, Formik } from "formik";
+import {
+  Box,
+  Heading,
+  Select,
+  Stat,
+  StatGroup,
+  StatHelpText,
+  StatLabel,
+  StatNumber,
+  Divider,
+  Table,
+  Thead,
+  Td,
+  Tbody,
+  Tr,
+  Th,
+} from "@chakra-ui/react";
 import { useGet } from "../common/hooks/httpHooks";
 
 function StatsPage() {
   const [academies] = useGet("/api/constant/academies", []);
 
-  const [now, loading, , setNow] = useFetch(`/api/stats/computeStats/now?academies=ALL`, null);
+  const [globalStats, globalStatsLoading, , setGlobalStats] = useFetch(`/api/stats/computeStats/now`, null);
+  const [organismes, setOrganismes] = useState(undefined);
+  const [voeux, setVoeux] = useState(undefined);
 
-  const organismes = now ? now.stats.organismes[0].stats : null;
-  const voeux = now ? now.stats.voeux[0].stats : null;
+  const selectAcademie = useCallback(
+    ({ academie }) => {
+      if (!academie.length) {
+        academie = "ALL";
+      }
+      if (globalStats) {
+        setOrganismes(globalStats.stats?.organismes?.find((s) => s.code === academie)?.stats);
+        setVoeux(globalStats.stats?.voeux?.find((s) => s.code === academie)?.stats);
+      }
+    },
+    [globalStats, setOrganismes, setVoeux]
+  );
 
-  async function fetchAcademieStats({ academie }) {
-    try {
-      const data = await _get(`/api/stats/computeStats/now?academies=${academie.length ? academie : "ALL"}`);
-      setNow(data);
-    } catch (e) {
-      console.error(e);
+  useEffect(() => {
+    if (globalStats) {
+      selectAcademie({ academie: "ALL" });
     }
-  }
+  }, [globalStats, selectAcademie]);
 
   return (
     <Page title="Statistiques">
-      {loading && <div>En cours de chargement...</div>}
-      {!loading && now && (
+      {globalStatsLoading && <div>En cours de chargement...</div>}
+      {!globalStatsLoading && (
         <>
           <Box mb={8}>
             <Formik
@@ -36,14 +61,14 @@ function StatsPage() {
                   // ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
                 }
               }
-              onSubmit={fetchAcademieStats}
-              onChange={fetchAcademieStats}
+              onSubmit={selectAcademie}
+              onChange={selectAcademie}
             >
               {({ handleSubmit, handleChange, values, submitForm }) => {
                 return (
                   <Form id="search">
                     <Field name="academie">
-                      {({ field, setFieldValue, meta }) => {
+                      {({ field }) => {
                         return (
                           <Select
                             style={{ width: "100%" }}
@@ -76,33 +101,31 @@ function StatsPage() {
               }}
             </Formik>
           </Box>
-
           <Box>
-            <Heading as="h3" size="md" mb={8}>
+            <Heading as="h4" size="md" mb={8}>
               Organismes
             </Heading>
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre d'organismes responsables</StatLabel>
-                <StatNumber>{organismes.totalGestionnaire}</StatNumber>
+                <StatNumber>{organismes?.totalGestionnaire}</StatNumber>
+                Dont {organismes?.totalGestionnaireMultiOrganismes} responsables multi-organismes
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre d'établissements formateurs</StatLabel>
-                <StatNumber>{organismes.totalFormateur}</StatNumber>
+                <StatNumber>{organismes?.totalFormateur}</StatNumber>
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre d'établissements d'accueil</StatLabel>
-                <StatNumber>{organismes.totalAccueil}</StatNumber>
+                <StatNumber>{organismes?.totalAccueil}</StatNumber>
               </Stat>
             </StatGroup>
           </Box>
-
           <Divider m={8} />
-
           <Box>
-            <Heading as="h3" size="md" mb={8}>
+            <Heading as="h4" size="md" mb={8}>
               Délégations
             </Heading>
 
@@ -112,7 +135,13 @@ function StatsPage() {
                   Responsables ayant procédé à au moins une <br />
                   délégation de droit de réception des listes de candidats
                 </StatLabel>
-                <StatNumber>{organismes.totalGestionnaireAvecDelegation}</StatNumber>
+                <StatNumber>{organismes?.totalGestionnaireAvecDelegation}</StatNumber>
+
+                <StatHelpText>
+                  (soit{" "}
+                  {+((organismes?.totalGestionnaireMultiOrganismes * 100) / organismes?.totalGestionnaire).toFixed(2)}%
+                  des responsables multi-organismes)
+                </StatHelpText>
               </Stat>
 
               <Stat>
@@ -120,59 +149,55 @@ function StatsPage() {
                   Formateurs ayant reçu une délégation de <br />
                   droit de réception des listes de candidats
                 </StatLabel>
-                <StatNumber>{organismes.totalFormateurAvecDelegation}</StatNumber>
+                <StatNumber>{organismes?.totalFormateurAvecDelegation}</StatNumber>
               </Stat>
             </StatGroup>
           </Box>
-
           <Divider m={8} />
-
           <Box>
-            <Heading as="h3" size="md" mb={8}>
+            <Heading as="h4" size="md" mb={8}>
               Candidatures
             </Heading>
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures</StatLabel>
-                <StatNumber>{voeux.total}</StatNumber>
-                <StatHelpText>et {voeux.nbVoeuxNonDiffusable} non diffusables</StatHelpText>
+                <StatNumber>{voeux?.total}</StatNumber>
+                <StatHelpText>et {voeux?.nbVoeuxNonDiffusable} non diffusables</StatHelpText>
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre d'apprenants</StatLabel>
-                <StatNumber>{voeux.apprenants}</StatNumber>
+                <StatNumber>{voeux?.apprenants}</StatNumber>
               </Stat>
 
               {/* <Stat>
                 <StatLabel>Responsables inconnus</StatLabel>
-                <StatNumber>{voeux.gestionnairesInconnus}</StatNumber>
+                <StatNumber>{voeux?.gestionnairesInconnus}</StatNumber>
               </Stat>
 
               <Stat>
                 <StatLabel>Formateurs inconnus</StatLabel>
-                <StatNumber>{voeux.formateursInconnus}</StatNumber>
+                <StatNumber>{voeux?.formateursInconnus}</StatNumber>
               </Stat> */}
             </StatGroup>
           </Box>
-
           <Divider m={8} />
-
           <Box>
-            <Heading as="h3" size="md" mb={8}>
+            <Heading as="h4" size="md" mb={8}>
               Téléchargements
             </Heading>
 
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées</StatLabel>
-                <StatNumber>{voeux.nbVoeuxDiffusésGestionnaire + voeux.nbVoeuxDiffusésFormateur}</StatNumber>
-                {(!!voeux.nbVoeuxDiffusésGestionnaire || !!voeux.nbVoeuxDiffusésFormateur) && (
+                <StatNumber>{voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur}</StatNumber>
+                {(!!voeux?.nbVoeuxDiffusésGestionnaire || !!voeux?.nbVoeuxDiffusésFormateur) && (
                   <StatHelpText>
                     (soit{" "}
                     {
                       +(
-                        ((voeux.nbVoeuxDiffusésGestionnaire + voeux.nbVoeuxDiffusésFormateur) * 100) /
-                        voeux.total
+                        ((voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur) * 100) /
+                        voeux?.total
                       ).toFixed(2)
                     }
                     %)
@@ -182,25 +207,73 @@ function StatsPage() {
 
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées par les responsables</StatLabel>
-                <StatNumber>{voeux.nbVoeuxDiffusésGestionnaire}</StatNumber>
+                <StatNumber>{voeux?.nbVoeuxDiffusésGestionnaire}</StatNumber>
 
-                {!!voeux.nbVoeuxDiffusésGestionnaire && (
+                {!!voeux?.nbVoeuxDiffusésGestionnaire && (
                   <StatHelpText>
-                    (soit {+((voeux.nbVoeuxDiffusésGestionnaire * 100) / voeux.total).toFixed(2)}%)
+                    (soit {+((voeux?.nbVoeuxDiffusésGestionnaire * 100) / voeux?.total).toFixed(2)}%)
                   </StatHelpText>
                 )}
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées par les délégués</StatLabel>
-                <StatNumber>{voeux.nbVoeuxDiffusésFormateur}</StatNumber>
-                {!!voeux.nbVoeuxDiffusésFormateur && (
+                <StatNumber>{voeux?.nbVoeuxDiffusésFormateur}</StatNumber>
+                {!!voeux?.nbVoeuxDiffusésFormateur && (
                   <StatHelpText>
-                    (soit {+((voeux.nbVoeuxDiffusésFormateur * 100) / voeux.total).toFixed(2)}%)
+                    (soit {+((voeux?.nbVoeuxDiffusésFormateur * 100) / voeux?.total).toFixed(2)}%)
                   </StatHelpText>
                 )}
               </Stat>
             </StatGroup>
+          </Box>
+          <Divider m={8} />
+
+          <Box mb={8}>
+            <Heading as="h3" size="md" mb={8}>
+              Répartition par académie
+            </Heading>
+
+            <Table size="sm">
+              <Thead>
+                <Tr>
+                  <Th>Académie</Th>
+                  <Th>Nombre de candidatures</Th>
+                  <Th>Nombre de candidatures téléchargées</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {academies.map((academie) => {
+                  const organismes = globalStats?.stats?.organismes?.find((s) => s.code === academie.code)?.stats;
+                  const voeux = globalStats?.stats?.voeux?.find((s) => s.code === academie.code)?.stats;
+
+                  return (
+                    <Tr key={academie.code}>
+                      <Td>{academie.nom}</Td>
+                      <Td>{voeux?.total}</Td>
+                      <Td>
+                        {voeux?.nbVoeuxDiffusésFormateur + voeux?.nbVoeuxDiffusésGestionnaire}{" "}
+                        {voeux?.total > 0 && (
+                          <>
+                            (
+                            <b>
+                              {
+                                +(
+                                  ((voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur) * 100) /
+                                  voeux?.total
+                                ).toFixed(2)
+                              }
+                              %
+                            </b>
+                            )
+                          </>
+                        )}
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
           </Box>
         </>
       )}
