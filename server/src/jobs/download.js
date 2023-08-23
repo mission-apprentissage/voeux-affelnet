@@ -576,6 +576,30 @@ async function download(output, options = {}) {
           return list(admins);
         },
 
+        "Localité responsable": async ({ gestionnaire }) => {
+          return gestionnaire.libelle_ville;
+        },
+
+        "Localité formateur": async ({ formateur }) => {
+          return formateur.libelle_ville;
+        },
+
+        "Localité des l'établissement d'accueil": async ({ gestionnaire, formateur }) => {
+          return list(
+            (
+              await Voeu.aggregate([
+                {
+                  $match: {
+                    "etablissement_formateur.uai": formateur.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                  },
+                },
+                { $group: { _id: "$etablissement_accueil.ville" } },
+              ])
+            ).map((result) => result._id)
+          );
+        },
+
         ...columns,
       },
     }),
