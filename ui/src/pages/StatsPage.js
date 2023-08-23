@@ -139,8 +139,13 @@ function StatsPage() {
 
                 <StatHelpText>
                   (soit{" "}
-                  {+((organismes?.totalGestionnaireMultiOrganismes * 100) / organismes?.totalGestionnaire).toFixed(2)}%
-                  des responsables multi-organismes)
+                  {
+                    +(
+                      (organismes?.totalGestionnaireAvecDelegation * 100) /
+                      organismes?.totalGestionnaireMultiOrganismes
+                    ).toFixed(2)
+                  }
+                  % des responsables multi-organismes)
                 </StatHelpText>
               </Stat>
 
@@ -200,7 +205,7 @@ function StatsPage() {
                         voeux?.total
                       ).toFixed(2)
                     }
-                    %)
+                    % de l’ensemble des candidature)
                   </StatHelpText>
                 )}
               </Stat>
@@ -211,7 +216,14 @@ function StatsPage() {
 
                 {!!voeux?.nbVoeuxDiffusésGestionnaire && (
                   <StatHelpText>
-                    (soit {+((voeux?.nbVoeuxDiffusésGestionnaire * 100) / voeux?.total).toFixed(2)}%)
+                    (soit{" "}
+                    {
+                      +(
+                        (voeux?.nbVoeuxDiffusésGestionnaire * 100) /
+                        (voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur)
+                      ).toFixed(2)
+                    }
+                    % des candidatures téléchargées)
                   </StatHelpText>
                 )}
               </Stat>
@@ -221,7 +233,14 @@ function StatsPage() {
                 <StatNumber>{voeux?.nbVoeuxDiffusésFormateur}</StatNumber>
                 {!!voeux?.nbVoeuxDiffusésFormateur && (
                   <StatHelpText>
-                    (soit {+((voeux?.nbVoeuxDiffusésFormateur * 100) / voeux?.total).toFixed(2)}%)
+                    (soit{" "}
+                    {
+                      +(
+                        (voeux?.nbVoeuxDiffusésFormateur * 100) /
+                        (voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur)
+                      ).toFixed(2)
+                    }
+                    % des candidatures téléchargées)
                   </StatHelpText>
                 )}
               </Stat>
