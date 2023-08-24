@@ -138,6 +138,10 @@ async function download(output, options = {}) {
 
         "Raison sociale de l’organisme responsable": ({ gestionnaire }) => gestionnaire.raison_sociale,
 
+        "Localité responsable": async ({ gestionnaire }) => {
+          return gestionnaire.libelle_ville;
+        },
+
         "Email de contact de l’organisme responsable": ({ gestionnaire }) => gestionnaire.email,
 
         "Académie de l’organisme formateur": ({ formateur }) => formateur?.academie?.nom,
@@ -150,6 +154,26 @@ async function download(output, options = {}) {
           `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/gestionnaire/${gestionnaire.siret}/formateur/${formateur?.uai}`,
 
         "Raison sociale de l’établissement formateur": ({ formateur }) => formateur?.raison_sociale,
+
+        "Localité formateur": async ({ formateur }) => {
+          return formateur.libelle_ville;
+        },
+
+        "Localité des établissements d'accueil": async ({ gestionnaire, formateur }) => {
+          return list(
+            (
+              await Voeu.aggregate([
+                {
+                  $match: {
+                    "etablissement_formateur.uai": formateur.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                  },
+                },
+                { $group: { _id: "$etablissement_accueil.ville" } },
+              ])
+            ).map((result) => result._id)
+          );
+        },
 
         "Délégation autorisée": ({ gestionnaire, formateur }) =>
           ouiNon(
@@ -574,30 +598,6 @@ async function download(output, options = {}) {
           ];
 
           return list(admins);
-        },
-
-        "Localité responsable": async ({ gestionnaire }) => {
-          return gestionnaire.libelle_ville;
-        },
-
-        "Localité formateur": async ({ formateur }) => {
-          return formateur.libelle_ville;
-        },
-
-        "Localité des l'établissement d'accueil": async ({ gestionnaire, formateur }) => {
-          return list(
-            (
-              await Voeu.aggregate([
-                {
-                  $match: {
-                    "etablissement_formateur.uai": formateur.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
-                  },
-                },
-                { $group: { _id: "$etablissement_accueil.ville" } },
-              ])
-            ).map((result) => result._id)
-          );
         },
 
         ...columns,
