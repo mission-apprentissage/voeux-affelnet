@@ -199,6 +199,17 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                 ) : (
                   <>
                     <Text mb={4}>
+                      Aucun vœu n’a été exprimé pour cet organisme sur la période de formulation des demandes (du 9 au
+                      30 mai).
+                    </Text>
+                    <Text mb={4}>
+                      Si vous pensez qu’il s’agit d’une anomalie, vous pouvez{" "}
+                      <Link href="/support" variant="action">
+                        transmettre un signalement
+                      </Link>
+                      .
+                    </Text>
+                    {/* <Text mb={4}>
                       La liste des vœux exprimés sera rendue disponible dans la semaine du 5 juin. Un courriel de
                       notification{" "}
                       {isDiffusionAutorisee ? (
@@ -225,7 +236,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                       Cette première liste pourra être mise à jour la semaine du 19 juin, pour prendre en compte les
                       modifications de vœux, les suppressions et les ajouts. Une notification courriel sera également
                       envoyée lors de cette mise à jour.
-                    </Text>
+                    </Text> */}
                   </>
                 )}
               </Box>
