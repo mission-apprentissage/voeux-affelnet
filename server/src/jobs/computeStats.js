@@ -1,6 +1,7 @@
 const { Gestionnaire, Formateur, Voeu } = require("../common/model");
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
+const logger = require("../common/logger");
 
 // A mettre à jour fonction de la liste des UAIs associés au siret 99999999999999 dans le fichier des relations
 const UAIS_RECENSEMENT = [
@@ -25,9 +26,17 @@ const UAIS_RECENSEMENT = [
   "0899999K",
 ];
 
-function computeOrganismesStats(filter = {}) {
+const computeOrganismesStats = async (filter = {}) => {
   const voeuxFilter = {
     "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
+  };
+
+  const etablissementsFilter = {
+    // "etablissements.nombre_voeux": { $gt: 0 },
+  };
+
+  const academieFilter = {
+    ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
   };
 
   return promiseAllProps({
@@ -42,7 +51,8 @@ function computeOrganismesStats(filter = {}) {
       },
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
         },
       },
       {
@@ -73,8 +83,52 @@ function computeOrganismesStats(filter = {}) {
       },
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
           "etablissements.diffusionAutorisee": true,
+        },
+      },
+      {
+        $group: {
+          _id: { siret: "$siret" },
+          siret: { $first: "$siret" },
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    totalGestionnaireMultiOrganismes: Gestionnaire.aggregate([
+      {
+        $match: {
+          statut: { $ne: "non concerné" },
+        },
+      },
+      {
+        $unwind: "$etablissements",
+      },
+      {
+        $match: {
+          ...etablissementsFilter,
+          ...academieFilter,
+
+          $expr: {
+            $and: [
+              {
+                $ne: ["$uai", "$etablissements.uai"],
+              },
+              {
+                $ne: ["$siret", "$etablissements.siret"],
+              },
+            ],
+          },
         },
       },
       {
@@ -107,7 +161,8 @@ function computeOrganismesStats(filter = {}) {
       },
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
           "etablissements.diffusionAutorisee": true,
         },
       },
@@ -139,7 +194,8 @@ function computeOrganismesStats(filter = {}) {
       },
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
         },
       },
       {
@@ -299,9 +355,9 @@ function computeOrganismesStats(filter = {}) {
     //   $and: [{ "emails.error": { $exists: true } }, { "emails.error.type": { $ne: "blocked" } }],
     // }),
   });
-}
+};
 
-async function computeVoeuxStats(filter = {}) {
+const computeVoeuxStats = async (filter = {}) => {
   const uais = (await Formateur.find(filter).select({ uai: 1 }))
     .map((formateur) => formateur.uai)
     .filter((uai) => !UAIS_RECENSEMENT.includes(uai));
@@ -311,6 +367,14 @@ async function computeVoeuxStats(filter = {}) {
 
   const voeuxFilter = {
     "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
+  };
+
+  const etablissementsFilter = {
+    // "etablissements.nombre_voeux": { $gt: 0 },
+  };
+
+  const academieFilter = {
+    ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
   };
 
   return promiseAllProps({
@@ -325,7 +389,8 @@ async function computeVoeuxStats(filter = {}) {
       },
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
         },
       },
       {
@@ -390,7 +455,8 @@ async function computeVoeuxStats(filter = {}) {
       },
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
         },
       },
       {
@@ -521,7 +587,8 @@ async function computeVoeuxStats(filter = {}) {
           $expr: {
             $eq: ["$etablissements.uai", "$voeux_telechargements.uai"],
           },
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
         },
       },
       {
@@ -602,7 +669,8 @@ async function computeVoeuxStats(filter = {}) {
         $match: {
           "etablissements.diffusionAutorisee": true,
           "etablissements.uai": { $in: uais },
-          ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
+          ...etablissementsFilter,
+          ...academieFilter,
         },
       },
       {
@@ -702,7 +770,593 @@ async function computeVoeuxStats(filter = {}) {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
   });
-}
+};
+
+const computeProgressesStats = async (filter = {}) => {
+  const etablissementsFilter = {
+    // "gestionnaire.etablissements.nombre_voeux": { $gt: 0 },
+  };
+
+  const academieFilter = {
+    ...(filter?.["academie.code"] ? { "gestionnaire.etablissements.academie.code": filter["academie.code"] } : {}),
+  };
+
+  const results = await Gestionnaire.aggregate(
+    [
+      {
+        $match: {
+          statut: { $ne: "non concerné" },
+        },
+      },
+
+      { $project: { gestionnaire: "$$ROOT" } },
+
+      {
+        $unwind: {
+          path: "$gestionnaire.etablissements",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $match: {
+          ...etablissementsFilter,
+          ...academieFilter,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          let: {
+            siret: "$gestionnaire.siret",
+            uai: "$gestionnaire.etablissements.uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $or: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
+                    },
+                    { $eq: ["$type", "Formateur"] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "formateur",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$formateur",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $project: {
+          gestionnaireSiret: "$gestionnaire.siret",
+          formateurUai: "$formateur.uai",
+
+          etablissement: "$gestionnaire.etablissements",
+
+          downloads: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $eq: ["$gestionnaire.etablissements.diffusionAutorisee", true],
+                  },
+                  then: "$formateur.voeux_telechargements",
+                },
+                {
+                  case: "$gestionnaire.voeux_telechargements",
+                  then: "$gestionnaire.voeux_telechargements",
+                },
+              ],
+              default: [],
+            },
+          },
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$downloads",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $match: {
+          $or: [
+            { downloads: { $exists: false } },
+            { "downloads.uai": { $exists: true }, $expr: { $eq: ["$downloads.uai", "$formateurUai"] } },
+            { "downloads.siret": { $exists: true }, $expr: { $eq: ["$downloads.siret", "$gestionnaireSiret"] } },
+          ],
+        },
+      },
+
+      { $sort: { "download.date": -1 } },
+
+      {
+        $group: {
+          _id: { siret: "$gestionnaireSiret", uai: "$formateurUai" },
+          gestionnaireSiret: { $first: "$gestionnaireSiret" },
+          formateurUai: { $first: "$formateurUai" },
+          etablissement: { $first: "$etablissement" },
+
+          downloads: { $addToSet: "$downloads" },
+
+          downloadDate: { $last: "$downloads.date" },
+        },
+      },
+
+      // { $match: { "etablissement.voeux_date": { $exists: true } } },
+
+      {
+        $group: {
+          _id: "$gestionnaireSiret",
+          siret: { $first: "$gestionnaireSiret" },
+          count: { $sum: 1 },
+
+          allUais: {
+            $addToSet: "$formateurUai",
+          },
+
+          uaiDownloaded: {
+            $addToSet: {
+              $cond: {
+                if: {
+                  $and: [
+                    { $ne: ["$downloads", []] },
+                    { $gt: ["$downloadDate", "$etablissement.voeux_date"] },
+                    { $ne: ["$etablissement.voeux_date", null] },
+                  ],
+                },
+                //                  then: {uai: "$formateur.uai", voeuxDate: "$etablissement.voeux_date", downloadDate: "$downloadDate"},
+                then: { uai: "$formateurUai", countVoeux: "$etablissement.nombre_voeux" },
+                else: "$$REMOVE",
+              },
+            },
+          },
+
+          uaiPartiallyDownloaded: {
+            $addToSet: {
+              $cond: {
+                if: {
+                  $and: [
+                    { $ne: ["$downloads", []] },
+                    { $lte: ["$downloadDate", "$etablissement.voeux_date"] },
+                    // { $ne: ["$etablissement.voeux_date", null] },
+                  ],
+                },
+                //                  then: {uai: "$formateur.uai", voeuxDate: "$etablissement.voeux_date", downloadDate: "$downloadDate"},
+                then: { uai: "$formateurUai", countVoeux: "$etablissement.nombre_voeux" },
+                else: "$$REMOVE",
+              },
+            },
+          },
+
+          uaiNotDownloaded: {
+            $addToSet: {
+              $cond: {
+                if: {
+                  $and: [
+                    { $eq: ["$downloads", []] },
+                    // { $ne: ["$etablissement.voeux_date", null] }
+                  ],
+                },
+                then: { uai: "$formateurUai", countVoeux: "$etablissement.nombre_voeux" },
+                else: "$$REMOVE",
+              },
+            },
+          },
+        },
+      },
+    ],
+    { allowDiskUse: true, noCursorTimeout: true }
+  );
+
+  logger.error({
+    fullDownload: {
+      nbGestionnaire: [
+        ...new Set(
+          results.filter((result) => result.uaiDownloaded.length === result.allUais.length).map((result) => result._id)
+        ),
+      ],
+
+      nbFormateur: [
+        ...new Set(results.filter((result) => result.uaiDownloaded.length).flatMap((result) => result.uaiDownloaded)),
+      ],
+    },
+
+    noDownload: {
+      nbGestionnaire: [
+        ...new Set(
+          results
+            .filter(
+              (result) =>
+                result.uaiNotDownloaded.length && !result.uaiDownloaded.length && !result.uaiPartiallyDownloaded.length
+            )
+            .map((result) => result._id)
+        ),
+      ],
+
+      nbFormateur: [
+        ...new Set(
+          results.filter((result) => result.uaiNotDownloaded.length).flatMap((result) => result.uaiNotDownloaded)
+        ),
+      ].length,
+    },
+
+    partialDownload: {
+      nbGestionnaire: [
+        ...new Set(results.filter((result) => result.uaiPartiallyDownloaded.length).map((result) => result._id)),
+      ],
+
+      nbFormateur: [
+        ...new Set(
+          results
+            .filter((result) => result.uaiPartiallyDownloaded.length)
+            .flatMap((result) => result.uaiPartiallyDownloaded)
+        ),
+      ],
+    },
+
+    noVoeux: await promiseAllProps({
+      nbGestionnaire: Gestionnaire.aggregate([
+        {
+          $match: {
+            statut: { $ne: "non concerné" },
+          },
+        },
+
+        { $project: { gestionnaire: "$$ROOT" } },
+
+        {
+          $unwind: "$gestionnaire.etablissements",
+        },
+
+        {
+          $match: {
+            ...etablissementsFilter,
+            ...academieFilter,
+          },
+        },
+
+        {
+          $lookup: {
+            from: "users",
+            let: {
+              siret: "$gestionnaire.siret",
+              uai: "$gestionnaire.etablissements.uai",
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {
+                        $or: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
+                      },
+                      { $eq: ["$type", "Formateur"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "formateur",
+          },
+        },
+
+        {
+          $project: {
+            siret: "$gestionnaire.siret",
+            uai: "$formateur.uai",
+            countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+          },
+        },
+        {
+          $group: {
+            _id: "$siret",
+            totalVoeux: { $sum: "$countVoeux" },
+          },
+        },
+        {
+          $match: { totalVoeux: 0 },
+        },
+      ]),
+      nbFormateur: Gestionnaire.aggregate([
+        {
+          $match: {
+            statut: { $ne: "non concerné" },
+          },
+        },
+
+        { $project: { gestionnaire: "$$ROOT" } },
+
+        {
+          $unwind: "$gestionnaire.etablissements",
+        },
+
+        {
+          $match: {
+            ...etablissementsFilter,
+            ...academieFilter,
+          },
+        },
+
+        {
+          $lookup: {
+            from: "users",
+            let: {
+              siret: "$gestionnaire.siret",
+              uai: "$gestionnaire.etablissements.uai",
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {
+                        $or: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
+                      },
+                      { $eq: ["$type", "Formateur"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "formateur",
+          },
+        },
+
+        {
+          $project: {
+            siret: "$gestionnaire.siret",
+            uai: "$formateur.uai",
+            countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+          },
+        },
+        {
+          $group: {
+            _id: "$uai",
+            totalVoeux: { $sum: "$countVoeux" },
+          },
+        },
+        {
+          $match: { totalVoeux: 0 },
+        },
+      ]),
+    }),
+  });
+
+  return {
+    fullDownload: {
+      nbGestionnaire: [
+        ...new Set(
+          results
+            .filter((result) => result.uaiDownloaded.length === result.allUais.length)
+            .map((result) => result.siret)
+        ),
+      ].length,
+
+      nbFormateur: [
+        ...new Set(
+          results
+            .filter((result) => result.uaiDownloaded.length)
+            .flatMap((result) => result.uaiDownloaded.map((value) => value.uai))
+        ),
+      ].length,
+
+      nbVoeux: results
+        .filter((result) => result.uaiDownloaded.length)
+        .flatMap((result) => result.uaiDownloaded.map((value) => value.countVoeux))
+        .reduce((a, b) => a + b, 0),
+    },
+
+    noDownload: {
+      nbGestionnaire: [
+        ...new Set(
+          results
+            .filter(
+              (result) =>
+                result.uaiNotDownloaded.length && !result.uaiDownloaded.length && !result.uaiPartiallyDownloaded.length
+            )
+            .map((result) => result.siret)
+        ),
+      ].length,
+
+      nbFormateur: [
+        ...new Set(
+          results
+            .filter((result) => result.uaiNotDownloaded.length)
+            .flatMap((result) => result.uaiNotDownloaded.map((value) => value.uai))
+        ),
+      ].length,
+
+      nbVoeux: results
+        .filter((result) => result.uaiNotDownloaded.length)
+        .flatMap((result) => result.uaiNotDownloaded.map((value) => value.countVoeux))
+        .reduce((a, b) => a + b, 0),
+    },
+
+    partialDownload: {
+      nbGestionnaire: [
+        ...new Set(results.filter((result) => result.uaiPartiallyDownloaded.length).map((result) => result.siret)),
+      ].length,
+
+      nbFormateur: [
+        ...new Set(
+          results
+            .filter((result) => result.uaiPartiallyDownloaded.length)
+            .flatMap((result) => result.uaiPartiallyDownloaded.map((value) => value.uai))
+        ),
+      ].length,
+
+      nbVoeux: results
+        .filter((result) => result.uaiPartiallyDownloaded.length)
+        .flatMap((result) => result.uaiPartiallyDownloaded.map((value) => value.countVoeux))
+        .reduce((a, b) => a + b, 0),
+    },
+
+    noVoeux: await promiseAllProps({
+      nbGestionnaire: Gestionnaire.aggregate([
+        {
+          $match: {
+            statut: { $ne: "non concerné" },
+          },
+        },
+
+        { $project: { gestionnaire: "$$ROOT" } },
+
+        {
+          $unwind: {
+            path: "$gestionnaire.etablissements",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $match: {
+            ...etablissementsFilter,
+            ...academieFilter,
+          },
+        },
+
+        {
+          $lookup: {
+            from: "users",
+            let: {
+              siret: "$gestionnaire.siret",
+              uai: "$gestionnaire.etablissements.uai",
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {
+                        $or: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
+                      },
+                      { $eq: ["$type", "Formateur"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "formateur",
+          },
+        },
+
+        {
+          $unwind: {
+            path: "$formateur",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $project: {
+            siret: "$gestionnaire.siret",
+            uai: "$formateur.uai",
+            countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+          },
+        },
+        {
+          $group: {
+            _id: "$siret",
+            totalVoeux: { $sum: "$countVoeux" },
+          },
+        },
+        {
+          $match: { totalVoeux: 0 },
+        },
+
+        { $group: { _id: null, total: { $sum: 1 } } },
+      ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+      nbFormateur: Gestionnaire.aggregate([
+        {
+          $match: {
+            statut: { $ne: "non concerné" },
+          },
+        },
+
+        { $project: { gestionnaire: "$$ROOT" } },
+
+        {
+          $unwind: {
+            path: "$gestionnaire.etablissements",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $match: {
+            ...etablissementsFilter,
+            ...academieFilter,
+          },
+        },
+
+        {
+          $lookup: {
+            from: "users",
+            let: {
+              siret: "$gestionnaire.siret",
+              uai: "$gestionnaire.etablissements.uai",
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {
+                        $or: [{ $eq: ["$uai", "$$uai"] }, { $eq: ["$siret", "$$siret"] }],
+                      },
+                      { $eq: ["$type", "Formateur"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "formateur",
+          },
+        },
+
+        {
+          $unwind: {
+            path: "$formateur",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $project: {
+            siret: "$gestionnaire.siret",
+            uai: "$formateur.uai",
+            countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+          },
+        },
+        {
+          $group: {
+            _id: "$uai",
+            totalVoeux: { $sum: "$countVoeux" },
+          },
+        },
+        {
+          $match: { totalVoeux: 0 },
+        },
+
+        { $group: { _id: null, total: { $sum: 1 } } },
+      ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+    }),
+  };
+};
 
 async function computeStats(options = {}) {
   const list = [
@@ -727,6 +1381,7 @@ async function computeStats(options = {}) {
   return promiseAllProps({
     organismes: forAcademies(computeOrganismesStats),
     voeux: forAcademies(computeVoeuxStats),
+    progresses: forAcademies(computeProgressesStats),
   });
 }
 
