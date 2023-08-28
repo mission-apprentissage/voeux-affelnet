@@ -302,14 +302,13 @@ export const Formateur = () => {
           Statut
         </Heading>
 
-        {(isDiffusionAutorisee || isResponsableFormateurCheck) && (
-          <Box mb={4}>
-            <Text display={"inline-flex"}>
-              <Box mr={2} display="inline-flex">
-                <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />.
-              </Box>
-
-              {(() => {
+        <Box mb={4}>
+          <Text display={"inline-flex"}>
+            <Box mr={2} display="inline-flex">
+              <FormateurStatut gestionnaire={gestionnaire} formateur={formateur} />.
+            </Box>
+            {(isDiffusionAutorisee || isResponsableFormateurCheck) &&
+              (() => {
                 switch (true) {
                   case UserStatut.CONFIRME === formateur.statut:
                     return (
@@ -327,9 +326,8 @@ export const Formateur = () => {
                     return <></>;
                 }
               })()}
-            </Text>
-          </Box>
-        )}
+          </Text>
+        </Box>
 
         <Heading as="h4" size="sm" mb={4}>
           Nombre de candidats: {etablissement.nombre_voeux}
