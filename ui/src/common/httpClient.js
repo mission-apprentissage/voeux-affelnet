@@ -45,41 +45,46 @@ export const getHeaders = () => {
   };
 };
 
-export const _get = (path) => {
+export const _get = (path, options = {}) => {
   return fetch(`${path}`, {
     method: "GET",
     headers: getHeaders(),
+    ...options,
   }).then((res) => handleResponse(path, res));
 };
 
-export const _post = (path, body) => {
+export const _post = (path, body, options = {}) => {
   return fetch(`${path}`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(body),
+    ...options,
   }).then((res) => handleResponse(path, res));
 };
 
-export const _put = (path, body = {}) => {
+export const _put = (path, body = {}, options = {}) => {
   return fetch(`${path}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(body),
+    ...options,
   }).then((res) => handleResponse(path, res));
 };
 
-export const _patch = (path, body = {}, auth = true) => {
+export const _patch = (path, body = {}, options = {}) => {
   return fetch(`${path}`, {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify(body),
+    ...options,
   }).then((res) => handleResponse(path, res));
 };
 
-export const _delete = (path) => {
+export const _delete = (path, options = {}) => {
   return fetch(`${path}`, {
     method: "DELETE",
     headers: getHeaders(),
+    ...options,
   }).then((res) => handleResponse(path, res));
 };
 

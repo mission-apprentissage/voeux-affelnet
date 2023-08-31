@@ -23,23 +23,18 @@ export const Alert = () => {
   const [messagesManuels, setMessagesManuels] = useState([]);
 
   const [user] = useAuth();
-  const mountedRef = useRef(false);
-
-  const getMessagesManuels = useCallback(async () => {
-    try {
-      const data = await _get("/api/alert");
-
-      setMessagesManuels(data);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [setMessagesManuels]);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
     const run = async () => {
-      if (!mountedRef.current) {
-        mountedRef.current = true;
-        await getMessagesManuels();
+      if (mountedRef.current) {
+        try {
+          const data = await _get("/api/alert");
+
+          setMessagesManuels(data);
+        } catch (e) {
+          console.error(e);
+        }
       }
     };
     run();
@@ -47,7 +42,7 @@ export const Alert = () => {
     return () => {
       mountedRef.current = false;
     };
-  }, [getMessagesManuels]);
+  }, []);
 
   const {
     values: valuesM,

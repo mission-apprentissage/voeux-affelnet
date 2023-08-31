@@ -1,31 +1,38 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { _get } from "../httpClient";
 
-export function useFetch(url, initialState = null) {
+export const useFetch = (url, initialState = null) => {
   const [response, setResponse] = useState(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const _fetch = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await _get(url);
-      setResponse(response);
-      setLoading(false);
-    } catch (error) {
-      setError(error);
-      setLoading(false);
-    }
-  }, [url]);
+  const ref = useRef(true);
 
   useEffect(() => {
-    async function fetchData() {
-      return _fetch();
+    const abortController = new AbortController();
+
+    const _fetch = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await _get(url, { signal: abortController.signal });
+        setResponse(response);
+        setLoading(false);
+      } catch (error) {
+        setError(error);
+        setLoading(false);
+      }
+    };
+
+    if (ref.current) {
+      _fetch();
     }
-    fetchData();
-  }, [url, _fetch]);
+
+    return () => {
+      ref.current = false;
+      // abortController.abort();
+    };
+  }, [url]);
 
   return [response, loading, error, setResponse];
-}
+};

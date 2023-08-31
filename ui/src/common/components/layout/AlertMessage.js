@@ -4,14 +4,14 @@ import { _get } from "../../../common/httpClient";
 
 export const AlertMessage = () => {
   const [messages, setMessages] = useState([]);
-  const mounted = useRef(false);
+  const mounted = useRef(true);
 
   useEffect(() => {
     const run = async () => {
       try {
         const data = await _get("/api/alert");
         const hasMessages = data.reduce((acc, item) => acc || item.enabled, false);
-        if (hasMessages && mounted) {
+        if (hasMessages && mounted.current) {
           setMessages(data);
         }
       } catch (e) {
@@ -19,13 +19,11 @@ export const AlertMessage = () => {
       }
     };
 
-    if (!mounted.current) {
-      mounted.current = true;
+    if (mounted.current) {
       run();
     }
 
     return () => {
-      // cleanup hook
       mounted.current = false;
     };
   }, []);
