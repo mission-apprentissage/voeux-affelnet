@@ -329,9 +329,12 @@ const fillFormateur = async (formateur, admin) => {
             "etablissement_gestionnaire.siret": etablissement.siret,
           };
 
+          console.log({ voeuxFilter });
           const voeux = await Voeu.find(voeuxFilter);
 
           const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret });
+
+          const etablissement_gestionnaire = gestionnaire?.etablissements.find((etab) => etab.uai === formateur.uai);
 
           const first_date_voeux = etablissement.siret
             ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
@@ -341,7 +344,7 @@ const fillFormateur = async (formateur, admin) => {
             ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
             : null;
 
-          const diffusionAutorisee = etablissement.diffusionAutorisee;
+          const diffusionAutorisee = etablissement_gestionnaire?.diffusionAutorisee;
 
           const downloadsByGestionnaire = gestionnaire.voeux_telechargements.filter(
             (download) => download.uai === formateur.uai

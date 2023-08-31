@@ -406,10 +406,11 @@ export const Formateur = ({ gestionnaire, formateurs, callback }) => {
                 </Link>
                 .
               </Text>
-              <Text mb={4}>
+              {/* <Text mb={4}>
                 Une mise à jour pourra être communiquée la semaine du 19 juin, pour prendre les éventuels ajouts. Une
                 notification courriel sera alors envoyée.
-              </Text>
+
+              </Text> */}
             </>
           )}
         </Box>

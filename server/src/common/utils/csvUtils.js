@@ -22,9 +22,14 @@ const number = (v) => {
   return v ? `${v}` : "0";
 };
 
+const list = (v) => {
+  return v ? `${v.join(", ")}` : "0";
+};
+
 module.exports = {
   parseCsv,
   ouiNon,
   date,
   number,
+  list,
 };

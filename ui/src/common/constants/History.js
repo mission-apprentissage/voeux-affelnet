@@ -45,8 +45,9 @@ export const FormateurHistoryItems = new Map([
   [
     FormateurActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT,
     {
-      component: ({ email }) =>
-        `Action automatique – ${email} a reçu un rappel de demande de création de mot de passe.`,
+      // component: ({ email }) =>
+      //   `Action automatique – ${email} a reçu un rappel de demande de création de mot de passe.`,
+      component: ({ email }) => `Action automatique – ${email} a reçu une demande de création de mot de passe.`,
     },
   ],
   [
@@ -59,14 +60,16 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.ACCOUNT_ACTIVATION_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} pour création de son mot de passe.`,
+        // `${admin} a généré l'envoi d'un rappel à ${email} pour création de son mot de passe.`,
+        `${admin} a généré l'envoi d'un courriel à ${email} pour création de son mot de passe.`,
     },
   ],
   [
     FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_RESENT,
     {
       component: ({ email }) =>
-        `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
+        // `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
+        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
     },
   ],
   [
@@ -80,7 +83,8 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.ACCOUNT_CONFIRMATION_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} pour confirmation de son adresse courriel.`,
+        // `${admin} a généré l'envoi d'un rappel à ${email} pour confirmation de son adresse courriel.`,
+        `${admin} a généré l'envoi d'un courriel à ${email} pour confirmation de son adresse courriel.`,
     },
   ],
   [
@@ -138,6 +142,7 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
     {
       component: ({ email }) =>
+        // `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
         `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
     },
   ],
@@ -152,7 +157,8 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats.`,
+        // ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats.`,
+        ` ${admin} a généré l'envoi  d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats.`,
     },
   ],
   [
@@ -184,6 +190,7 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
     {
       component: ({ email }) =>
+        // `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
         `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
     },
   ],
@@ -198,7 +205,8 @@ export const FormateurHistoryItems = new Map([
     FormateurActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`,
+        // ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`,
+        ` ${admin} a généré l'envoi  d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
     },
   ],
   [
@@ -274,8 +282,9 @@ export const ResponsableHistoryItems = new Map([
   [
     ResponsableActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT,
     {
-      component: ({ email }) =>
-        `Action automatique – ${email} a reçu un rappel de demande de création de mot de passe.`,
+      // component: ({ email }) =>
+      //   `Action automatique – ${email} a reçu un rappel de demande de création de mot de passe.`,
+      component: ({ email }) => `Action automatique – ${email} a reçu une demande de création de mot de passe.`,
     },
   ],
   [
@@ -294,8 +303,10 @@ export const ResponsableHistoryItems = new Map([
   [
     ResponsableActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_RESENT,
     {
+      // component: ({ email }) =>
+      //   `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
       component: ({ email }) =>
-        `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
+        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
     },
   ],
   [
@@ -309,7 +320,8 @@ export const ResponsableHistoryItems = new Map([
     ResponsableActions.ACCOUNT_CONFIRMATION_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} pour confirmation de son adresse courriel.`,
+        // `${admin} a généré l'envoi d'un rappel à ${email} pour confirmation de son adresse courriel.`,
+        `${admin} a généré l'envoi d'un courriel à ${email} pour confirmation de son adresse courriel.`,
     },
   ],
   [
@@ -337,6 +349,8 @@ export const ResponsableHistoryItems = new Map([
   [
     ResponsableActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
     {
+      // component: ({ email }) =>
+      //   `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
       component: ({ email }) =>
         `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
     },
@@ -352,13 +366,15 @@ export const ResponsableHistoryItems = new Map([
     ResponsableActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats.`,
+        // ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats.`,
+        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats.`,
     },
   ],
   [
     ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
     {
       component: ({ email }) =>
+        // `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
         `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
     },
   ],
@@ -373,7 +389,8 @@ export const ResponsableHistoryItems = new Map([
     ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats mise à jour.`,
+        // ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats mise à jour.`,
+        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
     },
   ],
 ]);

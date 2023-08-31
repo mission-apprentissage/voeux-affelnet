@@ -9,7 +9,7 @@ const voeux_email = process.env.VOEUX_AFFELNET_EMAIL;
 
 module.exports = {
   confirmation_gestionnaire: (gestionnaire, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
       subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("confirmation_gestionnaire"),
@@ -22,7 +22,7 @@ module.exports = {
     };
   },
   confirmation_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
       subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("confirmation_formateur"),
@@ -45,7 +45,7 @@ module.exports = {
     };
   },
   activation_user: (user, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
       subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte administrateur`,
       templateFile: getTemplateFile("activation_user"),
@@ -58,7 +58,7 @@ module.exports = {
     };
   },
   activation_academie: (user, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
       subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte académique`,
       templateFile: getTemplateFile("activation_academie"),
@@ -71,7 +71,7 @@ module.exports = {
     };
   },
   activation_gestionnaire: (gestionnaire, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
       subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (Siret : ${gestionnaire.siret})`,
       templateFile: getTemplateFile("activation_gestionnaire"),
@@ -84,7 +84,7 @@ module.exports = {
     };
   },
   activation_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
       subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${formateur.uai})`,
       templateFile: getTemplateFile("activation_formateur"),
@@ -97,7 +97,7 @@ module.exports = {
     };
   },
   activation_csaio: (csaio, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
       subject: `${prefix}Activation de votre compte`,
       templateFile: getTemplateFile("activation_csaio"),
@@ -110,7 +110,7 @@ module.exports = {
     };
   },
   notification_gestionnaire: (gestionnaire, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
 
     return {
       subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage sont téléchargeables (Siret : ${gestionnaire.siret})`,
@@ -124,7 +124,7 @@ module.exports = {
     };
   },
   notification_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
 
     return {
       subject: `${prefix}Affelnet 2023 – La liste de candidats à l’apprentissage est téléchargeable (UAI : ${formateur.uai})`,
@@ -138,7 +138,7 @@ module.exports = {
     };
   },
   update_gestionnaire: (gestionnaire, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
 
     return {
       subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (Siret : ${gestionnaire.siret})`,
@@ -152,7 +152,7 @@ module.exports = {
     };
   },
   update_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
+    const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
 
     return {
       subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (UAI : ${formateur.uai})`,

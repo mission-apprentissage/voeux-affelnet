@@ -66,7 +66,11 @@ describe("resendActivationEmails", () => {
     await resendActivationEmails(resendEmail);
 
     const sent = getEmailsSent();
-    assert.deepStrictEqual(sent[0].subject, "[Rappel] Des vœux Affelnet sont téléchargeables (Siret : 11111111100006)");
+    assert.deepStrictEqual(
+      sent[0].subject,
+      //  "[Rappel] Des vœux Affelnet sont téléchargeables (Siret : 11111111100006)"
+      "Des vœux Affelnet sont téléchargeables (Siret : 11111111100006)"
+    );
   });
 
   xit("Vérifie qu'on attend 3 jours avant de relancer une deuxième fois", async () => {

@@ -353,7 +353,6 @@ function StatsPage() {
                     <Tr key={academie.code}>
                       <Td>{academie.nom}</Td>
                       <Td>{organismes?.totalGestionnaire}</Td>
-
                       <Td>{organismes?.totalFormateur}</Td>
                       <Td>{voeux?.total}</Td>
                       <Td>

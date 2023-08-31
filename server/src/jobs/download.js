@@ -1,10 +1,11 @@
 const { Gestionnaire, Formateur, Voeu } = require("../common/model");
 const { oleoduc, transformIntoCSV, transformData } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
-const { ouiNon, date, number } = require("../common/utils/csvUtils.js");
+const { ouiNon, date, number, list } = require("../common/utils/csvUtils.js");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { fillFormateur, fillGestionnaire } = require("../common/utils/dataUtils");
 const { UserType } = require("../common/constants/UserType");
+const { ResponsableActions, FormateurActions } = require("../common/constants/History");
 
 async function download(output, options = {}) {
   const formateurs = new Map();
@@ -137,6 +138,10 @@ async function download(output, options = {}) {
 
         "Raison sociale de l’organisme responsable": ({ gestionnaire }) => gestionnaire.raison_sociale,
 
+        "Localité responsable": async ({ gestionnaire }) => {
+          return gestionnaire.libelle_ville;
+        },
+
         "Email de contact de l’organisme responsable": ({ gestionnaire }) => gestionnaire.email,
 
         "Académie de l’organisme formateur": ({ formateur }) => formateur?.academie?.nom,
@@ -149,6 +154,26 @@ async function download(output, options = {}) {
           `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/gestionnaire/${gestionnaire.siret}/formateur/${formateur?.uai}`,
 
         "Raison sociale de l’établissement formateur": ({ formateur }) => formateur?.raison_sociale,
+
+        "Localité formateur": async ({ formateur }) => {
+          return formateur.libelle_ville;
+        },
+
+        "Localité des établissements d'accueil": async ({ gestionnaire, formateur }) => {
+          return list(
+            (
+              await Voeu.aggregate([
+                {
+                  $match: {
+                    "etablissement_formateur.uai": formateur.uai,
+                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                  },
+                },
+                { $group: { _id: "$etablissement_accueil.ville" } },
+              ])
+            ).map((result) => result._id)
+          );
+        },
 
         "Délégation autorisée": ({ gestionnaire, formateur }) =>
           ouiNon(
@@ -553,78 +578,28 @@ async function download(output, options = {}) {
           }
         },
 
-        // "Téléchargement effectué pour tous les établissements formateurs liés ?": async ({gestionnaire}) => {
-        //   try {
-        //     if (gestionnaires.get(data.siret)) {
-        //       return ouiNon(areTelechargementsTotal(gestionnaires.get(data.siret), data.voeux_telechargements));
-        //     } else {
-        //       const gestionnaire = await Gestionnaire.findOne({ siret: data.siret }).lean();
-        //       gestionnaires.set(data.siret, gestionnaire);
-        //       return ouiNon(areTelechargementsTotal(gestionnaire.etablissements, data.voeux_telechargements));
-        //     }
-        //   } catch (e) {
-        //     return null;
-        //   }
-        // },
-        // "Date du dernier téléchargement": ({gestionnaire}) => {
-        //   const lastDownloadDate = getLastDownloadDate({gestionnaire});
+        "Intervention d'un administrateur": async ({ gestionnaire, formateur }) => {
+          const admins = [
+            ...new Set(
+              [
+                ...gestionnaire.histories.filter((history) =>
+                  [ResponsableActions.ACCOUNT_EMAIL_UPDATED_BY_ADMIN].includes(history?.action)
+                ),
+                ...formateur.histories.filter((history) =>
+                  [
+                    FormateurActions.ACCOUNT_EMAIL_UPDATED_BY_ADMIN,
+                    FormateurActions.DELEGATION_CANCELLED_BY_ADMIN,
+                    FormateurActions.DELEGATION_CREATED_BY_ADMIN,
+                    FormateurActions.DELEGATION_UPDATED_BY_ADMIN,
+                  ].includes(history?.action)
+                ),
+              ].map((history) => history?.variables?.admin)
+            ),
+          ];
 
-        //   return date(lastDownloadDate);
-        // },
-        // "Nombre de vœux téléchargés au moins une fois": async ({gestionnaire}) => {
-        //   const lastDownloadDate = getLastDownloadDate({gestionnaire});
+          return list(admins);
+        },
 
-        //   return `${
-        //     lastDownloadDate
-        //       ? await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
-        //           "etablissement_gestionnaire.siret": data.siret,
-        //           $expr: {
-        //             $gt: [lastDownloadDate, { $first: "$_meta.import_dates" }],
-        //           },
-        //         })
-        //       : 0
-        //   }`;
-        // },
-        // "Nombre de vœux jamais téléchargés": async ({gestionnaire}) => {
-        //   const lastDownloadDate = getLastDownloadDate({gestionnaire});
-
-        //   return `${
-        //     lastDownloadDate
-        //       ? await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
-        //           "etablissement_gestionnaire.siret": data.siret,
-        //           $nor: [
-        //             {
-        //               $expr: {
-        //                 $gt: [lastDownloadDate, { $first: "$_meta.import_dates" }],
-        //               },
-        //             },
-        //           ],
-        //         })
-        //       : await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
-        //           "etablissement_gestionnaire.siret": data.siret,
-        //         })
-        //   }`;
-        // },
-        // "Nombre de vœux à télécharger (nouveau+maj)": async ({gestionnaire}) => {
-        //   const lastDownloadDate = getLastDownloadDate({gestionnaire});
-
-        //   return `${
-        //     lastDownloadDate
-        //       ? await Voeu.countDocuments({
-        //           "etablissement_formateur.uai": etablissementFromGestionnaire?.uai,
-        //           $expr: {
-        //             $lte: [lastDownloadDate, { $last: "$_meta.import_dates" }],
-        //           },import { Etablissement } from '../../../../catalogue-apprentissage/server/src/common/model/schema/etablissement.d';
-
-        //         })
-        //       : await Voeu.countDocuments({
-        //           "etablissement_gestionnaire.siret": data.siret,
-        //         })
-        //   }`;
-        // },
         ...columns,
       },
     }),
