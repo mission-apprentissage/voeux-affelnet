@@ -25,7 +25,7 @@ function createMailer(transporter = createTransporter(config.smtp)) {
       html: await generateHtml(to, template),
       list: {
         // help: "https://mission-apprentissage.gitbook.io/general/les-services-en-devenir/accompagner-les-futurs-apprentis",
-        help: "https://voeux-affelnet.apprentissage.beta.gouv.fr/support",
+        help: "https://candidats-affelnet.apprentissage.education.fr/support",
         // unsubscribe: getPublicUrl(`/api/emails/${data.token}/unsubscribe`),
       },
     });

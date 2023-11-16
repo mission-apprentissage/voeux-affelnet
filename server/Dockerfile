@@ -1,5 +1,5 @@
 # STAGE 1 : BUILDER
-FROM node:16-alpine as builder
+FROM node:18-alpine as builder
 
 COPY .yarnrc.yml* /tmp/
 RUN echo -e "yarnPath: .yarn/releases/yarn-3.3.1.cjs\n\
@@ -15,7 +15,7 @@ RUN cd /tmp && \
   rm -f .yarnrc.yml
 
 # STAGE 2 : RUNNER
-FROM node:16-alpine as runner
+FROM node:18-alpine as runner
 
 WORKDIR /app
 VOLUME /data

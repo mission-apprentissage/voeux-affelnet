@@ -4,7 +4,8 @@
   "plugins": ["mocha"],
   "rules": {
     "mocha/no-skipped-tests": "warn",
-    "mocha/no-exclusive-tests": "error"
+    "mocha/no-exclusive-tests": "error",
+    "no-unused-vars": ["error", { "ignoreRestSiblings": true }]
   },
   "env": {
     "node": true,

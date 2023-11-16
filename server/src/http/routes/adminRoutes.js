@@ -81,142 +81,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const regex = ".*" + text + ".*";
       const regexQuery = { $regex: regex, $options: "i" };
 
-      // const academies = academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null;
-
-      // const data = await User.aggregate([
-      //   {
-      //     $match: {
-      //       $or: [
-      //         {
-      //           type: "Gestionnaire",
-
-      //           ...(academie || !!defaultAcademies?.length
-      //             ? {
-      //                 $or: [
-      //                   { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
-      //                   {
-      //                     etablissements: {
-      //                       $elemMatch: { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
-      //                     },
-      //                   },
-      //                 ],
-      //               }
-      //             : {}),
-      //         },
-      //         // {
-      //         //   type: "Formateur",
-
-      //         //   ...(academie || !!defaultAcademies?.length
-      //         //     ? [
-      //         //         {
-      //         //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
-      //         //         },
-      //         //       ]
-      //         //     : []),
-      //         // },
-      //       ],
-      //     },
-      //   },
-      //   ...(academies
-      //     ? [
-      //         {
-      //           $addFields: {
-      //             etablissements: {
-      //               $filter: {
-      //                 input: "$etablissements",
-      //                 as: "etablissement",
-      //                 cond: { $in: ["$$etablissement.academie.code", academies] },
-      //               },
-      //             },
-      //           },
-      //         },
-      //       ]
-      //     : []),
-
-      //   {
-      //     $unwind: {
-      //       path: "$etablissements",
-      //       preserveNullAndEmptyArrays: false,
-      //     },
-      //   },
-      // ]);
-
-      // const stats = {
-      //   organisme_count: data.length,
-
-      //   organisme_count_downloaded: data.filter(async (data) => {
-      //     const formateur = await getFormateur(data.etablissements?.uai, admin);
-      //     const gestionnaire = await getGestionnaire(data.siret, admin);
-
-      //     const etablissementFromGestionnaire = gestionnaire?.etablissements.find(
-      //       (etablissement) => etablissement.uai === formateur?.uai
-      //     );
-
-      //     const etablissementFromFormateur = formateur?.etablissements.find(
-      //       (etablissement) => etablissement.siret === gestionnaire?.siret
-      //     );
-
-      //     const telechargementsByGestionnaire = gestionnaire?.voeux_telechargements.filter(
-      //       (voeux_telechargement) => voeux_telechargement.uai === formateur?.uai
-      //     );
-
-      //     const lastVoeuxTelechargementDateByGestionnaire = new Date(
-      //       telechargementsByGestionnaire[telechargementsByGestionnaire.length - 1]?.date
-      //     );
-
-      //     const telechargementsByFormateur = formateur?.voeux_telechargements.filter(
-      //       (voeux_telechargement) => voeux_telechargement.siret === gestionnaire?.siret
-      //     );
-
-      //     const lastVoeuxTelechargementDateByFormateur = new Date(
-      //       telechargementsByFormateur[telechargementsByFormateur.length - 1]?.date
-      //     );
-
-      //     return etablissementFromGestionnaire.diffusionAutorisee
-      //       ? lastVoeuxTelechargementDateByFormateur.getTime() >
-      //           new Date(etablissementFromGestionnaire.voeux_date).getTime()
-      //       : lastVoeuxTelechargementDateByGestionnaire.getTime() >
-      //           new Date(etablissementFromGestionnaire.voeux_date).getTime();
-      //   }).length,
-      //   // organisme_count_partially_downloaded: await Formateur.countDocuments({
-      //   //   ...(academie || !!defaultAcademies?.length
-      //   //     ? [
-      //   //         {
-      //   //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
-      //   //         },
-      //   //       ]
-      //   //     : []),
-
-      //   //   voeux_telechargements: {
-      //   //     $elemMatch: {
-      //   //       $exists: true,
-      //   //       siret: "$etablissements.siret",
-      //   //       date: { $gt: "$etablissements.voeux_date" },
-      //   //     },
-      //   //   },
-      //   // }),
-      //   // organisme_count_not_downloaded: await Formateur.countDocuments({
-      //   //   ...(academie || !!defaultAcademies?.length
-      //   //     ? [
-      //   //         {
-      //   //           $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
-      //   //         },
-      //   //       ]
-      //   //     : []),
-
-      //   //   voeux_telechargements: {
-      //   //     $exists: false,
-      //   //   },
-      //   //   "etablissements.voeux_date": {
-      //   //     $exists: false,
-      //   //   },
-      //   // }),
-      // };
-
       const { find, pagination } = await paginate(
         User,
         {
-          // ...(text ?  $text: { $search: `"${text.trim()}"` } } : {}),
           $and: [
             ...(type ? [{ type }] : []),
 
@@ -349,7 +216,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
         }),
         transformIntoJSON({
           arrayWrapper: {
-            // stats,
             pagination,
           },
           arrayPropertyName: "users",
@@ -369,15 +235,15 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const admin = await User.findOne({ username }).lean();
       const defaultAcademies = admin?.academies?.map((academie) => academie.code);
 
-      const { academie /*, text*/ } = await Joi.object({
+      const { academie, text } = await Joi.object({
         academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
-        // text: Joi.string(),
+        text: Joi.string(),
         token: Joi.string(),
       }).validateAsync(req.query, { abortEarly: false });
 
-      // return sendJsonStream(stream, res);
       return download(asCsvResponse("export", res), {
         academies: academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null,
+        text,
         admin,
       });
     })
