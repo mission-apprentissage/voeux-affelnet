@@ -6,23 +6,23 @@ ARG HEADERS_MORE_VERSION="v0.33"
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        automake \
-        cmake \
-        doxygen \
-        g++ \
-        git \
-        libcurl4-gnutls-dev \
-        libgeoip-dev \
-        liblua5.3-dev \
-        libpcre++-dev \
-        libtool \
-        libxml2-dev \
-        make \
-        ruby \
-        pkg-config \
-        zlib1g-dev; \
-     apt-get clean; \
-     rm -rf /var/lib/apt/lists/*
+    automake \
+    cmake \
+    doxygen \
+    g++ \
+    git \
+    libcurl4-gnutls-dev \
+    libgeoip-dev \
+    liblua5.3-dev \
+    libpcre++-dev \
+    libtool \
+    libxml2-dev \
+    make \
+    ruby \
+    pkg-config \
+    zlib1g-dev; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /sources
 
