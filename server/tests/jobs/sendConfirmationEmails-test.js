@@ -26,7 +26,7 @@ describe("sendConfirmationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 2);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
+    assert.deepStrictEqual(sent[0].replyTo, "candidats-apprentissage@education.gouv.fr");
     assert.deepStrictEqual(sent[1].to, "test1@apprentissage.beta.gouv.fr");
     assert.ok(sent[1].html.indexOf("Madame, Monsieur,") !== -1);
     assert.strictEqual(

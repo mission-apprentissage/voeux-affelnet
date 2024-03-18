@@ -9,25 +9,18 @@ jobs:
         working-directory: 'server'
 
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
 
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - name: Restore yarn cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: yarn-cache-folder-${{ hashFiles('**/yarn.lock', '.yarnrc.yml') }}
-          restore-keys: |
-            yarn-cache-folder-
-
+      # setup .yarnrc.yml
       - name: Create .yarnrc.yml
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -35,6 +28,10 @@ jobs:
           yarn config set yarnPath .yarn/releases/yarn-3.3.1.cjs
           yarn config set nodeLinker node-modules
           yarn config set defaultSemverRangePrefix ""
+          yarn config set npmScopes.mission-apprentissage.npmRegistryServer "https://npm.pkg.github.com"
+          yarn config set npmScopes.mission-apprentissage.npmPublishRegistry "https://npm.pkg.github.com"
+          yarn config set npmScopes.mission-apprentissage.npmAlwaysAuth true
+          yarn config set npmScopes.mission-apprentissage.npmAuthToken $NPM_TOKEN
 
       # Install dependencies
       - name: Run Yarn Install
