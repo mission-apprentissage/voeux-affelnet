@@ -37,6 +37,7 @@ const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUn
 const { asArray } = require("./common/utils/stringUtils.js");
 const { findAcademieByCode } = require("./common/academies.js");
 const { createActionToken } = require("./common/utils/jwtUtils");
+const config = require("./config.js");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -462,5 +463,9 @@ cli
       logger.info("Token généré", token);
     });
   });
+
+cli.command("healthcheck").action(() => {
+  logger.info("config", config);
+});
 
 cli.parse(process.argv);
