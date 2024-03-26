@@ -290,18 +290,17 @@ export const AnomaliePage = () => {
 
               <ListItem>
                 <Text mb={4}>
-                  Phase 2 : dans la semaine du 5 juin, diffusion par courriel des notifications de mise à disposition
-                  des listes de candidats. Cette diffusion est effectuée auprès des personnes habilitées (qui auront
-                  préalablement créé leur compte pour l’accès au service).
+                  Phase 2 : entre le 3 juin et le 7 juin 2024, diffusion par courriel des notifications de mise à
+                  disposition des listes de candidats. Cette diffusion est effectuée auprès des personnes habilitées
+                  (qui auront préalablement créé leur compte pour l’accès au service).
                 </Text>
               </ListItem>
 
               <ListItem>
                 <Text mb={4}>
-                  Phase 3 : dans la semaine du 19 juin, diffusion par courriel des notifications de mise à jour des
-                  listes de candidats (le cas échéant). Une seule mise à jour sera diffusée en 2023, contre deux en
-                  2022. Les mises à jour peuvent correspondre à des suppressions, ajouts ou modifications de
-                  candidatures.
+                  Phase 3 : entre le 18 juin et le 21 juin 2024, diffusion par courriel des notifications de mise à jour
+                  des listes de candidats (le cas échéant). Les mises à jour peuvent correspondre à des suppressions,
+                  ajouts ou modifications de candidatures.
                 </Text>
               </ListItem>
 

@@ -201,6 +201,50 @@ function LoginPage() {
             ) : (
               <Alert display={"flex"} flexDirection={"column"}>
                 <Text mb={4}>
+                  Le service de diffusion des candidatures sera accessible dans la semaine du 21 mai 2024 : un courriel
+                  sera envoyé aux organismes responsables des offres pour leur permettre de confirmer l'adresse courriel
+                  de la personne habilitée, et créer le mot de passe d'accès au service pour 2024.
+                </Text>
+
+                <Text mb={4}>
+                  Les listes de candidatures seront ensuite diffusées entre le 3 juin et le 7 juin 2024. Les contacts
+                  habilités en seront informés par courriel.
+                </Text>
+
+                <Text mb={4}>
+                  En cas de mise à jour de ces listes, une deuxième et dernière version sera diffusée entre le 18 juin
+                  et le 21 juin 2024.
+                </Text>
+
+                <Text mb={4}>
+                  L'expéditeur des différentes correspondance sera{" "}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  </Link>
+                  .
+                </Text>
+
+                <Text mb={4}>
+                  Les destinataires seront les mêmes qu'en 2023. Si vous pensez que les contacts peuvent avoir changé,
+                  vous pouvez adresser un signalement à{" "}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  </Link>
+                  , en indiquant votre numéro Siret et code UAI.
+                </Text>
+
+                <Text mb={4}>
+                  Pour toute question, vous pouvez consulter notre{" "}
+                  <Link variant="action" href={"/support"}>
+                    page support
+                  </Link>
+                  , ou contacter l’équipe de diffusion par courriel :{" "}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  </Link>
+                </Text>
+
+                {/* <Text mb={4}>
                   <strong>
                     Les mots de passe utilisés en 2022 ne sont plus valables, de nouveaux comptes doivent être créés.
                     Des courriels ont été diffusés aux organismes de formation en apprentissage les 12 et 15 mai, pour
@@ -249,7 +293,7 @@ function LoginPage() {
                       </AccordionPanel>
                     </AccordionItem>
                   </Accordion>
-                </Box>
+                </Box> */}
               </Alert>
             )}
           </Box>
