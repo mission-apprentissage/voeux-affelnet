@@ -1,6 +1,6 @@
 const logger = require("../common/logger");
 const { DateTime } = require("luxon");
-const { User, Gestionnaire } = require("../common/model");
+const { User, Responsable } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
 const { UserType } = require("../common/constants/UserType");
@@ -56,16 +56,16 @@ async function resendUpdateEmails(resendEmail, options = {}) {
     .cursor()
     .eachAsync(async (user) => {
       if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({
+        const responsable = await Responsable.findOne({
           "etablissements.uai": user.username,
           "etablissements.diffusionAutorisee": true,
         });
 
-        if (!gestionnaire) {
+        if (!responsable) {
           return;
         }
 
-        const etablissement = gestionnaire.etablissements?.find(
+        const etablissement = responsable.etablissements_formateur?.find(
           (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
         );
 
@@ -89,7 +89,7 @@ async function resendUpdateEmails(resendEmail, options = {}) {
           await resendEmail(previous.token);
 
           switch (user.type) {
-            case UserType.GESTIONNAIRE:
+            case UserType.RESPONSABLE:
               options.sender
                 ? await saveUpdatedListAvailableEmailManualResentAsResponsable(user, options.sender)
                 : await saveUpdatedListAvailableEmailAutomaticResentAsResponsable(user);

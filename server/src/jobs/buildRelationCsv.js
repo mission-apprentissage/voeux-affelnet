@@ -37,15 +37,16 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
   ];
 
   if (options.additionalRelations) {
+    // Format : siret_responsable, email_responsable, uai_formateurs
     streams.push(parseAdditionalRelationsCsv(options.additionalRelations));
   }
 
   await oleoduc(
     mergeStreams(...streams),
-    transformData(({ siret_gestionnaire, email_gestionnaire, uai_etablissement }) => {
-      const sanitized_siret_gestionnaire = siret_gestionnaire?.replace(/\s+/g, "")?.toLowerCase();
-      const sanitized_email_gestionnaire = email_gestionnaire?.replace(/\s+/g, "");
-      const sanitized_uai_etablissement = uai_etablissement
+    transformData(({ siret_responsable, email_responsable, uai_formateurs }) => {
+      const sanitized_siret_responsable = siret_responsable?.replace(/\s+/g, "")?.toLowerCase();
+      const sanitized_email_responsable = email_responsable?.replace(/\s+/g, "");
+      const sanitized_uai_formateurs = uai_formateurs
         ?.replace(/\s+/g, "")
         ?.toUpperCase()
         .split(",")
@@ -53,25 +54,25 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
         .map((uai) => uai.toUpperCase());
 
       return {
-        siret_gestionnaire: sanitized_siret_gestionnaire?.length ? sanitized_siret_gestionnaire : undefined,
-        email_gestionnaire: sanitized_email_gestionnaire?.length ? sanitized_email_gestionnaire : undefined,
-        uai_etablissement: sanitized_uai_etablissement?.length ? sanitized_uai_etablissement : [],
+        siret_responsable: sanitized_siret_responsable?.length ? sanitized_siret_responsable : undefined,
+        email_responsable: sanitized_email_responsable?.length ? sanitized_email_responsable : undefined,
+        uai_formateurs: sanitized_uai_formateurs?.length ? sanitized_uai_formateurs : [],
       };
     }),
     accumulateData(
       async (accumulator, relation) => {
-        const index = accumulator.findIndex((item) => item.siret === relation.siret_gestionnaire);
+        const index = accumulator.findIndex((item) => item.siret === relation.siret_responsable);
 
         if (index === -1) {
           stats.valid++;
           accumulator.push({
-            siret: relation.siret_gestionnaire,
-            email: relation.email_gestionnaire,
-            etablissements: [...new Set(relation.uai_etablissement)],
+            siret: relation.siret_responsable,
+            email: relation.email_responsable,
+            etablissements: [...new Set(relation.uai_formateurs)],
           });
         } else {
           accumulator[index].etablissements = [
-            ...new Set([...accumulator[index].etablissements, ...relation.uai_etablissement]),
+            ...new Set([...accumulator[index].etablissements, ...relation.uai_formateurs]),
           ];
         }
         return accumulator;

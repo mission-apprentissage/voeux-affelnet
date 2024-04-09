@@ -27,15 +27,15 @@ import { Formik, Form, Field } from "formik";
 import { Yup } from "../../../Yup";
 import { _put } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
-import { FormateurEmail } from "../../gestionnaire/fields/FormateurEmail";
+import { FormateurEmail } from "../../responsable/fields/FormateurEmail";
 
-export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpen, onClose }) => {
+export const UpdateDelegationModal = ({ responsable, formateur, callback, isOpen, onClose }) => {
   const toast = useToast();
 
   const updateDelegationEmail = useCallback(
     async ({ form }) => {
       try {
-        await _put(`/api/admin/gestionnaires/${gestionnaire.siret}/formateurs/${formateur.uai}`, {
+        await _put(`/api/admin/responsables/${responsable.siret}/formateurs/${formateur.uai}`, {
           email: form.email,
           diffusionAutorisee: true,
         });
@@ -58,13 +58,13 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
         });
       }
     },
-    [callback, onClose, gestionnaire?.siret, formateur?.uai, toast]
+    [callback, onClose, responsable?.siret, formateur?.uai, toast]
   );
 
   const cancelDelegation = useCallback(
     async ({ form }) => {
       try {
-        await _put(`/api/admin/gestionnaires/${gestionnaire.siret}/formateurs/${formateur.uai}`, {
+        await _put(`/api/admin/responsables/${responsable.siret}/formateurs/${formateur.uai}`, {
           diffusionAutorisee: false,
         });
         onClose();
@@ -73,10 +73,12 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
         console.error(error);
       }
     },
-    [callback, onClose, gestionnaire?.siret, formateur?.uai]
+    [callback, onClose, responsable?.siret, formateur?.uai]
   );
 
-  const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
+  const etablissement = responsable.etablissements_formateur?.find(
+    (etablissement) => formateur.uai === etablissement.uai
+  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
@@ -95,7 +97,7 @@ export const UpdateDelegationModal = ({ gestionnaire, formateur, callback, isOpe
           <Text fontSize="lg" mb={4}>
             Vous vous apprêtez à modifier le destinataire de la délégation de droits au sein de l'organisme formateur{" "}
             <FormateurLibelle formateur={formateur} />, actuellement{" "}
-            <FormateurEmail gestionnaire={gestionnaire} formateur={formateur} />.
+            <FormateurEmail responsable={responsable} formateur={formateur} />.
           </Text>
           <Text mb={4}>
             <strong>Précisez ce que vous souhaitez faire :</strong>

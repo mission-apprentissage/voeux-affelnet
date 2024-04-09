@@ -1,4 +1,4 @@
-const { Gestionnaire, Formateur, Voeu } = require("../model");
+const { Responsable, Formateur, Voeu } = require("../model");
 const {
   saveListDownloadedByResponsable,
   saveListDownloadedByFormateur,
@@ -6,8 +6,8 @@ const {
   saveUpdatedListDownloadedByResponsable,
 } = require("./history/formateur");
 
-const markVoeuxAsDownloadedByGestionnaire = async (siret, uai) => {
-  await Gestionnaire.updateOne(
+const markVoeuxAsDownloadedByResponsable = async (siret, uai) => {
+  await Responsable.updateOne(
     { siret },
     {
       $push: {
@@ -21,7 +21,7 @@ const markVoeuxAsDownloadedByGestionnaire = async (siret, uai) => {
   if (
     await Voeu.countDocuments({
       "etablissement_formateur.uai": uai,
-      "etablissement_gestionnaire.siret": siret,
+      "etablissement_responsable.siret": siret,
       "_meta.import_dates.1": { $exists: true },
     })
   ) {
@@ -48,7 +48,7 @@ const markVoeuxAsDownloadedByFormateur = async (siret, uai) => {
   if (
     await Voeu.countDocuments({
       "etablissement_formateur.uai": uai,
-      "etablissement_gestionnaire.siret": siret,
+      "etablissement_responsable.siret": siret,
       "_meta.import_dates.1": { $exists: true },
     })
   ) {
@@ -58,4 +58,4 @@ const markVoeuxAsDownloadedByFormateur = async (siret, uai) => {
   }
 };
 
-module.exports = { markVoeuxAsDownloadedByGestionnaire, markVoeuxAsDownloadedByFormateur };
+module.exports = { markVoeuxAsDownloadedByResponsable, markVoeuxAsDownloadedByFormateur };

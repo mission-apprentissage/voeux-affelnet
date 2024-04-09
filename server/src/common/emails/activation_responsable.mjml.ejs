@@ -1,0 +1,33 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text> Madame la directrice, Monsieur le directeur, </mj-text>
+
+          <mj-text>
+            Veuillez dès à présent activer votre compte qui vous permettra le téléchargement des listes de vœux exprimés
+            via le service en ligne Affelnet pour votre établissement (Siret : <%= data.responsable.siret %>) et/ou pour
+            les établissements dont vous êtes responsable.
+          </mj-text>
+
+          <mj-button
+            href="<%= utils.getPublicUrl(`/activation?actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            Activer mon compte
+          </mj-button>
+
+          <mj-text> Votre identifiant de connexion : <strong><%= data.responsable.username %></strong> </mj-text>
+
+          <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>

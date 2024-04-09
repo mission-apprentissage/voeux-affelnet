@@ -1,13 +1,13 @@
 const { oleoduc, writeData } = require("oleoduc");
 
 const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
-const { Gestionnaire, Voeu } = require("../common/model/index.js");
+const { Responsable, Voeu } = require("../common/model/index.js");
 
 const getVoeuxDate = async ({ siret, uai }) => {
   const voeuxDates = (
     await Voeu.find({
       "etablissement_formateur.uai": uai,
-      "etablissement_gestionnaire.siret": siret,
+      "etablissement_responsable.siret": siret,
     })
   ).map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1]);
 
@@ -18,21 +18,21 @@ const getVoeuxDate = async ({ siret, uai }) => {
 const getNombreVoeux = async ({ siret, uai }) => {
   return await Voeu.countDocuments({
     "etablissement_formateur.uai": uai,
-    "etablissement_gestionnaire.siret": siret,
+    "etablissement_responsable.siret": siret,
   }).lean();
 };
 
 const countVoeux = async () => {
-  const request = await Gestionnaire.find().cursor();
+  const request = await Responsable.find().cursor();
 
   await oleoduc(
     request,
-    writeData(async (gestionnaire) => {
+    writeData(async (responsable) => {
       await Promise.all(
-        gestionnaire.etablissements.map(async (etablissement) => {
-          const voeuxDate = await getVoeuxDate({ siret: gestionnaire.siret, uai: etablissement.uai });
+        responsable.etablissements_formateur.map(async (etablissement) => {
+          const voeuxDate = await getVoeuxDate({ siret: responsable.siret, uai: etablissement.uai });
 
-          return markVoeuxAsAvailable({ siret: gestionnaire.siret, uai: etablissement.uai }, voeuxDate);
+          return markVoeuxAsAvailable({ siret: responsable.siret, uai: etablissement.uai }, voeuxDate);
         })
       );
     })

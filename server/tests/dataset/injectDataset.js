@@ -4,7 +4,7 @@ const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");
 const sendActivationEmails = require("../../src/jobs/sendActivationEmails");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 const importMefs = require("../../src/jobs/importMefs");
-const { insertGestionnaire, insertFormateur, insertVoeu } = require("../utils/fakeData");
+const { insertResponsable, insertFormateur, insertVoeu } = require("../utils/fakeData");
 const { range } = require("lodash");
 const { insertDossier, createUsername, createEmail } = require("../utils/fakeData.js");
 const { createAdmin } = require("../../src/jobs/createAdmin.js");
@@ -51,17 +51,17 @@ async function generateVoeux(uais, options = {}) {
   await JobEvent.create({ job: "importVoeux", stats });
 }
 
-async function generateGestionnaire(sendEmail, uais) {
+async function generateResponsable(sendEmail, uais) {
   const siret = faker.helpers.replaceSymbols("#########00015");
 
   logger.info(`Generating CFA ${siret}...`);
-  const stats = await insertGestionnaire({
+  const stats = await insertResponsable({
     siret,
     etablissements: uais.map((uai) => {
       return { uai, voeux_date: new Date() };
     }),
   });
-  await JobEvent.create({ job: "importGestionnaires", stats });
+  await JobEvent.create({ job: "importResponsables", stats });
   await generateFormateurs(uais);
   await sendConfirmationEmails(sendEmail, { username: siret });
 
@@ -98,8 +98,8 @@ async function injectDataset(actions, options = {}) {
     await generateCsaio(sendEmail);
   }
 
-  if (options.gestionnaire) {
-    await generateGestionnaire(sendEmail, uais);
+  if (options.responsable) {
+    await generateResponsable(sendEmail, uais);
   }
 
   await generateVoeux(uais, options);

@@ -1,15 +1,15 @@
-const { Gestionnaire, Formateur, Voeu } = require("../common/model");
+const { Responsable, Formateur, Voeu } = require("../common/model");
 const { oleoduc, transformIntoCSV, transformData } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date, number, list } = require("../common/utils/csvUtils.js");
 const { UserStatut } = require("../common/constants/UserStatut");
-const { fillFormateur, fillGestionnaire } = require("../common/utils/dataUtils");
+const { fillFormateur, fillResponsable } = require("../common/utils/dataUtils");
 const { UserType } = require("../common/constants/UserType");
 const { ResponsableActions, FormateurActions } = require("../common/constants/History");
 
 async function download(output, options = {}) {
   const formateurs = new Map();
-  const gestionnaires = new Map();
+  const responsables = new Map();
 
   const getFormateur = async (uai, admin) => {
     try {
@@ -25,14 +25,14 @@ async function download(output, options = {}) {
     }
   };
 
-  const getGestionnaire = async (siret, admin) => {
+  const getResponsable = async (siret, admin) => {
     try {
-      if (gestionnaires.get(siret)) {
-        return gestionnaires.get(siret);
+      if (responsables.get(siret)) {
+        return responsables.get(siret);
       } else {
-        const gestionnaire = await fillGestionnaire(await Gestionnaire.findOne({ siret }).lean(), admin);
-        gestionnaires.set(siret, gestionnaire);
-        return gestionnaire;
+        const responsable = await fillResponsable(await Responsable.findOne({ siret }).lean(), admin);
+        responsables.set(siret, responsable);
+        return responsable;
       }
     } catch (e) {
       return null;
@@ -41,10 +41,10 @@ async function download(output, options = {}) {
 
   const columns = options.columns || {};
   await oleoduc(
-    Gestionnaire.aggregate([
+    Responsable.aggregate([
       {
         $match: {
-          type: UserType.GESTIONNAIRE,
+          type: UserType.RESPONSABLE,
           statut: { $ne: UserStatut.NON_CONCERNE },
           ...(options.academies
             ? {
@@ -88,26 +88,26 @@ async function download(output, options = {}) {
 
     transformData(async (data) => {
       const formateur = await getFormateur(data.etablissements?.uai, options?.admin);
-      const gestionnaire = await getGestionnaire(data.siret, options?.admin);
+      const responsable = await getResponsable(data.siret, options?.admin);
 
-      const etablissementFromGestionnaire = gestionnaire?.etablissements.find(
+      const etablissementFromResponsable = responsable?.etablissements_formateur.find(
         (etablissement) => etablissement.uai === formateur?.uai
       );
 
-      const etablissementFromFormateur = formateur?.etablissements.find(
-        (etablissement) => etablissement.siret === gestionnaire?.siret
+      const etablissementFromFormateur = formateur?.etablissements_responsable.find(
+        (etablissement) => etablissement.siret === responsable?.siret
       );
 
-      const telechargementsByGestionnaire = gestionnaire?.voeux_telechargements.filter(
+      const telechargementsByResponsable = responsable?.voeux_telechargements_formateur.filter(
         (voeux_telechargement) => voeux_telechargement.uai === formateur?.uai
       );
 
-      const lastVoeuxTelechargementDateByGestionnaire = new Date(
-        telechargementsByGestionnaire[telechargementsByGestionnaire.length - 1]?.date
+      const lastVoeuxTelechargementDateByResponsable = new Date(
+        telechargementsByResponsable[telechargementsByResponsable.length - 1]?.date
       );
 
-      const telechargementsByFormateur = formateur?.voeux_telechargements.filter(
-        (voeux_telechargement) => voeux_telechargement.siret === gestionnaire?.siret
+      const telechargementsByFormateur = formateur?.voeux_telechargements_responsable.filter(
+        (voeux_telechargement) => voeux_telechargement.siret === responsable?.siret
       );
 
       const lastVoeuxTelechargementDateByFormateur = new Date(
@@ -115,11 +115,11 @@ async function download(output, options = {}) {
       );
 
       return {
-        gestionnaire,
+        responsable,
         formateur,
-        etablissementFromGestionnaire,
+        etablissementFromResponsable,
         etablissementFromFormateur,
-        lastVoeuxTelechargementDateByGestionnaire,
+        lastVoeuxTelechargementDateByResponsable,
         lastVoeuxTelechargementDateByFormateur,
       };
     }),
@@ -127,22 +127,22 @@ async function download(output, options = {}) {
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {
-        "Académie de l’organisme responsable": ({ gestionnaire }) => gestionnaire.academie?.nom,
+        "Académie de l’organisme responsable": ({ responsable }) => responsable.academie?.nom,
 
-        "Siret de l’organisme responsable": ({ gestionnaire }) => gestionnaire.siret,
+        "Siret de l’organisme responsable": ({ responsable }) => responsable.siret,
 
-        "Uai de l'établissement responsable": ({ gestionnaire }) => gestionnaire.uai,
+        "Uai de l'établissement responsable": ({ responsable }) => responsable.uai,
 
-        "Url du responsable": ({ gestionnaire }) =>
-          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/gestionnaire/${gestionnaire.siret}`,
+        "Url du responsable": ({ responsable }) =>
+          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable.siret}`,
 
-        "Raison sociale de l’organisme responsable": ({ gestionnaire }) => gestionnaire.raison_sociale,
+        "Raison sociale de l’organisme responsable": ({ responsable }) => responsable.raison_sociale,
 
-        "Localité responsable": async ({ gestionnaire }) => {
-          return gestionnaire.libelle_ville;
+        "Localité responsable": async ({ responsable }) => {
+          return responsable.libelle_ville;
         },
 
-        "Email de contact de l’organisme responsable": ({ gestionnaire }) => gestionnaire.email,
+        "Email de contact de l’organisme responsable": ({ responsable }) => responsable.email,
 
         "Académie de l’organisme formateur": ({ formateur }) => formateur?.academie?.nom,
 
@@ -150,8 +150,8 @@ async function download(output, options = {}) {
 
         "Uai de l'établissement formateur": ({ formateur }) => formateur?.uai,
 
-        "Url du formateur": ({ gestionnaire, formateur }) =>
-          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/gestionnaire/${gestionnaire.siret}/formateur/${formateur?.uai}`,
+        "Url du formateur": ({ responsable, formateur }) =>
+          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable.siret}/formateur/${formateur?.uai}`,
 
         "Raison sociale de l’établissement formateur": ({ formateur }) => formateur?.raison_sociale,
 
@@ -159,14 +159,14 @@ async function download(output, options = {}) {
           return formateur.libelle_ville;
         },
 
-        "Localité des établissements d'accueil": async ({ gestionnaire, formateur }) => {
+        "Localité des établissements d'accueil": async ({ responsable, formateur }) => {
           return list(
             (
               await Voeu.aggregate([
                 {
                   $match: {
                     "etablissement_formateur.uai": formateur.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                   },
                 },
                 { $group: { _id: "$etablissement_accueil.ville" } },
@@ -175,62 +175,62 @@ async function download(output, options = {}) {
           );
         },
 
-        "Délégation autorisée": ({ gestionnaire, formateur }) =>
+        "Délégation autorisée": ({ responsable, formateur }) =>
           ouiNon(
-            gestionnaire.etablissements.find((etablissement) => etablissement.uai === formateur?.uai)
+            responsable.etablissements_formateur.find((etablissement) => etablissement.uai === formateur?.uai)
               ?.diffusionAutorisee
           ),
 
-        "Email de contact de l'organisme formateur": async ({ gestionnaire, formateur }) =>
+        "Email de contact de l'organisme formateur": async ({ responsable, formateur }) =>
           formateur?.email ??
-          gestionnaire.etablissements?.find((etablissement) => etablissement.uai === formateur?.uai)?.email,
+          responsable.etablissements_formateur?.find((etablissement) => etablissement.uai === formateur?.uai)?.email,
 
-        "Statut ": async ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          const voeuxTelechargementsFormateur = formateur?.voeux_telechargements?.filter(
-            (telechargement) => telechargement.siret === gestionnaire.siret
+        "Statut ": async ({ responsable, formateur, etablissementFromResponsable }) => {
+          const voeuxTelechargementsFormateur = formateur?.voeux_telechargements_responsable?.filter(
+            (telechargement) => telechargement.siret === responsable.siret
           );
 
-          const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements?.filter(
+          const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur?.filter(
             (telechargement) => telechargement.uai === formateur?.uai
           );
 
-          const voeuxDisponible = etablissementFromGestionnaire?.nombre_voeux > 0;
+          const voeuxDisponible = etablissementFromResponsable?.nombre_voeux > 0;
 
-          switch (etablissementFromGestionnaire?.diffusionAutorisee) {
+          switch (etablissementFromResponsable?.diffusionAutorisee) {
             case true: {
               switch (true) {
                 case UserStatut.ACTIVE === formateur?.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                  new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
+                    new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsFormateur?.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromResponsable.last_date_voeux).getTime()
                   ): {
                   return "✅ Mise à jour téléchargée";
                 }
                 case UserStatut.ACTIVE === formateur?.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                  new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
+                    new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsFormateur?.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() <=
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                        new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
                       new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
+                        new Date(etablissementFromResponsable.first_date_voeux).getTime()
                   ): {
                   return "⚠️ Mise à jour non téléchargée";
                 }
                 case UserStatut.ACTIVE === formateur?.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() ===
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                  new Date(etablissementFromResponsable.first_date_voeux).getTime() ===
+                    new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
                   !!voeuxTelechargementsFormateur?.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromResponsable.last_date_voeux).getTime()
                   ): {
                   return "✅ Liste téléchargée";
                 }
@@ -240,7 +240,7 @@ async function download(output, options = {}) {
                     !voeuxTelechargementsFormateur?.find(
                       (telechargement) =>
                         new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                        new Date(etablissementFromResponsable.last_date_voeux).getTime()
                     )): {
                   return "⚠️ Compte créé, liste non téléchargée";
                 }
@@ -263,61 +263,61 @@ async function download(output, options = {}) {
             }
             case false: {
               switch (true) {
-                case UserStatut.ACTIVE === gestionnaire.statut &&
+                case UserStatut.ACTIVE === responsable.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsGestionnaire.find(
+                  new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
+                    new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+                  !!voeuxTelechargementsResponsable.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromResponsable.last_date_voeux).getTime()
                   ): {
                   return "✅ Mise à jour téléchargée";
                 }
-                case UserStatut.ACTIVE === gestionnaire.statut &&
+                case UserStatut.ACTIVE === responsable.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() !==
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsGestionnaire.find(
+                  new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
+                    new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+                  !!voeuxTelechargementsResponsable.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() <=
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
+                        new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
                       new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.first_date_voeux).getTime()
+                        new Date(etablissementFromResponsable.first_date_voeux).getTime()
                   ): {
                   return "⚠️ Mise à jour non téléchargée";
                 }
-                case UserStatut.ACTIVE === gestionnaire.statut &&
+                case UserStatut.ACTIVE === responsable.statut &&
                   voeuxDisponible &&
-                  new Date(etablissementFromGestionnaire.first_date_voeux).getTime() ===
-                    new Date(etablissementFromGestionnaire.last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsGestionnaire.find(
+                  new Date(etablissementFromResponsable.first_date_voeux).getTime() ===
+                    new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+                  !!voeuxTelechargementsResponsable.find(
                     (telechargement) =>
                       new Date(telechargement.date).getTime() >
-                      new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                      new Date(etablissementFromResponsable.last_date_voeux).getTime()
                   ): {
                   return "✅ Liste téléchargée";
                 }
-                case UserStatut.ACTIVE === gestionnaire.statut &&
+                case UserStatut.ACTIVE === responsable.statut &&
                   voeuxDisponible &&
-                  (!voeuxTelechargementsGestionnaire.length ||
-                    !voeuxTelechargementsGestionnaire.find(
+                  (!voeuxTelechargementsResponsable.length ||
+                    !voeuxTelechargementsResponsable.find(
                       (telechargement) =>
                         new Date(telechargement.date).getTime() >
-                        new Date(etablissementFromGestionnaire.last_date_voeux).getTime()
+                        new Date(etablissementFromResponsable.last_date_voeux).getTime()
                     )): {
                   return "⚠️ Compte créé, liste non téléchargée";
                 }
-                case UserStatut.ACTIVE === gestionnaire.statut && !voeuxDisponible: {
+                case UserStatut.ACTIVE === responsable.statut && !voeuxDisponible: {
                   return "✅ Compte créé";
                 }
-                case UserStatut.CONFIRME === gestionnaire.statut: {
+                case UserStatut.CONFIRME === responsable.statut: {
                   return "⚠️ Email confirmé, compte non créé";
                 }
-                case !!gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
+                case !!responsable.emails.length && UserStatut.EN_ATTENTE === responsable.statut: {
                   return "⚠️ En attente de confirmation d'email";
                 }
-                case !gestionnaire.emails.length && UserStatut.EN_ATTENTE === gestionnaire.statut: {
+                case !responsable.emails.length && UserStatut.EN_ATTENTE === responsable.statut: {
                   return "✅ En attente de diffusion de campagne";
                 }
 
@@ -336,61 +336,65 @@ async function download(output, options = {}) {
           return formateur?.histories?.[formateur?.histories.length - 1]?.action;
         },
 
-        Vœux: ({ etablissementFromGestionnaire }) => {
-          return ouiNon(etablissementFromGestionnaire?.voeux_date);
+        Vœux: ({ etablissementFromResponsable }) => {
+          return ouiNon(etablissementFromResponsable?.voeux_date);
         },
 
-        "Nombre de vœux": async ({ gestionnaire, formateur }) =>
+        "Nombre de vœux": async ({ responsable, formateur }) =>
           `${await Voeu.countDocuments({
             "etablissement_formateur.uai": formateur?.uai,
-            "etablissement_gestionnaire.siret": gestionnaire.siret,
+            "etablissement_responsable.siret": responsable.siret,
           })}`,
 
-        "Date du dernier import de vœux": ({ etablissementFromGestionnaire }) => {
-          return date(etablissementFromGestionnaire?.last_date_voeux);
+        "Date du dernier import de vœux": ({ etablissementFromResponsable }) => {
+          return date(etablissementFromResponsable?.last_date_voeux);
         },
 
-        Téléchargement: async ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+        Téléchargement: async ({ responsable, formateur, etablissementFromResponsable }) => {
+          if (etablissementFromResponsable?.diffusionAutorisee) {
             return ouiNon(
-              !!formateur?.voeux_telechargements.find((telechargement) => telechargement.siret === gestionnaire.siret)
+              !!formateur?.voeux_telechargements_responsable.find(
+                (telechargement) => telechargement.siret === responsable.siret
+              )
             );
           } else {
             return ouiNon(
-              !!gestionnaire.voeux_telechargements.find((telechargement) => telechargement.uai === formateur?.uai)
+              !!responsable.voeux_telechargements_formateur.find(
+                (telechargement) => telechargement.uai === formateur?.uai
+              )
             );
           }
         },
 
-        "Date du dernier téléchargement": ({ gestionnaire, formateur, etablissementFromGestionnaire }) => {
-          if (etablissementFromGestionnaire?.diffusionAutorisee) {
-            const voeuxTelechargementsFormateur = formateur?.voeux_telechargements?.filter(
-              (telechargement) => telechargement.siret === gestionnaire.siret
+        "Date du dernier téléchargement": ({ responsable, formateur, etablissementFromResponsable }) => {
+          if (etablissementFromResponsable?.diffusionAutorisee) {
+            const voeuxTelechargementsFormateur = formateur?.voeux_telechargements_responsable?.filter(
+              (telechargement) => telechargement.siret === responsable.siret
             );
 
             return date(voeuxTelechargementsFormateur[voeuxTelechargementsFormateur?.length - 1]?.date);
           } else {
-            const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements?.filter(
+            const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur?.filter(
               (telechargement) => telechargement.uai === formateur?.uai
             );
 
-            return date(voeuxTelechargementsGestionnaire[voeuxTelechargementsGestionnaire.length - 1]?.date);
+            return date(voeuxTelechargementsResponsable[voeuxTelechargementsResponsable.length - 1]?.date);
           }
         },
 
         "Vœux téléchargés par le destinataire principal": async ({
-          gestionnaire,
+          responsable,
           formateur,
-          etablissementFromGestionnaire,
-          lastVoeuxTelechargementDateByGestionnaire,
+          etablissementFromResponsable,
+          lastVoeuxTelechargementDateByResponsable,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+          if (etablissementFromResponsable?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByFormateur, { $first: "$_meta.import_dates" }],
                     },
@@ -399,12 +403,12 @@ async function download(output, options = {}) {
             );
           } else {
             return number(
-              lastVoeuxTelechargementDateByGestionnaire
+              lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
-                      $gt: [lastVoeuxTelechargementDateByGestionnaire, { $first: "$_meta.import_dates" }],
+                      $gt: [lastVoeuxTelechargementDateByResponsable, { $first: "$_meta.import_dates" }],
                     },
                   })
                 : 0
@@ -413,18 +417,18 @@ async function download(output, options = {}) {
         },
 
         "Vœux à jour téléchargés par le destinataire principal": async ({
-          gestionnaire,
+          responsable,
           formateur,
-          etablissementFromGestionnaire,
-          lastVoeuxTelechargementDateByGestionnaire,
+          etablissementFromResponsable,
+          lastVoeuxTelechargementDateByResponsable,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+          if (etablissementFromResponsable?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByFormateur, { $last: "$_meta.import_dates" }],
                     },
@@ -433,12 +437,12 @@ async function download(output, options = {}) {
             );
           } else {
             return number(
-              lastVoeuxTelechargementDateByGestionnaire
+              lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
-                      $gt: [lastVoeuxTelechargementDateByGestionnaire, { $last: "$_meta.import_dates" }],
+                      $gt: [lastVoeuxTelechargementDateByResponsable, { $last: "$_meta.import_dates" }],
                     },
                   })
                 : 0
@@ -447,58 +451,58 @@ async function download(output, options = {}) {
         },
 
         "Vœux à télécharger par le destinataire principal": async ({
-          gestionnaire,
+          responsable,
           formateur,
-          etablissementFromGestionnaire,
-          lastVoeuxTelechargementDateByGestionnaire,
+          etablissementFromResponsable,
+          lastVoeuxTelechargementDateByResponsable,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+          if (etablissementFromResponsable?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
                       $lte: [lastVoeuxTelechargementDateByFormateur, { $last: "$_meta.import_dates" }],
                     },
                   })
                 : await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                   })
             );
           } else {
             return number(
-              lastVoeuxTelechargementDateByGestionnaire
+              lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
-                      $lte: [lastVoeuxTelechargementDateByGestionnaire, { $last: "$_meta.import_dates" }],
+                      $lte: [lastVoeuxTelechargementDateByResponsable, { $last: "$_meta.import_dates" }],
                     },
                   })
                 : await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                   })
             );
           }
         },
 
         "Vœux à retélécharger pour mise à jour": async ({
-          gestionnaire,
+          responsable,
           formateur,
-          etablissementFromGestionnaire,
-          lastVoeuxTelechargementDateByGestionnaire,
+          etablissementFromResponsable,
+          lastVoeuxTelechargementDateByResponsable,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+          if (etablissementFromResponsable?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $and: [
                       {
                         $expr: {
@@ -516,19 +520,19 @@ async function download(output, options = {}) {
             );
           } else {
             return number(
-              lastVoeuxTelechargementDateByGestionnaire
+              lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $and: [
                       {
                         $expr: {
-                          $gt: [lastVoeuxTelechargementDateByGestionnaire, { $first: "$_meta.import_dates" }],
+                          $gt: [lastVoeuxTelechargementDateByResponsable, { $first: "$_meta.import_dates" }],
                         },
                       },
                       {
                         $expr: {
-                          $lte: [lastVoeuxTelechargementDateByGestionnaire, { $last: "$_meta.import_dates" }],
+                          $lte: [lastVoeuxTelechargementDateByResponsable, { $last: "$_meta.import_dates" }],
                         },
                       },
                     ],
@@ -539,50 +543,50 @@ async function download(output, options = {}) {
         },
 
         "Vœux jamais téléchargés par le destinataire principal": async ({
-          gestionnaire,
+          responsable,
           formateur,
-          etablissementFromGestionnaire,
-          lastVoeuxTelechargementDateByGestionnaire,
+          etablissementFromResponsable,
+          lastVoeuxTelechargementDateByResponsable,
           lastVoeuxTelechargementDateByFormateur,
         }) => {
-          if (etablissementFromGestionnaire?.diffusionAutorisee) {
+          if (etablissementFromResponsable?.diffusionAutorisee) {
             return number(
               lastVoeuxTelechargementDateByFormateur
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
                       $lt: [lastVoeuxTelechargementDateByFormateur, { $first: "$_meta.import_dates" }],
                     },
                   })
                 : await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                   })
             );
           } else {
             return number(
-              lastVoeuxTelechargementDateByGestionnaire
+              lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                     $expr: {
-                      $lt: [lastVoeuxTelechargementDateByGestionnaire, { $first: "$_meta.import_dates" }],
+                      $lt: [lastVoeuxTelechargementDateByResponsable, { $first: "$_meta.import_dates" }],
                     },
                   })
                 : await Voeu.countDocuments({
                     "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_gestionnaire.siret": gestionnaire.siret,
+                    "etablissement_responsable.siret": responsable.siret,
                   })
             );
           }
         },
 
-        "Intervention d'un administrateur": async ({ gestionnaire, formateur }) => {
+        "Intervention d'un administrateur": async ({ responsable, formateur }) => {
           const admins = [
             ...new Set(
               [
-                ...gestionnaire.histories.filter((history) =>
+                ...responsable.histories.filter((history) =>
                   [ResponsableActions.ACCOUNT_EMAIL_UPDATED_BY_ADMIN].includes(history?.action)
                 ),
                 ...formateur.histories.filter((history) =>

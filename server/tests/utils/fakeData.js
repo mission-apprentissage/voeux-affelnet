@@ -1,6 +1,6 @@
 const faker = require("@faker-js/faker/locale/fr").faker;
 const { merge } = require("lodash");
-const { Gestionnaire, Formateur, Voeu, User, Mef, Log } = require("../../src/common/model");
+const { Responsable, Formateur, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 const { Csaio, Dossier } = require("../../src/common/model/index.js");
 
@@ -28,15 +28,15 @@ module.exports = {
       )
     );
   },
-  insertGestionnaire: (custom = {}) => {
-    const username = custom.username || custom.siret || faker.helpers.replaceSymbols("#########00015");
+  insertResponsable: (custom = {}) => {
+    const siret = custom.siret || faker.helpers.replaceSymbols("#########00015");
 
-    return Gestionnaire.create(
+    return Responsable.create(
       merge(
         {},
         {
-          username,
-          siret: username,
+          username: siret,
+          siret,
           email: createEmail(),
           emails: [],
           raison_sociale: faker.company.companyName(),

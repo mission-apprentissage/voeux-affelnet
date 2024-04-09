@@ -2,7 +2,7 @@ const assert = require("assert");
 const { insertVoeu } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 const { Csaio } = require("../../src/common/model/index.js");
-const { insertDossier, insertGestionnaire } = require("../utils/fakeData.js");
+const { insertDossier, insertResponsable } = require("../utils/fakeData.js");
 const { DateTime } = require("luxon");
 
 describe("csaioRoutes", () => {
@@ -78,7 +78,7 @@ describe("csaioRoutes", () => {
     const date = DateTime.fromISO("2022-07-23T14:00:00.000Z");
 
     await Promise.all([
-      insertGestionnaire({
+      insertResponsable({
         voeux_telechargements: [
           {
             uai: "0751234J",

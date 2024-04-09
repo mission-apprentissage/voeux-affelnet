@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 const logger = require("../common/logger");
-const { User, Gestionnaire } = require("../common/model");
+const { User, Responsable } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 
@@ -49,7 +49,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
                 },
               }),
 
-          $or: [{ type: UserType.GESTIONNAIRE }],
+          $or: [{ type: UserType.RESPONSABLE }],
         }),
   };
 
@@ -63,16 +63,16 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
       const previous = user.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
       if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({
+        const responsable = await Responsable.findOne({
           "etablissements.uai": user.username,
           "etablissements.diffusionAutorisee": true,
         });
 
-        if (!gestionnaire) {
+        if (!responsable) {
           return;
         }
 
-        const etablissement = gestionnaire.etablissements?.find(
+        const etablissement = responsable.etablissements_formateur?.find(
           (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
         );
 
@@ -84,7 +84,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
         await resendEmail(previous.token, { retry: options.retry, user });
 
         switch (user.type) {
-          case UserType.GESTIONNAIRE:
+          case UserType.RESPONSABLE:
             options.sender
               ? await saveAccountConfirmationEmailManualResentAsResponsable(user, options.sender)
               : await saveAccountConfirmationEmailAutomaticResentAsResponsable(user);

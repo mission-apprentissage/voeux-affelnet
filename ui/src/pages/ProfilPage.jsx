@@ -11,8 +11,8 @@ export const ProfilPage = () => {
 
   const getSelf = useCallback(async () => {
     switch (auth.type) {
-      case "Gestionnaire": {
-        const response = await _get("/api/gestionnaire");
+      case "Responsable": {
+        const response = await _get("/api/responsable");
         setSelf(response);
         break;
       }
@@ -41,7 +41,7 @@ export const ProfilPage = () => {
     <>
       {
         {
-          Gestionnaire: <Redirect to={"/gestionnaire"} replace />,
+          Responsable: <Redirect to={"/responsable"} replace />,
           Formateur: <Redirect to={"/formateur"} replace />,
         }[self?.type]
       }

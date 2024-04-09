@@ -1,7 +1,7 @@
 const { Dossier } = require("../model/index.js");
 const { removeDiacritics } = require("../utils/objectUtils.js");
 
-function getGestionnaires() {
+function getResponsables() {
   return {
     "0601162M": "0597090L",
     "0595846J": "0595846J",
@@ -82,7 +82,7 @@ function getGestionnaires() {
 }
 
 function findDossiers(apprenant, responsable, filters) {
-  const gestionnaires = getGestionnaires();
+  const responsables = getResponsables();
 
   return Dossier.find({
     annee_formation: 1,
@@ -92,7 +92,7 @@ function findDossiers(apprenant, responsable, filters) {
           const uai = filter.uai_etablissement;
           return {
             ...filter,
-            ...(uai ? { uai_etablissement: { $in: gestionnaires[uai] ? [uai, gestionnaires[uai]] : [uai] } } : {}),
+            ...(uai ? { uai_etablissement: { $in: responsables[uai] ? [uai, responsables[uai]] : [uai] } } : {}),
           };
         }),
       },

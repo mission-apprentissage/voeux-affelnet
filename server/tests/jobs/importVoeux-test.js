@@ -1,9 +1,9 @@
 const assert = require("assert");
 const { Readable } = require("stream");
-const { Voeu, Gestionnaire } = require("../../src/common/model");
+const { Voeu, Responsable } = require("../../src/common/model");
 const importVoeux = require("../../src/jobs/importVoeux");
 const { DateTime } = require("luxon");
-const { insertMef, insertGestionnaire } = require("../utils/fakeData");
+const { insertMef, insertResponsable } = require("../utils/fakeData");
 const {
   markVoeuxUniquementEnApprentissage,
 } = require("../../src/common/actions/markVoeuxUniquementEnApprentissage.js");
@@ -101,7 +101,7 @@ describe("importVoeux", () => {
 
   xit("Vérifie qu'on met à jour le CFA pour indiquer qu'il a des voeux", async () => {
     const importDate = new Date();
-    await insertGestionnaire({ siret: "11111111100006", etablissements: [{ uai: "0751234J" }] });
+    await insertResponsable({ siret: "11111111100006", etablissements: [{ uai: "0751234J" }] });
 
     await importVoeux(
       Readable.from([
@@ -114,7 +114,7 @@ describe("importVoeux", () => {
 
     let found = await Voeu.findOne().lean();
     assert.deepStrictEqual(found._meta.import_dates, [importDate]);
-    found = await Gestionnaire.findOne().lean();
+    found = await Responsable.findOne().lean();
     const etablissement = found.etablissements[0];
     assert.deepStrictEqual(etablissement.voeux_date, importDate);
     assert.deepStrictEqual(etablissement.uai, "0751234J");
@@ -123,7 +123,7 @@ describe("importVoeux", () => {
   xit("Vérifie qu'on met à un jour un voeux et le cfa lors d'un nouvel import", async () => {
     const yesterday = DateTime.now().minus({ days: 1 }).toJSDate();
     const today = new Date();
-    await insertGestionnaire({ username: "11111111100006", etablissements: [{ uai: "0751234J" }] });
+    await insertResponsable({ username: "11111111100006", etablissements: [{ uai: "0751234J" }] });
     await importVoeux(
       Readable.from([
         `"Académie possédant le dossier élève";"INE";"Nom de l'élève";"Prénom 1";"Prénom 2";"Prénom 3";"Adresse de l'élève - Ligne 1";"Adresse de l'élève - Ligne 2";"Adresse de l'élève - Ligne 3";"Adresse de l'élève - Ligne 4";"Code postal";"VILLE";"PAYS";"Téléphone personnel";"Téléphone professionnel";"Téléphone portable";"Téléphone responsable 1";"Téléphone responsable 2";"Mail responsable 1";"Mail responsable 2";"Mnémonique MEF origine de l'élève";"Code Spécialité du MEF origine de l'élève";"Libellé formation origine de l'élève";"Code Option 1 d'origine de l'élève";"Libellé  Option 1 d'origine de l'élève";"Code Option 2 d'origine de l'élève";"Libellé Option 2 d'origine de l'élève";"Code LV1 d'origine de l'élève";"Libellé LV1 origine de l'élève";"Code LV2 d'origine de l'élève";"Libellé LV2 origine de l'élève";"Code UAI étab. origine";"Type étab. origine";"Libellé étab. origine";"Ville étab. origine";"Code UAI CIO origine";"Libellé CIO origine";"Rang du vœu";"Code offre de formation (vœu)";"Code MEF";"Avec barème ?";"Mnémonique MEF de l'offre de formation";"Code spécialité de l'offre de formation";"Libellé formation";"Code Enseignement Optionnel";"Libellé Enseignement Optionnel";"Dossier de candidature en internat demandé ?";"Code LV1 demandée";"Libellé  LV1 demandée";"Code LV2 demandée";"Libellé LV2 demandée";"Code UAI étab. Accueil";"Type étab. Accueil";"Libellé établissement Accueil";"Ville étab. Accueil"
@@ -153,7 +153,7 @@ describe("importVoeux", () => {
         type: "any.required",
       },
     ]);
-    const found = await Gestionnaire.findOne().lean();
+    const found = await Responsable.findOne().lean();
     assert.deepStrictEqual(found.etablissements[0].voeux_date, today);
 
     assert.deepStrictEqual(stats, {
@@ -170,7 +170,7 @@ describe("importVoeux", () => {
   xit("Vérifie qu'on ne met pas à jour le CFA si le voeu n'a pas été modifié dans le nouvel import", async () => {
     const yesterday = DateTime.now().minus({ days: 1 }).toJSDate();
     const today = new Date();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       etablissements: [{ uai: "0751234J", voeux_date: yesterday }],
     });
@@ -193,7 +193,7 @@ describe("importVoeux", () => {
 
     let found = await Voeu.findOne().lean();
     assert.deepStrictEqual(found._meta.import_dates, [yesterday, today]);
-    found = await Gestionnaire.findOne().lean();
+    found = await Responsable.findOne().lean();
     assert.deepStrictEqual(found.etablissements[0].voeux_date, yesterday);
   });
 

@@ -1,15 +1,15 @@
-const { Gestionnaire, Formateur, Voeu } = require("../model/index.js");
+const { Responsable, Formateur, Voeu } = require("../model/index.js");
 const logger = require("../logger.js");
 
 async function markVoeuxAsAvailable({ siret, uai }, voeuxDate) {
   const nombre_voeux = await Voeu.countDocuments({
-    "etablissement_gestionnaire.siret": siret,
+    "etablissement_responsable.siret": siret,
     "etablissement_formateur.uai": uai,
   });
 
   logger.info(`${siret} / ${uai} : ${nombre_voeux} voeux`);
 
-  const { matchedCount: matchedGestionnaireCount } = await Gestionnaire.updateOne(
+  const { matchedCount: matchedResponsableCount } = await Responsable.updateOne(
     { siret, "etablissements.uai": uai },
     {
       $set: {
@@ -35,7 +35,7 @@ async function markVoeuxAsAvailable({ siret, uai }, voeuxDate) {
     { runValidators: true }
   );
 
-  if (matchedGestionnaireCount === 0) {
+  if (matchedResponsableCount === 0) {
     logger.warn(`L'établissement responsable n'est pas connu en base ${siret} (formateur: ${uai})`);
     return false;
   }

@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { insertUser, insertGestionnaire } = require("../utils/fakeData");
+const { insertUser, insertResponsable } = require("../utils/fakeData");
 const resendActivationEmails = require("../../src/jobs/resendActivationEmails");
 const { DateTime } = require("luxon");
 const { createTestContext } = require("../utils/testUtils");
@@ -49,7 +49,7 @@ describe("resendActivationEmails", () => {
 
   xit("Vérifie qu'on envoie une relance 3 jours après l'envoi initial pour un CFA", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
@@ -96,7 +96,7 @@ describe("resendActivationEmails", () => {
 
   xit("Vérifie qu'on attend 3 jours avant de relancer une deuxième fois (CFA)", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],

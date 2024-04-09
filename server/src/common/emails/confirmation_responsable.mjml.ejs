@@ -1,0 +1,37 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text> Madame, Monsieur, </mj-text>
+          <mj-text>
+            Afin que nous puissions transmettre à votre organisme de formation en apprentissage (OFA), les candidatures
+            exprimées via le service en ligne affectation, nous vous invitons à confirmer ou modifier l’adresse courriel
+            de contact de votre organisme (Siret : <%= data.responsable.siret %>), en cliquant sur le bouton ci-dessous.
+          </mj-text>
+
+          <mj-button
+            href="<%= utils.getPublicUrl(`/confirmation?actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            Confirmer ou modifier votre adresse courriel
+          </mj-button>
+
+          <mj-text> Votre identifiant de connexion : <strong><%= data.responsable.username %></strong> </mj-text>
+
+          <mj-text>
+            Les listes des candidats aux formations que vous proposez vous seront communiquées à partir de la semaine du
+            5 juin 2023.
+          </mj-text>
+
+          <%- include('./common/procedure.ejs'); %> <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>

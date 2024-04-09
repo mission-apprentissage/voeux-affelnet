@@ -1,11 +1,12 @@
 import { Route, Routes } from "react-router-dom";
 
 import { Page } from "../../common/components/layout/Page";
-import { Users } from "./users/Users";
-import { Gestionnaire } from "./users/Gestionnaire";
-import { Gestionnaires } from "./users/Gestionnaires";
-import { Formateurs } from "./users/Formateurs";
-import { Formateur } from "./users/Formateur";
+import { Etablissements } from "./etablissements/Etablissements";
+// import { Etablissement } from "./etablissements/Etablissement";
+import { Responsable } from "./etablissements/Responsable";
+import { Responsables } from "./etablissements/Responsables";
+import { Formateurs } from "./etablissements/Formateurs";
+import { Formateur } from "./etablissements/Formateur";
 import { Alert } from "./Alert";
 
 function AdminRoutes() {
@@ -16,17 +17,18 @@ function AdminRoutes() {
         exact
         element={
           <Page title="Listes de candidats Affelnet : console de pilotage">
-            <Users />
+            <Etablissements />
           </Page>
         }
       ></Route>
 
       <Route path="alert" element={<Alert />}></Route>
-      <Route path="gestionnaire/:siret" element={<Gestionnaire />}></Route>
-      <Route path="gestionnaire/:siret/formateurs" element={<Formateurs />}></Route>
-      <Route path="gestionnaire/:siret/formateur/:uai" element={<Formateur />}></Route>
+      {/* <Route path="etablissement/:identifiant" element={<Etablissement />}></Route> */}
+      <Route path="responsable/:siret" element={<Responsable />}></Route>
+      <Route path="responsable/:siret/formateurs" element={<Formateurs />}></Route>
+      <Route path="responsable/:siret/formateur/:uai" element={<Formateur />}></Route>
       <Route path="formateur/:uai" element={<Formateur />}></Route>
-      <Route path="formateur/:uai/gestionnaires" element={<Gestionnaires />}></Route>
+      <Route path="formateur/:uai/responsables" element={<Responsables />}></Route>
     </Routes>
   );
 }

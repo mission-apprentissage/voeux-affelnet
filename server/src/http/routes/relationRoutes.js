@@ -2,13 +2,13 @@ const Boom = require("boom");
 const express = require("express");
 const Joi = require("@hapi/joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { Gestionnaire, Formateur } = require("../../common/model");
+const { Responsable, Formateur } = require("../../common/model");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
 
   router.get(
-    "/api/relation/rechercheGestionnaire",
+    "/api/relation/rechercheResponsable",
     tryCatch(async (req, res) => {
       const { search } = await Joi.object({
         search: Joi.string().required(),
@@ -17,19 +17,19 @@ module.exports = () => {
       const regex = ".*" + search + ".*";
       const regexQuery = { $regex: regex, $options: "i" };
 
-      const gestionnaire = await Gestionnaire.findOne(
+      const responsable = await Responsable.findOne(
         { $or: [{ siret: regexQuery }, { uai: regexQuery }, { raison_sociale: regexQuery }] },
         { _id: 0 }
       )
         .sort({ raison_sociale: 1 })
         .lean();
 
-      if (!gestionnaire) {
+      if (!responsable) {
         throw Boom.notFound(`Aucun organisme responsable trouvé pour la recherche "${search}"`);
       }
 
       const formateurs = await Formateur.find(
-        { uai: { $in: gestionnaire.etablissements.map((etablissement) => etablissement.uai) } },
+        { uai: { $in: responsable.etablissements_formateur.map((etablissement) => etablissement.uai) } },
         { _id: 0 }
       );
 
@@ -38,7 +38,7 @@ module.exports = () => {
       }
 
       return res.json({
-        gestionnaire,
+        responsable,
         formateurs,
       });
     })
@@ -63,19 +63,19 @@ module.exports = () => {
         throw Boom.notFound(`Aucun organisme formateur trouvé pour la recherche "${search}"`);
       }
 
-      const gestionnaires =
-        (await Gestionnaire.find(
-          { siret: { $in: formateur.etablissements.map((etablissement) => etablissement.siret) } },
+      const responsables =
+        (await Responsable.find(
+          { siret: { $in: formateur.etablissements_responsable.map((etablissement) => etablissement.siret) } },
           { _id: 0 }
         )
           .sort({ raison_sociale: 1 })
           .lean()) ?? [];
 
-      if (!gestionnaires.length) {
+      if (!responsables.length) {
         throw Boom.notFound(`Aucun organisme responsable trouvé pour cet établissement.`);
       }
 
-      return res.json({ gestionnaires, formateur });
+      return res.json({ responsables, formateur });
     })
   );
 

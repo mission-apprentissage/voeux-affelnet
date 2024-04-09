@@ -38,7 +38,7 @@ module.exports = () => {
   router.get(
     "/api/login/status",
     checkActionToken(),
-    // ensureIsOneOf(["Gestionnaire", "Formateur"]),
+    // ensureIsOneOf(["Responsable", "Formateur"]),
     tryCatch(async (req, res) => {
       const user = req.user;
 

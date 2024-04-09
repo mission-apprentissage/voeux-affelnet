@@ -1,6 +1,7 @@
 const UserType = {
-  GESTIONNAIRE: "Gestionnaire",
+  RESPONSABLE: "Responsable",
   FORMATEUR: "Formateur",
+  // ETABLISSEMENT: "Etablissement",
   CSAIO: "Csaio",
   ACADEMIE: "Academie",
 };

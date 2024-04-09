@@ -1,4 +1,4 @@
-const { Voeu, Gestionnaire } = require("../model/index.js");
+const { Voeu, Responsable } = require("../model/index.js");
 const { compose, transformData } = require("oleoduc");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { sortDescending } = require("../utils/dateUtils.js");
@@ -70,7 +70,7 @@ async function streamCroisementVoeux(options = {}) {
         const uai = voeu.etablissement_accueil.uai;
         const [dossier, cfa] = await Promise.all([
           findDossier(voeu),
-          Gestionnaire.findOne({ "voeux_telechargements.uai": uai }),
+          Responsable.findOne({ "voeux_telechargements.uai": uai }),
         ]);
 
         const statut = dossier?.statut;

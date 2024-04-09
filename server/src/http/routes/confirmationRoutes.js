@@ -6,7 +6,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const sendActivationEmails = require("../../jobs/sendActivationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
-const { User, Gestionnaire } = require("../../common/model");
+const { User, Responsable } = require("../../common/model");
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -15,7 +15,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/confirmation/status",
     checkActionToken(),
-    ensureIsOneOf(["Gestionnaire", "Formateur"]),
+    ensureIsOneOf(["Responsable", "Formateur"]),
     tryCatch(async (req, res) => {
       const user = req.user;
 
@@ -31,9 +31,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }
 
       if (user.type === "Formateur") {
-        const gestionnaire = await Gestionnaire.findOne({ "etablissements.uai": user.username });
+        const responsable = await Responsable.findOne({ "etablissements.uai": user.username });
 
-        const etablissement = gestionnaire.etablissements?.find((etablissement) => etablissement.uai === user.username);
+        const etablissement = responsable.etablissements_formateur?.find(
+          (etablissement) => etablissement.uai === user.username
+        );
 
         if (!etablissement.diffusionAutorisee) {
           throw Boom.badRequest(`Aucune délégation de droit n'a été activée pour votre compte ${user.username}`);
@@ -48,7 +50,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.post(
     "/api/confirmation/accept",
     checkActionToken(),
-    ensureIsOneOf(["Gestionnaire", "Formateur"]),
+    ensureIsOneOf(["Responsable", "Formateur"]),
     tryCatch(async (req, res) => {
       const user = req.user;
       const { email } = await Joi.object({

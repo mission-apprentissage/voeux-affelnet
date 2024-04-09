@@ -10,7 +10,7 @@ const PreviewEmail = lazy(() => import("./pages/PreviewEmail"));
 const StatsPage = lazy(() => import("./pages/StatsPage"));
 const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
 
-const GestionnaireRoutes = lazy(() => import("./pages/gestionnaire/Routes"));
+const ResponsableRoutes = lazy(() => import("./pages/responsable/Routes"));
 const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
 const AdminRoutes = lazy(() => import("./pages/admin/Routes"));
 const CsaioPage = lazy(() => import("./pages/CsaioPage.js"));
@@ -42,7 +42,7 @@ const App = () => {
   const [auth] = useAuth();
 
   const getDefaultRedirection = () => {
-    return auth.type === "Gestionnaire" ? "gestionnaire/formateurs" : getUserType(auth);
+    return auth.type === "Responsable" ? "responsable/formateurs" : getUserType(auth);
   };
 
   return (
@@ -72,11 +72,11 @@ const App = () => {
             }
           />
           <Route
-            path="/gestionnaire/*"
+            path="/responsable/*"
             element={
               <Suspense>
-                <RequireAuth allowed={["gestionnaire"]}>
-                  <GestionnaireRoutes />
+                <RequireAuth allowed={["responsable"]}>
+                  <ResponsableRoutes />
                 </RequireAuth>
               </Suspense>
             }
@@ -109,7 +109,7 @@ const App = () => {
             path="/profil"
             element={
               <Suspense>
-                <RequireAuth allowed={["gestionnaire", "formateur"]}>
+                <RequireAuth allowed={["responsable", "formateur"]}>
                   <Navigate to={`/${getUserType(auth)}`} />;
                 </RequireAuth>
               </Suspense>

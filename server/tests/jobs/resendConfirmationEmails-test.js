@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { insertGestionnaire } = require("../utils/fakeData");
+const { insertResponsable } = require("../utils/fakeData");
 const { DateTime } = require("luxon");
 const resendConfirmationEmails = require("../../src/jobs/resendConfirmationEmails");
 const { createTestContext } = require("../utils/testUtils");
@@ -10,7 +10,7 @@ const { User } = require("../../src/common/model");
 describe("resendConfirmationEmails", () => {
   xit("Vérifie qu'on envoie une relance 3 jours après le premier envoi", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
@@ -43,7 +43,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on ne renvoie pas d'email en erreur", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -72,7 +72,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on attend avant 3 jours avant d'envoyer une nouvelle relance", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -97,7 +97,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on relance 3 fois maximum par défaut", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
@@ -122,7 +122,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on peut modifier le nombre de relance maximal", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
@@ -147,10 +147,10 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on n'envoie pas d'email pour les CFA confirmés ou désinscrits", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       statut: "confirmé",
     });
-    await insertGestionnaire({
+    await insertResponsable({
       unsubscribe: true,
     });
 
@@ -162,7 +162,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on peut renvoyer un email en erreur (retry)", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -196,7 +196,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on ne renvoie pas un email en erreur autre que de type 'fatal' (retry)", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -224,7 +224,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on peut renvoyer un email à un CFA", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -235,7 +235,7 @@ describe("resendConfirmationEmails", () => {
         },
       ],
     });
-    await insertGestionnaire({
+    await insertResponsable({
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -260,7 +260,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on peut renvoyer un email à un CFA sans tenir compte de la dernière relance", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
@@ -286,7 +286,7 @@ describe("resendConfirmationEmails", () => {
 
   xit("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     const { resendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",

@@ -19,15 +19,6 @@ import { AlertMessage } from "./AlertMessage";
 
 import useAuth from "../../hooks/useAuth";
 
-const getAuthTypeLibelle = (type) => {
-  switch (type) {
-    case "Gestionnaire":
-      return "Responsable";
-    default:
-      return type;
-  }
-};
-
 const Header = () => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
@@ -72,14 +63,14 @@ const Header = () => {
                       <Text color="bluefrance" textStyle="sm">
                         {auth.sub}{" "}
                         <Text color="grey.600" as="span">
-                          ({auth.permissions?.isAdmin ? "admin" : getAuthTypeLibelle(auth.type)})
+                          ({auth.permissions?.isAdmin ? "admin" : auth.type})
                         </Text>
                       </Text>
                     </Box>
                   </Flex>
                 </MenuButton>
                 <MenuList>
-                  {["Gestionnaire", "Formateur"].includes(auth.type) && (
+                  {["Responsable", "Formateur"].includes(auth.type) && (
                     <>
                       <MenuItem as="a" href="/profil">
                         Profil

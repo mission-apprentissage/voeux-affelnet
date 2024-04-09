@@ -1,13 +1,13 @@
 const assert = require("assert");
-const { insertGestionnaire } = require("../utils/fakeData");
+const { insertResponsable } = require("../utils/fakeData");
 const { createActionToken } = require("../../src/common/utils/jwtUtils");
-const { Gestionnaire } = require("../../src/common/model");
+const { Responsable } = require("../../src/common/model");
 const { startServer } = require("../utils/testUtils");
 
 describe("confirmationRoutes", () => {
   xit("Vérifie qu'un cfa peut récupérer son statut", async () => {
     const { httpClient } = await startServer();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
     });
@@ -22,7 +22,7 @@ describe("confirmationRoutes", () => {
 
   xit("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus la confirmation", async () => {
     const { httpClient } = await startServer();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       statut: "confirmé",
     });
@@ -39,7 +39,7 @@ describe("confirmationRoutes", () => {
 
   xit("Vérifie qu'un cfa peut confirmer un compte", async () => {
     const { httpClient } = await startServer();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
     });
@@ -50,13 +50,13 @@ describe("confirmationRoutes", () => {
     });
 
     assert.strictEqual(response.status, 200);
-    const found = await Gestionnaire.findOne({ username: "11111111100006" }, { _id: 0 }).lean();
+    const found = await Responsable.findOne({ username: "11111111100006" }, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "confirmé");
   });
 
   xit("Vérifie qu'un cfa peut confirmer un compte avec une nouvelle adresse email", async () => {
     const { httpClient } = await startServer();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
     });
@@ -67,7 +67,7 @@ describe("confirmationRoutes", () => {
     });
 
     assert.strictEqual(response.status, 200);
-    const found = await Gestionnaire.findOne({ username: "11111111100006" }, { _id: 0 }).lean();
+    const found = await Responsable.findOne({ username: "11111111100006" }, { _id: 0 }).lean();
     assert.strictEqual(found.statut, "confirmé");
     assert.strictEqual(found.email, "user2@apprentissage.beta.gouv.fr");
     assert.strictEqual(found.anciens_emails[0].email, "11111111100006@apprentissage.beta.gouv.fr");
@@ -75,7 +75,7 @@ describe("confirmationRoutes", () => {
 
   xit("Vérifie qu'on envoie l'email d'activation après la confirmation", async () => {
     const { httpClient, getEmailsSent } = await startServer();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
@@ -101,7 +101,7 @@ describe("confirmationRoutes", () => {
 
   xit("Vérifie qu'une erreur est retourné quand le token est invalide", async () => {
     const { httpClient } = await startServer();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
     });
 

@@ -1,6 +1,6 @@
 const assert = require("assert");
 const { DateTime } = require("luxon");
-const { insertGestionnaire } = require("../utils/fakeData");
+const { insertResponsable } = require("../utils/fakeData");
 const resendNotificationEmails = require("../../src/jobs/resendNotificationEmails");
 const { createTestContext } = require("../utils/testUtils");
 const createEmailActions = require("../../src/common/actions/createEmailActions");
@@ -12,7 +12,7 @@ describe("resendNotificationEmails", () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -49,7 +49,7 @@ describe("resendNotificationEmails", () => {
     const today = new Date();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -88,7 +88,7 @@ describe("resendNotificationEmails", () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
@@ -122,7 +122,7 @@ describe("resendNotificationEmails", () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -153,7 +153,7 @@ describe("resendNotificationEmails", () => {
     const today = new Date();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "1234568X",
       email: "test1@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -172,7 +172,7 @@ describe("resendNotificationEmails", () => {
         },
       ],
     });
-    await insertGestionnaire({
+    await insertResponsable({
       username: "1234568Y",
       email: "test1@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -208,7 +208,7 @@ describe("resendNotificationEmails", () => {
     const today = new Date();
     const yesterday = DateTime.now().minus({ days: 1 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test1@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -249,7 +249,7 @@ describe("resendNotificationEmails", () => {
     const { resendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -286,7 +286,7 @@ describe("resendNotificationEmails", () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     const eightDaysAgo = DateTime.now().minus({ days: 8 }).toJSDate();
     const twoWeeksAgo = DateTime.now().minus({ days: 15 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -305,7 +305,7 @@ describe("resendNotificationEmails", () => {
         },
       ],
     });
-    await insertGestionnaire({
+    await insertResponsable({
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: eightDaysAgo }],
       voeux_telechargements: [

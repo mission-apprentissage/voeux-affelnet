@@ -3,7 +3,7 @@ const { compose, transformData } = require("oleoduc");
 
 function getVoeuxStream({ siret, uai }) {
   return compose(
-    Voeu.find({ "etablissement_gestionnaire.siret": siret, "etablissement_formateur.uai": uai }).lean().cursor(),
+    Voeu.find({ "etablissement_responsable.siret": siret, "etablissement_formateur.uai": uai }).lean().cursor(),
     transformData((voeu) => {
       return {
         INE_APPRENANT: voeu.apprenant.ine,

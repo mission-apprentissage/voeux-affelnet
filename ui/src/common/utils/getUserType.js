@@ -20,21 +20,21 @@ export const isFormateur = (auth) => {
   return getUserType(auth) === UserType.FORMATEUR;
 };
 
-export const isGestionnaire = (auth) => {
-  return getUserType(auth) === UserType.GESTIONNAIRE;
+export const isResponsable = (auth) => {
+  return getUserType(auth) === UserType.RESPONSABLE;
 };
 
-export const isResponsableFormateur = ({ gestionnaire, formateur }) => {
-  return gestionnaire?.siret === formateur?.siret || gestionnaire?.uai === formateur?.uai;
+export const isResponsableFormateur = ({ responsable, formateur }) => {
+  return responsable?.siret === formateur?.siret || responsable?.uai === formateur?.uai;
 };
 
 // const userTypes = new Map([
-//   ["Gestionnaire", "Organisme responsable"],
+//   ["Responsable", "Organisme responsable"],
 //   ["Formateur", "Organisme formateur"],
 // ]);
 
 // const userLibelles = new Map([
-//   ["Gestionnaire", (self) => `${self.raison_sociale} (${self.siret})`],
+//   ["Responsable", (self) => `${self.raison_sociale} (${self.siret})`],
 //   ["Formateur", (self) => `${self.raison_sociale} (${self.libelle_ville})`],
 // ]);
 

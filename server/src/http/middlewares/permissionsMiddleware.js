@@ -1,9 +1,9 @@
-const _ = require("lodash");
+const { isEqual, pick } = require("lodash");
 
 module.exports = (permissions = {}) => {
   return (req, res, next) => {
-    const current = _.pick(req.user, Object.keys(permissions));
-    if (_.isEqual(current, permissions)) {
+    const current = pick(req.user, Object.keys(permissions));
+    if (isEqual(current, permissions)) {
       next();
     } else {
       return res.status(401).send("");

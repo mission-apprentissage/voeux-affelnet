@@ -1,6 +1,6 @@
 const assert = require("assert");
 const config = require("../../src/config");
-const { Gestionnaire } = require("../../src/common/model");
+const { Responsable } = require("../../src/common/model");
 const { createResetPasswordToken } = require("../../src/common/utils/jwtUtils");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
@@ -30,7 +30,7 @@ describe("passwordRoutes", () => {
 
   it("Vérifie qu'un cfa peut faire une demande de réinitialisation de mot de passe en lower case", async () => {
     const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
-    await createAndLogUser("0751234J", "password", { model: Gestionnaire });
+    await createAndLogUser("0751234J", "password", { model: Responsable });
 
     const response = await httpClient.post("/api/password/forgotten-password", {
       username: "0751234J",

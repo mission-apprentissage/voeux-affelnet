@@ -1,6 +1,6 @@
 const assert = require("assert");
-const { Gestionnaire, User } = require("../../src/common/model");
-const { insertUser, insertGestionnaire } = require("../utils/fakeData");
+const { Responsable, User } = require("../../src/common/model");
+const { insertUser, insertResponsable } = require("../utils/fakeData");
 const sendActivationEmails = require("../../src/jobs/sendActivationEmails");
 const { createTestContext } = require("../utils/testUtils");
 const createEmailActions = require("../../src/common/actions/createEmailActions");
@@ -41,7 +41,7 @@ describe("sendActivationEmails", () => {
 
   xit("Vérifie qu'on envoie des emails d'activation uniquement aux CFA confirmés", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "confirmé",
@@ -50,7 +50,7 @@ describe("sendActivationEmails", () => {
 
     await sendActivationEmails(sendEmail);
 
-    const found = await Gestionnaire.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
+    const found = await Responsable.findOne({ email: "test@apprentissage.beta.gouv.fr" }).lean();
     assert.deepStrictEqual(found.emails[0].templateName, "activation_cfa");
     const sent = getEmailsSent();
     assert.deepStrictEqual(sent[0].subject, "Des vœux Affelnet sont téléchargeables (Siret : 11111111100006)");
@@ -105,18 +105,18 @@ describe("sendActivationEmails", () => {
 
   xit("Vérifie qu'on n'envoie pas d'emails aux cfas n'ayant pas de vœux", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       statut: "confirmé",
       etablissements: [{ uai: "0751234J", voeux_date: new Date() }],
     });
-    await insertGestionnaire({ username: "22222222200006", statut: "confirmé" });
+    await insertResponsable({ username: "22222222200006", statut: "confirmé" });
 
     const stats = await sendActivationEmails(sendEmail);
 
-    let found = await Gestionnaire.findOne({ siret: "11111111100006" }).lean();
+    let found = await Responsable.findOne({ siret: "11111111100006" }).lean();
     assert.strictEqual(found.emails.length, 1);
-    found = await Gestionnaire.findOne({ siret: "22222222200006" }).lean();
+    found = await Responsable.findOne({ siret: "22222222200006" }).lean();
     assert.deepStrictEqual(found.emails, []);
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);

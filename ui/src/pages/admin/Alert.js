@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Center,
@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 import { useFormik } from "formik";
-import { _post, _get, _patch, _delete } from "../../common/httpClient";
+import { _post, _get, _delete } from "../../common/httpClient";
 import { ArrowDropRightLine } from "../../theme/components/icons";
 import useAuth from "../../common/hooks/useAuth";
 
@@ -75,16 +75,16 @@ export const Alert = () => {
     },
   });
 
-  const toggleMessage = async (message) => {
-    try {
-      await _patch(`/api/admin/alert/${message._id}`, {
-        enabled: !message.enabled,
-      });
-      window.location.reload();
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  // const toggleMessage = async (message) => {
+  //   try {
+  //     await _patch(`/api/admin/alert/${message._id}`, {
+  //       enabled: !message.enabled,
+  //     });
+  //     window.location.reload();
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
 
   const deleteMessage = async (message) => {
     try {

@@ -16,18 +16,20 @@ const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
 const sendUpdateEmails = require("./jobs/sendUpdateEmails");
 const resendUpdateEmails = require("./jobs/resendUpdateEmails");
-const importGestionnaires = require("./jobs/importGestionnaires");
-const { cleanGestionnaires } = require("./jobs/cleanGestionnaires");
+const importEtablissementsResponsables = require("./jobs/importEtablissementsResponsables");
+const importResponsables = require("./jobs/importResponsables");
+const { cleanResponsables } = require("./jobs/cleanResponsables");
+const importEtablissementsFormateurs = require("./jobs/importEtablissementsFormateurs");
 const importFormateurs = require("./jobs/importFormateurs");
 const { cleanFormateurs } = require("./jobs/cleanFormateurs");
 const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
-const exportGestionnaires = require("./jobs/exportGestionnaires");
+const exportResponsables = require("./jobs/exportResponsables");
 const buildRelationCsv = require("./jobs/buildRelationCsv");
 const { createAdmin } = require("./jobs/createAdmin.js");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
-const { Gestionnaire } = require("./common/model");
+const { Responsable } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
@@ -86,27 +88,40 @@ cli
   });
 
 cli
-  .command("importGestionnaires <gestionnaireCsv>")
+  .command("importResponsables <responsableCsv>")
   .description(
     "Créé les comptes des responsables à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
   )
-  .action((gestionnaireCsv) => {
+  .action((responsableCsv) => {
     runScript(() => {
-      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
 
-      return importGestionnaires(input);
+      return importResponsables(input);
     });
   });
 
 cli
-  .command("cleanGestionnaires <gestionnaireCsv>")
-  .description("Supprime les gestionnaires n'apparaissant pas dans le fichier des relations")
-  .option("--proceed", "Permet d'applique la suppression", false)
-  .action((gestionnaireCsv, options) => {
+  .command("importEtablissementsResponsables <responsableCsv>")
+  .description(
+    "Créé les comptes des responsables à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+  )
+  .action((responsableCsv) => {
     runScript(() => {
-      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
 
-      return cleanGestionnaires(input, options);
+      return importEtablissementsResponsables(input);
+    });
+  });
+
+cli
+  .command("cleanResponsables <responsableCsv>")
+  .description("Supprime les responsables n'apparaissant pas dans le fichier des relations")
+  .option("--proceed", "Permet d'applique la suppression", false)
+  .action((responsableCsv, options) => {
+    runScript(() => {
+      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
+
+      return cleanResponsables(input, options);
     });
   });
 
@@ -124,12 +139,24 @@ cli
   });
 
 cli
+  .command("importEtablissementsFormateurs <formateurCsv>")
+  .description(
+    "Créé les comptes des formateurs à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+  )
+  .action((formateurCsv) => {
+    runScript(() => {
+      const input = formateurCsv ? createReadStream(formateurCsv) : process.stdin;
+
+      return importEtablissementsFormateurs(input);
+    });
+  });
+cli
   .command("cleanFormateurs <formateurCsv>")
   .description("Supprime les formateurs n'apparaissant pas dans le fichier des relations")
   .option("--proceed", "Permet d'applique la suppression", false)
-  .action((gestionnaireCsv, options) => {
+  .action((responsableCsv, options) => {
     runScript(() => {
-      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
 
       return cleanFormateurs(input, options);
     });
@@ -283,7 +310,7 @@ cli
     });
   });
 cli
-  .command("confirmGestionnaire")
+  .command("confirmResponsable")
   .description("Permet de confirmer manuellement un CFA")
   .arguments("<siret> <email>")
   .option("--force", "Ecrase les données déjà confirmées")
@@ -304,14 +331,14 @@ cli
   });
 
 cli
-  .command("exportGestionnaires")
+  .command("exportResponsables")
   .option("--filter <filter>", "Filtre au format json", JSON.parse)
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
       const output = out || writeToStdout();
 
-      return exportGestionnaires(output, { filter });
+      return exportResponsables(output, { filter });
     });
   });
 
@@ -342,7 +369,7 @@ cli.command("migrate").action(() => {
 cli
   .command("injectDataset")
   .option("--mef", "Importe les mefs")
-  .option("--gestionnaire", "Ajoute un gestionnaire")
+  .option("--responsable", "Ajoute un responsable")
   .option("--admin", "Ajoute un administrateur")
   .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
   .action((options) => {
@@ -381,7 +408,7 @@ cli
       };
 
       return await oleoduc(
-        Gestionnaire.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
+        Responsable.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
         transformData((etablissement) => etablissement.uai),
         transformData(async (uai) => await getEmailsFormateurFromUai(uai)),
         flattenArray(),
@@ -401,16 +428,16 @@ cli
   });
 
 cli
-  .command("getGestionnaireEmails")
+  .command("getResponsableEmails")
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out }) => {
     runScript(async () => {
       const output = out || writeToStdout();
 
-      // Récupération des adresses emails des CFAs gestionnaires
-      const etablissement_gestionnaire_emails = await Gestionnaire.distinct("email");
+      // Récupération des adresses emails des CFAs responsables
+      const etablissement_responsable_emails = await Responsable.distinct("email");
 
-      const source = Readable.from(etablissement_gestionnaire_emails);
+      const source = Readable.from(etablissement_responsable_emails);
 
       return oleoduc(
         source,

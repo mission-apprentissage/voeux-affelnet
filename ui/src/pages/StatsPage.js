@@ -109,8 +109,8 @@ function StatsPage() {
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre d'organismes responsables</StatLabel>
-                <StatNumber>{organismes?.totalGestionnaire}</StatNumber>
-                Dont {organismes?.totalGestionnaireMultiOrganismes} responsables multi-organismes
+                <StatNumber>{organismes?.totalResponsable}</StatNumber>
+                Dont {organismes?.totalResponsableMultiOrganismes} responsables multi-organismes
               </Stat>
 
               <Stat>
@@ -136,14 +136,14 @@ function StatsPage() {
                   Responsables ayant procédé à au moins une <br />
                   délégation de droit de réception des listes de candidats
                 </StatLabel>
-                <StatNumber>{organismes?.totalGestionnaireAvecDelegation}</StatNumber>
+                <StatNumber>{organismes?.totalResponsableAvecDelegation}</StatNumber>
 
                 <StatHelpText>
                   (soit{" "}
                   {
                     +(
-                      (organismes?.totalGestionnaireAvecDelegation * 100) /
-                      organismes?.totalGestionnaireMultiOrganismes
+                      (organismes?.totalResponsableAvecDelegation * 100) /
+                      organismes?.totalResponsableMultiOrganismes
                     ).toFixed(2)
                   }
                   % des responsables multi-organismes)
@@ -178,7 +178,7 @@ function StatsPage() {
 
               {/* <Stat>
                 <StatLabel>Responsables inconnus</StatLabel>
-                <StatNumber>{voeux?.gestionnairesInconnus}</StatNumber>
+                <StatNumber>{voeux?.responsablesInconnus}</StatNumber>
               </Stat>
 
               <Stat>
@@ -196,13 +196,13 @@ function StatsPage() {
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées</StatLabel>
-                <StatNumber>{voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur}</StatNumber>
-                {(!!voeux?.nbVoeuxDiffusésGestionnaire || !!voeux?.nbVoeuxDiffusésFormateur) && (
+                <StatNumber>{voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur}</StatNumber>
+                {(!!voeux?.nbVoeuxDiffusésResponsable || !!voeux?.nbVoeuxDiffusésFormateur) && (
                   <StatHelpText>
                     (soit{" "}
                     {
                       +(
-                        ((voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur) * 100) /
+                        ((voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur) * 100) /
                         voeux?.total
                       ).toFixed(2)
                     }
@@ -213,15 +213,15 @@ function StatsPage() {
 
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées par les responsables</StatLabel>
-                <StatNumber>{voeux?.nbVoeuxDiffusésGestionnaire}</StatNumber>
+                <StatNumber>{voeux?.nbVoeuxDiffusésResponsable}</StatNumber>
 
-                {!!voeux?.nbVoeuxDiffusésGestionnaire && (
+                {!!voeux?.nbVoeuxDiffusésResponsable && (
                   <StatHelpText>
                     (soit{" "}
                     {
                       +(
-                        (voeux?.nbVoeuxDiffusésGestionnaire * 100) /
-                        (voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur)
+                        (voeux?.nbVoeuxDiffusésResponsable * 100) /
+                        (voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur)
                       ).toFixed(2)
                     }
                     % des candidatures téléchargées)
@@ -238,7 +238,7 @@ function StatsPage() {
                     {
                       +(
                         (voeux?.nbVoeuxDiffusésFormateur * 100) /
-                        (voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur)
+                        (voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur)
                       ).toFixed(2)
                     }
                     % des candidatures téléchargées)
@@ -259,8 +259,8 @@ function StatsPage() {
                 {/* Nombre d’organismes responsables n’ayant pas téléchargé leur(s) liste(s) : 173 (17,5%), pour 292 organismes formateurs et 13962 candidatures (11,5%) */}
                 <StatLabel>Nombre d’organismes responsables n’ayant pas téléchargé leur(s) liste(s)</StatLabel>
                 <StatNumber>
-                  {+progresses?.noDownload?.nbGestionnaire} (
-                  {+((progresses?.noDownload?.nbGestionnaire * 100) / organismes?.totalGestionnaire).toFixed(2)}%)
+                  {+progresses?.noDownload?.nbResponsable} (
+                  {+((progresses?.noDownload?.nbResponsable * 100) / organismes?.totalResponsable).toFixed(2)}%)
                 </StatNumber>
 
                 <StatHelpText>
@@ -278,8 +278,8 @@ function StatsPage() {
                   Nombre d’organismes responsables n’ayant pas téléchargé la dernière mise à jour de leur(s) liste(s)
                 </StatLabel>
                 <StatNumber>
-                  {progresses?.partialDownload?.nbGestionnaire} (
-                  {+((progresses?.partialDownload?.nbGestionnaire * 100) / organismes?.totalGestionnaire).toFixed(2)}%)
+                  {progresses?.partialDownload?.nbResponsable} (
+                  {+((progresses?.partialDownload?.nbResponsable * 100) / organismes?.totalResponsable).toFixed(2)}%)
                 </StatNumber>
 
                 <StatHelpText>
@@ -298,8 +298,8 @@ function StatsPage() {
                 <StatLabel>Nombre d’organisme responsables ayant téléchargé l’intégralité des candidatures</StatLabel>
 
                 <StatNumber>
-                  {progresses?.fullDownload?.nbGestionnaire} (
-                  {+((progresses?.fullDownload?.nbGestionnaire * 100) / organismes?.totalGestionnaire).toFixed(2)}%)
+                  {progresses?.fullDownload?.nbResponsable} (
+                  {+((progresses?.fullDownload?.nbResponsable * 100) / organismes?.totalResponsable).toFixed(2)}%)
                 </StatNumber>
 
                 <StatHelpText>
@@ -315,8 +315,8 @@ function StatsPage() {
                 {/* Nombre d’organismes responsables sans candidatures : 54 (5,5%), pour 81 organismes formateurs. */}
                 <StatLabel>Nombre d’organismes responsables sans candidatures</StatLabel>
                 <StatNumber>
-                  {progresses?.noVoeux?.nbGestionnaire} (
-                  {+((progresses?.noVoeux?.nbGestionnaire * 100) / organismes?.totalGestionnaire).toFixed(2)}%)
+                  {progresses?.noVoeux?.nbResponsable} (
+                  {+((progresses?.noVoeux?.nbResponsable * 100) / organismes?.totalResponsable).toFixed(2)}%)
                 </StatNumber>
 
                 <StatHelpText>
@@ -352,18 +352,18 @@ function StatsPage() {
                   return (
                     <Tr key={academie.code}>
                       <Td>{academie.nom}</Td>
-                      <Td>{organismes?.totalGestionnaire}</Td>
+                      <Td>{organismes?.totalResponsable}</Td>
                       <Td>{organismes?.totalFormateur}</Td>
                       <Td>{voeux?.total}</Td>
                       <Td>
-                        {voeux?.nbVoeuxDiffusésFormateur + voeux?.nbVoeuxDiffusésGestionnaire}{" "}
+                        {voeux?.nbVoeuxDiffusésFormateur + voeux?.nbVoeuxDiffusésResponsable}{" "}
                         {voeux?.total > 0 && (
                           <>
                             (
                             <b>
                               {
                                 +(
-                                  ((voeux?.nbVoeuxDiffusésGestionnaire + voeux?.nbVoeuxDiffusésFormateur) * 100) /
+                                  ((voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur) * 100) /
                                   voeux?.total
                                 ).toFixed(2)
                               }

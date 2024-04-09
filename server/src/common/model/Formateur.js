@@ -29,7 +29,7 @@ const schema = new Schema({
     type: String,
   },
 
-  etablissements: {
+  etablissements_responsable: {
     required: true,
     default: [],
     type: [
@@ -55,7 +55,7 @@ const schema = new Schema({
     ],
   },
 
-  voeux_telechargements: {
+  voeux_telechargements_responsable: {
     default: [],
     type: [
       nested({
@@ -77,7 +77,7 @@ const schema = new Schema({
     type: academieSchema,
   },
 
-  histories: {
+  histories_responsable: {
     default: [],
     type: [historySchema],
   },

@@ -6,8 +6,8 @@ const { removePassword } = require("./removePassword");
 const { getUser } = require("./getUser");
 const { UserStatut } = require("../constants/UserStatut");
 const {
-  saveAccountConfirmed: saveAccountConfirmedAsGestionnaire,
-  saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsGestionnaire,
+  saveAccountConfirmed: saveAccountConfirmedAsResponsable,
+  saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsResponsable,
 } = require("./history/responsable");
 const {
   saveAccountConfirmed: saveAccountConfirmedAsFormateur,
@@ -27,8 +27,8 @@ async function confirm(username, email, options = {}) {
     await changeEmail(username, email, { auteur: username });
 
     switch (user.type) {
-      case UserType.GESTIONNAIRE:
-        await saveAccountEmailUpdatedByAccountAsGestionnaire({ siret: user.username, email }, user.email);
+      case UserType.RESPONSABLE:
+        await saveAccountEmailUpdatedByAccountAsResponsable({ siret: user.username, email }, user.email);
         break;
       case UserType.FORMATEUR:
         await saveAccountEmailUpdatedByAccountAsFormateur({ uai: user.username, email }, user.email);
@@ -41,8 +41,8 @@ async function confirm(username, email, options = {}) {
   }
 
   switch (user.type) {
-    case UserType.GESTIONNAIRE:
-      await saveAccountConfirmedAsGestionnaire({ siret: user.username, email });
+    case UserType.RESPONSABLE:
+      await saveAccountConfirmedAsResponsable({ siret: user.username, email });
       break;
     case UserType.FORMATEUR:
       await saveAccountConfirmedAsFormateur({ uai: user.username, email });

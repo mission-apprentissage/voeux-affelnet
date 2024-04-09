@@ -23,19 +23,19 @@ import { _get } from "../common/httpClient";
 import ErrorMessage from "../common/components/ErrorMessage";
 import { Page } from "../common/components/layout/Page";
 import { FormateurLibelle } from "../common/components/formateur/fields/FormateurLibelle";
-import { GestionnaireLibelle } from "../common/components/gestionnaire/fields/GestionnaireLibelle";
+import { ResponsableLibelle } from "../common/components/responsable/fields/ResponsableLibelle";
 
-// function getDownloadStatus(gestionnaire, formateur) {
+// function getDownloadStatus(responsable, formateur) {
 //   let statut;
 
-//   console.log({ gestionnaire, formateur });
+//   console.log({ responsable, formateur });
 
-//   if (!gestionnaire || !formateur) {
+//   if (!responsable || !formateur) {
 //     return;
 //   }
 
-//   const etablissement = gestionnaire.etablissements?.find((etab) => etab.uai === formateur.uai);
-//   const telechargements = gestionnaire.voeux_telechargements
+//   const etablissement = responsable.etablissements_formateur?.find((etab) => etab.uai === formateur.uai);
+//   const telechargements = responsable.voeux_telechargements_formateur
 //     ?.sort((a, b) => sortDescending(a.date, b.date))
 //     .filter((t) => t.uai === formateur.uai);
 
@@ -70,20 +70,20 @@ import { GestionnaireLibelle } from "../common/components/gestionnaire/fields/Ge
 // }
 
 function ReceptionVoeuxPage() {
-  const [gestionnaireData, setGestionnaireData] = useState(undefined);
-  const [gestionnaireError, setGestionnaireError] = useState(undefined);
+  const [responsableData, setResponsableData] = useState(undefined);
+  const [responsableError, setResponsableError] = useState(undefined);
   const [formateurData, setFormateurData] = useState(undefined);
   const [formateurError, setFormateurError] = useState(undefined);
 
-  const submitGestionnaireSearch = async (value) => {
+  const submitResponsableSearch = async (value) => {
     try {
-      setGestionnaireError(undefined);
-      const data = await _get(`/api/relation/rechercheGestionnaire?search=${value.search}`);
-      setGestionnaireData(data);
+      setResponsableError(undefined);
+      const data = await _get(`/api/relation/rechercheResponsable?search=${value.search}`);
+      setResponsableData(data);
     } catch (e) {
       console.error(e);
-      setGestionnaireData(undefined);
-      setGestionnaireError(e);
+      setResponsableData(undefined);
+      setResponsableError(e);
     }
   };
 
@@ -126,7 +126,7 @@ function ReceptionVoeuxPage() {
                 validationSchema={Yup.object().shape({
                   search: Yup.string().required("Requis"),
                 })}
-                onSubmit={submitGestionnaireSearch}
+                onSubmit={submitResponsableSearch}
               >
                 {({ status = {} }) => {
                   return (
@@ -148,7 +148,7 @@ function ReceptionVoeuxPage() {
                         </Button>
                       </Stack>
 
-                      {gestionnaireError && (
+                      {responsableError && (
                         <ErrorMessage>
                           L'établissement n'a pas été trouvé. Vous pouvez relancer une nouvelle recherche avec un autre
                           paramètre.
@@ -160,9 +160,9 @@ function ReceptionVoeuxPage() {
               </Formik>
             </Box>
 
-            {gestionnaireData && (
+            {responsableData && (
               <Box pl={8} mb={12}>
-                Organisme responsable trouvé : <GestionnaireLibelle gestionnaire={gestionnaireData.gestionnaire} />
+                Organisme responsable trouvé : <ResponsableLibelle responsable={responsableData.responsable} />
                 <br />
                 <br />
                 Cet organisme recevra les vœux exprimés pour les établissements d'accueil suivants :
@@ -176,7 +176,7 @@ function ReceptionVoeuxPage() {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {gestionnaireData.formateurs?.map((formateur, index) => (
+                    {responsableData.formateurs?.map((formateur, index) => (
                       <Tr key={index}>
                         <Td>{formateur.siret}</Td>
                         <Td>{formateur.uai}</Td>
@@ -246,7 +246,7 @@ function ReceptionVoeuxPage() {
 
             {formateurData && (
               <Box pl={8} mb={12}>
-                Etablissement d'accueil trouvé : <FormateurLibelle formateur={formateurData.formateur} />
+                Établissement d'accueil trouvé : <FormateurLibelle formateur={formateurData.formateur} />
                 <br />
                 <br />
                 Cet établissement d'accueil dispense des formations pour les organismes responsables suivants :
@@ -260,12 +260,12 @@ function ReceptionVoeuxPage() {
                     </Tr>
                   </Thead>
                   <Tbody>
-                    {formateurData.gestionnaires?.map((gestionnaire, index) => (
+                    {formateurData.responsables?.map((responsable, index) => (
                       <Tr key={index}>
-                        <Td>{gestionnaire.siret}</Td>
-                        <Td>{gestionnaire.uai}</Td>
-                        <Td>{gestionnaire.raison_sociale}</Td>
-                        <Td>{gestionnaire.adresse}</Td>
+                        <Td>{responsable.siret}</Td>
+                        <Td>{responsable.uai}</Td>
+                        <Td>{responsable.raison_sociale}</Td>
+                        <Td>{responsable.adresse}</Td>
                       </Tr>
                     ))}
                   </Tbody>

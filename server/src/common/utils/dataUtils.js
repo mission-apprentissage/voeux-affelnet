@@ -1,6 +1,6 @@
 const { UserType } = require("../constants/UserType.js");
 const logger = require("../logger.js");
-const { Gestionnaire, Formateur, Voeu } = require("../model/index.js");
+const { /*Etablissement,*/ Voeu, Responsable, Formateur } = require("../model/index.js");
 const { sortDescending } = require("./dateUtils.js");
 
 /**
@@ -115,15 +115,15 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
   logger.debug("allFilesAsAlreadyBeenDownloaded", user);
 
   switch (user.type) {
-    case UserType.GESTIONNAIRE: {
-      const gestionnaire = await fillGestionnaire(user);
+    case UserType.RESPONSABLE: {
+      const responsable = await fillResponsable(user);
 
       // logger.debug(
-      //   !gestionnaire.etablissements.find(
+      //   !responsable.etablissements_formateur.find(
       //     (etablissement) =>
       //       !etablissement.diffusionAutorisee &&
       //       etablissement.nombre_voeux > 0 &&
-      //       !gestionnaire.voeux_telechargements.find(
+      //       !responsable.voeux_telechargements_formateur.find(
       //         (telechargement) =>
       //           telechargement.uai === etablissement.uai &&
       //           new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
@@ -131,11 +131,11 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
       //   )
       // );
 
-      return !gestionnaire.etablissements.find(
+      return !responsable.etablissements_formateur.find(
         (etablissement) =>
           !etablissement.diffusionAutorisee &&
           etablissement.nombre_voeux > 0 &&
-          !gestionnaire.voeux_telechargements.find(
+          !responsable.voeux_telechargements_formateur.find(
             (telechargement) =>
               telechargement.uai === etablissement.uai &&
               new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
@@ -146,17 +146,24 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
     case UserType.FORMATEUR: {
       const formateur = await fillFormateur(user);
 
-      const gestionnaires = await Gestionnaire.find({ etablissements: { $elemMatch: { uai: formateur.uai } } });
+      const responsables = await Responsable.find({
+        etablissements_formateur: { $elemMatch: { uai: formateur.uai } },
+      });
 
-      const etablissements = gestionnaires.flatMap((gestionnaire) =>
-        gestionnaire.etablissements.filter((etablissement) => etablissement.uai === formateur.uai)
+      // const responsables = await Etablissement.find({
+      //   "etablissements_formateur.0": { $exists: true },
+      //   etablissements_formateur: { $elemMatch: { uai: formateur.uai } },
+      // });
+
+      const etablissements = responsables.flatMap((responsable) =>
+        responsable.etablissements_formateur.filter((etablissement) => etablissement.uai === formateur.uai)
       );
 
       return !etablissements.find(
         (etablissement) =>
           etablissement.diffusionAutorisee &&
           etablissement.nombre_voeux > 0 &&
-          !formateur.voeux_telechargements.find(
+          !formateur.voeux_telechargements_responsable.find(
             (telechargement) =>
               telechargement.siret === etablissement.siret &&
               new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
@@ -174,27 +181,27 @@ const filesHaveUpdate = async (user) => {
   logger.debug("filesHaveUpdate", user);
 
   switch (user.type) {
-    case UserType.GESTIONNAIRE: {
-      const gestionnaire = user;
+    case UserType.RESPONSABLE: {
+      const responsable = user;
 
       logger.debug(
-        !!gestionnaire.etablissements.find(
+        !!responsable.etablissements_formateur.find(
           async (etablissement) =>
             !etablissement.diffusionAutorisee &&
             (await Voeu.countDocuments({
               "etablissement_formateur.uai": etablissement.uai,
-              "etablissement_gestionnaire.siret": gestionnaire.siret,
+              "etablissement_responsable.siret": responsable.siret,
               "_meta.import_dates.1": { $exists: true },
             })) > 0
         )
       );
 
-      return !!gestionnaire.etablissements.find(
+      return !!responsable.etablissements_formateur.find(
         async (etablissement) =>
           !etablissement.diffusionAutorisee &&
           (await Voeu.countDocuments({
             "etablissement_formateur.uai": etablissement.uai,
-            "etablissement_gestionnaire.siret": gestionnaire.siret,
+            "etablissement_responsable.siret": responsable.siret,
             "_meta.import_dates.1": { $exists: true },
           })) > 0
       );
@@ -203,10 +210,16 @@ const filesHaveUpdate = async (user) => {
     case UserType.FORMATEUR: {
       const formateur = user;
 
-      const gestionnaires = await Gestionnaire.find({ etablissements: { $elemMatch: { uai: formateur.uai } } });
+      const responsables = await Responsable.find({
+        etablissements_formateur: { $elemMatch: { uai: formateur.uai } },
+      });
 
-      const etablissements = gestionnaires.flatMap((gestionnaire) =>
-        gestionnaire.etablissements.filter((etablissement) => etablissement.uai === formateur.uai)
+      // const responsables = await Etablissement.find({
+      //   etablissements_formateur: { $elemMatch: { uai: formateur.uai } },
+      // });
+
+      const etablissements = responsables.flatMap((responsable) =>
+        responsable.etablissements_formateur.filter((etablissement) => etablissement.uai === formateur.uai)
       );
 
       return !!etablissements.find(
@@ -214,7 +227,7 @@ const filesHaveUpdate = async (user) => {
           etablissement.diffusionAutorisee &&
           (await Voeu.countDocuments({
             "etablissement_formateur.uai": formateur.uai,
-            "etablissement_gestionnaire.siret": etablissement.siret,
+            "etablissement_responsable.siret": etablissement.siret,
             "_meta.import_dates.1": { $exists: true },
           })) > 0
       );
@@ -232,30 +245,37 @@ const filterForAcademie = (etablissement, user) => {
     : true;
 };
 
-const fillGestionnaire = async (gestionnaire, admin) => {
-  const voeuxFilter = {
-    "etablissement_gestionnaire.siret": gestionnaire.siret,
-  };
-
-  if (!gestionnaire) {
-    return gestionnaire;
+const fillResponsable = async (responsable, admin) => {
+  if (!responsable) {
+    return responsable;
   }
 
+  const voeuxFilter = {
+    "etablissement_responsable.siret": responsable?.siret,
+  };
+
   return {
-    ...gestionnaire,
+    ...responsable,
 
     nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
 
-    etablissements: await Promise.all(
-      gestionnaire?.etablissements
+    etablissements_formateur: await Promise.all(
+      responsable?.etablissements_formateur
         .filter((etablissement) => filterForAcademie(etablissement, admin))
         .map(async (etablissement) => {
           const voeuxFilter = {
             "etablissement_formateur.uai": etablissement.uai,
-            "etablissement_gestionnaire.siret": gestionnaire.siret,
+            "etablissement_responsable.siret": responsable.siret,
           };
 
-          const formateur = await Formateur.findOne({ uai: etablissement.uai });
+          const formateur = await Formateur.findOne({
+            uai: etablissement.uai,
+          });
+
+          // const formateur = await Etablissement.findOne({
+          //   "etablissements_responsable.0": { $exists: true },
+          //   uai: etablissement.uai,
+          // });
 
           const voeux = await Voeu.find(voeuxFilter);
 
@@ -269,16 +289,16 @@ const fillGestionnaire = async (gestionnaire, admin) => {
 
           const diffusionAutorisee = etablissement.diffusionAutorisee;
 
-          const downloadsByGestionnaire = gestionnaire?.voeux_telechargements.filter(
-            (download) => download.uai === etablissement.uai
-          );
-          const downloadsByFormateur = formateur?.voeux_telechargements.filter(
-            (download) => download.siret === gestionnaire?.siret
-          );
+          const downloadsByResponsable =
+            responsable?.voeux_telechargements_formateur?.filter((download) => download.uai === etablissement.uai) ??
+            [];
+          const downloadsByFormateur =
+            formateur?.voeux_telechargements_responsable?.filter((download) => download.siret === responsable?.siret) ??
+            [];
 
           const lastDownloadDate = diffusionAutorisee
             ? downloadsByFormateur[downloadsByFormateur.length - 1]?.date
-            : downloadsByGestionnaire[downloadsByGestionnaire.length - 1]?.date;
+            : downloadsByResponsable[downloadsByResponsable.length - 1]?.date;
 
           return {
             ...etablissement,
@@ -320,21 +340,29 @@ const fillFormateur = async (formateur, admin) => {
 
     nombre_voeux: await Voeu.countDocuments(voeuxFilter).lean(),
 
-    etablissements: await Promise.all(
-      formateur?.etablissements
+    etablissements_responsable: await Promise.all(
+      formateur?.etablissements_responsable
         // .filter((etablissement) => filterForAcademie(etablissement, admin))
         .map(async (etablissement) => {
           const voeuxFilter = {
             "etablissement_formateur.uai": formateur.uai,
-            "etablissement_gestionnaire.siret": etablissement.siret,
+            "etablissement_responsable.siret": etablissement.siret,
           };
 
-          console.log({ voeuxFilter });
+          // console.log({ voeuxFilter });
           const voeux = await Voeu.find(voeuxFilter);
 
-          const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret });
+          const responsable = await Responsable.findOne({
+            siret: etablissement.siret,
+          });
+          // const responsable = await Etablissement.findOne({
+          //   "etablissements_formateur.0": { $exists: true },
+          //   siret: etablissement.siret,
+          // });
 
-          const etablissement_gestionnaire = gestionnaire?.etablissements.find((etab) => etab.uai === formateur.uai);
+          const etablissement_responsable = responsable?.etablissements_formateur.find(
+            (etab) => etab.uai === formateur.uai
+          );
 
           const first_date_voeux = etablissement.siret
             ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(a) - new Date(b))[0]
@@ -344,18 +372,18 @@ const fillFormateur = async (formateur, admin) => {
             ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
             : null;
 
-          const diffusionAutorisee = etablissement_gestionnaire?.diffusionAutorisee;
+          const diffusionAutorisee = etablissement_responsable?.diffusionAutorisee;
 
-          const downloadsByGestionnaire = gestionnaire.voeux_telechargements.filter(
-            (download) => download.uai === formateur.uai
-          );
-          const downloadsByFormateur = formateur.voeux_telechargements.filter(
-            (download) => download.siret === etablissement.siret
-          );
+          const downloadsByResponsable =
+            responsable?.voeux_telechargements_formateur?.filter((download) => download.uai === formateur.uai) ?? [];
+          const downloadsByFormateur =
+            formateur?.voeux_telechargements_responsable?.filter(
+              (download) => download.siret === etablissement.siret
+            ) ?? [];
 
           const lastDownloadDate = diffusionAutorisee
             ? downloadsByFormateur[downloadsByFormateur.length - 1]?.date
-            : downloadsByGestionnaire[downloadsByGestionnaire.length - 1]?.date;
+            : downloadsByResponsable[downloadsByResponsable.length - 1]?.date;
 
           return {
             ...etablissement,
@@ -393,6 +421,6 @@ module.exports = {
   allFilesAsAlreadyBeenDownloaded,
   filesHaveUpdate,
   filterForAcademie,
-  fillGestionnaire,
+  fillResponsable,
   fillFormateur,
 };

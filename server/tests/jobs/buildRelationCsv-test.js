@@ -3,7 +3,7 @@ const buildRelationCsv = require("../../src/jobs/buildRelationCsv.js");
 const { mockCatalogueApi, mockReferentielApi } = require("../utils/apiMocks.js");
 const { writeData } = require("oleoduc");
 const { createStream } = require("../utils/testUtils.js");
-const { insertGestionnaire } = require("../utils/fakeData.js");
+const { insertResponsable } = require("../utils/fakeData.js");
 
 describe("buildRelationCsv", () => {
   function fakeCsvFile() {
@@ -43,7 +43,7 @@ describe("buildRelationCsv", () => {
     const affelnetCsv = createStream(
       `UAI;CLE_MINISTERE_EDUCATIF;SIRET_UAI_GESTIONNAIRE;LIBELLE_TYPE_ETABLISSEMENT\n0751234J;CLE-ZZZZZ;11111111100006;Centre de formation`
     );
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       email: "test@email.fr",
       etablissements: [{ uai: "0751234J" }],
@@ -72,7 +72,7 @@ describe("buildRelationCsv", () => {
     const affelnetCsv = createStream(
       `UAI;CLE_MINISTERE_EDUCATIF;SIRET_UAI_GESTIONNAIRE;LIBELLE_TYPE_ETABLISSEMENT\n0751234J;CLE-YYYYY;11111111100006;Centre de formation`
     );
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       email: "test@email.fr",
     });

@@ -94,6 +94,14 @@ module.exports = () => {
     },
     ensureIs: (type) => {
       return (req, res, next) => {
+        // if (type === "Responsable" && req.user.type === "Etablissement" && !!req.user.etablissements_formateur.length) {
+        //   return next();
+        // }
+
+        // if (type === "Formateur" && req.user.type === "Etablissement" && !!req.user.etablissements_responsable.length) {
+        //   return next();
+        // }
+
         if (req.user.type !== type) {
           next(Boom.forbidden());
         } else {
@@ -103,6 +111,22 @@ module.exports = () => {
     },
     ensureIsOneOf: (types) => {
       return (req, res, next) => {
+        // if (
+        //   types.include("Responsable") &&
+        //   req.user.type === "Etablissement" &&
+        //   !!req.user.etablissements_formateur.length
+        // ) {
+        //   return next();
+        // }
+
+        // if (
+        //   types.include("Formateur") &&
+        //   req.user.type === "Etablissement" &&
+        //   !!req.user.etablissements_responsable.length
+        // ) {
+        //   return next();
+        // }
+
         if (!types.includes(req.user.type)) {
           next(Boom.forbidden());
         } else {

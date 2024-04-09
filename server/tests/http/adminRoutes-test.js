@@ -1,24 +1,24 @@
 const assert = require("assert");
 const { DateTime } = require("luxon");
-const { Gestionnaire } = require("../../src/common/model");
+const { Responsable } = require("../../src/common/model");
 const { date } = require("../../src/common/utils/csvUtils.js");
 
-const { insertGestionnaire, insertVoeu, insertLog } = require("../utils/fakeData");
+const { insertResponsable, insertVoeu, insertLog } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 const { omit } = require("lodash");
 
 describe("adminRoutes", () => {
-  xit("Vérifie qu'on peut obtenir la liste des gestionnaires", async () => {
+  xit("Vérifie qu'on peut obtenir la liste des responsables", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       password: "12345",
       email: "contact@organisme.com",
       raison_sociale: "Organisme de formation",
     });
 
-    const response = await httpClient.get("/api/admin/gestionnaires", {
+    const response = await httpClient.get("/api/admin/responsables", {
       headers: {
         ...auth,
       },
@@ -26,12 +26,12 @@ describe("adminRoutes", () => {
 
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
-      gestionnaires: [
+      responsables: [
         {
           statut: "en attente",
           isAdmin: false,
           unsubscribe: false,
-          type: "Gestionnaire",
+          type: "Responsable",
           username: "11111111100006",
           siret: "11111111100006",
           raison_sociale: "Organisme de formation",
@@ -47,96 +47,98 @@ describe("adminRoutes", () => {
     });
   });
 
-  xit("Vérifie qu'on peut obtenir la liste paginée des gestionnaires ", async () => {
+  it("Vérifie qu'on peut obtenir la liste paginée des responsables ", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({ username: "13000460900017" });
-    await insertGestionnaire({ username: "13001400400043" });
-    await insertGestionnaire({ username: "13001727000823" });
-    await insertGestionnaire({ username: "13002068800011" });
-    await insertGestionnaire({ username: "13002087800240" });
-    await insertGestionnaire({ username: "13002172800014" });
-    await insertGestionnaire({ username: "13002175100131" });
-    await insertGestionnaire({ username: "13002245200036" });
-    await insertGestionnaire({ username: "13002271800014" });
-    await insertGestionnaire({ username: "13002280900029" });
-    await insertGestionnaire({ username: "13002280900110" });
-    await insertGestionnaire({ username: "13002293200086" });
-    await insertGestionnaire({ username: "13002374000439" });
-    await insertGestionnaire({ username: "13002792300049" });
-    await insertGestionnaire({ username: "13002792300056" });
-    await insertGestionnaire({ username: "13002792300080" });
-    await insertGestionnaire({ username: "13002792300155" });
-    await insertGestionnaire({ username: "13002792300171" });
-    await insertGestionnaire({ username: "13002792300205" });
-    await insertGestionnaire({ username: "13002792300221" });
-    await insertGestionnaire({ username: "13002792300262" });
-    await insertGestionnaire({ username: "13002792300320" });
-    await insertGestionnaire({ username: "13002792300353" });
-    await insertGestionnaire({ username: "13002792300361" });
-    await insertGestionnaire({ username: "13002793100042" });
-    await insertGestionnaire({ username: "13002793100067" });
-    await insertGestionnaire({ username: "13002793100117" });
-    await insertGestionnaire({ username: "13002793100141" });
-    await insertGestionnaire({ username: "13002793100216" });
-    await insertGestionnaire({ username: "13002793100232" });
-    await insertGestionnaire({ username: "13002793100281" });
-    await insertGestionnaire({ username: "13002793100299" });
-    await insertGestionnaire({ username: "13002793100356" });
-    await insertGestionnaire({ username: "13002794900093" });
-    await insertGestionnaire({ username: "13002794900135" });
-    await insertGestionnaire({ username: "13002794900150" });
-    await insertGestionnaire({ username: "13002794900168" });
-    await insertGestionnaire({ username: "13002794900218" });
-    await insertGestionnaire({ username: "13002794900242" });
-    await insertGestionnaire({ username: "13002794900259" });
-    await insertGestionnaire({ username: "13002797200129" });
-    await insertGestionnaire({ username: "13002797200160" });
-    await insertGestionnaire({ username: "13002797200285" });
-    await insertGestionnaire({ username: "13002797200293" });
-    await insertGestionnaire({ username: "13002797200301" });
-    await insertGestionnaire({ username: "13002798000015" });
-    await insertGestionnaire({ username: "13002799800017" });
-    await insertGestionnaire({ username: "13002804600022" });
-    await insertGestionnaire({ username: "13002948100095" });
+    await insertResponsable({ siret: "13000460900017" });
+    await insertResponsable({ siret: "13001400400043" });
+    await insertResponsable({ siret: "13001727000823" });
+    await insertResponsable({ siret: "13002068800011" });
+    await insertResponsable({ siret: "13002087800240" });
+    await insertResponsable({ siret: "13002172800014" });
+    await insertResponsable({ siret: "13002175100131" });
+    await insertResponsable({ siret: "13002245200036" });
+    await insertResponsable({ siret: "13002271800014" });
+    await insertResponsable({ siret: "13002280900029" });
+    await insertResponsable({ siret: "13002280900110" });
+    await insertResponsable({ siret: "13002293200086" });
+    await insertResponsable({ siret: "13002374000439" });
+    await insertResponsable({ siret: "13002792300049" });
+    await insertResponsable({ siret: "13002792300056" });
+    await insertResponsable({ siret: "13002792300080" });
+    await insertResponsable({ siret: "13002792300155" });
+    await insertResponsable({ siret: "13002792300171" });
+    await insertResponsable({ siret: "13002792300205" });
+    await insertResponsable({ siret: "13002792300221" });
+    await insertResponsable({ siret: "13002792300262" });
+    await insertResponsable({ siret: "13002792300320" });
+    await insertResponsable({ siret: "13002792300353" });
+    await insertResponsable({ siret: "13002792300361" });
+    await insertResponsable({ siret: "13002793100042" });
+    await insertResponsable({ siret: "13002793100067" });
+    await insertResponsable({ siret: "13002793100117" });
+    await insertResponsable({ siret: "13002793100141" });
+    await insertResponsable({ siret: "13002793100216" });
+    await insertResponsable({ siret: "13002793100232" });
+    await insertResponsable({ siret: "13002793100281" });
+    await insertResponsable({ siret: "13002793100299" });
+    await insertResponsable({ siret: "13002793100356" });
+    await insertResponsable({ siret: "13002794900093" });
+    await insertResponsable({ siret: "13002794900135" });
+    await insertResponsable({ siret: "13002794900150" });
+    await insertResponsable({ siret: "13002794900168" });
+    await insertResponsable({ siret: "13002794900218" });
+    await insertResponsable({ siret: "13002794900242" });
+    await insertResponsable({ siret: "13002794900259" });
+    await insertResponsable({ siret: "13002797200129" });
+    await insertResponsable({ siret: "13002797200160" });
+    await insertResponsable({ siret: "13002797200285" });
+    await insertResponsable({ siret: "13002797200293" });
+    await insertResponsable({ siret: "13002797200301" });
+    await insertResponsable({ siret: "13002798000015" });
+    await insertResponsable({ siret: "13002799800017" });
+    await insertResponsable({ siret: "13002804600022" });
+    await insertResponsable({ siret: "13002948100095" });
 
-    const response = await httpClient.get("/api/admin/gestionnaires?page=2", {
+    const response = await httpClient.get(`/api/admin/etablissements?page=2&sort=${JSON.stringify({ siret: 1 })}`, {
       headers: {
         ...auth,
       },
     });
 
+    console.log(response.data);
+
     assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.gestionnaires.length, 10);
-    assert.deepStrictEqual(response.data.gestionnaires.filter((c) => c.siret === "13002271800014").length, 0);
+    assert.strictEqual(response.data.etablissements.length, 10);
+    assert.deepStrictEqual(response.data.etablissements.filter((c) => c.siret === "13002271800014").length, 0);
   });
 
-  it("Vérifie qu'on peut filtrer les utilisateurs", async () => {
+  it("Vérifie qu'on peut filtrer les établissements", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
+    await insertResponsable({
       email: "contact@organisme.fr",
     });
-    await insertGestionnaire({
+    await insertResponsable({
       email: "contact@organisme2.fr",
     });
 
-    const response = await httpClient.get("/api/admin/users?text=contact@organisme.fr", {
+    const response = await httpClient.get(`/api/admin/etablissements?text=contact%40organisme.fr`, {
       headers: {
         ...auth,
       },
     });
 
     assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.users.length, 1);
-    assert.strictEqual(response.data.users[0].email, "contact@organisme.fr");
+    assert.strictEqual(response.data.etablissements.length, 1);
+    assert.strictEqual(response.data.etablissements[0].email, "contact@organisme.fr");
   });
 
-  xit("Vérifie qu'on peut exporter les gestionnaires injoinables", async () => {
+  xit("Vérifie qu'on peut exporter les responsables injoinables", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
     const sendDate = new Date();
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
       email: "test@apprentissage.beta.gouv.fr",
@@ -171,10 +173,10 @@ describe("adminRoutes", () => {
     );
   });
 
-  xit("Vérifie qu'on peut exporter les gestionnaires à relancer", async () => {
+  xit("Vérifie qu'on peut exporter les responsables à relancer", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
       email: "test@apprentissage.beta.gouv.fr",
@@ -187,7 +189,7 @@ describe("adminRoutes", () => {
         },
         {
           token: "token2",
-          templateName: "activation_gestionnaire",
+          templateName: "activation_responsable",
           sendDates: ["2023-05-16T16:20:39.495Z", "2023-05-18T16:20:39.495Z"],
         },
       ],
@@ -209,7 +211,7 @@ describe("adminRoutes", () => {
     assert.strictEqual(
       response.data,
       `"siret";"formateurs";"raison_sociale";"academie";"email";"erreur";"voeux";"dernier_email";"dernier_email_date";"statut";"nb_voeux"
-"11111111100015";"0751234J";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"";"Oui";"activation_gestionnaire";"${date(
+"11111111100015";"0751234J";"Organisme de formation";"Paris";"test@apprentissage.beta.gouv.fr";"";"Oui";"activation_responsable";"${date(
         new Date("2023-05-18T16:20:39.495Z")
       )}";"en attente";"1"
 `
@@ -263,7 +265,7 @@ describe("adminRoutes", () => {
   xit("Vérifie qu'on peut exporter le statut des téléchargements des voeux", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100015",
       raison_sociale: "Organisme de formation",
       email: "test@apprentissage.beta.gouv.fr",
@@ -386,17 +388,17 @@ describe("adminRoutes", () => {
   it("Vérifie qu'on peut modifier l'adresse email d'un formateur", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
-      username: "11111111100006",
+    await insertResponsable({
+      siret: "11111111100006",
       email: "x@organisme.com",
     });
-    await insertGestionnaire({
-      username: "22222222200006",
+    await insertResponsable({
+      siret: "22222222200006",
       email: "y@organisme.com",
     });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/setEmail",
+      "/api/admin/responsables/11111111100006/setEmail",
       {
         email: "robert.hue@organisme.com",
       },
@@ -408,7 +410,7 @@ describe("adminRoutes", () => {
     );
 
     assert.strictEqual(response.status, 200);
-    let found = await Gestionnaire.findOne({ username: "11111111100006" }).lean();
+    let found = await Responsable.findOne({ username: "11111111100006" }).lean();
     assert.deepStrictEqual(found.email, "robert.hue@organisme.com");
     const ancien = found.anciens_emails[0];
     assert.deepStrictEqual(omit(ancien, ["modification_date"]), {
@@ -416,7 +418,7 @@ describe("adminRoutes", () => {
       auteur: "admin",
     });
     assert.ok(ancien.modification_date);
-    found = await Gestionnaire.findOne({ username: "22222222200006" }).lean();
+    found = await Responsable.findOne({ username: "22222222200006" }).lean();
     assert.deepStrictEqual(found.email, "y@organisme.com");
   });
 
@@ -425,7 +427,7 @@ describe("adminRoutes", () => {
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/setEmail",
+      "/api/admin/responsables/11111111100006/setEmail",
       {},
       {
         headers: {
@@ -445,7 +447,7 @@ describe("adminRoutes", () => {
   it("Vérifie qu'on ne peut renvoyer un email de confirmation", async () => {
     const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
@@ -453,24 +455,24 @@ describe("adminRoutes", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_gestionnaire",
+          templateName: "confirmation_responsable",
         },
       ],
     });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "22222222200006",
       statut: "en attente",
       email: "test2@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN",
-          templateName: "confirmation_gestionnaire",
+          templateName: "confirmation_responsable",
         },
       ],
     });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/resendConfirmationEmail",
+      "/api/admin/responsables/11111111100006/resendConfirmationEmail",
       {},
       {
         headers: {
@@ -500,7 +502,7 @@ describe("adminRoutes", () => {
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/resendConfirmationEmail",
+      "/api/admin/responsables/11111111100006/resendConfirmationEmail",
       {},
       {
         headers: {
@@ -520,7 +522,7 @@ describe("adminRoutes", () => {
   xit("Vérifie qu'on peut renvoyer un email d'activation", async () => {
     const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       statut: "confirmé",
       email: "test1@apprentissage.beta.gouv.fr",
@@ -528,24 +530,24 @@ describe("adminRoutes", () => {
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation_gestionnaire",
+          templateName: "activation_responsable",
         },
       ],
     });
-    await insertGestionnaire({
+    await insertResponsable({
       username: "22222222200006",
       statut: "confirmé",
       email: "test2@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN",
-          templateName: "activation_gestionnaire",
+          templateName: "activation_responsable",
         },
       ],
     });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/resendActivationEmail",
+      "/api/admin/responsables/11111111100006/resendActivationEmail",
       {},
       {
         headers: {
@@ -575,7 +577,7 @@ describe("adminRoutes", () => {
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/resendActivationEmail",
+      "/api/admin/responsables/11111111100006/resendActivationEmail",
       {},
       {
         headers: {
@@ -595,17 +597,17 @@ describe("adminRoutes", () => {
   it("Vérifie qu'on peut marquer un CFA comme non concerné", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "11111111100006",
       statut: "confirmé",
     });
-    await insertGestionnaire({
+    await insertResponsable({
       siret: "22222222200006",
       statut: "confirmé",
     });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/markAsNonConcerne",
+      "/api/admin/responsables/11111111100006/markAsNonConcerne",
       {},
       {
         headers: {
@@ -616,9 +618,9 @@ describe("adminRoutes", () => {
 
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data.statut, "non concerné");
-    let found = await Gestionnaire.findOne({ username: "11111111100006" });
+    let found = await Responsable.findOne({ username: "11111111100006" });
     assert.deepStrictEqual(found.statut, "non concerné");
-    found = await Gestionnaire.findOne({ username: "22222222200006" });
+    found = await Responsable.findOne({ username: "22222222200006" });
     assert.deepStrictEqual(found.statut, "confirmé");
   });
 
@@ -627,7 +629,7 @@ describe("adminRoutes", () => {
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
 
     const response = await httpClient.put(
-      "/api/admin/gestionnaires/11111111100006/markAsNonConcerne",
+      "/api/admin/responsables/11111111100006/markAsNonConcerne",
       {},
       {
         headers: {

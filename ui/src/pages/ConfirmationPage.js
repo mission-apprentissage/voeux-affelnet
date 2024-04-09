@@ -139,7 +139,7 @@ const ConfirmationPage = () => {
                   <Text mb={4}>
                     Afin d’accéder au téléchargement des candidats en apprentissage exprimés via Affelnet, veuillez
                     confirmer{" "}
-                    {data.type === "Gestionnaire" ? (
+                    {data.type === "Responsable" ? (
                       <>l’adresse courriel du directeur général de votre établissement (Siret: {username})</>
                     ) : (
                       <>

@@ -1,7 +1,7 @@
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
-const { User, Gestionnaire } = require("../common/model");
+const { User, Responsable } = require("../common/model");
 
 const {
   saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentForResponsable,
@@ -24,10 +24,10 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
 
           "emails.templateName": { $not: { $regex: "^confirmation_.*$" } },
 
-          // TODO : Définir les règles pour trouver les utilisateurs à qui envoyer les mails de confirmations (User de type formateur ou gestionnaire,
-          // mais également qui ont des voeux et qui sont destinataires de ces voeux - diffusion autorisée ou gestionnaire sans délégation)
+          // TODO : Définir les règles pour trouver les utilisateurs à qui envoyer les mails de confirmations (User de type formateur ou responsable,
+          // mais également qui ont des voeux et qui sont destinataires de ces voeux - diffusion autorisée ou responsable sans délégation)
 
-          $or: [{ type: UserType.GESTIONNAIRE }],
+          $or: [{ type: UserType.RESPONSABLE }],
         }),
   };
 
@@ -37,16 +37,16 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
     .cursor()
     .eachAsync(async (user) => {
       if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({
+        const responsable = await Responsable.findOne({
           "etablissements.uai": user.username,
           "etablissements.diffusionAutorisee": true,
         });
 
-        if (!gestionnaire) {
+        if (!responsable) {
           return;
         }
 
-        const etablissement = gestionnaire.etablissements?.find(
+        const etablissement = responsable.etablissements_formateur?.find(
           (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
         );
 
@@ -61,7 +61,7 @@ async function sendConfirmationEmails(sendEmail, options = {}) {
         await sendEmail(user, templateName);
 
         switch (user.type) {
-          case UserType.GESTIONNAIRE:
+          case UserType.RESPONSABLE:
             await saveAccountConfirmationEmailAutomaticSentForResponsable(user);
             break;
           case UserType.FORMATEUR:

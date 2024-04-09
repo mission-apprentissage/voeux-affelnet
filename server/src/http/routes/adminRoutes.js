@@ -3,7 +3,7 @@ const { oleoduc, transformIntoJSON, transformData, compose, transformIntoCSV } =
 const Joi = require("@hapi/joi");
 const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { User, Gestionnaire, /*Log,*/ Voeu, Formateur } = require("../../common/model");
+const { User, Formateur, Responsable, /*Etablissement,*/ /*Log,*/ Voeu } = require("../../common/model");
 const { getAcademies } = require("../../common/academies");
 const { paginate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -25,7 +25,7 @@ const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/f
 const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/formateur");
 const { UserType } = require("../../common/constants/UserType");
 const { download } = require("../../jobs/download");
-const { fillFormateur, filterForAcademie, fillGestionnaire } = require("../../common/utils/dataUtils");
+const { fillFormateur, filterForAcademie, fillResponsable } = require("../../common/utils/dataUtils");
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router();
@@ -37,6 +37,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
     res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
     return res;
   }
+
+  // const responsableFilter = { type: UserType.ETABLISSEMENT, "etablissements_formateur.0": { $exists: true } };
+  // const formateurFilter = { type: UserType.ETABLISSEMENT, "etablissements_responsable.0": { $exists: true } };
 
   /**
    * USER (ADMIN & ACADEMIE)
@@ -54,14 +57,14 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   /**
-   * USERS (GESTIONNAIRES & FORMATEURS)
+   * Établissements (RESPONSABLES & FORMATEURS)
    */
 
   /**
-   * Permet de récupérer la liste des utilisateurs
+   * Permet de récupérer la liste des établissements
    */
   router.get(
-    "/api/admin/users",
+    "/api/admin/etablissements",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -85,12 +88,23 @@ module.exports = ({ sendEmail, resendEmail }) => {
         User,
         {
           $and: [
-            ...(type ? [{ type }] : []),
+            ...(type
+              ? // [
+                //     {
+                //       type: UserType.ETABLISSEMENT,
+                //       ...(type === UserType.FORMATEUR ? formateurFilter : {}),
+                //       ...(type === UserType.RESPONSABLE ? responsableFilter : {}),
+                //     },
+                //   ]
+                [{ type }]
+              : []),
 
             {
               $or: [
                 {
-                  type: "Formateur",
+                  // Formateur
+                  type: UserType.FORMATEUR,
+                  // ...formateurFilter,
                   $and: [
                     {},
                     ...(text
@@ -102,7 +116,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                               { raison_sociale: regexQuery },
                               { email: regexQuery },
                               {
-                                etablissements: {
+                                etablissements_responsable: {
                                   $elemMatch: { siret: regexQuery },
                                 },
                               },
@@ -121,7 +135,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
                   ],
                 },
                 {
-                  type: "Gestionnaire",
+                  // Responsables
+                  type: UserType.RESPONSABLE,
+                  // ...responsableFilter,
                   $and: [
                     {},
                     ...(text
@@ -133,12 +149,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
                               { raison_sociale: regexQuery },
                               { email: regexQuery },
                               {
-                                etablissements: {
+                                etablissements_formateur: {
                                   $elemMatch: { uai: regexQuery },
                                 },
                               },
                               {
-                                etablissements: {
+                                etablissements_formateur: {
                                   $elemMatch: { email: regexQuery },
                                 },
                               },
@@ -153,7 +169,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
                             $or: [
                               { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
                               {
-                                etablissements: {
+                                etablissements_formateur: {
                                   $elemMatch: { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
                                 },
                               },
@@ -179,46 +195,51 @@ module.exports = ({ sendEmail, resendEmail }) => {
         find.cursor(),
         transformData(async (user) => {
           return {
-            ...(user.type === UserType.GESTIONNAIRE
-              ? {
-                  ...(await fillGestionnaire(user, admin)),
+            ...(user.type === UserType.RESPONSABLE && {
+              // ...(!!user.etablissements_formateur?.length && {
+              ...(await fillResponsable(user, admin)),
 
-                  formateurs: await Promise.all(
-                    (
-                      await Formateur.find({
-                        uai: {
-                          $in:
-                            user?.etablissements
-                              .filter((etablissement) => filterForAcademie(etablissement, admin))
-                              .map((etablissement) => etablissement.uai) ?? [],
-                        },
-                      }).lean()
-                    ).map((etablissement) => fillFormateur(etablissement, admin))
-                  ),
-                }
-              : {
-                  ...(await fillFormateur(user, admin)),
+              formateurs: await Promise.all(
+                (
+                  await Formateur.find({
+                    // await Etablissement.find({
+                    //   ...formateurFilter,
+                    uai: {
+                      $in:
+                        user?.etablissements_formateur
+                          .filter((etablissement) => filterForAcademie(etablissement, admin))
+                          .map((etablissement) => etablissement.uai) ?? [],
+                    },
+                  }).lean()
+                ).map((etablissement) => fillFormateur(etablissement, admin))
+              ),
+            }),
+            ...(user.type === UserType.FORMATEUR && {
+              // ...(!!user.etablissements_responsable?.length && {
+              ...(await fillFormateur(user, admin)),
 
-                  gestionnaires: await Promise.all(
-                    (
-                      await Gestionnaire.find({
-                        siret: {
-                          $in:
-                            user?.etablissements
-                              // .filter((etablissement) => filterForAcademie(etablissement, admin))
-                              .map((etablissement) => etablissement.siret) ?? [],
-                        },
-                      }).lean()
-                    ).map((gestionnaire) => fillGestionnaire(gestionnaire, admin))
-                  ),
-                }),
+              responsables: await Promise.all(
+                (
+                  await Responsable.find({
+                    // await Etablissement.find({
+                    //   ...responsableFilter,
+                    siret: {
+                      $in:
+                        user?.etablissements_responsable
+                          // .filter((etablissement) => filterForAcademie(etablissement, admin))
+                          .map((etablissement) => etablissement.siret) ?? [],
+                    },
+                  }).lean()
+                ).map((responsable) => fillResponsable(responsable, admin))
+              ),
+            }),
           };
         }),
         transformIntoJSON({
           arrayWrapper: {
             pagination,
           },
-          arrayPropertyName: "users",
+          arrayPropertyName: "etablissements",
         })
       );
 
@@ -227,7 +248,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   router.get(
-    "/api/admin/users/export.csv",
+    "/api/admin/etablissements/export.csv",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -250,12 +271,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   /**
-   * GESTIONNAIRES
+   * RESPONSABLES
    * =============
    */
 
   router.get(
-    "/api/admin/gestionnaires/:siret",
+    "/api/admin/responsables/:siret",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -266,14 +287,21 @@ module.exports = ({ sendEmail, resendEmail }) => {
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+      const responsable = await Responsable.findOne({
+        siret,
+      }).lean();
 
-      res.json(await fillGestionnaire(gestionnaire, admin));
+      // const responsable = await Etablissement.findOne({
+      //   ...responsableFilter,
+      //   siret,
+      // }).lean();
+
+      res.json(await fillResponsable(responsable, admin));
     })
   );
 
   router.get(
-    "/api/admin/gestionnaires/:siret/formateurs",
+    "/api/admin/responsables/:siret/formateurs",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -284,10 +312,17 @@ module.exports = ({ sendEmail, resendEmail }) => {
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret });
+      const responsable = await Responsable.findOne({
+        siret,
+      });
+
+      // const responsable = await Etablissement.findOne({
+      //   ...responsableFilter,
+      //   siret,
+      // });
 
       if (
-        !gestionnaire?.etablissements
+        !responsable?.etablissements_formateur
           .filter((etablissement) => filterForAcademie(etablissement, admin))
           .filter((e) => e.voeux_date).length === 0
       ) {
@@ -296,21 +331,27 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       res.json(
         await Promise.all(
-          gestionnaire?.etablissements
+          responsable?.etablissements_formateur
             .filter((etablissement) => filterForAcademie(etablissement, admin))
             .map(async (etablissement) => {
-              const formateur = await Formateur.findOne({ uai: etablissement.uai }).lean();
+              const formateur = await Formateur.findOne({
+                uai: etablissement.uai,
+              }).lean();
+              // const formateur = await Etablissement.findOne({
+              //   ...formateurFilter,
+              //   uai: etablissement.uai,
+              // }).lean();
 
               return {
                 ...formateur,
 
                 etablissements: await Promise.all(
-                  formateur?.etablissements
+                  formateur?.etablissements_responsable
                     .filter((etablissement) => filterForAcademie(etablissement, admin))
                     .map(async (etablissement) => {
                       const voeuxFilter = {
                         "etablissement_formateur.uai": formateur.uai,
-                        "etablissement_gestionnaire.siret": etablissement.siret,
+                        "etablissement_responsable.siret": etablissement.siret,
                       };
 
                       const voeux = await Voeu.find(voeuxFilter);
@@ -340,10 +381,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   /**
-   * Permet au gestionnaire de modifier les paramètres de diffusion à un de ses formateurs associés
+   * Permet au responsable de modifier les paramètres de diffusion à un de ses formateurs associés
    */
   router.put(
-    "/api/admin/gestionnaires/:siret/formateurs/:uai",
+    "/api/admin/responsables/:siret/formateurs/:uai",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -352,15 +393,22 @@ module.exports = ({ sendEmail, resendEmail }) => {
         uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+      const responsable = await Responsable.findOne({
+        siret,
+      }).lean();
 
-      if (!gestionnaire?.etablissements.filter((etablissements) => etablissements.uai === uai).length === 0) {
-        throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
+      // const responsable = await Etablissement.findOne({
+      //   ...responsableFilter,
+      //   siret,
+      // }).lean();
+
+      if (!responsable?.etablissements_formateur.filter((etablissements) => etablissements.uai === uai).length === 0) {
+        throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre responsable.");
       }
 
-      const etablissement = gestionnaire?.etablissements.find((e) => e.uai === uai);
+      const etablissement = responsable?.etablissements_formateur.find((e) => e.uai === uai);
 
-      const etablissements = gestionnaire?.etablissements.map((etablissement) => {
+      const etablissements = responsable?.etablissements_formateur.map((etablissement) => {
         if (etablissement.uai === uai) {
           typeof req.body.email !== "undefined" && (etablissement.email = req.body.email);
           typeof req.body.diffusionAutorisee !== "undefined" &&
@@ -369,9 +417,20 @@ module.exports = ({ sendEmail, resendEmail }) => {
         return etablissement;
       });
 
-      await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { etablissements });
+      await Responsable.updateOne({ siret: responsable.siret }, { etablissements_formateur: etablissements });
+      // await Etablissement.updateOne(
+      //   { ...responsableFilter, siret: responsable.siret },
+      //   { etablissements_formateur: etablissements }
+      // );
 
-      const formateur = await Formateur.findOne({ uai }).lean();
+      const formateur = await Formateur.findOne({
+        uai,
+      }).lean();
+
+      // const formateur = await Etablissement.findOne({
+      //   ...formateurFilter,
+      //   uai,
+      // }).lean();
 
       if (typeof req.body.email !== "undefined" && req.body.diffusionAutorisee === true) {
         etablissement?.diffusionAutorisee
@@ -382,6 +441,10 @@ module.exports = ({ sendEmail, resendEmail }) => {
           { uai },
           { $set: { statut: UserStatut.CONFIRME, email: req.body.email, password: null } }
         );
+        // await Etablissement.updateOne(
+        //   { ...formateurFilter, uai },
+        //   { $set: { statut: UserStatut.CONFIRME, email: req.body.email, password: null } }
+        // );
         const previousActivationEmail = formateur.emails.find((e) => e.templateName.startsWith("activation_"));
 
         previousActivationEmail
@@ -391,9 +454,15 @@ module.exports = ({ sendEmail, resendEmail }) => {
         await saveDelegationCancelledByAdmin({ ...formateur, email: formateur.email ?? etablissement.email }, req.user);
       }
 
-      const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });
+      const updatedResponsable = await Responsable.findOne({
+        siret: responsable.siret,
+      }).lean();
 
-      res.json(updatedGestionnaire);
+      // const updatedResponsable = await Etablissement.findOne({
+      //   ...responsableFilter,
+      //   siret: responsable.siret,
+      // }).lean();
+      res.json(updatedResponsable);
     })
   );
 
@@ -401,7 +470,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * Retourne la liste des voeux pour un formateur donné sous forme d'un CSV.
    */
   router.get(
-    "/api/admin/gestionnaires/:siret/formateurs/:uai/voeux",
+    "/api/admin/responsables/:siret/formateurs/:uai/voeux",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -419,7 +488,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/gestionnaires/:siret/setEmail",
+    "/api/admin/responsables/:siret/setEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -428,14 +497,23 @@ module.exports = ({ sendEmail, resendEmail }) => {
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret });
+      const responsable = await Responsable.findOne({
+        siret,
+      });
+
+      // const responsable = await Etablissement.findOne({
+      //   ...responsableFilter,
+      //   siret,
+      // });
 
       await changeEmail(siret, email, { auteur: req.user.username });
 
-      await saveAccountEmailUpdatedByAdmin({ siret, email }, gestionnaire.email, req.user);
+      await saveAccountEmailUpdatedByAdmin({ siret, email }, responsable.email, req.user);
 
-      await Gestionnaire.updateOne({ siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
-      const previousConfirmationEmail = gestionnaire.emails.find((e) => e.templateName.startsWith("confirmation_"));
+      await Responsable.updateOne({ siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
+      // await Etablissement.updateOne({ ...responsableFilter, siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
+
+      const previousConfirmationEmail = responsable.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
       previousConfirmationEmail
         ? await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user })
@@ -446,7 +524,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/gestionnaires/:siret/resendConfirmationEmail",
+    "/api/admin/responsables/:siret/resendConfirmationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -462,7 +540,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/gestionnaires/:siret/resendActivationEmail",
+    "/api/admin/responsables/:siret/resendActivationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -478,7 +556,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/gestionnaires/:siret/resendNotificationEmail",
+    "/api/admin/responsables/:siret/resendNotificationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -494,7 +572,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/admin/gestionnaires/:siret/markAsNonConcerne",
+    "/api/admin/responsables/:siret/markAsNonConcerne",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -526,13 +604,14 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       const formateur = await Formateur.findOne({ uai }).lean();
+      // const formateur = await Etablissement.findOne({ ...formateurFilter, uai }).lean();
 
       res.json(await fillFormateur(formateur, admin));
     })
   );
 
   router.get(
-    "/api/admin/formateurs/:uai/gestionnaires",
+    "/api/admin/formateurs/:uai/responsables",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -544,13 +623,21 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       const formateur = await Formateur.findOne({ uai });
+      // const formateur = await Etablissement.findOne({ ...formateurFilter, uai });
 
       res.json(
         await Promise.all(
-          formateur?.etablissements.map(async (etablissement) => {
-            const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret }).lean();
+          formateur?.etablissements_responsable.map(async (etablissement) => {
+            const responsable = await Responsable.findOne({
+              siret: etablissement.siret,
+            }).lean();
 
-            return await fillGestionnaire(gestionnaire, admin);
+            // const responsable = await Etablissement.findOne({
+            //   ...responsableFilter,
+            //   siret: etablissement.siret,
+            // }).lean();
+
+            return await fillResponsable(responsable, admin);
           })
         )
       );

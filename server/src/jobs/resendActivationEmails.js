@@ -50,12 +50,12 @@ async function resendActivationEmails(resendEmail, options = {}) {
                 },
               }),
 
-          type: { $in: [UserType.FORMATEUR, UserType.GESTIONNAIRE] },
+          type: { $in: [UserType.FORMATEUR, UserType.RESPONSABLE] },
 
           // $or: [
-          //   { type: UserType.GESTIONNAIRE },
+          //   { type: UserType.RESPONSABLE },
           //   { type: UserType.FORMATEUR },
-          //   // { type: { $nin: [UserType.FORMATEUR, UserType.GESTIONNAIRE] } },
+          //   // { type: { $nin: [UserType.FORMATEUR, UserType.RESPONSABLE] } },
           // ],
         }),
   };
@@ -70,16 +70,16 @@ async function resendActivationEmails(resendEmail, options = {}) {
       const previous = user.emails.find((e) => e.templateName.startsWith("activation_"));
 
       // if (user.type === UserType.FORMATEUR) {
-      //   const gestionnaire = await Gestionnaire.findOne({
+      //   const responsable = await Responsable.findOne({
       //     "etablissements.uai": user.username,
       //     "etablissements.diffusionAutorisee": true,
       //   });
 
-      //   if (!gestionnaire) {
+      //   if (!responsable) {
       //     return;
       //   }
 
-      //   const etablissement = gestionnaire.etablissements?.find(
+      //   const etablissement = responsable.etablissements_formateur?.find(
       //     (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
       //   );
 
@@ -91,7 +91,7 @@ async function resendActivationEmails(resendEmail, options = {}) {
         await resendEmail(previous.token, { retry: options.retry, user });
 
         switch (user.type) {
-          case UserType.GESTIONNAIRE:
+          case UserType.RESPONSABLE:
             options.sender
               ? await saveAccountActivationEmailManualResentAsResponsable(user, options.sender)
               : await saveAccountActivationEmailAutomaticResentAsResponsable(user);

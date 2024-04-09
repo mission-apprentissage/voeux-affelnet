@@ -1,4 +1,4 @@
-const { Gestionnaire, Formateur, Voeu } = require("../common/model");
+const { Responsable, Formateur, Voeu } = require("../common/model");
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
 
@@ -31,26 +31,28 @@ const computeOrganismesStats = async (filter = {}) => {
   };
 
   const etablissementsFilter = {
-    "gestionnaire.etablissements": { $exists: true },
+    "responsable.etablissements_formateur": { $exists: true },
   };
 
   const academieFilter = {
-    ...(filter?.["academie.code"] ? { "gestionnaire.etablissements.academie.code": filter["academie.code"] } : {}),
+    ...(filter?.["academie.code"]
+      ? { "responsable.etablissements_formateur.academie.code": filter["academie.code"] }
+      : {}),
   };
 
   return promiseAllProps({
-    totalGestionnaire: Gestionnaire.aggregate([
+    totalResponsable: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
         },
       },
 
-      { $project: { gestionnaire: "$$ROOT" } },
+      { $project: { responsable: "$$ROOT" } },
 
       {
         $unwind: {
-          path: "$gestionnaire.etablissements",
+          path: "$responsable.etablissements_formateur",
           preserveNullAndEmptyArrays: false,
         },
       },
@@ -64,8 +66,8 @@ const computeOrganismesStats = async (filter = {}) => {
 
       {
         $group: {
-          _id: { siret: "$gestionnaire.siret" },
-          siret: { $first: "$gestionnaire.siret" },
+          _id: { siret: "$responsable.siret" },
+          siret: { $first: "$responsable.siret" },
         },
       },
 
@@ -79,18 +81,18 @@ const computeOrganismesStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    totalGestionnaireAvecDelegation: Gestionnaire.aggregate([
+    totalResponsableAvecDelegation: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
         },
       },
 
-      { $project: { gestionnaire: "$$ROOT" } },
+      { $project: { responsable: "$$ROOT" } },
 
       {
         $unwind: {
-          path: "$gestionnaire.etablissements",
+          path: "$responsable.etablissements_formateur",
           preserveNullAndEmptyArrays: false,
         },
       },
@@ -100,13 +102,13 @@ const computeOrganismesStats = async (filter = {}) => {
           ...etablissementsFilter,
           ...academieFilter,
 
-          "gestionnaire.etablissements.diffusionAutorisee": true,
+          "responsable.etablissements_formateur.diffusionAutorisee": true,
         },
       },
       {
         $group: {
-          _id: { siret: "$gestionnaire.siret" },
-          siret: { $first: "$gestionnaire.siret" },
+          _id: { siret: "$responsable.siret" },
+          siret: { $first: "$responsable.siret" },
         },
       },
 
@@ -120,18 +122,18 @@ const computeOrganismesStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    totalGestionnaireMultiOrganismes: Gestionnaire.aggregate([
+    totalResponsableMultiOrganismes: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
         },
       },
 
-      { $project: { gestionnaire: "$$ROOT" } },
+      { $project: { responsable: "$$ROOT" } },
 
       {
         $unwind: {
-          path: "$gestionnaire.etablissements",
+          path: "$responsable.etablissements_formateur",
           preserveNullAndEmptyArrays: false,
         },
       },
@@ -144,10 +146,10 @@ const computeOrganismesStats = async (filter = {}) => {
           $expr: {
             $and: [
               {
-                $ne: ["$gestionnaire.uai", "$gestionnaire.etablissements.uai"],
+                $ne: ["$responsable.uai", "$responsable.etablissements_formateur.uai"],
               },
               {
-                $ne: ["$gestionnaire.siret", "$gestionnaire.etablissements.siret"],
+                $ne: ["$responsable.siret", "$responsable.etablissements_formateur.siret"],
               },
             ],
           },
@@ -155,8 +157,8 @@ const computeOrganismesStats = async (filter = {}) => {
       },
       {
         $group: {
-          _id: { siret: "$gestionnaire.siret" },
-          siret: { $first: "$gestionnaire.siret" },
+          _id: { siret: "$responsable.siret" },
+          siret: { $first: "$responsable.siret" },
         },
       },
 
@@ -170,18 +172,18 @@ const computeOrganismesStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    totalFormateur: Gestionnaire.aggregate([
+    totalFormateur: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
         },
       },
 
-      { $project: { gestionnaire: "$$ROOT" } },
+      { $project: { responsable: "$$ROOT" } },
 
       {
         $unwind: {
-          path: "$gestionnaire.etablissements",
+          path: "$responsable.etablissements_formateur",
           preserveNullAndEmptyArrays: false,
         },
       },
@@ -197,8 +199,8 @@ const computeOrganismesStats = async (filter = {}) => {
         $lookup: {
           from: "users",
           let: {
-            siret: "$gestionnaire.etablissements.siret",
-            uai: "$gestionnaire.etablissements.uai",
+            siret: "$responsable.etablissements_formateur.siret",
+            uai: "$responsable.etablissements_formateur.uai",
           },
           pipeline: [
             {
@@ -230,9 +232,9 @@ const computeOrganismesStats = async (filter = {}) => {
 
       {
         $project: {
-          siret: "$gestionnaire.siret",
+          siret: "$responsable.siret",
           uai: "$formateur.uai",
-          countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+          countVoeux: "$responsable.etablissements_formateur.nombre_voeux",
         },
       },
       {
@@ -248,18 +250,18 @@ const computeOrganismesStats = async (filter = {}) => {
       { $group: { _id: null, total: { $sum: 1 } } },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    totalFormateurAvecDelegation: Gestionnaire.aggregate([
+    totalFormateurAvecDelegation: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
         },
       },
 
-      { $project: { gestionnaire: "$$ROOT" } },
+      { $project: { responsable: "$$ROOT" } },
 
       {
         $unwind: {
-          path: "$gestionnaire.etablissements",
+          path: "$responsable.etablissements_formateur",
           preserveNullAndEmptyArrays: false,
         },
       },
@@ -269,7 +271,7 @@ const computeOrganismesStats = async (filter = {}) => {
           ...etablissementsFilter,
           ...academieFilter,
 
-          "gestionnaire.etablissements.diffusionAutorisee": true,
+          "responsable.etablissements_formateur.diffusionAutorisee": true,
         },
       },
 
@@ -277,8 +279,8 @@ const computeOrganismesStats = async (filter = {}) => {
         $lookup: {
           from: "users",
           let: {
-            siret: "$gestionnaire.etablissements.siret",
-            uai: "$gestionnaire.etablissements.uai",
+            siret: "$responsable.etablissements_formateur.siret",
+            uai: "$responsable.etablissements_formateur.uai",
           },
           pipeline: [
             {
@@ -310,9 +312,9 @@ const computeOrganismesStats = async (filter = {}) => {
 
       {
         $project: {
-          siret: "$gestionnaire.siret",
+          siret: "$responsable.siret",
           uai: "$formateur.uai",
-          countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+          countVoeux: "$responsable.etablissements_formateur.nombre_voeux",
         },
       },
       {
@@ -328,18 +330,18 @@ const computeOrganismesStats = async (filter = {}) => {
       { $group: { _id: null, total: { $sum: 1 } } },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    totalAccueil: Gestionnaire.aggregate([
+    totalAccueil: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
         },
       },
 
-      { $project: { gestionnaire: "$$ROOT" } },
+      { $project: { responsable: "$$ROOT" } },
 
       {
         $unwind: {
-          path: "$gestionnaire.etablissements",
+          path: "$responsable.etablissements_formateur",
           preserveNullAndEmptyArrays: false,
         },
       },
@@ -353,9 +355,9 @@ const computeOrganismesStats = async (filter = {}) => {
 
       {
         $group: {
-          _id: { siret: "$gestionnaire.siret", uai: "$gestionnaire.etablissements.uai" },
-          siret: { $first: "$gestionnaire.siret" },
-          uai: { $first: "$gestionnaire.etablissements.uai" },
+          _id: { siret: "$responsable.siret", uai: "$responsable.etablissements_formateur.uai" },
+          siret: { $first: "$responsable.siret" },
+          uai: { $first: "$responsable.etablissements_formateur.uai" },
         },
       },
       {
@@ -371,7 +373,7 @@ const computeOrganismesStats = async (filter = {}) => {
                 ...voeuxFilter,
                 $expr: {
                   $and: [
-                    { $eq: ["$etablissement_gestionnaire.siret", "$$siret"] },
+                    { $eq: ["$etablissement_responsable.siret", "$$siret"] },
                     { $eq: ["$etablissement_formateur.uai", "$$uai"] },
                   ],
                 },
@@ -407,7 +409,7 @@ const computeVoeuxStats = async (filter = {}) => {
     .map((formateur) => formateur.uai)
     .filter((uai) => !UAIS_RECENSEMENT.includes(uai));
 
-  const gestionnaires = await Gestionnaire.aggregate([{ $project: { siret: "$siret" } }]);
+  const responsables = await Responsable.aggregate([{ $project: { siret: "$siret" } }]);
   const formateurs = await Formateur.aggregate([{ $project: { uai: "$uai" } }]);
 
   const voeuxFilter = {
@@ -424,7 +426,7 @@ const computeVoeuxStats = async (filter = {}) => {
   };
 
   return promiseAllProps({
-    total: Gestionnaire.aggregate([
+    total: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
@@ -459,7 +461,7 @@ const computeVoeuxStats = async (filter = {}) => {
                 ...voeuxFilter,
                 $expr: {
                   $and: [
-                    { $eq: ["$etablissement_gestionnaire.siret", "$$siret"] },
+                    { $eq: ["$etablissement_responsable.siret", "$$siret"] },
                     { $eq: ["$etablissement_formateur.uai", "$$uai"] },
                   ],
                 },
@@ -490,7 +492,7 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    apprenants: Gestionnaire.aggregate([
+    apprenants: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
@@ -525,7 +527,7 @@ const computeVoeuxStats = async (filter = {}) => {
                 ...voeuxFilter,
                 $expr: {
                   $and: [
-                    { $eq: ["$etablissement_gestionnaire.siret", "$$siret"] },
+                    { $eq: ["$etablissement_responsable.siret", "$$siret"] },
                     { $eq: ["$etablissement_formateur.uai", "$$uai"] },
                   ],
                 },
@@ -554,18 +556,18 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    gestionnairesInconnus: Voeu.aggregate([
+    responsablesInconnus: Voeu.aggregate([
       {
         $match: {
-          "etablissement_gestionnaire.siret": {
-            $nin: gestionnaires.map((gestionnaire) => gestionnaire.siret),
+          "etablissement_responsable.siret": {
+            $nin: responsables.map((responsable) => responsable.siret),
           },
           ...(filter?.["academie.code"] ? { "etablissement_accueil.academie.code": filter["academie.code"] } : {}),
         },
       },
       {
         $group: {
-          _id: "$etablissement_gestionnaire.siret",
+          _id: "$etablissement_responsable.siret",
         },
       },
       {
@@ -597,7 +599,7 @@ const computeVoeuxStats = async (filter = {}) => {
         $match: {
           ...(filter?.["academie.code"] ? { "etablissements.academie.code": filter["academie.code"] } : {}),
           $or: [
-            { "etablissement_gestionnaire.siret": { $exists: false } },
+            { "etablissement_responsable.siret": { $exists: false } },
             { "etablissement_formateur.uai": { $exists: false } },
           ],
           "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
@@ -611,7 +613,7 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    nbVoeuxDiffusésGestionnaire: Gestionnaire.aggregate([
+    nbVoeuxDiffusésResponsable: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
@@ -670,7 +672,7 @@ const computeVoeuxStats = async (filter = {}) => {
                 ...voeuxFilter,
                 $expr: {
                   $and: [
-                    { $eq: ["$etablissement_gestionnaire.siret", "$$siret"] },
+                    { $eq: ["$etablissement_responsable.siret", "$$siret"] },
                     { $eq: ["$etablissement_formateur.uai", "$$uai"] },
                     { $gt: ["$$lastDownloadDate", { $first: "$_meta.import_dates" }] },
                   ],
@@ -702,7 +704,7 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    nbVoeuxDiffusésFormateur: Gestionnaire.aggregate([
+    nbVoeuxDiffusésFormateur: Responsable.aggregate([
       {
         $match: {
           statut: { $ne: "non concerné" },
@@ -740,23 +742,23 @@ const computeVoeuxStats = async (filter = {}) => {
         $unwind: "$formateur",
       },
       {
-        $unwind: "$formateur.etablissements",
+        $unwind: "$formateur.etablissements_responsable",
       },
       {
-        $unwind: "$formateur.voeux_telechargements",
+        $unwind: "$formateur.voeux_telechargements_responsable",
       },
       {
         $match: {
           $expr: {
-            $eq: ["$formateur.etablissements.siret", "$formateur.voeux_telechargements.siret"],
+            $eq: ["$formateur.etablissements_responsable.siret", "$formateur.voeux_telechargements_responsable.siret"],
           },
         },
       },
       {
         $sort: {
           "formateur.uai": 1,
-          "formateur.voeux_telechargements.siret": 1,
-          "formateur.voeux_telechargements.date": 1,
+          "formateur.voeux_telechargements_responsable.siret": 1,
+          "formateur.voeux_telechargements_responsable.date": 1,
           "etablissements.voeux_date": 1,
         },
       },
@@ -765,9 +767,9 @@ const computeVoeuxStats = async (filter = {}) => {
           _id: { uai: "$formateur.uai", siret: "$siret" },
           uai: { $first: "$formateur.uai" },
           siret: { $first: "$siret" },
-          lastDownloadDates: { $addToSet: "$formateur.voeux_telechargements.date" },
+          lastDownloadDates: { $addToSet: "$formateur.voeux_telechargements_responsable.date" },
           importDates: { $addToSet: "$etablissements.voeux_date" },
-          lastDownloadDate: { $last: "$formateur.voeux_telechargements.date" },
+          lastDownloadDate: { $last: "$formateur.voeux_telechargements_responsable.date" },
           importDate: { $first: "$etablissements.voeux_date" },
         },
       },
@@ -784,7 +786,7 @@ const computeVoeuxStats = async (filter = {}) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$etablissement_gestionnaire.siret", "$$siret"] },
+                    { $eq: ["$etablissement_responsable.siret", "$$siret"] },
                     { $eq: ["$etablissement_formateur.uai", "$$uai"] },
                     { $gt: ["$$lastDownloadDate", { $first: "$_meta.import_dates" }] },
                   ],
@@ -820,25 +822,27 @@ const computeVoeuxStats = async (filter = {}) => {
 
 const computeProgressesStats = async (filter = {}) => {
   const etablissementsFilter = {
-    "gestionnaire.etablissements": { $exists: true },
+    "responsable.etablissements_formateur": { $exists: true },
   };
 
   const academieFilter = {
-    ...(filter?.["academie.code"] ? { "gestionnaire.etablissements.academie.code": filter["academie.code"] } : {}),
+    ...(filter?.["academie.code"]
+      ? { "responsable.etablissements_formateur.academie.code": filter["academie.code"] }
+      : {}),
   };
 
-  const relationBetweenGestionnaireAndFormateurPipelines = [
+  const relationBetweenResponsableAndFormateurPipelines = [
     {
       $match: {
         statut: { $ne: "non concerné" },
       },
     },
 
-    { $project: { gestionnaire: "$$ROOT" } },
+    { $project: { responsable: "$$ROOT" } },
 
     {
       $unwind: {
-        path: "$gestionnaire.etablissements",
+        path: "$responsable.etablissements_formateur",
         preserveNullAndEmptyArrays: false,
       },
     },
@@ -854,8 +858,8 @@ const computeProgressesStats = async (filter = {}) => {
       $lookup: {
         from: "users",
         let: {
-          siret: "$gestionnaire.etablissements.siret",
-          uai: "$gestionnaire.etablissements.uai",
+          siret: "$responsable.etablissements_formateur.siret",
+          uai: "$responsable.etablissements_formateur.uai",
         },
         pipeline: [
           {
@@ -886,36 +890,36 @@ const computeProgressesStats = async (filter = {}) => {
     },
   ];
 
-  const results = await Gestionnaire.aggregate(
+  const results = await Responsable.aggregate(
     [
-      ...relationBetweenGestionnaireAndFormateurPipelines,
+      ...relationBetweenResponsableAndFormateurPipelines,
 
       {
         $match: {
-          "gestionnaire.etablissements.nombre_voeux": { $gt: 0 },
-          "gestionnaire.etablissements.voeux_date": { $ne: null },
+          "responsable.etablissements_formateur.nombre_voeux": { $gt: 0 },
+          "responsable.etablissements_formateur.voeux_date": { $ne: null },
         },
       },
 
       {
         $project: {
-          gestionnaireSiret: "$gestionnaire.siret",
+          responsableSiret: "$responsable.siret",
           formateurUai: "$formateur.uai",
 
-          etablissement: "$gestionnaire.etablissements",
+          etablissement: "$responsable.etablissements_formateur",
 
           downloads: {
             $switch: {
               branches: [
                 {
                   case: {
-                    $eq: ["$gestionnaire.etablissements.diffusionAutorisee", true],
+                    $eq: ["$responsable.etablissements_formateur.diffusionAutorisee", true],
                   },
-                  then: "$formateur.voeux_telechargements",
+                  then: "$formateur.voeux_telechargements_responsable",
                 },
                 {
-                  case: "$gestionnaire.voeux_telechargements",
-                  then: "$gestionnaire.voeux_telechargements",
+                  case: "$responsable.voeux_telechargements_formateur",
+                  then: "$responsable.voeux_telechargements_formateur",
                 },
               ],
               default: [],
@@ -936,7 +940,7 @@ const computeProgressesStats = async (filter = {}) => {
           $or: [
             { downloads: { $exists: false } },
             { "downloads.uai": { $exists: true }, $expr: { $eq: ["$downloads.uai", "$formateurUai"] } },
-            { "downloads.siret": { $exists: true }, $expr: { $eq: ["$downloads.siret", "$gestionnaireSiret"] } },
+            { "downloads.siret": { $exists: true }, $expr: { $eq: ["$downloads.siret", "$responsableSiret"] } },
           ],
         },
       },
@@ -945,8 +949,8 @@ const computeProgressesStats = async (filter = {}) => {
 
       {
         $group: {
-          _id: { siret: "$gestionnaireSiret", uai: "$formateurUai" },
-          gestionnaireSiret: { $first: "$gestionnaireSiret" },
+          _id: { siret: "$responsableSiret", uai: "$formateurUai" },
+          responsableSiret: { $first: "$responsableSiret" },
           formateurUai: { $first: "$formateurUai" },
           etablissement: { $first: "$etablissement" },
 
@@ -958,8 +962,8 @@ const computeProgressesStats = async (filter = {}) => {
 
       {
         $group: {
-          _id: "$gestionnaireSiret",
-          siret: { $first: "$gestionnaireSiret" },
+          _id: "$responsableSiret",
+          siret: { $first: "$responsableSiret" },
           count: { $sum: 1 },
 
           allUais: {
@@ -1025,7 +1029,7 @@ const computeProgressesStats = async (filter = {}) => {
 
   return {
     fullDownload: {
-      nbGestionnaire: [
+      nbResponsable: [
         ...new Set(
           results
             .map((result) => ({
@@ -1072,7 +1076,7 @@ const computeProgressesStats = async (filter = {}) => {
     },
 
     partialDownload: {
-      nbGestionnaire: [
+      nbResponsable: [
         ...new Set(
           results
             .map((result) => ({
@@ -1127,7 +1131,7 @@ const computeProgressesStats = async (filter = {}) => {
     },
 
     noDownload: {
-      nbGestionnaire: [
+      nbResponsable: [
         ...new Set(
           results
             .map((result) => ({
@@ -1177,14 +1181,14 @@ const computeProgressesStats = async (filter = {}) => {
     },
 
     noVoeux: await promiseAllProps({
-      nbGestionnaire: Gestionnaire.aggregate([
-        ...relationBetweenGestionnaireAndFormateurPipelines,
+      nbResponsable: Responsable.aggregate([
+        ...relationBetweenResponsableAndFormateurPipelines,
 
         {
           $project: {
-            siret: "$gestionnaire.siret",
+            siret: "$responsable.siret",
             uai: "$formateur.uai",
-            countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+            countVoeux: "$responsable.etablissements_formateur.nombre_voeux",
           },
         },
         {
@@ -1200,14 +1204,14 @@ const computeProgressesStats = async (filter = {}) => {
 
         { $group: { _id: null, total: { $sum: 1 } } },
       ]).then((res) => (res.length > 0 ? res[0].total : 0)),
-      nbFormateur: Gestionnaire.aggregate([
-        ...relationBetweenGestionnaireAndFormateurPipelines,
+      nbFormateur: Responsable.aggregate([
+        ...relationBetweenResponsableAndFormateurPipelines,
 
         {
           $project: {
-            siret: "$gestionnaire.siret",
+            siret: "$responsable.siret",
             uai: "$formateur.uai",
-            countVoeux: "$gestionnaire.etablissements.nombre_voeux",
+            countVoeux: "$responsable.etablissements_formateur.nombre_voeux",
           },
         },
         {

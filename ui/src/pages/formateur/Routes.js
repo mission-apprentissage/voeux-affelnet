@@ -6,7 +6,7 @@ import { Formateur } from "./Formateur";
 
 const FormateurRoutes = () => {
   const [formateur, setFormateur] = useState(undefined);
-  const [gestionnaires, setGestionnaires] = useState(undefined);
+  const [responsables, setResponsables] = useState(undefined);
   const mounted = useRef(false);
 
   const getFormateur = useCallback(async () => {
@@ -19,20 +19,20 @@ const FormateurRoutes = () => {
     }
   }, [setFormateur]);
 
-  const getGestionnaires = useCallback(async () => {
+  const getResponsables = useCallback(async () => {
     try {
-      const response = await _get("/api/formateur/gestionnaires");
-      setGestionnaires(response);
+      const response = await _get("/api/formateur/responsables");
+      setResponsables(response);
     } catch (error) {
-      setGestionnaires(undefined);
+      setResponsables(undefined);
       throw Error;
     }
-  }, [setGestionnaires]);
+  }, [setResponsables]);
 
   const reload = useCallback(async () => {
     await getFormateur();
-    await getGestionnaires();
-  }, [getFormateur, getGestionnaires]);
+    await getResponsables();
+  }, [getFormateur, getResponsables]);
 
   useEffect(() => {
     const run = async () => {
@@ -58,18 +58,18 @@ const FormateurRoutes = () => {
         <Route
           exact
           path=""
-          element={<Formateur formateur={formateur} gestionnaires={gestionnaires} callback={reload} />}
+          element={<Formateur formateur={formateur} responsables={responsables} callback={reload} />}
         />
 
         {/* <Route
           exact
-          path="gestionnaires"
-          element={<Gestionnaires formateur={formateur} gestionnaires={gestionnaires} callback={reload} />}
+          path="responsables"
+          element={<Responsables formateur={formateur} responsables={responsables} callback={reload} />}
         />
         <Route
           exact
-          path="gestionnaires/:uai"
-          element={<Formateur formateur={formateur} gestionnaires={gestionnaires} callback={reload} />}
+          path="responsables/:uai"
+          element={<Formateur formateur={formateur} responsables={responsables} callback={reload} />}
         /> */}
       </Routes>
     </>

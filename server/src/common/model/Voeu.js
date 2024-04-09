@@ -100,7 +100,7 @@ const schema = new Schema({
       },
     }),
   },
-  etablissement_gestionnaire: {
+  etablissement_responsable: {
     required: true,
     type: nested({
       siret: {

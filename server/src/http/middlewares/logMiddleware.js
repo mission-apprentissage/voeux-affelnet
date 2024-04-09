@@ -1,4 +1,4 @@
-const _ = require("lodash");
+const { omitBy } = require("lodash");
 const logger = require("../../common/logger");
 
 module.exports = () => {
@@ -6,7 +6,7 @@ module.exports = () => {
     const relativeUrl = (req.baseUrl || "") + (req.url || "");
     const startTime = new Date().getTime();
     const withoutSensibleFields = (obj) => {
-      return _.omitBy(obj, (value, key) => {
+      return omitBy(obj, (value, key) => {
         const lower = key.toLowerCase();
         return lower.indexOf("token") !== -1 || ["authorization", "password", "newPassword"].includes(lower);
       });

@@ -1,8 +1,10 @@
 import { Text } from "@chakra-ui/react";
 import { UserStatut } from "../../../constants/UserStatut";
 
-export const FormateurEmail = ({ gestionnaire, formateur }) => {
-  const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
+export const FormateurEmail = ({ responsable, formateur }) => {
+  const etablissement = responsable.etablissements_formateur?.find(
+    (etablissement) => formateur.uai === etablissement.uai
+  );
 
   const diffusionAutorisee = etablissement?.diffusionAutorisee;
 
@@ -18,7 +20,7 @@ export const FormateurEmail = ({ gestionnaire, formateur }) => {
             )
           </>
         ) : (
-          <>{gestionnaire.email}</>
+          <>{responsable.email}</>
         )}
       </Text>
     </>

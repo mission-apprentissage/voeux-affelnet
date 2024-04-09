@@ -5,17 +5,17 @@ import { useDownloadVoeux } from "../../common/hooks/formateurHooks";
 import { SuccessLine } from "../../theme/components/icons";
 import { Page } from "../../common/components/layout/Page";
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
-import { GestionnaireLibelle } from "../../common/components/gestionnaire/fields/GestionnaireLibelle";
-import { GestionnaireEmail } from "../../common/components/formateur/fields/GestionnaireEmail";
+import { ResponsableLibelle } from "../../common/components/responsable/fields/ResponsableLibelle";
+import { ResponsableEmail } from "../../common/components/formateur/fields/ResponsableEmail";
 import { FormateurEmail } from "../../common/components/formateur/fields/FormateurEmail";
-import { History } from "../gestionnaire/History";
+import { History } from "../responsable/History";
 
-export const Formateur = ({ formateur, gestionnaires, callback }) => {
+export const Formateur = ({ formateur, responsables, callback }) => {
   const downloadVoeux = useDownloadVoeux({ formateur });
 
   const downloadVoeuxAndReload = useCallback(
-    async ({ gestionnaire }) => {
-      await downloadVoeux({ gestionnaire });
+    async ({ responsable }) => {
+      await downloadVoeux({ responsable });
       await callback();
     },
     [downloadVoeux, callback]
@@ -39,10 +39,10 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           </Text>
         </Box>
 
-        {formateur.etablissements.map((etablissement, index) => {
-          const gestionnaire = gestionnaires?.find((gestionnaire) => gestionnaire.siret === etablissement.siret);
+        {formateur.etablissements_responsable.map((etablissement, index) => {
+          const responsable = responsables?.find((responsable) => responsable.siret === etablissement.siret);
 
-          if (!gestionnaire) {
+          if (!responsable) {
             return <Fragment key={index}></Fragment>;
           }
 
@@ -50,16 +50,16 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
 
           const isDiffusionAutorisee = etablissement?.diffusionAutorisee;
 
-          const voeuxTelechargementsFormateur = formateur.voeux_telechargements.filter(
-            (telechargement) => telechargement.siret === gestionnaire.siret
+          const voeuxTelechargementsFormateur = formateur.voeux_telechargements_responsable.filter(
+            (telechargement) => telechargement.siret === responsable.siret
           );
 
-          const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
+          const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur.filter(
             (telechargement) => telechargement.uai === formateur.uai
           );
 
           const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
-            ? !!voeuxTelechargementsGestionnaire.find(
+            ? !!voeuxTelechargementsResponsable.find(
                 (telechargement) =>
                   new Date(telechargement.date).getTime() >= new Date(etablissement.first_date_voeux).getTime()
               )
@@ -69,7 +69,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
               );
 
           const voeuxTelecharges = !isDiffusionAutorisee
-            ? !!voeuxTelechargementsGestionnaire.find(
+            ? !!voeuxTelechargementsResponsable.find(
                 (telechargement) =>
                   new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
               )
@@ -82,9 +82,9 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           return (
             <Box
               key={index}
-              my={formateur.etablissements.length > 1 ? 18 : 12}
-              borderLeft={formateur.etablissements.length > 1 ? "2px solid" : "none"}
-              paddingLeft={formateur.etablissements.length > 1 ? 4 : 0}
+              my={formateur.etablissements_responsable.length > 1 ? 18 : 12}
+              borderLeft={formateur.etablissements_responsable.length > 1 ? "2px solid" : "none"}
+              paddingLeft={formateur.etablissements_responsable.length > 1 ? 4 : 0}
             >
               <Alert status="info" variant="left-accent" my={6}>
                 <Box>
@@ -92,15 +92,15 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                     <Text as="b" style={{ textDecoration: "underline" }}>
                       Organisme responsable
                     </Text>{" "}
-                    : <GestionnaireLibelle gestionnaire={gestionnaire} />
+                    : <ResponsableLibelle responsable={responsable} />
                   </Text>
                   <Text mb={2}>
-                    Adresse : {gestionnaire.adresse ?? "Inconnue"} – Siret : {gestionnaire.siret ?? "Inconnu"} – UAI :{" "}
-                    {gestionnaire.uai ?? "Inconnu"}
+                    Adresse : {responsable.adresse ?? "Inconnue"} – Siret : {responsable.siret ?? "Inconnu"} – UAI :{" "}
+                    {responsable.uai ?? "Inconnu"}
                   </Text>
                   <Text mb={2}>
                     Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
-                    <GestionnaireEmail gestionnaire={gestionnaire} />
+                    <ResponsableEmail responsable={responsable} />
                   </Text>
                 </Box>
               </Alert>
@@ -110,7 +110,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                   {isDiffusionAutorisee ? (
                     <>
                       La délégation des droits de réception des listes a été activée pour votre organisme à l'adresse :{" "}
-                      <FormateurEmail formateur={formateur} gestionnaire={gestionnaire} />.
+                      <FormateurEmail formateur={formateur} responsable={responsable} />.
                     </>
                   ) : (
                     <>La délégation des droits de réception n'est pas activée pour votre organisme.</>
@@ -155,7 +155,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                             <Text mb={4}>
                               <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Vous (
                               {formateur.email}) avez téléchargé la liste.{" "}
-                              <Link variant="action" onClick={() => downloadVoeuxAndReload({ gestionnaire })}>
+                              <Link variant="action" onClick={() => downloadVoeuxAndReload({ responsable })}>
                                 Télécharger à nouveau
                               </Link>
                             </Text>
@@ -165,7 +165,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                           </>
                         ) : (
                           <>
-                            <Button variant="primary" mb={4} onClick={() => downloadVoeuxAndReload({ gestionnaire })}>
+                            <Button variant="primary" mb={4} onClick={() => downloadVoeuxAndReload({ responsable })}>
                               Télécharger la liste
                             </Button>
                           </>
@@ -177,7 +177,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                           <>
                             <Text mb={4}>
                               La liste des candidats a été téléchargée par votre organisme responsable. Vous pouvez le
-                              contacter ({gestionnaire.email}) pour la récupérer.
+                              contacter ({responsable.email}) pour la récupérer.
                             </Text>
                             <Text mb={4}>
                               Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par
@@ -188,7 +188,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
                           <>
                             <Text mb={4}>
                               La liste des candidats n'a pas été téléchargée par votre organisme responsable (
-                              {gestionnaire.email}). Vous pouvez le contacter pour l'inviter à la télécharger et vous la
+                              {responsable.email}). Vous pouvez le contacter pour l'inviter à la télécharger et vous la
                               transmettre.
                             </Text>
                           </>
@@ -254,7 +254,7 @@ export const Formateur = ({ formateur, gestionnaires, callback }) => {
           <Heading as="h3" size="md" mb={4}>
             Historique des actions
           </Heading>
-          <History /*gestionnaire={gestionnaire}*/ formateur={formateur} />
+          <History /*responsable={responsable}*/ formateur={formateur} />
         </Box>
 
         <Box mb={12}>

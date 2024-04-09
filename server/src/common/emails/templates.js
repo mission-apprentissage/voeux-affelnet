@@ -8,15 +8,15 @@ function getTemplateFile(name) {
 const voeux_email = process.env.VOEUX_AFFELNET_EMAIL;
 
 module.exports = {
-  confirmation_gestionnaire: (gestionnaire, token, options = {}) => {
+  confirmation_responsable: (responsable, token, options = {}) => {
     const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
-      subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (Siret : ${gestionnaire.siret})`,
-      templateFile: getTemplateFile("confirmation_gestionnaire"),
+      subject: `${prefix}Affelnet 2023 – Action requise pour la transmission des listes de candidats (Siret : ${responsable.siret})`,
+      templateFile: getTemplateFile("confirmation_responsable"),
       data: {
-        gestionnaire,
+        responsable,
         token,
-        actionToken: createActionToken(gestionnaire.username),
+        actionToken: createActionToken(responsable.username),
         voeux_email,
       },
     };
@@ -70,15 +70,15 @@ module.exports = {
       },
     };
   },
-  activation_gestionnaire: (gestionnaire, token, options = {}) => {
+  activation_responsable: (responsable, token, options = {}) => {
     const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
     return {
-      subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (Siret : ${gestionnaire.siret})`,
-      templateFile: getTemplateFile("activation_gestionnaire"),
+      subject: `${prefix}Affelnet 2023 – Veuillez activer votre compte pour l'accès aux listes de candidats (Siret : ${responsable.siret})`,
+      templateFile: getTemplateFile("activation_responsable"),
       data: {
-        gestionnaire,
+        responsable,
         token,
-        actionToken: createActionToken(gestionnaire.username),
+        actionToken: createActionToken(responsable.username),
         voeux_email,
       },
     };
@@ -109,16 +109,16 @@ module.exports = {
       },
     };
   },
-  notification_gestionnaire: (gestionnaire, token, options = {}) => {
+  notification_responsable: (responsable, token, options = {}) => {
     const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
 
     return {
-      subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage sont téléchargeables (Siret : ${gestionnaire.siret})`,
-      templateFile: getTemplateFile("notification_gestionnaire"),
+      subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage sont téléchargeables (Siret : ${responsable.siret})`,
+      templateFile: getTemplateFile("notification_responsable"),
       data: {
-        gestionnaire,
+        responsable,
         token,
-        actionToken: createActionToken(gestionnaire.username),
+        actionToken: createActionToken(responsable.username),
         voeux_email,
       },
     };
@@ -137,16 +137,16 @@ module.exports = {
       },
     };
   },
-  update_gestionnaire: (gestionnaire, token, options = {}) => {
+  update_responsable: (responsable, token, options = {}) => {
     const prefix = options.resend ? /*"[Rappel] "*/ "" : "";
 
     return {
-      subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (Siret : ${gestionnaire.siret})`,
-      templateFile: getTemplateFile("update_gestionnaire"),
+      subject: `${prefix}Affelnet 2023 – Les listes de candidats à l’apprentissage ont été mises à jour (Siret : ${responsable.siret})`,
+      templateFile: getTemplateFile("update_responsable"),
       data: {
-        gestionnaire,
+        responsable,
         token,
-        actionToken: createActionToken(gestionnaire.username),
+        actionToken: createActionToken(responsable.username),
         voeux_email,
       },
     };

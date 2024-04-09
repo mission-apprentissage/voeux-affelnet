@@ -5,7 +5,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { markVoeuxAsDownloadedByFormateur } = require("../../common/actions/markVoeuxAsDownloaded");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
-const { Gestionnaire, Formateur, Voeu } = require("../../common/model");
+const { Responsable, Formateur, Voeu } = require("../../common/model");
 const { siretFormat } = require("../../common/utils/format");
 const { changeEmail } = require("../../common/actions/changeEmail");
 
@@ -14,7 +14,7 @@ module.exports = ({ users }) => {
   const { checkApiToken, ensureIs } = authMiddleware(users);
 
   /**
-   * Retourne le gestionnaire connecté
+   * Retourne le responsable connecté
    */
   router.get(
     "/api/formateur",
@@ -30,17 +30,17 @@ module.exports = ({ users }) => {
         nombre_voeux: await Voeu.countDocuments({ "etablissement_formateur.uai": uai }),
 
         etablissements: await Promise.all(
-          formateur?.etablissements?.map(async (etablissement) => {
+          formateur?.etablissements_responsable?.map(async (etablissement) => {
             const voeuxFilter = {
               "etablissement_formateur.uai": uai,
-              "etablissement_gestionnaire.siret": etablissement.siret,
+              "etablissement_responsable.siret": etablissement.siret,
             };
             const voeux = await Voeu.find(voeuxFilter);
 
             return {
               ...etablissement,
 
-              diffusionAutorisee: (await Gestionnaire.findOne({ siret: etablissement.siret }))?.etablissements?.find(
+              diffusionAutorisee: (await Responsable.findOne({ siret: etablissement.siret }))?.etablissements?.find(
                 (etablissement) => etablissement.uai === uai
               )?.diffusionAutorisee,
 
@@ -80,24 +80,24 @@ module.exports = ({ users }) => {
   );
 
   /**
-   * Retourne la liste des gestionnaires associés au formateur connecté
+   * Retourne la liste des responsables associés au formateur connecté
    */
   router.get(
-    "/api/formateur/gestionnaires",
+    "/api/formateur/responsables",
     checkApiToken(),
     ensureIs("Formateur"),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
       const formateur = await Formateur.findOne({ uai }).lean();
 
-      if (!formateur?.etablissements.filter((e) => e.voeux_date).length === 0) {
+      if (!formateur?.etablissements_responsable.filter((e) => e.voeux_date).length === 0) {
         return res.json([]);
       }
 
       res.json(
         await Promise.all(
-          formateur?.etablissements.map(async (etablissement) => {
-            return await Gestionnaire.findOne({ siret: etablissement.siret }).lean();
+          formateur?.etablissements_responsable.map(async (etablissement) => {
+            return await Responsable.findOne({ siret: etablissement.siret }).lean();
           }) ?? []
         )
       );
@@ -109,7 +109,7 @@ module.exports = ({ users }) => {
    */
   router.get(
     // "/api/formateur/voeux",
-    "/api/formateur/gestionnaires/:siret/voeux",
+    "/api/formateur/responsables/:siret/voeux",
     checkApiToken(),
     ensureIs("Formateur"),
     tryCatch(async (req, res) => {

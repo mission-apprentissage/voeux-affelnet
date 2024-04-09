@@ -24,13 +24,13 @@ import { Yup } from "../../../Yup";
 import { _put } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 
-export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onClose }) => {
+export const DelegationModal = ({ responsable, formateur, callback, isOpen, onClose }) => {
   const toast = useToast();
 
   const activateDelegation = useCallback(
     async ({ form }) => {
       try {
-        await _put(`/api/admin/gestionnaires/${gestionnaire.siret}/formateurs/${formateur.uai}`, {
+        await _put(`/api/admin/responsables/${responsable.siret}/formateurs/${formateur.uai}`, {
           email: form.email,
           diffusionAutorisee: true,
         });
@@ -53,18 +53,20 @@ export const DelegationModal = ({ gestionnaire, formateur, callback, isOpen, onC
         });
       }
     },
-    [onClose, callback, gestionnaire?.siret, formateur?.uai, toast]
+    [onClose, callback, responsable?.siret, formateur?.uai, toast]
   );
 
-  const etablissement = gestionnaire.etablissements?.find((etablissement) => formateur.uai === etablissement.uai);
+  const etablissement = responsable.etablissements_formateur?.find(
+    (etablissement) => formateur.uai === etablissement.uai
+  );
 
   const hasVoeux = etablissement.nombre_voeux > 0;
 
-  const voeuxTelechargementsGestionnaire = gestionnaire.voeux_telechargements.filter(
+  const voeuxTelechargementsParResponsable = responsable.voeux_telechargements_formateur.filter(
     (telechargement) => telechargement.uai === formateur.uai
   );
 
-  const voeuxTelecharges = !!voeuxTelechargementsGestionnaire.find(
+  const voeuxTelecharges = !!voeuxTelechargementsParResponsable.find(
     (telechargement) => new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
   );
 
