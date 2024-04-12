@@ -20,8 +20,8 @@ const { diff } = require("deep-object-diff");
 const SIRET_RECENSEMENT = "99999999999999";
 
 const schema = Joi.object({
-  siret: Joi.string().pattern(siretFormat).required(),
-  etablissements: arrayOf(Joi.string().pattern(uaiFormat)).required(),
+  siret_responsable: Joi.string().pattern(siretFormat).required(),
+  uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
 async function buildEtablissements(sirets, formateur) {
@@ -83,18 +83,18 @@ async function importFormateurs(formateursCsv, options = {}) {
       return false;
     }),
     accumulateData(
-      async (accumulator, { siret, etablissements }) => {
-        if (siret === SIRET_RECENSEMENT) {
+      async (accumulator, { siret_responsable, uai_formateurs }) => {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return accumulator;
         }
 
-        etablissements.split(",").forEach((uai) => {
-          if (!accumulator.filter((acc) => acc.uai === uai).length) {
-            accumulator.push({ uai, etablissements: [siret] });
+        uai_formateurs.split(",").forEach((uai_formateur) => {
+          if (!accumulator.filter((acc) => acc.uai_formateur === uai_formateur).length) {
+            accumulator.push({ uai_formateur, siret_responsables: [siret_responsable] });
           } else {
             accumulator = accumulator.map((acc) => {
-              if (acc.uai === uai) {
-                return { ...acc, etablissements: [...new Set([...acc.etablissements, siret])] };
+              if (acc.uai_formateur === uai_formateur) {
+                return { ...acc, siret_responsables: [...new Set([...acc.siret_responsables, siret_responsable])] };
               } else {
                 return acc;
               }
@@ -108,22 +108,24 @@ async function importFormateurs(formateursCsv, options = {}) {
     ),
     flattenArray(),
     writeData(
-      async ({ uai, etablissements }) => {
+      async ({ uai_formateur, siret_responsables }) => {
         try {
-          const found = await Formateur.findOne({ uai }).lean();
-          const responsables = await buildEtablissements(etablissements, found ?? { uai });
+          const found = await Formateur.findOne({ uai: uai_formateur }).lean();
+          const responsables = await buildEtablissements(siret_responsables, found ?? { uai: uai_formateur });
           let organisme;
 
           const organismes = (
-            await referentielApi.searchOrganismes({ uais: uai, etat_administratif: "actif" }).catch((error) => {
-              logger.warn(error, `Le formateur ${uai} n'est pas dans le référentiel`);
-              return null;
-            })
+            await referentielApi
+              .searchOrganismes({ uais: uai_formateur, etat_administratif: "actif" })
+              .catch((error) => {
+                logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le référentiel`);
+                return null;
+              })
           )?.organismes;
 
           if (!found) {
             if (organismes?.length > 1) {
-              logger.error(`Multiples organismes trouvés dans le référentiel pour l'UAI ${uai}`);
+              logger.error(`Multiples organismes trouvés dans le référentiel pour l'UAI ${uai_formateur}`);
               stats.failed++;
               return;
             }
@@ -131,7 +133,7 @@ async function importFormateurs(formateursCsv, options = {}) {
             organisme = organismes[0];
 
             if (!organisme) {
-              logger.error(`Le formateur ${uai} n'est pas dans le référentiel`);
+              logger.error(`Le formateur ${uai_formateur} n'est pas dans le référentiel`);
               stats.failed++;
               return;
             }
@@ -139,7 +141,7 @@ async function importFormateurs(formateursCsv, options = {}) {
 
           if (!found?.siret && !organisme?.siret) {
             stats.failed++;
-            logger.error(`Le formateur ${uai} n'a pas de siret dans le référentiel`);
+            logger.error(`Le formateur ${uai_formateur} n'a pas de siret dans le référentiel`);
             return;
           }
 
@@ -149,15 +151,15 @@ async function importFormateurs(formateursCsv, options = {}) {
             raison_sociale: organisme?.raison_sociale ?? found?.raison_sociale,
             adresse: organisme?.adresse?.label ?? found?.adresse,
             libelle_ville: organisme?.adresse?.localite ?? found?.libelle_ville,
-            academie: pick(findAcademieByUai(uai), ["code", "nom"]),
+            academie: pick(findAcademieByUai(uai_formateur), ["code", "nom"]),
           });
 
           const res = await Formateur.updateOne(
-            { uai },
+            { uai: uai_formateur },
             {
               $setOnInsert: {
-                uai,
-                username: uai,
+                uai: uai_formateur,
+                username: uai_formateur,
               },
               $set: updates,
             },
@@ -166,7 +168,7 @@ async function importFormateurs(formateursCsv, options = {}) {
 
           if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Formateur ${uai} ajouté`);
+            logger.info(`Formateur ${uai_formateur} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
 
@@ -179,18 +181,18 @@ async function importFormateurs(formateursCsv, options = {}) {
             ]);
 
             logger.info(
-              `Formateur ${uai} / ${organisme?.siret ?? found?.siret} mis à jour \n${JSON.stringify(
+              `Formateur ${uai_formateur} / ${organisme?.siret ?? found?.siret} mis à jour \n${JSON.stringify(
                 diff(previous, updates),
                 null,
                 2
               )}`
             );
           } else {
-            logger.trace(`Formateur ${uai} déjà à jour`);
+            logger.trace(`Formateur ${uai_formateur} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter le formateur ${uai}`, error);
+          logger.error(`Impossible de traiter le formateur ${uai_formateur}`, error);
         }
       },
       { parallel: 10 }

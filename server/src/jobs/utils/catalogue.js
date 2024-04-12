@@ -58,7 +58,7 @@ const catalogue = async () => {
       } catch (e) {
         logger.error(
           e,
-          `Une erreur est survenue lors de l'appel au catalogue pour les valeurs ${uai} /
+          `catalogue > findFormateurUai : Une erreur est survenue lors de l'appel au catalogue pour les valeurs ${uai} /
         ${cle_ministere_educatif} /
         ${siret_responsable}`
         );
@@ -106,12 +106,16 @@ const catalogue = async () => {
       } catch (e) {
         logger.error(
           e,
-          `Une erreur est survenue lors de l'appel au catalogue pour les valeurs ${uai_formateur} /
+          `catallogue > findResponsableSiretAndEmail : Une erreur est survenue lors de l'appel au catalogue pour les valeurs ${uai_formateur} /
         ${cle_ministere_educatif} /
         ${siret_responsable}`
         );
         return null;
       }
+    },
+
+    findFormation: async (params) => {
+      return await catalogueApi.getFormation(params);
     },
   };
 };

@@ -15,9 +15,9 @@ const { diff } = require("deep-object-diff");
 const SIRET_RECENSEMENT = "99999999999999";
 
 const schema = Joi.object({
-  siret: Joi.string().pattern(siretFormat).required(),
-  email: Joi.string().email().required(),
-  etablissements: arrayOf(Joi.string().pattern(uaiFormat)).required(),
+  siret_responsable: Joi.string().pattern(siretFormat).required(),
+  email_responsable: Joi.string().email().required(),
+  uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
 async function buildEtablissements(uais, responsable) {
@@ -71,42 +71,42 @@ async function importResponsables(relationCsv, options = {}) {
       }
 
       stats.invalid++;
-      logger.warn(`Le cfa ${json.siret} est invalide`, error);
+      logger.warn(`Le cfa ${json.siret_responsable} est invalide`, error);
       return null;
     }),
     writeData(
-      async ({ siret, email, etablissements }) => {
-        if (siret === SIRET_RECENSEMENT) {
+      async ({ siret_responsable, email_responsable, uai_formateurs }) => {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return;
         }
 
         try {
-          const found = await Responsable.findOne({ siret }).lean();
-          const formateurs = await buildEtablissements(etablissements, found ?? { siret });
+          const found = await Responsable.findOne({ siret: siret_responsable }).lean();
+          const formateurs = await buildEtablissements(uai_formateurs, found ?? { siret: siret_responsable });
           let organisme;
 
           if (!found) {
-            organisme = await referentielApi.getOrganisme(siret).catch((error) => {
-              logger.warn(error, `Le responsable ${siret} n'est pas dans le référentiel`);
+            organisme = await referentielApi.getOrganisme(siret_responsable).catch((error) => {
+              logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le référentiel`);
               return null;
             });
 
             if (!organisme) {
               stats.failed++;
-              logger.error(`Le responsable ${siret} n'est pas dans le référentiel`);
+              logger.error(`Le responsable ${siret_responsable} n'est pas dans le référentiel`);
               return;
             }
           }
 
           if (!found?.uai && !organisme?.uai) {
             stats.failed++;
-            logger.error(`Le responsable ${siret} n'a pas d'UAI dans le référentiel`);
+            logger.error(`Le responsable ${siret_responsable} n'a pas d'UAI dans le référentiel`);
             return;
           }
 
           if (formateurs.length === 0) {
             stats.failed++;
-            logger.error(`Le responsable ${siret} / ${organisme?.uai} n'a aucun établissement formateur`);
+            logger.error(`Le responsable ${siret_responsable} / ${organisme?.uai} n'a aucun établissement formateur`);
             return;
           }
 
@@ -120,12 +120,12 @@ async function importResponsables(relationCsv, options = {}) {
           });
 
           const res = await Responsable.updateOne(
-            { siret },
+            { siret: siret_responsable },
             {
               $setOnInsert: {
-                siret,
-                username: siret,
-                email,
+                siret: siret_responsable,
+                username: siret_responsable,
+                email: email_responsable,
               },
               $set: updates,
             },
@@ -134,7 +134,7 @@ async function importResponsables(relationCsv, options = {}) {
 
           if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Responsable ${siret} ajouté`);
+            logger.info(`Responsable ${siret_responsable} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
 
@@ -148,18 +148,18 @@ async function importResponsables(relationCsv, options = {}) {
             ]);
 
             logger.info(
-              `Responsable ${siret} / ${organisme?.uai ?? found?.uai} mis à jour \n${JSON.stringify(
+              `Responsable ${siret_responsable} / ${organisme?.uai ?? found?.uai} mis à jour \n${JSON.stringify(
                 diff(previous, updates),
                 null,
                 2
               )}`
             );
           } else {
-            logger.trace(`Responsable ${siret} déjà à jour`);
+            logger.trace(`Responsable ${siret_responsable} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter le responsable ${siret}`, error);
+          logger.error(`Impossible de traiter le responsable ${siret_responsable}`, error);
         }
       },
       { parallel: 10 }

@@ -61,18 +61,18 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
     }),
     accumulateData(
       async (accumulator, relation) => {
-        const index = accumulator.findIndex((item) => item.siret === relation.siret_responsable);
+        const index = accumulator.findIndex((item) => item.siret_responsable === relation.siret_responsable);
 
         if (index === -1) {
           stats.valid++;
           accumulator.push({
-            siret: relation.siret_responsable,
-            email: relation.email_responsable,
-            etablissements: [...new Set(relation.uai_formateurs)],
+            siret_responsable: relation.siret_responsable,
+            email_responsable: relation.email_responsable,
+            uai_formateurs: [...new Set(relation.uai_formateurs)],
           });
         } else {
-          accumulator[index].etablissements = [
-            ...new Set([...accumulator[index].etablissements, ...relation.uai_formateurs]),
+          accumulator[index].uai_formateurs = [
+            ...new Set([...accumulator[index].uai_formateurs, ...relation.uai_formateurs]),
           ];
         }
         return accumulator;
@@ -81,7 +81,11 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
     ),
     flattenArray(),
     filterData((relation) => {
-      if (!relation.siret?.length || !relation.email?.length || !relation.etablissements?.length) {
+      if (
+        !relation.siret_responsable?.length ||
+        !relation.email_responsable?.length ||
+        !relation.uai_formateurs?.length
+      ) {
         stats.invalid++;
         invalids.push(relation);
         return false;

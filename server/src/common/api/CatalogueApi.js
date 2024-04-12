@@ -71,6 +71,25 @@ class CatalogueApi extends RateLimitedApi {
     });
   }
 
+  async getFormation(query, options) {
+    const params = convertQueryIntoParams(query, options);
+
+    if (this.#getFormationsCache.has(JSON.stringify(params))) {
+      return this.#getFormationsCache.get(JSON.stringify(params));
+    }
+
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching formation...`, query);
+      const response = fetchJson(`${CatalogueApi.baseApiUrl}/entity/formation?${params}`, {
+        headers: { Cookie: this.cookie },
+      });
+
+      this.#getFormationsCache.set(JSON.stringify(params), response);
+
+      return response;
+    });
+  }
+
   async postFormations(query, options) {
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching formations...`, query);

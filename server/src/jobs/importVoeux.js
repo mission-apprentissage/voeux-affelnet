@@ -118,7 +118,7 @@ const pickAcademie = (academie) => {
 
 const parseVoeuxCsv = async (source) => {
   const { findFormateurUai, findResponsableSiretAndEmail } = await catalogue();
-  const { findSiretResponsableReferentiel } = await referentiel();
+  const { findSiretResponsable } = await referentiel();
 
   return oleoduc(
     source,
@@ -213,7 +213,7 @@ const parseVoeuxCsv = async (source) => {
           uai: uaiFormateur,
         },
         etablissement_responsable: {
-          siret: siretResponsable ?? (await findSiretResponsableReferentiel(uaiFormateur)),
+          siret: siretResponsable ?? (await findSiretResponsable(uaiFormateur)),
         },
       });
     }),

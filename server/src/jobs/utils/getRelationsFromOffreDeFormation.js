@@ -4,7 +4,7 @@ const { Responsable /*Etablissement*/ } = require("../../common/model/index.js")
 const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
 const { catalogue } = require("./catalogue.js");
-const { referentiel } = require("./referentiel.js");
+// const { referentiel } = require("./referentiel.js");
 const { getSiretResponsableFromCleMinistereEducatif } = require("../../common/utils/cleMinistereEducatifUtils.js");
 
 const SIRET_RECENSEMENT = "99999999999999";
@@ -48,66 +48,65 @@ function filterConflicts(onConflict = () => ({})) {
 }
 
 async function getRelationsFromOffreDeFormation(options = {}) {
-  const { findFormateurUai, findResponsableSiretAndEmail } = await catalogue();
-  const { findEmailReferentiel, findSiretResponsableReferentiel } = await referentiel();
+  const { /*findFormateurUai, findResponsableSiretAndEmail, */ findFormation } = await catalogue();
+  // const { findEmail, findSiretResponsable } = await referentiel();
   const { onConflict = () => ({}), affelnet } = options;
 
-  async function searchResponsableSiretAndEmail({ uai, cle_ministere_educatif, siret_responsable }) {
-    logger.debug(`searchResponsableSiretAndEmail '${uai}', '${cle_ministere_educatif}', '${siret_responsable}'`);
-    const { formations, alternatives } = await findResponsableSiretAndEmail({
-      uai,
-      cle_ministere_educatif,
-      siret_responsable,
-    });
+  // async function searchResponsableSiretAndEmail({ uai, cle_ministere_educatif, siret_responsable }) {
+  //   logger.debug(`searchResponsableSiretAndEmail '${uai}', '${cle_ministere_educatif}', '${siret_responsable}'`);
+  //   const { formations, alternatives } = await findResponsableSiretAndEmail({
+  //     uai,
+  //     cle_ministere_educatif,
+  //     siret_responsable,
+  //   });
 
-    const siret = siret_responsable.length
-      ? siret_responsable
-      : formations[0]?.etablissement_gestionnaire_siret ?? (await findSiretResponsableReferentiel(uai));
+  //   const siret = siret_responsable.length
+  //     ? siret_responsable
+  //     : formations[0]?.etablissement_gestionnaire_siret ?? (await findSiretResponsable(uai));
 
-    const email =
-      formations[0]?.etablissement_gestionnaire_courriel?.split("##")[0] || (await findEmailReferentiel(siret));
+  //   const email = formations[0]?.etablissement_gestionnaire_courriel?.split("##")[0] || (await findEmail(siret));
 
-    if (alternatives.length) {
-      logger.warn({ uai, cle_ministere_educatif, siret_responsable, formations, alternatives });
-    }
+  //   if (alternatives.length) {
+  //     logger.warn({ uai, cle_ministere_educatif, siret_responsable, formations, alternatives });
+  //   }
 
-    return {
-      siret,
-      email,
-      alternatives,
-    };
-  }
+  //   return {
+  //     siret,
+  //     email,
+  //     alternatives,
+  //   };
+  // }
 
-  async function searchFormateurUai({ uai, cle_ministere_educatif, siret_responsable }) {
-    const { formations, alternatives } = await findFormateurUai({
-      uai,
-      cle_ministere_educatif,
-      siret_responsable,
-    });
+  // async function searchFormateurUai({ uai, cle_ministere_educatif, siret_responsable }) {
+  //   const { formations, alternatives } = await findFormateurUai({
+  //     uai,
+  //     cle_ministere_educatif,
+  //     siret_responsable,
+  //   });
 
-    if (!formations?.length) {
-      logger.warn(`Pas de formations permettant de retrouver l'UAI du formateur à partir de l'UAI du lieu ${uai}`);
-      return {
-        uai_formateur: null,
-        alternatives: [],
-      };
-    }
+  //   if (!formations?.length) {
+  //     // logger.warn(`Pas de formations permettant de retrouver l'UAI du formateur à partir de l'UAI du lieu ${uai}`);
+  //     return {
+  //       uai_formateur: null,
+  //       alternatives: [],
+  //     };
+  //   }
 
-    const uai_formateur = formations[0]?.etablissement_formateur_uai;
+  //   const uai_formateur = formations[0]?.etablissement_formateur_uai;
 
-    if (alternatives.length) {
-      logger.warn({ uai, cle_ministere_educatif, siret_responsable, formations, alternatives });
-    }
+  //   if (alternatives.length) {
+  //     logger.warn({ uai, cle_ministere_educatif, siret_responsable, formations, alternatives });
+  //   }
 
-    // if (uai_formateur !== uai) {
-    //   logger.info(`${uai_formateur} trouvé à la place de ${uai}`);
-    // }
+  //   // if (uai_formateur !== uai) {
+  //   //   logger.info(`${uai_formateur} trouvé à la place de ${uai}`);
+  //   // }
 
-    return {
-      uai_formateur,
-      alternatives,
-    };
-  }
+  //   return {
+  //     uai_formateur,
+  //     alternatives,
+  //   };
+  // }
 
   return compose(
     await getOffreDeFormationCsv(affelnet),
@@ -118,66 +117,103 @@ async function getRelationsFromOffreDeFormation(options = {}) {
         const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
 
         const cle_ministere_educatif = data["CLE_MINISTERE_EDUCATIF"]?.toUpperCase();
-        const siret_responsable = ![
+        let siret_responsable = [
           "SERVICE ACAD ET CENTRES INFO ET ORIENTAT",
           "RECTORAT ET SERVICES RECTORAUX",
           "SERVICES DEPARTEMENTAUX DE L'EN",
+          "SERVICES DEPARTEMENTAUX DE L EN",
         ].includes(libelleTypeEtablissement)
-          ? getSiretResponsableFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_GESTIONNAIRE"])
-          : SIRET_RECENSEMENT;
+          ? SIRET_RECENSEMENT
+          : getSiretResponsableFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_GESTIONNAIRE"]);
         const uai = data["UAI"]?.toUpperCase();
         let uai_formateur = data["UAI_FORMATEUR"]?.toUpperCase();
+        // let uai_responsable = data["UAI_RESPONSABLE"]?.toUpperCase();
+
+        const academie = data["ACADEMIE"];
+        const code_offre = data["CODE_OFFRE"];
+        const affelnet_id = `${academie}/${code_offre}`;
 
         if (siret_responsable === SIRET_RECENSEMENT) {
-          logger.debug(`Siret recensement détecté pour l'uai d'accueil ${uai}, skipping`);
+          logger.debug(`${affelnet_id} / Siret recensement détecté pour l'uai d'accueil ${uai}`);
           return accumulator;
         }
 
-        if (!uai_formateur?.length) {
-          logger.debug(`Recherche de l'UAI formateur pour ${uai} (${cle_ministere_educatif}, ${siret_responsable})`);
-          uai_formateur = (
-            await searchFormateurUai({ cle_ministere_educatif, siret_responsable, uai })
-          )?.uai_formateur?.toUpperCase();
-
+        try {
           if (!uai_formateur?.length) {
-            logger.error(
-              `UAI formateur introuvable pour l'UAI d'accueil ${uai} (${cle_ministere_educatif}, ${siret_responsable}), skipping`
-            );
-            return accumulator;
-          } else {
-            logger.info(`UAI formateur trouvé pour ${uai} : ${uai_formateur}`);
+            // logger.debug(
+            //   `${affelnet_id} / Recherche de l'UAI formateur pour ${uai} (${cle_ministere_educatif}, ${siret_responsable})`
+            // );
+            logger.debug(`${affelnet_id} / Recherche de l'UAI formateur`);
+
+            const formation = await findFormation({ affelnet_id });
+
+            uai_formateur = formation?.etablissement_formateur_uai;
+            // uai_formateur = (
+            //   await searchFormateurUai({ cle_ministere_educatif, siret_responsable, uai })
+            // )?.uai_formateur?.toUpperCase();
+
+            if (!uai_formateur?.length) {
+              logger.error(`${affelnet_id} / UAI formateur introuvable`);
+              // logger.error(
+              //   `${affelnet_id} / UAI formateur introuvable pour l'UAI d'accueil ${uai} (${cle_ministere_educatif}, ${siret_responsable})`
+              // );
+              return accumulator;
+            } else {
+              logger.info(`${affelnet_id} / UAI formateur trouvé pour ${uai} : ${uai_formateur}`);
+            }
           }
+
+          if (!siret_responsable?.length) {
+            logger.debug(`${affelnet_id} / Recherche du siret responsable`);
+
+            const formation = await findFormation({ affelnet_id });
+
+            siret_responsable = formation?.etablissement_gestionnaire_siret;
+
+            if (!siret_responsable?.length) {
+              logger.error(`${affelnet_id} / siret responsable introuvable`);
+
+              return accumulator;
+            } else {
+              logger.info(`${affelnet_id} / siret responsable trouvé : ${siret_responsable}`);
+            }
+          }
+
+          if (!libelleTypeEtablissement?.length || typeof libelleTypeEtablissement !== "string") {
+            logger.error(`${libelleTypeEtablissement} - ${typeof libelleTypeEtablissement}`);
+          }
+
+          const existingRelations = accumulator.filter(
+            (acc) => acc.uai_formateur === uai_formateur && acc.siret_responsable !== siret_responsable
+          );
+
+          const uniqueSirets = [
+            ...new Set([siret_responsable, ...existingRelations.map((item) => item.siret_responsable)]),
+          ];
+
+          if (uniqueSirets.length > 1) {
+            logger.debug(
+              `${affelnet_id} / UAI formateur ${uai_formateur} on multiple SIRET : ${uniqueSirets.join(" / ")}`
+            );
+            // return accumulator;
+          }
+
+          if (
+            !accumulator.filter(
+              (acc) =>
+                acc.affelnet_id === affelnet_id &&
+                acc.uai_formateur === uai_formateur &&
+                acc.siret_responsable === siret_responsable
+            ).length
+          ) {
+            accumulator.push({ uai_formateur, affelnet_id, siret_responsable });
+          }
+
+          return accumulator;
+        } catch (e) {
+          logger.error(`${affelnet_id} / Une erreur est survenue lors du traitement de la ligne`);
+          return accumulator;
         }
-
-        if (!libelleTypeEtablissement?.length || typeof libelleTypeEtablissement !== "string") {
-          logger.error(`${libelleTypeEtablissement} - ${typeof libelleTypeEtablissement}`);
-        }
-
-        const existingRelations = accumulator.filter(
-          (acc) => acc.uai_formateur === uai_formateur && acc.siret_responsable !== siret_responsable
-        );
-
-        const uniqueSirets = [
-          ...new Set([siret_responsable, ...existingRelations.map((item) => item.siret_responsable)]),
-        ];
-
-        if (uniqueSirets.length > 1) {
-          logger.debug(`UAI formateur ${uai_formateur} on multiple SIRET : ${uniqueSirets.join(" / ")}`);
-          // return accumulator;
-        }
-
-        if (
-          !accumulator.filter(
-            (acc) =>
-              acc.uai_formateur === uai_formateur &&
-              acc.cle_ministere_educatif === cle_ministere_educatif &&
-              acc.siret_responsable === siret_responsable
-          ).length
-        ) {
-          accumulator.push({ uai_formateur, cle_ministere_educatif, siret_responsable });
-        }
-
-        return accumulator;
       },
       { accumulator: [] }
     ),
@@ -186,15 +222,85 @@ async function getRelationsFromOffreDeFormation(options = {}) {
     //   logger.info(data);
     //   return data;
     // }),
+    // transformData(
+    //   async ({ uai_formateur, cle_ministere_educatif, siret_responsable }) => {
+    //     if (!uai_formateur?.length || !cle_ministere_educatif?.length || !siret_responsable?.length) {
+    //       logger.warn("Informations manquantes : ", {
+    //         uai_formateur,
+    //         cle_ministere_educatif,
+    //         siret_responsable,
+    //       });
+    //     }
+
+    //     try {
+    //       if (siret_responsable === SIRET_RECENSEMENT) {
+    //         return {
+    //           uai_formateurs: uai_formateur?.toUpperCase(),
+    //           siret_responsable: SIRET_RECENSEMENT,
+    //           email_responsable: process.env.VOEUX_AFFELNET_EMAIL,
+    //         };
+    //       }
+
+    //       if (siret_responsable) {
+    //         const responsable = await Responsable.findOne({ siret: siret_responsable });
+    //         // const responsable = await Etablissement.findOne({ siret: siret_responsable });
+
+    //         if (responsable) {
+    //           return {
+    //             uai_formateurs: uai_formateur?.toUpperCase(),
+    //             siret_responsable: responsable.siret,
+    //             email_responsable: responsable.email?.toLowerCase(),
+    //           };
+    //         }
+    //       }
+
+    //       try {
+    //         const { siret, email, alternatives } = await searchResponsableSiretAndEmail({
+    //           uai_formateur,
+    //           cle_ministere_educatif,
+    //           siret_responsable,
+    //         });
+
+    //         logger.info("Informations trouvées : ", {
+    //           uai_formateurs: uai_formateur?.toUpperCase(),
+    //           siret_responsable: siret,
+    //           email_responsable: email?.toLowerCase(),
+    //           alternatives,
+    //         });
+
+    //         return {
+    //           uai_formateurs: uai_formateur?.toUpperCase(),
+    //           siret_responsable: siret,
+    //           email_responsable: email?.toLowerCase(),
+    //           alternatives,
+    //         };
+    //       } catch (e) {
+    //         return {
+    //           uai_formateurs: uai_formateur?.toUpperCase(),
+    //           siret_responsable: null,
+    //           email_responsable: null,
+    //           alternatives: [],
+    //         };
+    //       }
+    //     } catch (e) {
+    //       logger.error(
+    //         { err: e },
+    //         `Une erreur est survenue lors du traitement de la ligne { uai_formateur: ${uai_formateur}, cle_ministere_educatif: ${cle_ministere_educatif}, siret_responsable: ${siret_responsable} }`
+    //       );
+    //     }
+    //   },
+    //   { parallel: 10 }
+    // ),
+
     transformData(
-      async ({ uai_formateur, cle_ministere_educatif, siret_responsable }) => {
-        // if (!uai?.length || !cle_ministere_educatif?.length || !siret_responsable?.length) {
-        //   logger.warn("Informations manquantes : ", {
-        //     uai,
-        //     cle_ministere_educatif,
-        //     siret_responsable,
-        //   });
-        // }
+      async ({ uai_formateur, affelnet_id, siret_responsable }) => {
+        if (!uai_formateur?.length || !affelnet_id?.length || !siret_responsable?.length) {
+          logger.warn("Informations manquantes : ", {
+            uai_formateur,
+            affelnet_id,
+            siret_responsable,
+          });
+        }
 
         try {
           if (siret_responsable === SIRET_RECENSEMENT) {
@@ -219,30 +325,32 @@ async function getRelationsFromOffreDeFormation(options = {}) {
           }
 
           try {
-            const { siret, email, alternatives } = await searchResponsableSiretAndEmail({
-              uai_formateur,
-              cle_ministere_educatif,
-              siret_responsable,
+            const formation = await findFormation({
+              affelnet_id,
             });
+
+            // logger.info("Informations trouvées : ", {
+            //   uai_formateurs: uai_formateur?.toUpperCase(),
+            //   siret_responsable: formation?.etablissement_gestionnaire_siret,
+            //   email_responsable: formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
+            // });
 
             return {
               uai_formateurs: uai_formateur?.toUpperCase(),
-              siret_responsable: siret,
-              email_responsable: email?.toLowerCase(),
-              alternatives,
+              siret_responsable: formation?.etablissement_gestionnaire_siret,
+              email_responsable: formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
             };
           } catch (e) {
             return {
               uai_formateurs: uai_formateur?.toUpperCase(),
               siret_responsable: null,
               email_responsable: null,
-              alternatives: [],
             };
           }
         } catch (e) {
           logger.error(
             { err: e },
-            `Une erreur est survenue lors du traitement de la ligne { uai_formateur: ${uai_formateur}, cle_ministere_educatif: ${cle_ministere_educatif}, siret_responsable: ${siret_responsable} }`
+            `Une erreur est survenue lors du traitement de la ligne { uai_formateur: ${uai_formateur}, affelnet_id: ${affelnet_id}, siret_responsable: ${siret_responsable} }`
           );
         }
       },
