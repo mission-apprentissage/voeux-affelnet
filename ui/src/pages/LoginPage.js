@@ -225,7 +225,7 @@ function LoginPage() {
                 </Text>
 
                 <Text mb={4}>
-                  Les destinataires seront les mêmes qu'en 2023. Si vous pensez que les contacts peuvent avoir changé,
+                  Les destinataires seront les mêmes qu'en 2024 . Si vous pensez que les contacts peuvent avoir changé,
                   vous pouvez adresser un signalement à{" "}
                   <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                     {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
@@ -276,7 +276,7 @@ function LoginPage() {
                         </AccordionButton>
                       </h2>
                       <AccordionPanel pb={4}>
-                        <Text mb={4}>En 2023, la transmission des listes s’effectuera en trois temps :</Text>
+                        <Text mb={4}>En 2024 , la transmission des listes s’effectuera en trois temps :</Text>
                         <Text mb={4}>
                           <UnorderedList>
                             <ListItem>

@@ -390,7 +390,7 @@ export const Formateur = ({ responsable, callback }) => {
           ) : new Date().getTime() <= new Date("2024/06/05").getTime() ? (
             <>
               <Text mb={4}>
-                Les vœux exprimés en mai seront rendus disponibles dans la semaine du 5 juin 2023. Un courriel vous
+                Les vœux exprimés en mai seront rendus disponibles dans la semaine du 5 juin 2024 . Un courriel vous
                 préviendra de la mise à disposition des listes.
               </Text>
             </>

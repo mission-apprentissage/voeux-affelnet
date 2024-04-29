@@ -105,7 +105,7 @@ const Footer = () => {
               </ListItem>
             </List>
             <Text textStyle="xs" mt={[2, 2, 0]}>
-              © République française 2023
+              © République française 2024
             </Text>
           </Flex>
         </Container>
