@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Box, Button, useDisclosure } from "@chakra-ui/react";
+import { Text, Button, useDisclosure } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../../hooks/responsableHooks";
 import { UserStatut } from "../../../constants/UserStatut";
@@ -8,8 +8,13 @@ import { DelegationModal } from "../modals/DelegationModal";
 import { StatutBadge, statuses } from "../../StatutBadge";
 import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
 import { WarningFill } from "../../../../theme/components/icons/WarningFill";
+import { UserType } from "../../../constants/UserType";
 
-export const FormateurStatut = ({ responsable, formateur, callback, showDownloadButton }) => {
+export const FormateurStatut = ({ relation, callback, showDownloadButton }) => {
+  const responsable = relation.responsable ?? relation.etablissements_responsable;
+  const formateur = relation.formateur ?? relation.etablissements_formateur;
+  const delegue = relation.delegue;
+
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const downloadVoeux = useDownloadVoeux({ responsable, formateur });
@@ -23,83 +28,67 @@ export const FormateurStatut = ({ responsable, formateur, callback, showDownload
     return;
   }
 
-  const etablissementFromResponsable = responsable.etablissements_formateur?.find(
-    (etablissement) => formateur.uai === etablissement.uai
-  );
+  const isDiffusionAutorisee = !!delegue;
 
-  const etablissementFromFormateur = formateur.etablissements_responsable?.find(
-    (etablissement) => responsable.siret === etablissement.siret
-  );
+  const voeuxDisponible = relation?.nombre_voeux > 0;
 
-  const diffusionAutorisee = etablissementFromResponsable?.diffusionAutorisee;
+  const voeuxTelechargementsDelegue =
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
 
-  const voeuxDisponible = etablissementFromResponsable.nombre_voeux > 0;
+  const voeuxTelechargementsResponsable =
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
 
-  const voeuxTelechargementsFormateur = formateur.voeux_telechargements_responsable.filter(
-    (telechargement) => telechargement.siret === responsable.siret
-  );
-
-  const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur.filter(
-    (telechargement) => telechargement.uai === formateur.uai
-  );
-
-  switch (diffusionAutorisee) {
+  switch (isDiffusionAutorisee) {
     case true: {
       switch (true) {
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-          !!voeuxTelechargementsFormateur.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
+          !!voeuxTelechargementsDelegue.find(
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-          !!voeuxTelechargementsFormateur.find(
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
+          !!voeuxTelechargementsDelegue.find(
             (telechargement) =>
-              new Date(telechargement.date).getTime() <=
-                new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-              new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.first_date_voeux).getTime()
+              new Date(telechargement.date).getTime() <= new Date(relation.last_date_voeux).getTime() &&
+              new Date(telechargement.date).getTime() > new Date(relation.first_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() ===
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-          !!voeuxTelechargementsFormateur.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+          new Date(relation.first_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime() &&
+          !!voeuxTelechargementsDelegue.find(
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          (!voeuxTelechargementsFormateur.length ||
-            !voeuxTelechargementsFormateur.find(
-              (telechargement) =>
-                new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.last_date_voeux).getTime()
+          (!voeuxTelechargementsDelegue.length ||
+            !voeuxTelechargementsDelegue.find(
+              (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
             )): {
           return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut && !voeuxDisponible: {
+        case UserStatut.ACTIVE === delegue.statut && !voeuxDisponible: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
-        case UserStatut.CONFIRME === formateur.statut: {
+        case UserStatut.CONFIRME === delegue.statut: {
           return (
-            <Box title="Une délégation de droit a été activée pour cet organisme, mais le destinataire n'a pas encore créé son compte.">
+            <Text
+              as="span"
+              title="Une délégation de droit a été activée pour cet organisme, mais le destinataire n'a pas encore créé son compte."
+            >
               <WarningFill color="#fcc63a" verticalAlign="text-bottom" /> Délégation activée, compte non créé
-            </Box>
+            </Text>
           );
         }
-        case UserStatut.EN_ATTENTE === formateur.statut: {
+        case UserStatut.EN_ATTENTE === delegue.statut: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
         default: {
@@ -108,47 +97,32 @@ export const FormateurStatut = ({ responsable, formateur, callback, showDownload
       }
     }
     case false: {
-      if (!responsable.nombre_voeux) {
+      if (!relation.nombre_voeux) {
         return (
           <>
-            {!isResponsableFormateur({ responsable, formateur }) && !etablissementFromResponsable.diffusionAutorisee && (
-              <>
-                <Button ml={4} variant="primary" onClick={onOpen}>
-                  Déléguer
-                </Button>
+            <Button ml={4} variant="primary" onClick={onOpen}>
+              Déléguer
+            </Button>
 
-                <DelegationModal
-                  responsable={responsable}
-                  formateur={formateur}
-                  callback={callback}
-                  isOpen={isOpen}
-                  onClose={onClose}
-                />
-              </>
-            )}
+            <DelegationModal relation={relation} callback={callback} isOpen={isOpen} onClose={onClose} />
           </>
         );
       }
 
       switch (true) {
         case voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
         case voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
             (telechargement) =>
-              new Date(telechargement.date).getTime() <=
-                new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-              new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.first_date_voeux).getTime()
+              new Date(telechargement.date).getTime() <= new Date(relation.last_date_voeux).getTime() &&
+              new Date(telechargement.date).getTime() > new Date(relation.first_date_voeux).getTime()
           ): {
           return showDownloadButton ? (
             <Button variant="primary" onClick={downloadVoeuxAndReload}>
@@ -159,20 +133,16 @@ export const FormateurStatut = ({ responsable, formateur, callback, showDownload
           );
         }
         case voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() ===
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+          new Date(relation.first_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
         case voeuxDisponible &&
           (!voeuxTelechargementsResponsable.length ||
             !voeuxTelechargementsResponsable.find(
-              (telechargement) =>
-                new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.last_date_voeux).getTime()
+              (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
             )): {
           return showDownloadButton ? (
             <Button variant="primary" onClick={downloadVoeuxAndReload}>
@@ -184,9 +154,9 @@ export const FormateurStatut = ({ responsable, formateur, callback, showDownload
         }
         case !voeuxDisponible: {
           return (
-            <Box>
+            <Text as="span">
               <SuccessFill verticalAlign="text-bottom" /> Pas de vœux disponibles
-            </Box>
+            </Text>
           );
         }
         default: {

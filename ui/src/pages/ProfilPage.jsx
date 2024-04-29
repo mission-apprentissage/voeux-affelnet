@@ -3,6 +3,7 @@ import { Redirect } from "react-router-dom";
 
 import useAuth from "../common/hooks/useAuth";
 import { _get } from "../common/httpClient";
+import { UserType } from "../common/constants/UserType";
 
 export const ProfilPage = () => {
   const [auth] = useAuth();
@@ -11,13 +12,18 @@ export const ProfilPage = () => {
 
   const getSelf = useCallback(async () => {
     switch (auth.type) {
-      case "Responsable": {
+      case UserType.RESPONSABLE: {
         const response = await _get("/api/responsable");
         setSelf(response);
         break;
       }
-      case "Formateur": {
+      case UserType.FORMATEUR: {
         const response = await _get("/api/formateur");
+        setSelf(response);
+        break;
+      }
+      case UserType.DELEGUE: {
+        const response = await _get("/api/delegue");
         setSelf(response);
         break;
       }
@@ -41,8 +47,9 @@ export const ProfilPage = () => {
     <>
       {
         {
-          Responsable: <Redirect to={"/responsable"} replace />,
-          Formateur: <Redirect to={"/formateur"} replace />,
+          [UserType.RESPONSABLE]: <Redirect to={"/responsable"} replace />,
+          [UserType.FORMATEUR]: <Redirect to={"/formateur"} replace />,
+          [UserType.DELEGUE]: <Redirect to={"/delegue"} replace />,
         }[self?.type]
       }
     </>

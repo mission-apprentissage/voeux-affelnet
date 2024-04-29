@@ -142,7 +142,7 @@ function LoginPage() {
                                   Votre identifiant figure dans nos correspondances courriel
                                   <ul style={{ listStyle: "none" }}>
                                     <li>Organisme responsable : votre numéro de Siret</li>
-                                    <li>Organisme formateur : votre code UAI</li>
+                                    <li>Personne déléguée: votre adresse courriel</li>
                                     <li>Autres utilisateurs : prenom.nom</li>
                                   </ul>
                                 </FormHelperText>

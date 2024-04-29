@@ -1,6 +1,6 @@
 const logger = require("../../common/logger.js");
 const { compose, transformData, filterData, accumulateData, flattenArray } = require("oleoduc");
-const { Responsable /*Etablissement*/ } = require("../../common/model/index.js");
+const { Responsable /*Etablissement*/ } = require("../../common/model");
 const { getFromStorage } = require("../../common/utils/ovhUtils.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
 const { catalogue } = require("./catalogue.js");

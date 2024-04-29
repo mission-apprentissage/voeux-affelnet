@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import queryString from "query-string";
 
 import { Field, Form, Formik } from "formik";
@@ -19,12 +19,12 @@ import {
   Text,
 } from "@chakra-ui/react";
 
-import { Yup } from "../common/Yup";
 import { _post } from "../common/httpClient";
 import decodeJWT from "../common/utils/decodeJWT";
 import ErrorMessage from "../common/components/ErrorMessage";
 import { useFetch } from "../common/hooks/useFetch";
 import { AlertMessage } from "../common/components/layout/AlertMessage";
+import { emailConfirmationSchema } from "../common/utils/validationUtils";
 
 function ServerErrorMessage() {
   return (
@@ -42,7 +42,7 @@ function ServerErrorMessage() {
   );
 }
 
-function StatusErrorMessage({ error, username }) {
+function StatusErrorMessage({ error, username, actionToken }) {
   if (error) {
     if (error.statusCode === 401) {
       return (
@@ -72,6 +72,12 @@ function StatusErrorMessage({ error, username }) {
             <Text mb={4}>
               C’est à cette adresse que les listes de candidats seront transmises, à partir de la semaine du 5 juin.
             </Text>
+            <Text mb={4}>
+              Vous pouvez désormais définir votre mot de passe en suivant ce lien si ce n'est déjà fait :{" "}
+              <Link variant="action" href={`/activation?username=${username}&actionToken=${actionToken}`}>
+                Définir mon mot de passe
+              </Link>
+            </Text>
             <Text>
               Si vous pensez qu’il s’agit d’une erreur, veuillez le signaler en envoyant un courriel à :{" "}
               <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
@@ -90,6 +96,7 @@ function StatusErrorMessage({ error, username }) {
 
 const ConfirmationPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { actionToken } = queryString.parse(location.search);
   const username = decodeJWT(actionToken).sub;
   const [data, loading, error] = useFetch(`/api/confirmation/status?username=${username}&token=${actionToken}`);
@@ -101,17 +108,19 @@ const ConfirmationPage = () => {
   const accept = async (values) => {
     try {
       await _post("/api/confirmation/accept", { email: values.email, actionToken });
-      setTitle(<>Dernière étape : veuillez définir votre mot de passe de connexion.</>);
-      setMessage(
-        <Alert status="warning" variant="left-accent">
-          <AlertIcon />
-          <Box>
-            <Text>
-              Un nouveau message vient de vous être envoyé, avec un lien vous permettant de définir votre mot de passe.
-            </Text>
-          </Box>
-        </Alert>
-      );
+      // setTitle(<>Dernière étape : veuillez définir votre mot de passe de connexion.</>);
+      // setMessage(
+      //   <Alert status="warning" variant="left-accent">
+      //     <AlertIcon />
+      //     <Box>
+      //       <Text>
+      //         Un nouveau message vient de vous être envoyé, avec un lien vous permettant de définir votre mot de passe.
+      //       </Text>
+      //     </Box>
+      //   </Alert>
+      // );
+
+      navigate("/activation?actionToken=" + actionToken);
     } catch (e) {
       console.error(e);
       setMessage(<ServerErrorMessage />);
@@ -132,7 +141,7 @@ const ConfirmationPage = () => {
           <Box mt={8}>
             <Box mb={8}>
               {message}
-              {error && <StatusErrorMessage error={error} username={username} />}
+              {error && <StatusErrorMessage error={error} username={username} actionToken={actionToken} />}
               {loading && <div>En cours de chargement...</div>}
               {showForm && (
                 <Box>
@@ -159,13 +168,7 @@ const ConfirmationPage = () => {
                       email: data?.email,
                       email_confirmation: data?.email,
                     }}
-                    validationSchema={Yup.object().shape({
-                      email: Yup.string().email().required(),
-                      email_confirmation: Yup.string()
-                        .email()
-                        .required("Requis")
-                        .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
-                    })}
+                    validationSchema={emailConfirmationSchema}
                     onSubmit={accept}
                   >
                     {({ status = {} }) => {

@@ -94,6 +94,10 @@ const schema = new Schema({
   etablissement_formateur: {
     required: true,
     type: nested({
+      siret: {
+        type: String,
+        index: true,
+      },
       uai: {
         type: String,
         index: true,
@@ -104,6 +108,10 @@ const schema = new Schema({
     required: true,
     type: nested({
       siret: {
+        type: String,
+        index: true,
+      },
+      uai: {
         type: String,
         index: true,
       },

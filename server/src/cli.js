@@ -22,6 +22,7 @@ const { cleanResponsables } = require("./jobs/cleanResponsables");
 const importEtablissementsFormateurs = require("./jobs/importEtablissementsFormateurs");
 const importFormateurs = require("./jobs/importFormateurs");
 const { cleanFormateurs } = require("./jobs/cleanFormateurs");
+const importRelations = require("./jobs/importRelations");
 const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
 const exportResponsables = require("./jobs/exportResponsables");
@@ -159,6 +160,17 @@ cli
       const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
 
       return cleanFormateurs(input, options);
+    });
+  });
+
+cli
+  .command("importRelations [<relationCsv>]")
+  .description("Importe les formations depuis le fichier transmis par Affelnet")
+  .action((relationCsv) => {
+    runScript(() => {
+      const input = relationCsv ? createReadStream(relationCsv) : null;
+
+      return importRelations(input);
     });
   });
 
@@ -408,7 +420,10 @@ cli
       };
 
       return await oleoduc(
-        Responsable.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
+        Responsable.aggregate([
+          { $unwind: "$etablissements_formateur" },
+          { $project: { uai: "$etablissements_formateur.uai" } },
+        ]).cursor(),
         transformData((etablissement) => etablissement.uai),
         transformData(async (uai) => await getEmailsFormateurFromUai(uai)),
         flattenArray(),

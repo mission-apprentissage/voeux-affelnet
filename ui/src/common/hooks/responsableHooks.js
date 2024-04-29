@@ -4,9 +4,9 @@ import { downloadCSV } from "../utils/downloadUtils";
 
 export const useDownloadVoeux = ({ responsable, formateur }) => {
   return useCallback(async () => {
-    const filename = `${responsable.siret}-${formateur.uai}.csv`;
+    const filename = `${responsable.siret}-${formateur?.uai}.csv`;
 
-    const content = await fetch(`/api/responsable/formateurs/${formateur.uai}/voeux`, {
+    const content = await fetch(`/api/responsable/formateurs/${formateur?.uai}/voeux`, {
       method: "GET",
       headers: getHeaders(),
     });

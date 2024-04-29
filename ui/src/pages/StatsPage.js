@@ -109,18 +109,18 @@ function StatsPage() {
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre d'organismes responsables</StatLabel>
-                <StatNumber>{organismes?.totalResponsable}</StatNumber>
-                Dont {organismes?.totalResponsableMultiOrganismes} responsables multi-organismes
+                <StatNumber>{organismes?.totalResponsable?.toLocaleString()}</StatNumber>
+                Dont {organismes?.totalResponsableMultiOrganismes?.toLocaleString()} responsables multi-organismes
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre d'établissements formateurs</StatLabel>
-                <StatNumber>{organismes?.totalFormateur}</StatNumber>
+                <StatNumber>{organismes?.totalFormateur?.toLocaleString()}</StatNumber>
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre d'établissements d'accueil</StatLabel>
-                <StatNumber>{organismes?.totalAccueil}</StatNumber>
+                <StatNumber>{organismes?.totalAccueil?.toLocaleString()}</StatNumber>
               </Stat>
             </StatGroup>
           </Box>
@@ -136,26 +136,21 @@ function StatsPage() {
                   Responsables ayant procédé à au moins une <br />
                   délégation de droit de réception des listes de candidats
                 </StatLabel>
-                <StatNumber>{organismes?.totalResponsableAvecDelegation}</StatNumber>
+                <StatNumber>{organismes?.totalResponsableAvecDelegation?.toLocaleString()}</StatNumber>
 
                 <StatHelpText>
                   (soit{" "}
-                  {
-                    +(
-                      (organismes?.totalResponsableAvecDelegation * 100) /
-                      organismes?.totalResponsableMultiOrganismes
-                    ).toFixed(2)
-                  }
-                  % des responsables multi-organismes)
+                  {+((organismes?.totalResponsableAvecDelegation * 100) / organismes?.totalResponsable).toFixed(2)}% des
+                  responsables)
                 </StatHelpText>
               </Stat>
 
               <Stat>
                 <StatLabel>
-                  Formateurs ayant reçu une délégation de <br />
-                  droit de réception des listes de candidats
+                  Formateurs pour lesquels une délégation de <br />
+                  droit de réception des listes de candidats a été accordée
                 </StatLabel>
-                <StatNumber>{organismes?.totalFormateurAvecDelegation}</StatNumber>
+                <StatNumber>{organismes?.totalFormateurAvecDelegation?.toLocaleString()}</StatNumber>
               </Stat>
             </StatGroup>
           </Box>
@@ -167,13 +162,13 @@ function StatsPage() {
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures</StatLabel>
-                <StatNumber>{voeux?.total}</StatNumber>
-                <StatHelpText>et {voeux?.nbVoeuxNonDiffusable} non diffusables</StatHelpText>
+                <StatNumber>{voeux?.total?.toLocaleString()}</StatNumber>
+                <StatHelpText>et {voeux?.nbVoeuxNonDiffusable?.toLocaleString()} non diffusables</StatHelpText>
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre d'apprenants</StatLabel>
-                <StatNumber>{voeux?.apprenants}</StatNumber>
+                <StatNumber>{voeux?.apprenants?.toLocaleString()}</StatNumber>
               </Stat>
 
               {/* <Stat>
@@ -196,7 +191,9 @@ function StatsPage() {
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées</StatLabel>
-                <StatNumber>{voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur}</StatNumber>
+                <StatNumber>
+                  {(voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur)?.toLocaleString()}
+                </StatNumber>
                 {(!!voeux?.nbVoeuxDiffusésResponsable || !!voeux?.nbVoeuxDiffusésFormateur) && (
                   <StatHelpText>
                     (soit{" "}
@@ -206,14 +203,14 @@ function StatsPage() {
                         voeux?.total
                       ).toFixed(2)
                     }
-                    % de l’ensemble des candidature)
+                    % de l’ensemble des candidatures)
                   </StatHelpText>
                 )}
               </Stat>
 
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées par les responsables</StatLabel>
-                <StatNumber>{voeux?.nbVoeuxDiffusésResponsable}</StatNumber>
+                <StatNumber>{voeux?.nbVoeuxDiffusésResponsable?.toLocaleString()}</StatNumber>
 
                 {!!voeux?.nbVoeuxDiffusésResponsable && (
                   <StatHelpText>
@@ -231,7 +228,7 @@ function StatsPage() {
 
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées par les délégués</StatLabel>
-                <StatNumber>{voeux?.nbVoeuxDiffusésFormateur}</StatNumber>
+                <StatNumber>{voeux?.nbVoeuxDiffusésFormateur?.toLocaleString()}</StatNumber>
                 {!!voeux?.nbVoeuxDiffusésFormateur && (
                   <StatHelpText>
                     (soit{" "}
@@ -264,11 +261,14 @@ function StatsPage() {
                 </StatNumber>
 
                 <StatHelpText>
-                  pour {progresses?.noDownload?.nbFormateur} organismes formateurs (
+                  pour {progresses?.noDownload?.nbFormateur?.toLocaleString()} organismes formateurs{" "}
+                  {/*(
                   {+((progresses?.noDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
-                  %) et {+progresses?.noDownload?.nbVoeux} candidatures (
+                  %)*/}{" "}
+                  et {+progresses?.noDownload?.nbVoeux?.toLocaleString()} candidatures{" "}
+                  {/*(
                   {+((progresses?.noDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
-                  %)
+                  %)*/}
                 </StatHelpText>
               </Stat>
 
@@ -283,11 +283,14 @@ function StatsPage() {
                 </StatNumber>
 
                 <StatHelpText>
-                  pour {progresses?.partialDownload?.nbFormateur} organismes formateurs (
-                  {+((progresses?.partialDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
-                  %) et {progresses?.partialDownload?.nbVoeux} candidatures (
-                  {+((progresses?.partialDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
-                  %)
+                  pour {progresses?.partialDownload?.nbFormateur?.toLocaleString()} organismes formateurs{" "}
+                  {/*(
+                 ({+((progresses?.partialDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
+                  %)*/}{" "}
+                  et {progresses?.partialDownload?.nbVoeux?.toLocaleString()} candidatures
+                  {/* (
+                  {/*({+((progresses?.partialDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
+                  %)*/}
                 </StatHelpText>
               </Stat>
             </StatGroup>
@@ -298,16 +301,19 @@ function StatsPage() {
                 <StatLabel>Nombre d’organisme responsables ayant téléchargé l’intégralité des candidatures</StatLabel>
 
                 <StatNumber>
-                  {progresses?.fullDownload?.nbResponsable} (
+                  {progresses?.fullDownload?.nbResponsable?.toLocaleString()} (
                   {+((progresses?.fullDownload?.nbResponsable * 100) / organismes?.totalResponsable).toFixed(2)}%)
                 </StatNumber>
 
                 <StatHelpText>
-                  pour {progresses?.fullDownload?.nbFormateur} organismes formateurs (
-                  {+((progresses?.fullDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
-                  %) et {progresses?.fullDownload?.nbVoeux} candidatures (
-                  {+((progresses?.fullDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
-                  %)
+                  pour {progresses?.fullDownload?.nbFormateur?.toLocaleString()} organismes formateurs{" "}
+                  {/*(
+                  ({+((progresses?.fullDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
+                  %)*/}{" "}
+                  et {progresses?.fullDownload?.nbVoeux?.toLocaleString()} candidatures{" "}
+                  {/*(
+                  {({+((progresses?.fullDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
+                  %)*/}
                 </StatHelpText>
               </Stat>
 
@@ -315,13 +321,14 @@ function StatsPage() {
                 {/* Nombre d’organismes responsables sans candidatures : 54 (5,5%), pour 81 organismes formateurs. */}
                 <StatLabel>Nombre d’organismes responsables sans candidatures</StatLabel>
                 <StatNumber>
-                  {progresses?.noVoeux?.nbResponsable} (
+                  {progresses?.noVoeux?.nbResponsable?.toLocaleString()} (
                   {+((progresses?.noVoeux?.nbResponsable * 100) / organismes?.totalResponsable).toFixed(2)}%)
                 </StatNumber>
 
                 <StatHelpText>
-                  pour {progresses?.noVoeux?.nbFormateur} organismes formateurs (
-                  {+((progresses?.noVoeux?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}%)
+                  pour {progresses?.noVoeux?.nbFormateur?.toLocaleString()} organismes formateurs
+                  {/* (
+                  ({+((progresses?.noVoeux?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}%)*/}
                 </StatHelpText>
               </Stat>
             </StatGroup>
@@ -352,11 +359,11 @@ function StatsPage() {
                   return (
                     <Tr key={academie.code}>
                       <Td>{academie.nom}</Td>
-                      <Td>{organismes?.totalResponsable}</Td>
-                      <Td>{organismes?.totalFormateur}</Td>
-                      <Td>{voeux?.total}</Td>
+                      <Td>{organismes?.totalResponsable?.toLocaleString()}</Td>
+                      <Td>{organismes?.totalFormateur?.toLocaleString()}</Td>
+                      <Td>{voeux?.total?.toLocaleString()}</Td>
                       <Td>
-                        {voeux?.nbVoeuxDiffusésFormateur + voeux?.nbVoeuxDiffusésResponsable}{" "}
+                        {(voeux?.nbVoeuxDiffusésFormateur + voeux?.nbVoeuxDiffusésResponsable)?.toLocaleString()}{" "}
                         {voeux?.total > 0 && (
                           <>
                             (

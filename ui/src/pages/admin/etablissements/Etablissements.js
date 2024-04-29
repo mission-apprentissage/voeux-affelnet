@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner } from "@chakra-ui/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner, Progress } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import queryString from "query-string";
 
@@ -13,14 +13,17 @@ import { FormateurLibelle } from "../../../common/components/formateur/fields/Fo
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
 import { useGet } from "../../../common/hooks/httpHooks";
-import { ContactDelegueTag } from "../../../common/components/tags/ContactDelegue";
 import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
-import { ContactResponsableTag } from "../../../common/components/tags/ContactResponsable";
 import { OrganismeResponsableTag } from "../../../common/components/tags/OrganismeResponsable";
 import { FileDownloadLine } from "../../../theme/components/icons/FileDownloadLine";
 import { useDownloadStatut } from "../../../common/hooks/adminHooks";
+import { ResponsableEmail } from "../../../common/components/admin/fields/ResponsableEmail";
+import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
 
 export const Etablissements = () => {
+  const mounted = useRef(true);
+
+  const [abortController, setAbortController] = useState(new AbortController());
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
   const [downloading, setDownloading] = useState(false);
@@ -39,18 +42,23 @@ export const Etablissements = () => {
 
   const search = useCallback(
     async (values) => {
+      abortController?.abort();
       try {
+        const controller = new AbortController();
+        setAbortController(controller);
         setLoading(true);
         setQuery(values);
         const params = queryString.stringify(
           {
             ...values,
-            sort: JSON.stringify({ type: -1, nombre_voeux: -1, uai: 1 }),
+            sort: JSON.stringify({ type: -1, nombre_voeux_restant: -1 }),
             ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
           },
           { skipNull: true, skipEmptyString: true }
         );
-        const response = await _get(`/api/admin/etablissements${params ? `?${params}` : ""}`);
+        const response = await _get(`/api/admin/etablissements${params ? `?${params}` : ""}`, {
+          signal: controller.signal,
+        });
 
         setLoading(false);
         setData(response.etablissements);
@@ -58,12 +66,14 @@ export const Etablissements = () => {
         // setStats(response.stats);
         setError(undefined);
       } catch (e) {
-        console.error(e);
-        setLoading(false);
-        setError(e);
+        if (!(e.name === "AbortError")) {
+          console.error(e);
+          setLoading(false);
+          setError(e);
+        }
       }
     },
-    [self]
+    [self, abortController, setAbortController]
   );
 
   const downloadStatut = useDownloadStatut();
@@ -82,21 +92,35 @@ export const Etablissements = () => {
     setDownloading(false);
   }, [query, self?.academies, downloadStatut]);
 
-  useEffect(() => {
-    const run = async () => {
-      await search();
-    };
+  // useEffect(() => {
+  //   const run = async () => {
+  //     await search();
+  //   };
 
-    run();
-  }, [search]);
+  //   run();
+  // }, [search]);
 
   const callback = useCallback(
     async (values) => {
-      console.log(values);
+      // console.log(values);
       await search({ page: 1, ...values });
     },
     [search]
   );
+
+  useEffect(() => {
+    const run = async () => {
+      await callback();
+    };
+
+    if (mounted.current) {
+      run();
+    }
+
+    return () => {
+      mounted.current = false;
+    };
+  }, [callback]);
 
   if (!self) {
     return;
@@ -213,15 +237,15 @@ export const Etablissements = () => {
             <Th width="450px">Raison sociale / Ville</Th>
             <Th width="350px">Courriel habilité</Th>
 
-            <Th width={"80px"}>Candidats</Th>
-            <Th width={"80px"}>Restant à télécharger</Th>
+            <Th width={"70px"}>Candidats</Th>
+            <Th width={"70px"}>Restant à télécharger</Th>
             <Th>Statut</Th>
           </Tr>
         </Thead>
         <Tbody>
-          {loading && data.length === 0 ? (
+          {loading || data.length === 0 ? (
             <Tr>
-              <Td colSpan={4}>{loading ? "Chargement..." : "Pas de résultats"}</Td>
+              <Td colSpan={6}>{loading ? <Progress size="xs" isIndeterminate /> : "Pas de résultats"}</Td>
             </Tr>
           ) : (
             data.map((user, index) => {
@@ -237,27 +261,22 @@ export const Etablissements = () => {
                             </Link>
                           </Td>
                           <Td>
-                            <Text lineHeight={6}>
+                            <Box lineHeight={6}>
                               <ResponsableLibelle responsable={user} />{" "}
                               <OrganismeResponsableTag verticalAlign="baseline" />
-                            </Text>
+                            </Box>
                           </Td>
                           <Td>
-                            <Text lineHeight={6}>
-                              {user.email} <ContactResponsableTag />
-                            </Text>
+                            <Box lineHeight={6}>
+                              <ResponsableEmail responsable={user} />
+                            </Box>
                           </Td>
-                          <Td>{user.nombre_voeux}</Td>
+                          <Td>{user.nombre_voeux.toLocaleString()}</Td>
+                          <Td>{user.nombre_voeux_restant.toLocaleString()}</Td>
                           <Td>
-                            {user.etablissements_formateur?.reduce(
-                              (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
-                              0
-                            )}
-                          </Td>
-                          <Td>
-                            <Text lineHeight={6}>
+                            <Box lineHeight={6}>
                               <ResponsableStatut responsable={user} />{" "}
-                            </Text>
+                            </Box>
                           </Td>
                         </>
                       ),
@@ -269,41 +288,36 @@ export const Etablissements = () => {
                             </Link>
                           </Td>
                           <Td>
-                            <Text lineHeight={6}>
+                            <Box lineHeight={6}>
                               <FormateurLibelle formateur={user} /> <OrganismeFormateurTag verticalAlign="baseline" />
-                            </Text>
+                            </Box>
                           </Td>
                           <Td>
-                            <Text lineHeight={6}>
-                              {user.responsables?.map((responsable) => {
-                                const etablissement = responsable.etablissements_formateur.find(
-                                  (etablissement) => etablissement.uai === user.uai
-                                );
-                                return etablissement?.diffusionAutorisee ? (
-                                  <Box>
-                                    {user.email ?? etablissement.email} <ContactDelegueTag />
-                                  </Box>
-                                ) : (
-                                  <Box>
-                                    {responsable.email} <ContactResponsableTag />
+                            <Box lineHeight={6}>
+                              {user.relations?.map((relation, index) => {
+                                const delegue = relation.delegue;
+                                const responsable = relation.responsable ?? relation.etablissements_responsable;
+
+                                return (
+                                  <Box key={index}>
+                                    <FormateurEmail responsable={responsable} formateur={user} delegue={delegue} />
                                   </Box>
                                 );
                               })}
-                            </Text>
-                          </Td>
-                          <Td>{user.nombre_voeux}</Td>
-                          <Td>
-                            {user.etablissements_responsable?.reduce(
-                              (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
-                              0
-                            )}
+                            </Box>
                           </Td>
                           <Td>
-                            <Text lineHeight={6}>
-                              {user.responsables?.map((responsable) => {
-                                return <FormateurStatut responsable={responsable} formateur={user} />;
+                            <Text>{user.nombre_voeux.toLocaleString()}</Text>
+                          </Td>
+                          <Td>
+                            <Text>{user.nombre_voeux_restant.toLocaleString()}</Text>
+                          </Td>
+                          <Td>
+                            <Box lineHeight={6}>
+                              {user.relations?.map((relation, index) => {
+                                return <FormateurStatut key={index} relation={relation} />;
                               })}
-                            </Text>
+                            </Box>
                           </Td>
                         </>
                       ),
@@ -334,25 +348,25 @@ export const Etablissements = () => {
                       //         )}
                       //         {!!user.responsables?.length &&
                       //           user.responsables
-                      //             ?.filter((responsable) => responsable.siret !== user.siret)
+                      //             ?.filter((responsable) => responsable?.siret !== user.siret)
                       //             ?.map((responsable) => {
-                      //               const etablissement = responsable.etablissements_formateur.find(
+                      //               const etablissement = responsable?.etablissements_formateur.find(
                       //                 (etablissement) => etablissement.uai === user.uai
                       //               );
-                      //               return etablissement?.diffusionAutorisee ? (
+                      //               return etablissement?.diffusion_autorisee ? (
                       //                 <Box>
                       //                   {user.email ?? etablissement.email} <ContactDelegueTag />
                       //                 </Box>
                       //               ) : (
                       //                 <Box>
-                      //                   {responsable.email} <ContactResponsableTag />
+                      //                   {responsable?.email} <ContactResponsableTag />
                       //                 </Box>
                       //               );
                       //             })}
                       //       </Text>
                       //     </Td>
                       //     <Td>
-                      //       {/* {user.nombre_voeux} */}
+                      //       {/* {user.nombre_voeux.toLocaleString()} */}
                       //       {user.etablissements_responsable.reduce(
                       //         (acc, etablissement) => acc + etablissement.nombre_voeux,
                       //         0

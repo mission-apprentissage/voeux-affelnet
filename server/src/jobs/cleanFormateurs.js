@@ -22,17 +22,18 @@ async function cleanFormateurs(formateursCsv, options = {}) {
       on_record: (record) => omitEmpty(record),
     }),
     accumulateData(
-      async (accumulator, { siret, etablissements }) => {
-        if (siret === SIRET_RECENSEMENT) {
+      async (accumulator, { siret_responsable, uai_formateurs }) => {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return accumulator;
         }
 
-        accumulator = [...new Set([...accumulator, ...etablissements.split(",")])];
+        accumulator = [...new Set([...accumulator, ...uai_formateurs.split(",")])];
 
         return accumulator;
       },
       { accumulator: [] }
     ),
+
     flattenArray(),
     writeData(
       async (data) => {
@@ -44,7 +45,7 @@ async function cleanFormateurs(formateursCsv, options = {}) {
 
   logger.warn(
     "Les formateurs suivants vont être supprimés :",
-    JSON.stringify((await Formateur.find({ uai: { $nin: toKeep } })).map((formateur) => formateur.uai))
+    JSON.stringify((await Formateur.find({ uai: { $nin: toKeep } })).map((formateur) => formateur?.uai))
   );
 
   if (options.proceed) {

@@ -12,7 +12,7 @@ async function exportVoeuxRecensement(output, options = {}) {
   console.log(cfa);
 
   await oleoduc(
-    Formateur.find({ uai: { $in: cfa.etablissements?.map((e) => e.uai) ?? [] } }).cursor(),
+    Formateur.find({ uai: { $in: cfa.etablissements_formateur?.map((e) => e.uai) ?? [] } }).cursor(),
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {

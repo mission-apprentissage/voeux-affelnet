@@ -20,6 +20,7 @@ services:
     stdin_open: true
     environment:
       - FAST_REFRESH=false
+      - WDS_SOCKET_PORT=0
     volumes:
       - ./ui:/app #Allows source folders to be watched
 

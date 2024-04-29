@@ -1,9 +1,9 @@
 const { Schema } = require("mongoose");
+// const { nested } = require("../utils/mongooseUtils");
+const { UserType } = require("../constants/UserType");
 const { academieSchema } = require("./schemas/academieSchema");
 const { historySchema } = require("./schemas/responsableHistorySchema");
 const User = require("./User");
-const { nested } = require("../utils/mongooseUtils");
-const { UserType } = require("../constants/UserType");
 
 const schema = new Schema({
   siret: {
@@ -29,62 +29,59 @@ const schema = new Schema({
     type: String,
   },
 
-  etablissements_formateur: {
-    required: true,
-    default: [],
-    type: [
-      nested({
-        uai: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        siret: {
-          type: String,
-          index: true,
-        },
-        email: {
-          type: String,
-        },
-        diffusionAutorisee: {
-          type: Boolean,
-          default: false,
-        },
-        voeux_date: {
-          type: Date,
-        },
-        nombre_voeux: {
-          type: Number,
-          default: 0,
-        },
-        academie: academieSchema,
-      }),
-    ],
-  },
+  // etablissements_formateur: {
+  //   required: true,
+  //   default: [],
+  //   type: [
+  //     nested({
+  //       uai: {
+  //         type: String,
+  //         required: true,
+  //         index: true,
+  //       },
+  //       siret: {
+  //         type: String,
+  //         index: true,
+  //       },
+  //       diffusion_autorisee: {
+  //         type: Boolean,
+  //         default: false,
+  //       },
+  //       voeux_date: {
+  //         type: Date,
+  //       },
+  //       nombre_voeux: {
+  //         type: Number,
+  //         default: 0,
+  //       },
+  //       academie: academieSchema,
+  //     }),
+  //   ],
+  // },
 
-  voeux_telechargements_formateur: {
-    default: [],
-    type: [
-      nested({
-        uai: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        date: {
-          type: Date,
-          required: true,
-          default: () => new Date(),
-        },
-      }),
-    ],
-  },
+  // voeux_telechargements_formateur: {
+  //   default: [],
+  //   type: [
+  //     nested({
+  //       uai: {
+  //         type: String,
+  //         required: true,
+  //         index: true,
+  //       },
+  //       date: {
+  //         type: Date,
+  //         required: true,
+  //         default: () => new Date(),
+  //       },
+  //     }),
+  //   ],
+  // },
 
   academie: {
     type: academieSchema,
   },
 
-  histories_formateur: {
+  histories: {
     default: [],
     type: [historySchema],
   },
@@ -98,7 +95,7 @@ schema.index(
     // "academie.nom": "text",
     email: "text",
     // statut: "text",
-    // "etablissements.uai": "text",
+    // "etablissements_formateur.uai": "text",
   },
   { default_language: "french" }
 );

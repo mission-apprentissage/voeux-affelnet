@@ -1,16 +1,17 @@
+const Joi = require("@hapi/joi");
+const { diff } = require("deep-object-diff");
 const { oleoduc, transformData, writeData } = require("oleoduc");
 const { pick } = require("lodash");
-const { omitEmpty } = require("../common/utils/objectUtils.js");
-const logger = require("../common/logger.js");
-const { findAcademieByUai } = require("../common/academies.js");
-const { Responsable, Formateur } = require("../common/model/index.js");
-const { parseCsv } = require("../common/utils/csvUtils.js");
-const ReferentielApi = require("../common/api/ReferentielApi.js");
-const Joi = require("@hapi/joi");
-const { arrayOf } = require("../common/validators.js");
-const { siretFormat, uaiFormat } = require("../common/utils/format.js");
-const { getVoeuxDate, getNombreVoeux } = require("./countVoeux.js");
-const { diff } = require("deep-object-diff");
+
+const CatalogueApi = require("../common/api/CatalogueApi");
+
+const { findAcademieByUai } = require("../common/academies");
+const { Responsable } = require("../common/model");
+const logger = require("../common/logger");
+const { arrayOf } = require("../common/validators");
+const { parseCsv } = require("../common/utils/csvUtils");
+const { siretFormat, uaiFormat } = require("../common/utils/format");
+const { omitEmpty } = require("../common/utils/objectUtils");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -20,36 +21,9 @@ const schema = Joi.object({
   uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
-async function buildEtablissements(uais, responsable) {
-  return Promise.all(
-    [...new Set(uais)].map(async (uai) => {
-      const formateur = await Formateur.findOne({ uai }).lean();
-
-      const existingEtablissement = responsable?.etablissements_formateur?.find(
-        (etablissement) => etablissement.uai === uai
-      );
-
-      const voeux_date = await getVoeuxDate({ uai, siret: responsable.siret });
-
-      const nombre_voeux = await getNombreVoeux({ uai, siret: responsable.siret });
-
-      // console.log({ siret: responsable.siret, uai, nombre_voeux, voeux_date });
-
-      return {
-        uai,
-        siret: formateur?.siret,
-        nombre_voeux,
-        voeux_date,
-        email: existingEtablissement?.email || undefined,
-        diffusionAutorisee: existingEtablissement?.diffusionAutorisee || false,
-        academie: pick(findAcademieByUai(uai), ["code", "nom"]),
-      };
-    })
-  );
-}
-
 async function importResponsables(relationCsv, options = {}) {
-  const referentielApi = options.referentielApi || new ReferentielApi();
+  const catalogueApi = options.catalogueApi || (await new CatalogueApi());
+
   const stats = {
     total: 0,
     created: 0,
@@ -75,48 +49,58 @@ async function importResponsables(relationCsv, options = {}) {
       return null;
     }),
     writeData(
-      async ({ siret_responsable, email_responsable, uai_formateurs }) => {
+      async ({ siret_responsable, email_responsable }) => {
         if (siret_responsable === SIRET_RECENSEMENT) {
           return;
         }
 
         try {
           const found = await Responsable.findOne({ siret: siret_responsable }).lean();
-          const formateurs = await buildEtablissements(uai_formateurs, found ?? { siret: siret_responsable });
           let organisme;
 
           if (!found) {
-            organisme = await referentielApi.getOrganisme(siret_responsable).catch((error) => {
-              logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le référentiel`);
-              return null;
-            });
+            organisme = await catalogueApi
+              .getEtablissement({ siret: siret_responsable, published: true })
+              .catch((error) => {
+                logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le catalogue`);
+
+                return null;
+              });
+
+            // organisme = await referentielApi.getOrganisme(siret_responsable).catch((error) => {
+            //   logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le référentiel`);
+            //   return null;
+            // });
 
             if (!organisme) {
               stats.failed++;
-              logger.error(`Le responsable ${siret_responsable} n'est pas dans le référentiel`);
+              logger.error(`Le responsable ${siret_responsable} n'est pas dans le catalogue`);
               return;
             }
           }
 
           if (!found?.uai && !organisme?.uai) {
             stats.failed++;
-            logger.error(`Le responsable ${siret_responsable} n'a pas d'UAI dans le référentiel`);
-            return;
-          }
-
-          if (formateurs.length === 0) {
-            stats.failed++;
-            logger.error(`Le responsable ${siret_responsable} / ${organisme?.uai} n'a aucun établissement formateur`);
+            logger.error(`Le responsable ${siret_responsable} n'a pas d'UAI dans le catalogue`);
             return;
           }
 
           const updates = omitEmpty({
             uai: organisme?.uai ?? found?.uai,
-            etablissements_formateur: formateurs,
-            raison_sociale: organisme?.raison_sociale ?? found?.raison_sociale,
+            raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
+            adresse: organisme
+              ? [
+                  organisme?.numero_voie,
+                  organisme?.type_voie,
+                  organisme?.nom_voie,
+                  organisme?.code_postal,
+                  organisme?.localite,
+                ]
+                  .filter((value) => !!value)
+                  .join(" ")
+              : found?.adresse,
+            libelle_ville: organisme?.localite ?? found?.libelle_ville,
             academie: pick(findAcademieByUai(organisme?.uai ?? found?.uai), ["code", "nom"]),
-            adresse: organisme?.adresse?.label ?? found?.adresse,
-            libelle_ville: organisme?.adresse?.localite ?? found?.libelle_ville,
           });
 
           const res = await Responsable.updateOne(
@@ -138,14 +122,7 @@ async function importResponsables(relationCsv, options = {}) {
           } else if (res.modifiedCount) {
             stats.updated++;
 
-            const previous = pick(found, [
-              "uai",
-              "etablissements_formateur",
-              "raison_sociale",
-              "academie",
-              "adresse",
-              "libelle_ville",
-            ]);
+            const previous = pick(found, ["uai", "raison_sociale", "academie", "adresse", "libelle_ville"]);
 
             logger.info(
               `Responsable ${siret_responsable} / ${organisme?.uai ?? found?.uai} mis à jour \n${JSON.stringify(

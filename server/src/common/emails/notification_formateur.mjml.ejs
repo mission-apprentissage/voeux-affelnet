@@ -12,7 +12,8 @@
 
           <mj-text>
             Vous pouvez dès à présent télécharger les candidatures exprimées sur le service en ligne affectation pour
-            <%= data.formateur.raison_sociale %>, <%= data.formateur.libelle_ville %> (UAI : <%= data.formateur.uai %>).
+            <%= data.formateur?.raison_sociale %>, <%= data.formateur?.libelle_ville %> (UAI : <%= data.formateur?.uai
+            %>).
           </mj-text>
 
           <mj-button
@@ -23,7 +24,7 @@
             Accéder au téléchargement des listes
           </mj-button>
 
-          <mj-text> Votre identifiant de connexion : <strong><%= data.formateur.username %></strong> </mj-text>
+          <mj-text> Votre identifiant de connexion : <strong><%= data.formateur?.username %></strong> </mj-text>
 
           <mj-text>
             Si vous n’avez pas défini de mot de passe pour l’accès au service, vous serez dirigé sur une demande de

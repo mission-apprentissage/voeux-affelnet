@@ -2,7 +2,7 @@ const faker = require("@faker-js/faker/locale/fr").faker;
 const { merge } = require("lodash");
 const { Responsable, Formateur, Voeu, User, Mef, Log } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
-const { Csaio, Dossier } = require("../../src/common/model/index.js");
+const { Csaio, Dossier } = require("../../src/common/model");
 
 function createUsername() {
   return faker.internet.userName().toLowerCase();

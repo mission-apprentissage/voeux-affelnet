@@ -1,9 +1,9 @@
 const { Schema } = require("mongoose");
-const { nested } = require("../utils/mongooseUtils");
-const User = require("./User");
+// const { nested } = require("../utils/mongooseUtils");
+const { UserType } = require("../constants/UserType");
 const { academieSchema } = require("./schemas/academieSchema");
 const { historySchema } = require("./schemas/formateurHistorySchema");
-const { UserType } = require("../constants/UserType");
+const User = require("./User");
 
 const schema = new Schema({
   uai: {
@@ -29,55 +29,55 @@ const schema = new Schema({
     type: String,
   },
 
-  etablissements_responsable: {
-    required: true,
-    default: [],
-    type: [
-      nested({
-        siret: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        uai: {
-          type: String,
-          index: true,
-        },
-        voeux_date: {
-          type: Date,
-        },
-        nombre_voeux: {
-          type: Number,
-          default: 0,
-        },
-        academie: academieSchema,
-      }),
-    ],
-  },
+  // etablissements_responsable: {
+  //   required: true,
+  //   default: [],
+  //   type: [
+  //     nested({
+  //       siret: {
+  //         type: String,
+  //         required: true,
+  //         index: true,
+  //       },
+  //       // uai: {
+  //       //   type: String,
+  //       //   index: true,
+  //       // },
+  //       // voeux_date: {
+  //       //   type: Date,
+  //       // },
+  //       // nombre_voeux: {
+  //       //   type: Number,
+  //       //   default: 0,
+  //       // },
+  //       // academie: academieSchema,
+  //     }),
+  //   ],
+  // },
 
-  voeux_telechargements_responsable: {
-    default: [],
-    type: [
-      nested({
-        siret: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        date: {
-          type: Date,
-          required: true,
-          default: () => new Date(),
-        },
-      }),
-    ],
-  },
+  // voeux_telechargements_responsable: {
+  //   default: [],
+  //   type: [
+  //     nested({
+  //       siret: {
+  //         type: String,
+  //         required: true,
+  //         index: true,
+  //       },
+  //       date: {
+  //         type: Date,
+  //         required: true,
+  //         default: () => new Date(),
+  //       },
+  //     }),
+  //   ],
+  // },
 
   academie: {
     type: academieSchema,
   },
 
-  histories_responsable: {
+  histories: {
     default: [],
     type: [historySchema],
   },

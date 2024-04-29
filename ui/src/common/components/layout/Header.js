@@ -18,6 +18,7 @@ import { AccountFill, LockFill } from "../../../theme/components/icons";
 import { AlertMessage } from "./AlertMessage";
 
 import useAuth from "../../hooks/useAuth";
+import { UserType } from "../../constants/UserType";
 
 const Header = () => {
   const [auth, setAuth] = useAuth();
@@ -70,7 +71,7 @@ const Header = () => {
                   </Flex>
                 </MenuButton>
                 <MenuList>
-                  {["Responsable", "Formateur"].includes(auth.type) && (
+                  {[UserType.RESPONSABLE, UserType.FORMATEUR, UserType.DELEGUE].includes(auth.type) && (
                     <>
                       <MenuItem as="a" href="/profil">
                         Profil

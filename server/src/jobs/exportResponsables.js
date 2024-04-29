@@ -1,4 +1,4 @@
-const { Responsable } = require("../common/model/index.js");
+const { Responsable } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date } = require("../common/utils/csvUtils.js");

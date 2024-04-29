@@ -7,23 +7,23 @@ import { Page } from "../../common/components/layout/Page";
 import { FormateursAvecVoeux } from "./FormateursAvecVoeux";
 import { FormateursSansVoeux } from "./FormateursSansVoeux";
 
-export const Formateurs = ({ responsable, formateurs, callback }) => {
+export const Formateurs = ({ responsable, callback }) => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (
-      responsable?.etablissements_formateur.length === 1 &&
-      responsable.etablissements_formateur[0].uai === responsable.uai
-    ) {
-      navigate(`/responsable/formateurs/${responsable.uai}`, { replace: true });
-    }
-  }, [responsable?.etablissements_formateur, responsable?.uai, navigate]);
+  // useEffect(() => {
+  //   if (
+  //     responsable?.relations.length === 1 &&
+  //     responsable?.relations[0].etablissements_formateur.uai === responsable?.uai
+  //   ) {
+  //     navigate(`/responsable/formateurs/${responsable?.uai}`, { replace: true });
+  //   }
+  // }, [responsable, navigate]);
 
   if (!responsable) {
     return;
   }
 
-  const avecVoeux = !!responsable.etablissements_formateur.find((etablissement) => etablissement.nombre_voeux);
+  const avecVoeux = !!responsable?.nombre_voeux;
 
   return (
     <>
@@ -43,20 +43,30 @@ export const Formateurs = ({ responsable, formateurs, callback }) => {
         <Alert status="info" variant="left-accent">
           <AlertIcon />
           <Text fontStyle="italic">
-            Nouveauté pour 2023 : vous avez maintenant la possibilité de déléguer les droits de réception des listes de
-            candidats aux organismes dont vous êtes responsable, en cliquant sur les boutons "Détail". En cas de
-            délégation de droits, vous conserverez un accès à l'ensemble des listes, et vous pourrez visualiser les
-            statuts d'avancement de chaque établissement.
+            Vous avez la possibilité de déléguer les droits de réception des listes de candidats aux organismes dont
+            vous êtes responsable, en cliquant sur les boutons "Détail". En cas de délégation de droits, vous
+            conserverez un accès à l'ensemble des listes, et vous pourrez visualiser les statuts d'avancement de chaque
+            établissement.
           </Text>
         </Alert>
 
         <Box mb={12}>
-          {formateurs && avecVoeux && (
-            <FormateursAvecVoeux responsable={responsable} formateurs={formateurs} callback={callback} />
+          {responsable?.relations && avecVoeux && (
+            <FormateursAvecVoeux
+              responsable={responsable}
+              // formateurs={formateurs}
+              // delegues={delegues}
+              callback={callback}
+            />
           )}
 
-          {formateurs && !avecVoeux && (
-            <FormateursSansVoeux responsable={responsable} formateurs={formateurs} callback={callback} />
+          {responsable?.relations && !avecVoeux && (
+            <FormateursSansVoeux
+              responsable={responsable}
+              // formateurs={formateurs}
+              // delegues={delegues}
+              callback={callback}
+            />
           )}
         </Box>
 

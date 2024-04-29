@@ -1,4 +1,4 @@
-const { Voeu } = require("../model/index.js");
+const { Voeu } = require("../model");
 const { compose, transformData } = require("oleoduc");
 const { findDossiers } = require("./findDossiers.js");
 const { capitalizeFirstLetter } = require("../utils/stringUtils.js");

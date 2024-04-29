@@ -1,6 +1,6 @@
 const assert = require("assert");
 const { Readable } = require("stream");
-const { Voeu } = require("../../src/common/model/index.js");
+const { Voeu } = require("../../src/common/model");
 const { importJeunesUniquementEnApprentissage } = require("../../src/jobs/importJeunesUniquementEnApprentissage.js");
 const { insertVoeu } = require("../utils/fakeData.js");
 

@@ -8,10 +8,6 @@ const historySchema = new Schema(
       required: true,
       default: () => new Date(),
     },
-    // username: {
-    //   type: String,
-    //   // required: true,
-    // },
     action: {
       type: String,
       enum: Object.values(ResponsableActions),

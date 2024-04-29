@@ -1,89 +1,73 @@
 import { UserStatut } from "../../../constants/UserStatut";
+import { UserType } from "../../../constants/UserType";
 import { StatutBadge, statuses } from "../../StatutBadge";
 
-export const FormateurStatut = ({ responsable, formateur }) => {
+export const FormateurStatut = ({ relation }) => {
+  const responsable = relation.responsable ?? relation.etablissements_responsable;
+  const formateur = relation.formateur ?? relation.etablissements_formateur;
+  const delegue = relation.delegue;
+
   if (!responsable || !formateur) {
     return;
   }
 
-  const etablissementFromResponsable = responsable.etablissements_formateur?.find(
-    (etablissement) => formateur.uai === etablissement.uai
-  );
+  const isDiffusionAutorisee = !!delegue;
 
-  const etablissementFromFormateur = formateur.etablissements_responsable?.find(
-    (etablissement) => responsable.siret === etablissement.siret
-  );
+  const voeuxDisponible = relation?.nombre_voeux > 0;
 
-  const diffusionAutorisee = etablissementFromResponsable?.diffusionAutorisee;
+  const voeuxTelechargementsDelegue =
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
 
-  const voeuxDisponible = diffusionAutorisee
-    ? etablissementFromFormateur?.nombre_voeux > 0
-    : etablissementFromResponsable?.nombre_voeux > 0;
+  const voeuxTelechargementsResponsable =
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
 
-  const voeuxTelechargementsFormateur = formateur.voeux_telechargements_responsable?.filter(
-    (telechargement) => telechargement.siret === responsable.siret
-  );
-
-  const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur?.filter(
-    (telechargement) => telechargement.uai === formateur.uai
-  );
-
-  switch (diffusionAutorisee) {
+  switch (isDiffusionAutorisee) {
     case true: {
       switch (true) {
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-          !!voeuxTelechargementsFormateur.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
+          !!voeuxTelechargementsDelegue.find(
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-          !!voeuxTelechargementsFormateur.find(
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
+          !!voeuxTelechargementsDelegue.find(
             (telechargement) =>
-              new Date(telechargement.date).getTime() <=
-                new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-              new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.first_date_voeux).getTime()
+              new Date(telechargement.date).getTime() <= new Date(relation.last_date_voeux).getTime() &&
+              new Date(telechargement.date).getTime() > new Date(relation.first_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() ===
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-          !!voeuxTelechargementsFormateur.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+          new Date(relation.first_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime() &&
+          !!voeuxTelechargementsDelegue.find(
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut &&
+        case UserStatut.ACTIVE === delegue.statut &&
           voeuxDisponible &&
-          (!voeuxTelechargementsFormateur.length ||
-            !voeuxTelechargementsFormateur.find(
-              (telechargement) =>
-                new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.last_date_voeux).getTime()
+          (!voeuxTelechargementsDelegue.length ||
+            !voeuxTelechargementsDelegue.find(
+              (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
             )): {
           return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === formateur.statut && !voeuxDisponible: {
+        case UserStatut.ACTIVE === delegue.statut && !voeuxDisponible: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
-        case UserStatut.CONFIRME === formateur.statut: {
+        case UserStatut.CONFIRME === delegue.statut: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
         }
-        case !!formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
+        case !!delegue.emails?.length && UserStatut.EN_ATTENTE === delegue.statut: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
-        case !formateur.emails.length && UserStatut.EN_ATTENTE === formateur.statut: {
+        case !delegue.emails?.length && UserStatut.EN_ATTENTE === delegue.statut: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
         }
         default: {
@@ -93,59 +77,50 @@ export const FormateurStatut = ({ responsable, formateur }) => {
     }
     case false: {
       switch (true) {
-        case UserStatut.ACTIVE === responsable.statut &&
+        case UserStatut.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable.statut &&
+        case UserStatut.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() !==
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+          new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
             (telechargement) =>
-              new Date(telechargement.date).getTime() <=
-                new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
-              new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.first_date_voeux).getTime()
+              new Date(telechargement.date).getTime() <= new Date(relation.last_date_voeux).getTime() &&
+              new Date(telechargement.date).getTime() > new Date(relation.first_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable.statut &&
+        case UserStatut.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
-          new Date(etablissementFromResponsable.first_date_voeux).getTime() ===
-            new Date(etablissementFromResponsable.last_date_voeux).getTime() &&
+          new Date(relation.first_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
-            (telechargement) =>
-              new Date(telechargement.date).getTime() > new Date(etablissementFromResponsable.last_date_voeux).getTime()
+            (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
           ): {
           return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable.statut &&
+        case UserStatut.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
           (!voeuxTelechargementsResponsable.length ||
             !voeuxTelechargementsResponsable.find(
-              (telechargement) =>
-                new Date(telechargement.date).getTime() >
-                new Date(etablissementFromResponsable.last_date_voeux).getTime()
+              (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
             )): {
           return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable.statut && !voeuxDisponible: {
+        case UserStatut.ACTIVE === responsable?.statut && !voeuxDisponible: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
-        case UserStatut.CONFIRME === responsable.statut: {
+        case UserStatut.CONFIRME === responsable?.statut: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
         }
-        case !!responsable.emails.length && UserStatut.EN_ATTENTE === responsable.statut: {
+        case UserStatut.EN_ATTENTE === responsable?.statut && !!responsable?.emails.length: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
-        case !responsable.emails.length && UserStatut.EN_ATTENTE === responsable.statut: {
+        case UserStatut.EN_ATTENTE === responsable?.statut && !responsable?.emails.length: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
         }
 

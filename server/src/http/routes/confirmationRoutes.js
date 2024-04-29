@@ -31,13 +31,13 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }
 
       if (user.type === "Formateur") {
-        const responsable = await Responsable.findOne({ "etablissements.uai": user.username });
+        const responsable = await Responsable.findOne({ "etablissements_formateur.uai": user.username });
 
         const etablissement = responsable.etablissements_formateur?.find(
           (etablissement) => etablissement.uai === user.username
         );
 
-        if (!etablissement.diffusionAutorisee) {
+        if (!etablissement.diffusion_autorisee) {
           throw Boom.badRequest(`Aucune délégation de droit n'a été activée pour votre compte ${user.username}`);
         }
         user.email = etablissement?.email;

@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { SuccessFill } from "../../theme/components/icons/SuccessFill";
 import { WarningFill } from "../../theme/components/icons/WarningFill";
 
@@ -84,8 +84,8 @@ export const StatutBadge = ({ statut }) => {
   const statutDescription = statusesDescription.get(statut);
 
   return (
-    <Box title={statutDescription.description} cursor={"help"}>
+    <Text as="span" title={statutDescription.description} cursor={"help"}>
       {statutDescription.icon} {statut}
-    </Box>
+    </Text>
   );
 };

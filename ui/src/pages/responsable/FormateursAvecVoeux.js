@@ -1,43 +1,14 @@
+import { Fragment } from "react";
 import { Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
 import { FormateurStatut } from "../../common/components/responsable/fields/FormateurStatut";
 
-const FormateurVoeuxRestants = ({ responsable, formateur }) => {
-  const etablissement = responsable.etablissements_formateur?.find(
-    (etablissement) => formateur.uai === etablissement.uai
-  );
+export const FormateursAvecVoeux = ({ responsable, callback }) => {
+  const relations = responsable?.relations;
 
-  if (!etablissement) {
-    return;
-  }
-
-  return (
-    <>
-      <Text>{etablissement?.nombre_voeux_restant}</Text>
-    </>
-  );
-};
-
-const FormateurVoeuxDisponibles = ({ responsable, formateur }) => {
-  const etablissement = responsable.etablissements_formateur?.find(
-    (etablissement) => formateur.uai === etablissement.uai
-  );
-
-  if (!etablissement) {
-    return;
-  }
-
-  return (
-    <>
-      <Text>{etablissement?.nombre_voeux}</Text>
-    </>
-  );
-};
-
-export const FormateursAvecVoeux = ({ responsable, formateurs, callback }) => {
-  if (!formateurs) {
+  if (!relations) {
     return;
   }
 
@@ -49,20 +20,24 @@ export const FormateursAvecVoeux = ({ responsable, formateurs, callback }) => {
           <Th width="400px">Raison sociale / Ville</Th>
           <Th width="450px">Courriel habilité</Th>
           <Th>Candidats</Th>
-          <Th width={"80px"}>Restant à télécharger</Th>
+          <Th width={"70px"}>Restant à télécharger</Th>
           <Th>Statut</Th>
         </Tr>
       </Thead>
       <Tbody>
-        {formateurs.map((formateur) => {
-          if (!formateur) {
-            return <></>;
-          }
+        {relations.map((relation, index) => {
+          const formateur =
+            relation.formateur ?? relation.etablissements_formateur ?? relation.etablissements_formateur;
+          const delegue = relation.delegue;
+
+          // if (!formateur) {
+          //   return <Fragment key={index} />;
+          // }
 
           return (
-            <Tr key={formateur?.uai}>
+            <Tr key={index}>
               <Td>
-                <Link variant="primary" href={`/responsable/formateurs/${formateur.uai}`}>
+                <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
                   Détail
                 </Link>
               </Td>
@@ -73,28 +48,24 @@ export const FormateursAvecVoeux = ({ responsable, formateurs, callback }) => {
               </Td>
               <Td>
                 <Text lineHeight={6}>
-                  <FormateurEmail responsable={responsable} formateur={formateur} callback={callback} />
+                  <FormateurEmail
+                    responsable={responsable}
+                    formateur={formateur}
+                    delegue={delegue}
+                    callback={callback}
+                  />
                 </Text>
               </Td>
               <Td>
-                <Text lineHeight={6}>
-                  <FormateurVoeuxDisponibles responsable={responsable} formateur={formateur} />
-                </Text>
+                <Text lineHeight={6}>{relation.nombre_voeux.toLocaleString()}</Text>
               </Td>
               <Td>
-                <Text lineHeight={6}>
-                  <FormateurVoeuxRestants responsable={responsable} formateur={formateur} />
-                </Text>
+                <Text lineHeight={6}>{relation.nombre_voeux_restant.toLocaleString()}</Text>
               </Td>
 
               <Td>
                 <Text lineHeight={6}>
-                  <FormateurStatut
-                    responsable={responsable}
-                    formateur={formateur}
-                    callback={callback}
-                    showDownloadButton
-                  />
+                  <FormateurStatut relation={relation} callback={callback} showDownloadButton />
                 </Text>
               </Td>
             </Tr>

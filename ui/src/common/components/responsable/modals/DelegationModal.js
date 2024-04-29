@@ -21,21 +21,29 @@ import {
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
-import { Yup } from "../../../Yup";
-import { _put } from "../../../httpClient";
+import { _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
+import { emailConfirmationSchema } from "../../../utils/validationUtils";
+import { UserType } from "../../../constants/UserType";
 
-export const DelegationModal = ({ responsable, formateur, callback, isOpen, onClose }) => {
+export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
+
+  const responsable = relation.responsable ?? relation.etablissements_responsable;
+  const formateur = relation.formateur ?? relation.etablissements_formateur;
+  const delegue = relation.delegue;
 
   const activateDelegation = useCallback(
     async ({ form }) => {
       try {
-        await _put(`/api/responsable/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
+        await _post(`/api/responsable/delegation`, {
+          email: form.email,
+          uai: formateur?.uai,
+        });
         onClose();
         toast({
           title: "Délégation mise à jour",
-          description: `La délégation de droit a été enregistrée pour le formateur ${formateur.uai} vers l'adresse courriel ${form.email}`,
+          description: `La délégation de droit a été enregistrée pour le formateur ${formateur?.uai} vers l'adresse courriel ${form.email}`,
           status: "success",
           duration: 9000,
           isClosable: true,
@@ -54,22 +62,17 @@ export const DelegationModal = ({ responsable, formateur, callback, isOpen, onCl
     [onClose, callback, formateur?.uai, toast]
   );
 
-  const etablissement = responsable.etablissements_formateur?.find(
-    (etablissement) => formateur.uai === etablissement.uai
-  );
+  const hasVoeux = relation.nombre_voeux > 0;
 
-  const hasVoeux = etablissement.nombre_voeux > 0;
-
-  const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur.filter(
-    (telechargement) => telechargement.uai === formateur.uai
-  );
+  const voeuxTelechargementsResponsable =
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
 
   const voeuxTelecharges = !!voeuxTelechargementsResponsable.find(
-    (telechargement) => new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
+    (telechargement) => new Date(telechargement.date).getTime() >= new Date(relation.last_date_voeux).getTime()
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
@@ -83,15 +86,9 @@ export const DelegationModal = ({ responsable, formateur, callback, isOpen, onCl
         <ModalBody>
           <Formik
             initialValues={{
-              email: etablissement.email,
+              email: delegue?.email,
             }}
-            validationSchema={Yup.object().shape({
-              email: Yup.string().email().required("Requis"),
-              email_confirmation: Yup.string()
-                .email()
-                .required("Requis")
-                .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
-            })}
+            validationSchema={emailConfirmationSchema}
             onSubmit={(form) => activateDelegation({ form })}
           >
             <Form style={{ width: "100%" }} id="delegation-form">

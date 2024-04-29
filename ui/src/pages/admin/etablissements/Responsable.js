@@ -12,6 +12,9 @@ import { UserStatut } from "../../../common/constants/UserStatut";
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
 
 export const Responsable = () => {
+  const mounted = useRef(false);
+  const toast = useToast();
+
   const {
     onOpen: onOpenUpdateResponsableEmailModal,
     isOpen: isOpenUpdateResponsableEmailModal,
@@ -22,8 +25,6 @@ export const Responsable = () => {
 
   const [responsable, setResponsable] = useState(undefined);
   const [loadingResponsable, setLoadingResponsable] = useState(false);
-  const mounted = useRef(false);
-  const toast = useToast();
 
   const getResponsable = useCallback(async () => {
     try {
@@ -48,7 +49,7 @@ export const Responsable = () => {
 
       toast({
         title: "Courriel envoyé",
-        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${responsable.email}`,
+        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${responsable?.email}`,
         status: "success",
         duration: 9000,
         isClosable: true,
@@ -72,7 +73,7 @@ export const Responsable = () => {
 
       toast({
         title: "Courriel envoyé",
-        description: `Le courriel de confirmation de l'adresse courriel a été renvoyé à l'adresse ${responsable.email}`,
+        description: `Le courriel de confirmation de l'adresse courriel a été renvoyé à l'adresse ${responsable?.email}`,
         status: "success",
         duration: 9000,
         isClosable: true,
@@ -96,7 +97,7 @@ export const Responsable = () => {
 
   //     toast({
   //       title: "Courriel envoyé",
-  //       description: `Le courriel de notification de listes téléchargeables a été renvoyé à l'adresse ${responsable.email}`,
+  //       description: `Le courriel de notification de listes téléchargeables a été renvoyé à l'adresse ${responsable?.email}`,
   //       status: "success",
   //       duration: 9000,
   //       isClosable: true,
@@ -136,9 +137,11 @@ export const Responsable = () => {
     return;
   }
 
-  const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.etablissements_formateur?.find(
-    (etablissement) => etablissement.uai === responsable.uai || etablissement.siret === responsable.siret
-  );
+  // const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.relations?.find(
+  //   (relation) =>
+  //     relation?.etablissement_formateur.uai === formateur?.uai ||
+  //     relation?.etablissement_responsable.siret === responsable?.siret
+  // );
 
   return (
     <Page
@@ -152,35 +155,35 @@ export const Responsable = () => {
       <Box my={12}>
         <Box mb={12}>
           <Text mb={4}>
-            Adresse : {responsable.adresse} - Siret : {responsable.siret ?? "Inconnu"} - UAI :{" "}
-            {responsable.uai ?? "Inconnu"}
+            Adresse : {responsable?.adresse} - Siret : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
+            {responsable?.uai ?? "Inconnu"}
           </Text>
 
           <Text mb={4}>
             Email de direction enregistré : <strong>{responsable?.email}</strong>.{" "}
           </Text>
 
-          {(responsable?.etablissements_formateur?.length === 1 &&
-            responsable.etablissements_formateur[0].uai !== responsable.uai) ||
-            (responsable?.etablissements_formateur?.length > 1 && (
+          {(responsable?.relations?.length === 1 &&
+            responsable?.relations[0]?.etablissement_formateur.uai !== responsable?.uai) ||
+            (responsable?.relations?.length > 1 && (
               <Text mb={4}>
-                L'organisme est responsable de l'offre de {responsable?.etablissements_formateur?.length} organisme
-                {responsable?.etablissements_formateur?.length > 1 && "s"} formateur
-                {responsable?.etablissements_formateur?.length > 1 && "s"}.{" "}
-                <Link variant="action" href={`/admin/responsable/${responsable.siret}/formateurs`}>
+                L'organisme est responsable de l'offre de {responsable?.relations?.length} organisme
+                {responsable?.relations?.length > 1 && "s"} formateur
+                {responsable?.relations?.length > 1 && "s"}.{" "}
+                <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
                   Accéder à la liste
                 </Link>
               </Text>
             ))}
 
-          {isResponsableFormateurForAtLeastOneEtablissement && (
+          {/* {isResponsableFormateurForAtLeastOneEtablissement && (
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
-              <Link variant="action" href={`/admin/responsable/${responsable.siret}/formateur/${responsable.uai}`}>
+              <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}>
                 Accéder à la page de téléchargement des listes de candidats
               </Link>
             </Text>
-          )}
+          )} */}
 
           <Button variant="primary" onClick={onOpenUpdateResponsableEmailModal}>
             Modifier l'adresse courriel
@@ -193,27 +196,29 @@ export const Responsable = () => {
           </Heading>
 
           <Box mb={4}>
-            <Text display={"inline-flex"}>
+            <Box display={"inline-flex"}>
               <Box mr={2} display="inline-flex">
                 <ResponsableStatut responsable={responsable} />.
               </Box>
 
-              {UserType.RESPONSABLE === responsable.type &&
+              {UserType.RESPONSABLE === responsable?.type &&
                 (() => {
                   switch (true) {
-                    case UserStatut.EN_ATTENTE === responsable.statut:
+                    case UserStatut.EN_ATTENTE === responsable?.statut &&
+                      !!responsable?.emails.filter((email) => email.templateName === "confirmation_responsable").length:
                       return (
                         <Link variant="action" onClick={resendConfirmationEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    case UserStatut.CONFIRME === responsable.statut:
+                    case UserStatut.CONFIRME === responsable?.statut &&
+                      !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length:
                       return (
                         <Link variant="action" onClick={resendActivationEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    // case UserStatut.ACTIVE === responsable.statut:
+                    // case UserStatut.ACTIVE === responsable?.statut:
                     //   return (
                     //     <Link variant="action" onClick={resendNotificationEmail}>
                     //       Générer un nouvel envoi de notification
@@ -223,15 +228,15 @@ export const Responsable = () => {
                       return <></>;
                   }
                 })()}
-            </Text>
+            </Box>
           </Box>
 
           <Heading as="h4" size="sm" mb={4}>
-            Nombre de candidats: {responsable.nombre_voeux}
+            Nombre de candidats: {responsable?.nombre_voeux.toLocaleString()}
           </Heading>
 
           <Text mb={4}>
-            <Link variant="action" href={`/admin/responsable/${responsable.siret}/formateurs`}>
+            <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
               Voir la liste des organismes formateurs
             </Link>{" "}
             pour accéder aux listes de candidats disponibles et à leurs statuts de téléchargement.

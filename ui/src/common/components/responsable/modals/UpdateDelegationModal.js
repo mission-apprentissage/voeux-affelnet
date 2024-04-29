@@ -25,22 +25,30 @@ import {
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
-import { Yup } from "../../../Yup";
-import { _put } from "../../../httpClient";
+import { _delete, _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../responsable/fields/FormateurEmail";
+import { emailConfirmationSchema } from "../../../utils/validationUtils";
 
-export const UpdateDelegationModal = ({ responsable, formateur, callback, isOpen, onClose }) => {
+export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
+
+  const responsable = relation.responsable ?? relation.etablissements_responsable;
+  const formateur = relation.formateur ?? relation.etablissements_formateur;
+  const delegue = relation.delegue;
 
   const updateDelegationEmail = useCallback(
     async ({ form }) => {
       try {
-        await _put(`/api/responsable/formateurs/${formateur.uai}`, { email: form.email, diffusionAutorisee: true });
+        await _post(`/api/responsable/delegation`, {
+          email: form.email,
+          uai: formateur?.uai,
+        });
+
         onClose();
         toast({
           title: "Délégation mise à jour",
-          description: `La délégation de droit a été modifiée pour le formateur ${formateur.uai} vers l'adresse courriel ${form.email}`,
+          description: `La délégation de droit a été modifiée pour le formateur ${formateur?.uai} vers l'adresse courriel ${form.email}`,
           status: "success",
           duration: 9000,
           isClosable: true,
@@ -62,7 +70,9 @@ export const UpdateDelegationModal = ({ responsable, formateur, callback, isOpen
   const cancelDelegation = useCallback(
     async ({ form }) => {
       try {
-        await _put(`/api/responsable/formateurs/${formateur.uai}`, { diffusionAutorisee: false });
+        await _delete(`/api/responsable/delegation`, {
+          uai: formateur?.uai,
+        });
         onClose();
         await callback?.();
       } catch (error) {
@@ -72,12 +82,8 @@ export const UpdateDelegationModal = ({ responsable, formateur, callback, isOpen
     [callback, onClose, formateur?.uai]
   );
 
-  const etablissement = responsable.etablissements_formateur?.find(
-    (etablissement) => formateur.uai === etablissement.uai
-  );
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
@@ -93,7 +99,7 @@ export const UpdateDelegationModal = ({ responsable, formateur, callback, isOpen
           <Text fontSize="lg" mb={4}>
             Vous vous apprêtez à modifier le destinataire de la délégation de droits au sein de l'organisme formateur{" "}
             <FormateurLibelle formateur={formateur} />, actuellement{" "}
-            <FormateurEmail responsable={responsable} formateur={formateur} />.
+            <FormateurEmail responsable={responsable} formateur={formateur} delegue={delegue} />.
           </Text>
           <Text mb={4}>
             <strong>Précisez ce que vous souhaitez faire :</strong>
@@ -143,22 +149,16 @@ export const UpdateDelegationModal = ({ responsable, formateur, callback, isOpen
               <AccordionPanel pb={4}>
                 <Formik
                   initialValues={{
-                    email: etablissement.email,
+                    email: delegue.email,
                   }}
-                  validationSchema={Yup.object().shape({
-                    email: Yup.string().email().required("Requis"),
-                    email_confirmation: Yup.string()
-                      .email()
-                      .required("Requis")
-                      .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
-                  })}
+                  validationSchema={emailConfirmationSchema}
                   onSubmit={(form) => updateDelegationEmail({ form })}
                 >
                   <Form style={{ width: "100%" }} id="update-email-form">
                     <Text mb={4}>
                       <strong>
                         La personne à laquelle vous allez déléguer le droit de réception des listes doit impérativement
-                        exercer au sein de l'établissement formateur.
+                        exercer au sein de l'établissement formateur?.
                       </strong>
                     </Text>
                     <Text mb={4}>

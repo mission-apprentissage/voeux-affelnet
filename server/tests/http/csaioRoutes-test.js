@@ -1,7 +1,7 @@
 const assert = require("assert");
 const { insertVoeu } = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
-const { Csaio } = require("../../src/common/model/index.js");
+const { Csaio } = require("../../src/common/model");
 const { insertDossier, insertResponsable } = require("../utils/fakeData.js");
 const { DateTime } = require("luxon");
 

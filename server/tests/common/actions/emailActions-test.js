@@ -53,8 +53,8 @@ describe("emails", () => {
     assert.strictEqual(emailsSent[0].from, "candidats-apprentissage@education.gouv.fr");
     assert.strictEqual(
       emailsSent[0].subject,
-      // "[Rappel] Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
-      "Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
+      "[Rappel] Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
+      // "Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
     );
     const found = await User.findOne().lean();
     assert.strictEqual(found.emails.length, 1);

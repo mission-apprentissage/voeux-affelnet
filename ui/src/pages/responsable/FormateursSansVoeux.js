@@ -4,8 +4,10 @@ import { FormateurLibelle } from "../../common/components/formateur/fields/Forma
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
 import { FormateurStatut } from "../../common/components/responsable/fields/FormateurStatut";
 
-export const FormateursSansVoeux = ({ responsable, formateurs, callback }) => {
-  if (!formateurs) {
+export const FormateursSansVoeux = ({ responsable, callback }) => {
+  const relations = responsable?.relations;
+
+  if (!relations) {
     return;
   }
 
@@ -20,14 +22,19 @@ export const FormateursSansVoeux = ({ responsable, formateurs, callback }) => {
         </Tr>
       </Thead>
       <Tbody>
-        {formateurs.map((formateur) => {
+        {relations.map((relation) => {
+          const formateur = relation.formateur ?? relation.etablissements_formateur;
+
           if (!formateur) {
             return <></>;
           }
+
+          const delegue = relation.delegue;
+
           return (
             <Tr key={formateur?.uai}>
               <Td>
-                <Link variant="primary" href={`/responsable/formateurs/${formateur.uai}`}>
+                <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
                   Détail
                 </Link>
               </Td>
@@ -37,15 +44,18 @@ export const FormateursSansVoeux = ({ responsable, formateurs, callback }) => {
                 </Text>
               </Td>
               <Td>
-                <Box display="flex">
-                  <Text lineHeight={6}>
-                    <FormateurEmail responsable={responsable} formateur={formateur} callback={callback} />
-                  </Text>
-                </Box>
+                <Text lineHeight={6}>
+                  <FormateurEmail
+                    responsable={responsable}
+                    formateur={formateur}
+                    delegue={delegue}
+                    callback={callback}
+                  />
+                </Text>
               </Td>
               <Td>
                 <Text lineHeight={6}>
-                  <FormateurStatut responsable={responsable} formateur={formateur} callback={callback} />
+                  <FormateurStatut relation={relation} callback={callback} />
                 </Text>
               </Td>
             </Tr>

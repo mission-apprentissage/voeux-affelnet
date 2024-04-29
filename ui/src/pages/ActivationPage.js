@@ -16,11 +16,11 @@ import {
   Alert,
 } from "@chakra-ui/react";
 
-import { Yup } from "../common/Yup";
 import { _post } from "../common/httpClient";
 import useAuth from "../common/hooks/useAuth";
 import decodeJWT from "../common/utils/decodeJWT";
 import { useFetch } from "../common/hooks/useFetch";
+import { passwordConfirmationSchema } from "../common/utils/validationUtils";
 
 function StatusErrorMessage({ error, username }) {
   const navigate = useNavigate();
@@ -97,21 +97,7 @@ function ActivationPage() {
                     password: "",
                     password_confirmation: "",
                   }}
-                  validationSchema={Yup.object().shape({
-                    password: Yup.string()
-                      .required("Veuillez saisir un mot de passe")
-                      .matches(
-                        "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[ !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~])[A-Za-z\\d !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]{8,}$",
-                        "Le mot de passe doit contenir au moins 8 caractères, une lettre en majuscule, un chiffre et un caractère spécial"
-                      ),
-                    password_confirmation: Yup.string()
-                      .required("Veuillez saisir votre mot de passe une seconde fois")
-                      .equalsTo(Yup.ref("password"), "Le mot de passe doit être identique à celui saisi plus haut.")
-                      .matches(
-                        "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[ !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~])[A-Za-z\\d !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]{8,}$",
-                        "Le mot de passe doit contenir au moins 8 caractères, une lettre en majuscule, un chiffre et un caractère spécial"
-                      ),
-                  })}
+                  validationSchema={passwordConfirmationSchema}
                   onSubmit={activation}
                 >
                   {({ status = {} }) => {

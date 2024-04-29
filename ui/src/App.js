@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-d
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
 import { getUserType } from "./common/utils/getUserType.js";
+import { UserType } from "./common/constants/UserType.js";
 
 const ForgottenPasswordPage = lazy(() => import("./pages/password/ForgottenPasswordPage"));
 const ActivationPage = lazy(() => import("./pages/ActivationPage"));
@@ -12,6 +13,7 @@ const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
 
 const ResponsableRoutes = lazy(() => import("./pages/responsable/Routes"));
 const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
+const DelegueRoutes = lazy(() => import("./pages/delegue/Routes"));
 const AdminRoutes = lazy(() => import("./pages/admin/Routes"));
 const CsaioPage = lazy(() => import("./pages/CsaioPage.js"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -29,7 +31,7 @@ const Accessibilite = lazy(() => import("./pages/legal/Accessibilite"));
 const RequireAuth = ({ children, allowed }) => {
   const [auth] = useAuth();
   const type = getUserType(auth);
-  const isNotAllowed = allowed && !allowed.includes(type);
+  const isNotAllowed = allowed && !allowed.map((v) => v.toLowerCase()).includes(type);
 
   if (!auth || auth.sub === "anonymous" || isNotAllowed) {
     return <Navigate to="/login" />;
@@ -42,7 +44,14 @@ const App = () => {
   const [auth] = useAuth();
 
   const getDefaultRedirection = () => {
-    return auth.type === "Responsable" ? "responsable/formateurs" : getUserType(auth);
+    switch (auth.type) {
+      case UserType.RESPONSABLE:
+        return "responsable/formateurs";
+      case UserType.DELEGUE:
+        return "delegue/relations";
+      default:
+        return getUserType(auth);
+    }
   };
 
   return (
@@ -75,7 +84,7 @@ const App = () => {
             path="/responsable/*"
             element={
               <Suspense>
-                <RequireAuth allowed={["responsable"]}>
+                <RequireAuth allowed={[UserType.RESPONSABLE]}>
                   <ResponsableRoutes />
                 </RequireAuth>
               </Suspense>
@@ -86,8 +95,19 @@ const App = () => {
             path="/formateur/*"
             element={
               <Suspense>
-                <RequireAuth allowed={["formateur"]}>
+                <RequireAuth allowed={[UserType.FORMATEUR]}>
                   <FormateurRoutes />
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/delegue/*"
+            element={
+              <Suspense>
+                <RequireAuth allowed={[UserType.DELEGUE]}>
+                  <DelegueRoutes />
                 </RequireAuth>
               </Suspense>
             }
@@ -97,7 +117,7 @@ const App = () => {
             path="/csaio"
             element={
               <Suspense>
-                <RequireAuth allowed={["csaio"]}>
+                <RequireAuth allowed={[UserType.CSAIO]}>
                   <CsaioPage />
                 </RequireAuth>
               </Suspense>
@@ -109,7 +129,7 @@ const App = () => {
             path="/profil"
             element={
               <Suspense>
-                <RequireAuth allowed={["responsable", "formateur"]}>
+                <RequireAuth allowed={[UserType.RESPONSABLE, UserType.FORMATEUR, UserType.DELEGUE]}>
                   <Navigate to={`/${getUserType(auth)}`} />;
                 </RequireAuth>
               </Suspense>

@@ -6,15 +6,17 @@ import { ResponsableLibelle } from "../../common/components/responsable/fields/R
 import { ResponsableEmail } from "../../common/components/responsable/fields/ResponsableEmail";
 import { History } from "./History";
 
-export const Responsable = ({ responsable, formateurs, callback }) => {
+export const Responsable = ({ responsable, callback }) => {
   const { onOpen, isOpen, onClose } = useDisclosure();
 
   if (!responsable) {
     return;
   }
 
-  const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.etablissements_formateur?.find(
-    (etablissement) => etablissement.uai === responsable.uai || etablissement.siret === responsable.siret
+  const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.relations?.find(
+    (relation) =>
+      relation.etablissement_formateur.uai === responsable?.uai ||
+      relation.etablissement_formateur.siret === responsable?.siret
   );
 
   return (
@@ -29,8 +31,8 @@ export const Responsable = ({ responsable, formateurs, callback }) => {
       >
         <Box mb={12}>
           <Text mb={4}>
-            Adresse : {responsable.adresse} - Siret : {responsable.siret ?? "Inconnu"} - UAI :{" "}
-            {responsable.uai ?? "Inconnu"}
+            Adresse : {responsable?.adresse} - Siret : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
+            {responsable?.uai ?? "Inconnu"}
           </Text>
 
           <Text mb={4}>
@@ -41,9 +43,9 @@ export const Responsable = ({ responsable, formateurs, callback }) => {
           </Text>
 
           <Text mb={4}>
-            L'organisme est responsable de l'offre de {responsable?.etablissements_formateur?.length} organisme
-            {responsable?.etablissements_formateur?.length > 1 && "s"} formateur
-            {responsable?.etablissements_formateur?.length > 1 && "s"}.{" "}
+            L'organisme est responsable de l'offre de {responsable?.relations?.length} organisme
+            {responsable?.relations?.length > 1 && "s"} formateur
+            {responsable?.relations?.length > 1 && "s"}.{" "}
             <Link variant="action" href="/responsable/formateurs">
               Accéder à la liste
             </Link>
@@ -52,7 +54,7 @@ export const Responsable = ({ responsable, formateurs, callback }) => {
           {isResponsableFormateurForAtLeastOneEtablissement && (
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
-              <Link variant="action" href={`/responsable/formateurs/${responsable.uai}`}>
+              <Link variant="action" href={`/responsable/formateurs/${responsable?.uai}`}>
                 Accéder à la page de téléchargement des listes de candidats
               </Link>
             </Text>
@@ -65,7 +67,7 @@ export const Responsable = ({ responsable, formateurs, callback }) => {
           </Heading>
 
           <Heading as="h4" size="sm" mb={4}>
-            Nombre de candidats : {responsable.nombre_voeux}
+            Nombre de candidats : {responsable?.nombre_voeux.toLocaleString()}
           </Heading>
 
           <Text mb={4}>

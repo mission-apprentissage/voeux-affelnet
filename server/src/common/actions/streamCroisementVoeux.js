@@ -1,4 +1,4 @@
-const { Voeu, Responsable } = require("../model/index.js");
+const { Voeu, Responsable } = require("../model");
 const { compose, transformData } = require("oleoduc");
 const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
 const { sortDescending } = require("../utils/dateUtils.js");

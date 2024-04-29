@@ -1,25 +1,16 @@
-import { Flex, Text } from "@chakra-ui/react";
-import { UserStatut } from "../../../constants/UserStatut";
+import { Text } from "@chakra-ui/react";
 
-export const FormateurEmail = ({ responsable, formateur }) => {
-  const etablissement = responsable.etablissements_formateur?.find(
-    (etablissement) => formateur.uai === etablissement.uai
-  );
-
-  const diffusionAutorisee = etablissement?.diffusionAutorisee;
+export const FormateurEmail = ({ responsable, delegue }) => {
+  const isDiffusionAutorisee = !!delegue;
 
   return (
     <>
-      {diffusionAutorisee ? (
-        <Text display={"inline"}>
-          {[UserStatut.CONFIRME, UserStatut.ACTIVE].includes(formateur.statut) ? formateur.email : etablissement.email}
-        </Text>
+      {isDiffusionAutorisee ? (
+        <Text as="span">{delegue?.email}</Text>
       ) : (
-        <Flex alignItems="center">
-          <Text mr={4}>
-            <strong>Vous</strong> ({responsable.email})
-          </Text>
-        </Flex>
+        <Text as="span">
+          <strong>Vous</strong> ({responsable.email})
+        </Text>
       )}
     </>
   );

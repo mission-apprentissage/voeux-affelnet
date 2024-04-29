@@ -10,7 +10,7 @@
 
           <mj-text>
             Une délégation de droit au téléchargement des listes de candidats ayant exprimé des vœux sur le service en
-            ligne affectation vous a été accordée pour l'établissement <%= data.formateur.uai %>) .
+            ligne affectation vous a été accordée pour l'établissement <%= data.formateur?.uai %>) .
           </mj-text>
 
           <mj-text>
@@ -26,7 +26,7 @@
             Activer mon compte
           </mj-button>
 
-          <mj-text> Votre identifiant de connexion : <strong><%= data.formateur.username %></strong> </mj-text>
+          <mj-text> Votre identifiant de connexion : <strong><%= data.formateur?.username %></strong> </mj-text>
 
           <%- include('./common/procedure.ejs'); %> <%- include('./common/signature.ejs'); %>
         </mj-column>

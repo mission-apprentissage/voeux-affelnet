@@ -26,11 +26,12 @@ async function sendNotificationEmails(sendEmail, options = {}) {
           "etablissements.voeux_date": { $exists: true },
           "emails.templateName": { $not: { $regex: "^update_.*$" } },
 
+          // TODO : Vérifier si il y'a délégation ou non pour savoir à qui envoyer les mails de notifications de mises à jour
           $or: [
             {
               type: UserType.RESPONSABLE,
               etablissements: {
-                $elemMatch: { diffusionAutorisee: false, voeux_date: { $exists: true }, nombre_voeux: { $gt: 0 } },
+                $elemMatch: { diffusion_autorisee: false, voeux_date: { $exists: true }, nombre_voeux: { $gt: 0 } },
               },
             },
             { type: UserType.FORMATEUR },
@@ -46,7 +47,7 @@ async function sendNotificationEmails(sendEmail, options = {}) {
       if (user.type === UserType.FORMATEUR) {
         const responsable = await Responsable.findOne({
           "etablissements.uai": user.username,
-          "etablissements.diffusionAutorisee": true,
+          "etablissements.diffusion_autorisee": true,
         });
 
         if (!responsable) {
@@ -54,7 +55,7 @@ async function sendNotificationEmails(sendEmail, options = {}) {
         }
 
         const etablissement = responsable.etablissements_formateur?.find(
-          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+          (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
         );
 
         user.email = user.email || etablissement?.email;

@@ -19,9 +19,9 @@ function convertQueryIntoParams(query, options = {}) {
   );
 }
 
-class CatalogueApi extends RateLimitedApi {
-  #getFormationsCache = new Map();
+const getFormationsCache = new Map();
 
+class CatalogueApi extends RateLimitedApi {
   constructor(options = {}) {
     super("CatalogueApi", { nbRequests: 5, durationInSeconds: 1, ...options });
   }
@@ -55,8 +55,8 @@ class CatalogueApi extends RateLimitedApi {
   async getFormations(query, options) {
     const params = convertQueryIntoParams(query, options);
 
-    if (this.#getFormationsCache.has(JSON.stringify(params))) {
-      return this.#getFormationsCache.get(JSON.stringify(params));
+    if (getFormationsCache.has(JSON.stringify(params))) {
+      return getFormationsCache.get(JSON.stringify(params));
     }
 
     return this.execute(async () => {
@@ -65,7 +65,7 @@ class CatalogueApi extends RateLimitedApi {
         headers: { Cookie: this.cookie },
       });
 
-      this.#getFormationsCache.set(JSON.stringify(params), response);
+      getFormationsCache.set(JSON.stringify(params), response);
 
       return response;
     });
@@ -74,8 +74,8 @@ class CatalogueApi extends RateLimitedApi {
   async getFormation(query, options) {
     const params = convertQueryIntoParams(query, options);
 
-    if (this.#getFormationsCache.has(JSON.stringify(params))) {
-      return this.#getFormationsCache.get(JSON.stringify(params));
+    if (getFormationsCache.has(JSON.stringify(params))) {
+      return getFormationsCache.get(JSON.stringify(params));
     }
 
     return this.execute(async () => {
@@ -84,7 +84,7 @@ class CatalogueApi extends RateLimitedApi {
         headers: { Cookie: this.cookie },
       });
 
-      this.#getFormationsCache.set(JSON.stringify(params), response);
+      getFormationsCache.set(JSON.stringify(params), response);
 
       return response;
     });

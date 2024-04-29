@@ -80,10 +80,11 @@ export const _patch = (path, body = {}, options = {}) => {
   }).then((res) => handleResponse(path, res));
 };
 
-export const _delete = (path, options = {}) => {
+export const _delete = (path, body = {}, options = {}) => {
   return fetch(`${path}`, {
     method: "DELETE",
     headers: getHeaders(),
+    body: JSON.stringify(body),
     ...options,
   }).then((res) => handleResponse(path, res));
 };

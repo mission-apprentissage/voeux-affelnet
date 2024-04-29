@@ -1,4 +1,4 @@
-const { Voeu } = require("../model/index.js");
+const { Voeu } = require("../model");
 const { compose, transformData } = require("oleoduc");
 
 function getVoeuxStream({ siret, uai }) {

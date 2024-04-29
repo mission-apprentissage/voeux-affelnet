@@ -1,4 +1,4 @@
-const { Responsable, Formateur, Voeu } = require("../model/index.js");
+const { Responsable, Formateur, Voeu } = require("../model");
 const logger = require("../logger.js");
 
 async function markVoeuxAsAvailable({ siret, uai }, voeuxDate) {
@@ -7,30 +7,30 @@ async function markVoeuxAsAvailable({ siret, uai }, voeuxDate) {
     "etablissement_formateur.uai": uai,
   });
 
-  logger.info(`${siret} / ${uai} : ${nombre_voeux} voeux`);
+  logger.info(`${siret} / ${uai} : ${nombre_voeux.toLocaleString()} voeux`);
 
   const { matchedCount: matchedResponsableCount } = await Responsable.updateOne(
-    { siret, "etablissements.uai": uai },
+    { siret, "etablissements_formateur.uai": uai },
     {
       $set: {
-        "etablissements.$.voeux_date": voeuxDate,
-        "etablissements.$.nombre_voeux": nombre_voeux,
+        "etablissements_formateur.$.voeux_date": voeuxDate,
+        "etablissements_formateur.$.nombre_voeux": nombre_voeux,
       },
 
-      // $unset: { "etablissements.$[].voeux_date": "" },
+      // $unset: { "etablissements_formateur.$[].voeux_date": "" },
     },
     { runValidators: true }
   );
 
   const { matchedCount: matchedFormateurCount } = await Formateur.updateOne(
-    { uai, "etablissements.siret": siret },
+    { uai, "etablissements_responsable.siret": siret },
     {
       $set: {
-        "etablissements.$.voeux_date": voeuxDate,
-        "etablissements.$.nombre_voeux": nombre_voeux,
+        "etablissements_responsable.$.voeux_date": voeuxDate,
+        "etablissements_responsable.$.nombre_voeux": nombre_voeux,
       },
 
-      // $unset: { "etablissements.$[].voeux_date": "" },
+      // $unset: { "etablissements_responsable.$[].voeux_date": "" },
     },
     { runValidators: true }
   );

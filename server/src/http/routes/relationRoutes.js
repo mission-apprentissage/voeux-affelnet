@@ -65,7 +65,7 @@ module.exports = () => {
 
       const responsables =
         (await Responsable.find(
-          { siret: { $in: formateur.etablissements_responsable.map((etablissement) => etablissement.siret) } },
+          { siret: { $in: formateur?.etablissements_responsable.map((etablissement) => etablissement.siret) } },
           { _id: 0 }
         )
           .sort({ raison_sociale: 1 })

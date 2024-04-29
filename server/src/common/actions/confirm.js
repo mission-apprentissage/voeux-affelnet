@@ -10,14 +10,15 @@ const {
   saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsResponsable,
 } = require("./history/responsable");
 const {
-  saveAccountConfirmed: saveAccountConfirmedAsFormateur,
-  saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsFormateur,
-} = require("./history/formateur");
+  saveAccountConfirmed: saveAccountConfirmedAsDelegue,
+  saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsDelegue,
+} = require("./history/delegue");
 const { UserType } = require("../constants/UserType");
 
 async function confirm(username, email, options = {}) {
   const user = await getUser(username);
   const isNewEmail = user.email !== email;
+  const oldEmail = user.email;
 
   if (!email || (!options.force && user.statut !== UserStatut.EN_ATTENTE)) {
     throw Boom.badRequest(`Une confirmation a déjà été enregistrée pour le compte ${username}`);
@@ -28,10 +29,10 @@ async function confirm(username, email, options = {}) {
 
     switch (user.type) {
       case UserType.RESPONSABLE:
-        await saveAccountEmailUpdatedByAccountAsResponsable({ siret: user.username, email }, user.email);
+        await saveAccountEmailUpdatedByAccountAsResponsable(user, email, oldEmail);
         break;
-      case UserType.FORMATEUR:
-        await saveAccountEmailUpdatedByAccountAsFormateur({ uai: user.username, email }, user.email);
+      case UserType.DELEGUE:
+        await saveAccountEmailUpdatedByAccountAsDelegue(user, email, oldEmail);
         break;
     }
   }
@@ -42,17 +43,17 @@ async function confirm(username, email, options = {}) {
 
   switch (user.type) {
     case UserType.RESPONSABLE:
-      await saveAccountConfirmedAsResponsable({ siret: user.username, email });
+      await saveAccountConfirmedAsResponsable(user, email);
       break;
-    case UserType.FORMATEUR:
-      await saveAccountConfirmedAsFormateur({ uai: user.username, email });
+    case UserType.DELEGUE:
+      await saveAccountConfirmedAsDelegue(user, email);
       break;
     default:
       break;
   }
 
   return User.findOneAndUpdate(
-    { username },
+    { _id: user._id },
     {
       $set: {
         statut: UserStatut.CONFIRME,

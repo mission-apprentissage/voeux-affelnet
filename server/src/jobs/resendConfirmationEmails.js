@@ -65,7 +65,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
       if (user.type === UserType.FORMATEUR) {
         const responsable = await Responsable.findOne({
           "etablissements.uai": user.username,
-          "etablissements.diffusionAutorisee": true,
+          "etablissements.diffusion_autorisee": true,
         });
 
         if (!responsable) {
@@ -73,7 +73,7 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
         }
 
         const etablissement = responsable.etablissements_formateur?.find(
-          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+          (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
         );
 
         user.email = etablissement?.email;

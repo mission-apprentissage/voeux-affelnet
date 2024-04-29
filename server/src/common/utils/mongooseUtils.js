@@ -30,8 +30,28 @@ async function paginate(Model, query, options = {}) {
   };
 }
 
+async function aggregate(Model, aggregation, options = {}) {
+  const total = (await Model.aggregate([...aggregation, { $count: "total" }]))[0]?.total || 0;
+
+  const page = options.page || 1;
+  const limit = options.items_par_page || 10;
+  const sort = options.sort || {};
+  const skip = (page - 1) * limit;
+
+  return {
+    find: Model.aggregate([...aggregation, { $sort: sort }, { $skip: skip }, { $limit: limit }]),
+    pagination: {
+      page,
+      items_par_page: limit,
+      nombre_de_page: Math.ceil(total / limit) || 1,
+      total,
+    },
+  };
+}
+
 module.exports = {
   nested,
   raw,
   paginate,
+  aggregate,
 };

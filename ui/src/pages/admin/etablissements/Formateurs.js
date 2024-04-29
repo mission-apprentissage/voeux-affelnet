@@ -11,11 +11,12 @@ import { _get } from "../../../common/httpClient";
 import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
 
 export const Formateurs = () => {
+  const mounted = useRef(false);
   const { siret } = useParams();
 
   const [responsable, setResponsable] = useState(undefined);
-  const [formateurs, setFormateurs] = useState(undefined);
-  const mounted = useRef(false);
+  // const [formateurs, setFormateurs] = useState(undefined);
+  // const [delegues, setDelegues] = useState(undefined);
 
   const getResponsable = useCallback(async () => {
     try {
@@ -27,21 +28,31 @@ export const Formateurs = () => {
     }
   }, [siret]);
 
-  const getFormateurs = useCallback(async () => {
-    try {
-      const response = await _get(`/api/admin/responsables/${siret}/formateurs`);
+  // const getFormateurs = useCallback(async () => {
+  //   try {
+  //     const response = await _get(`/api/admin/responsables/${siret}/formateurs`);
 
-      setFormateurs(response);
-    } catch (error) {
-      setFormateurs(undefined);
-      throw Error;
-    }
-  }, [siret, setFormateurs]);
+  //     setFormateurs(response);
+  //   } catch (error) {
+  //     setFormateurs(undefined);
+  //     throw Error;
+  //   }
+  // }, [siret, setFormateurs]);
+
+  // const getDelegues = useCallback(async () => {
+  //   try {
+  //     const response = await _get(`/api/admin/responsables/${siret}/delegues`);
+
+  //     setDelegues(response);
+  //   } catch (error) {
+  //     setDelegues(undefined);
+  //     throw Error;
+  //   }
+  // }, [siret, setDelegues]);
 
   const reload = useCallback(async () => {
-    await getResponsable();
-    await getFormateurs();
-  }, [getResponsable, getFormateurs]);
+    await Promise.all([await getResponsable() /*, await getFormateurs(), await getDelegues()*/]);
+  }, [getResponsable /*, getFormateurs, getDelegues*/]);
 
   useEffect(() => {
     const run = async () => {
@@ -74,13 +85,14 @@ export const Formateurs = () => {
         <Box mb={12}>
           <Text mb={4}>
             <strong>
-              Voici la listes des organismes formateurs pour lesquels l'organisme a été identifié comme responsable.
+              Voici la listes des organismes formateurs pour lesquels l'organisme a été identifié comme responsable?.
             </strong>
           </Text>
         </Box>
 
         <Box mb={12}>
-          {formateurs && (
+          {/* {formateurs && ( */}
+          {!!responsable?.relations?.length && (
             <Table mt={12}>
               <Thead>
                 <Tr>
@@ -89,22 +101,22 @@ export const Formateurs = () => {
                   <Th width="450px">Raison sociale / Ville</Th>
                   <Th width="350px">Courriel habilité</Th>
 
-                  <Th width={"80px"}>Candidats</Th>
-                  <Th width={"80px"}>Restant à télécharger</Th>
+                  <Th width={"70px"}>Candidats</Th>
+                  <Th width={"70px"}>Restant à télécharger</Th>
                   <Th>Statut</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {formateurs.map((formateur) => {
-                  const etablissement = responsable.etablissements_formateur?.find(
-                    (etablissement) => etablissement.uai === formateur.uai
-                  );
+                {responsable?.relations.map((relation) => {
+                  const formateur = relation?.formateur ?? relation.etablissement_formateur;
+                  const delegue = relation?.delegue;
+
                   return (
                     <Tr key={formateur?.uai}>
                       <Td>
                         <Link
                           variant="primary"
-                          href={`/admin/responsable/${responsable.siret}/formateur/${formateur.uai}`}
+                          href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}
                         >
                           Détail
                         </Link>
@@ -116,18 +128,23 @@ export const Formateurs = () => {
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <FormateurEmail responsable={responsable} formateur={formateur} callback={reload} />
+                          <FormateurEmail
+                            responsable={responsable}
+                            formateur={formateur}
+                            delegue={delegue}
+                            callback={reload}
+                          />
                         </Text>
                       </Td>
                       <Td>
-                        <Text>{etablissement?.nombre_voeux}</Text>
+                        <Text>{relation?.nombre_voeux.toLocaleString()}</Text>
                       </Td>
                       <Td>
-                        <Text>{etablissement?.nombre_voeux_restant}</Text>
+                        <Text>{relation?.nombre_voeux_restant.toLocaleString()}</Text>
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <FormateurStatut responsable={responsable} formateur={formateur} />
+                          <FormateurStatut relation={relation} />
                         </Text>
                       </Td>
                     </Tr>

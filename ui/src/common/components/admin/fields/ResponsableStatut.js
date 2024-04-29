@@ -7,17 +7,17 @@ export const ResponsableStatut = ({ responsable }) => {
   }
 
   switch (true) {
-    case UserStatut.ACTIVE === responsable.statut: {
+    case UserStatut.ACTIVE === responsable?.statut: {
       return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
     }
-    case UserStatut.CONFIRME === responsable.statut: {
+    case UserStatut.CONFIRME === responsable?.statut: {
       return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
     }
 
-    case !!responsable.emails.length && UserStatut.EN_ATTENTE === responsable.statut: {
+    case UserStatut.EN_ATTENTE === responsable?.statut && !!responsable?.emails.length: {
       return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
     }
-    case !responsable.emails.length && UserStatut.EN_ATTENTE === responsable.statut: {
+    case UserStatut.EN_ATTENTE === responsable?.statut && !responsable?.emails.length: {
       return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
     }
 

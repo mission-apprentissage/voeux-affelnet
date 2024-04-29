@@ -18,8 +18,8 @@ import {
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
-import { Yup } from "../../../Yup";
 import { _put } from "../../../httpClient";
+import { emailConfirmationSchema } from "../../../utils/validationUtils";
 
 export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -31,7 +31,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
         toast({
           title: "Votre adresse courriel a été modifiée",
           description:
-            "C'est à cette adresse que vous recevrez les mises à jour des listes de candidats pour les établissements donc vous être responsables.",
+            "C'est à cette adresse que vous recevrez les mises à jour des listes de candidats pour les établissements dont vous être responsables.",
           status: "success",
           duration: 9000,
           isClosable: true,
@@ -68,13 +68,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
             initialValues={{
               email: responsable.email,
             }}
-            validationSchema={Yup.object().shape({
-              email: Yup.string().email().required("Requis"),
-              email_confirmation: Yup.string()
-                .email()
-                .required("Requis")
-                .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
-            })}
+            validationSchema={emailConfirmationSchema}
             onSubmit={(form) => updateEmail({ form })}
           >
             <Form style={{ width: "100%" }} id="update-email-form">

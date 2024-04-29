@@ -34,12 +34,12 @@ import { ResponsableLibelle } from "../common/components/responsable/fields/Resp
 //     return;
 //   }
 
-//   const etablissement = responsable.etablissements_formateur?.find((etab) => etab.uai === formateur.uai);
+//   const etablissement = responsable.etablissements_formateur?.find((etab) => etab.uai === formateur?.uai);
 //   const telechargements = responsable.voeux_telechargements_formateur
 //     ?.sort((a, b) => sortDescending(a.date, b.date))
-//     .filter((t) => t.uai === formateur.uai);
+//     .filter((t) => t.uai === formateur?.uai);
 
-//   console.log(formateur.uai, {
+//   console.log(formateur?.uai, {
 //     etablissement,
 //     telechargements,
 //     telecharges: telechargements.find((v) => v.date > etablissement?.voeux_date),
@@ -178,10 +178,10 @@ function ReceptionVoeuxPage() {
                   <Tbody>
                     {responsableData.formateurs?.map((formateur, index) => (
                       <Tr key={index}>
-                        <Td>{formateur.siret}</Td>
-                        <Td>{formateur.uai}</Td>
-                        <Td>{formateur.raison_sociale}</Td>
-                        <Td>{formateur.adresse}</Td>
+                        <Td>{formateur?.siret}</Td>
+                        <Td>{formateur?.uai}</Td>
+                        <Td>{formateur?.raison_sociale}</Td>
+                        <Td>{formateur?.adresse}</Td>
                       </Tr>
                     ))}
                   </Tbody>

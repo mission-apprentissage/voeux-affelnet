@@ -8,18 +8,19 @@ const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Responsable, Formateur, Voeu } = require("../../common/model");
 const { siretFormat } = require("../../common/utils/format");
 const { changeEmail } = require("../../common/actions/changeEmail");
+const { UserType } = require("../../common/constants/UserType.js");
 
 module.exports = ({ users }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkApiToken, ensureIs } = authMiddleware(users);
 
   /**
-   * Retourne le responsable connecté
+   * Retourne le formateur connecté
    */
   router.get(
     "/api/formateur",
     checkApiToken(),
-    ensureIs("Formateur"),
+    ensureIs(UserType.FORMATEUR),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
       const formateur = await Formateur.findOne({ uai }).lean();
@@ -40,9 +41,9 @@ module.exports = ({ users }) => {
             return {
               ...etablissement,
 
-              diffusionAutorisee: (await Responsable.findOne({ siret: etablissement.siret }))?.etablissements?.find(
-                (etablissement) => etablissement.uai === uai
-              )?.diffusionAutorisee,
+              diffusion_autorisee: (
+                await Responsable.findOne({ siret: etablissement.siret })
+              )?.etablissements_formateur?.find((etablissement) => etablissement.uai === uai)?.diffusion_autorisee,
 
               nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
 
@@ -63,7 +64,7 @@ module.exports = ({ users }) => {
   router.put(
     "/api/formateur/setEmail",
     checkApiToken(),
-    ensureIs("Formateur"),
+    ensureIs(UserType.FORMATEUR),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
 
@@ -85,7 +86,7 @@ module.exports = ({ users }) => {
   router.get(
     "/api/formateur/responsables",
     checkApiToken(),
-    ensureIs("Formateur"),
+    ensureIs(UserType.FORMATEUR),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
       const formateur = await Formateur.findOne({ uai }).lean();
@@ -111,7 +112,7 @@ module.exports = ({ users }) => {
     // "/api/formateur/voeux",
     "/api/formateur/responsables/:siret/voeux",
     checkApiToken(),
-    ensureIs("Formateur"),
+    ensureIs(UserType.FORMATEUR),
     tryCatch(async (req, res) => {
       const { uai } = req.user;
 

@@ -10,9 +10,9 @@ const {
   saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsResponsable,
 } = require("../common/actions/history/responsable");
 const {
-  saveUpdatedListAvailableEmailManualResent: saveUpdatedListAvailableEmailManualResentAsFormateur,
-  saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsFormateur,
-} = require("../common/actions/history/formateur");
+  saveUpdatedListAvailableEmailManualResent: saveUpdatedListAvailableEmailManualResentAsDelegue,
+  saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsDelegue,
+} = require("../common/actions/history/delegue");
 
 async function resendUpdateEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -58,7 +58,7 @@ async function resendUpdateEmails(resendEmail, options = {}) {
       if (user.type === UserType.FORMATEUR) {
         const responsable = await Responsable.findOne({
           "etablissements.uai": user.username,
-          "etablissements.diffusionAutorisee": true,
+          "etablissements.diffusion_autorisee": true,
         });
 
         if (!responsable) {
@@ -66,7 +66,7 @@ async function resendUpdateEmails(resendEmail, options = {}) {
         }
 
         const etablissement = responsable.etablissements_formateur?.find(
-          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
+          (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
         );
 
         user.email = user.email || etablissement?.email;
@@ -94,10 +94,10 @@ async function resendUpdateEmails(resendEmail, options = {}) {
                 ? await saveUpdatedListAvailableEmailManualResentAsResponsable(user, options.sender)
                 : await saveUpdatedListAvailableEmailAutomaticResentAsResponsable(user);
               break;
-            case UserType.FORMATEUR:
+            case UserType.DELEGUE:
               options.sender
-                ? await saveUpdatedListAvailableEmailManualResentAsFormateur(user, options.sender)
-                : await saveUpdatedListAvailableEmailAutomaticResentAsFormateur(user);
+                ? await saveUpdatedListAvailableEmailManualResentAsDelegue(user, options.sender)
+                : await saveUpdatedListAvailableEmailAutomaticResentAsDelegue(user);
               break;
             default:
               break;

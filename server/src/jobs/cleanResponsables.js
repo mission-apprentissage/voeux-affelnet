@@ -22,12 +22,12 @@ async function cleanResponsables(formateursCsv, options = {}) {
       on_record: (record) => omitEmpty(record),
     }),
     accumulateData(
-      async (accumulator, { siret }) => {
-        if (siret === SIRET_RECENSEMENT) {
+      async (accumulator, { siret_responsable }) => {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return accumulator;
         }
 
-        accumulator = [...new Set([...accumulator, siret])];
+        accumulator = [...new Set([...accumulator, siret_responsable])];
 
         return accumulator;
       },

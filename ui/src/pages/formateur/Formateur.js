@@ -29,17 +29,18 @@ export const Formateur = ({ formateur, responsables, callback }) => {
     <>
       <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
         <Box mb={4}>
-          <Heading as="h3" size="md" display="flex" mb={4}>
+          <Heading as="h3" size="md" mb={4}>
             Organisme formateur :&nbsp;
             <FormateurLibelle formateur={formateur} />
           </Heading>
 
           <Text mb={4}>
-            Adresse : {formateur.adresse} - Siret : {formateur.siret ?? "Inconnu"} - UAI : {formateur.uai ?? "Inconnu"}
+            Adresse : {formateur?.adresse} - Siret : {formateur?.siret ?? "Inconnu"} - UAI :{" "}
+            {formateur?.uai ?? "Inconnu"}
           </Text>
         </Box>
 
-        {formateur.etablissements_responsable.map((etablissement, index) => {
+        {formateur?.etablissements_responsable.map((etablissement, index) => {
           const responsable = responsables?.find((responsable) => responsable.siret === etablissement.siret);
 
           if (!responsable) {
@@ -48,14 +49,14 @@ export const Formateur = ({ formateur, responsables, callback }) => {
 
           const hasVoeux = etablissement.nombre_voeux > 0;
 
-          const isDiffusionAutorisee = etablissement?.diffusionAutorisee;
+          const isDiffusionAutorisee = etablissement?.diffusion_autorisee;
 
-          const voeuxTelechargementsFormateur = formateur.voeux_telechargements_responsable.filter(
+          const voeuxTelechargementsFormateur = formateur?.voeux_telechargements_responsable.filter(
             (telechargement) => telechargement.siret === responsable.siret
           );
 
           const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur.filter(
-            (telechargement) => telechargement.uai === formateur.uai
+            (telechargement) => telechargement.uai === formateur?.uai
           );
 
           const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
@@ -82,9 +83,9 @@ export const Formateur = ({ formateur, responsables, callback }) => {
           return (
             <Box
               key={index}
-              my={formateur.etablissements_responsable.length > 1 ? 18 : 12}
-              borderLeft={formateur.etablissements_responsable.length > 1 ? "2px solid" : "none"}
-              paddingLeft={formateur.etablissements_responsable.length > 1 ? 4 : 0}
+              my={formateur?.etablissements_responsable.length > 1 ? 18 : 12}
+              borderLeft={formateur?.etablissements_responsable.length > 1 ? "2px solid" : "none"}
+              paddingLeft={formateur?.etablissements_responsable.length > 1 ? 4 : 0}
             >
               <Alert status="info" variant="left-accent" my={6}>
                 <Box>
@@ -126,11 +127,11 @@ export const Formateur = ({ formateur, responsables, callback }) => {
                 <Heading as="h4" size="sm" mb={4}>
                   {hasUpdatedVoeux ? (
                     <>
-                      Une liste mise à jour de {etablissement.nombre_voeux} candidat
+                      Une liste mise à jour de {etablissement.nombre_voeux.toLocaleString()} candidat
                       {etablissement.nombre_voeux > 1 ? "s" : ""} est disponible pour cet établissement.
                     </>
                   ) : (
-                    <>Nombre de candidats: {etablissement.nombre_voeux}</>
+                    <>Nombre de candidats: {etablissement.nombre_voeux.toLocaleString()}</>
                   )}
                 </Heading>
 
@@ -154,7 +155,7 @@ export const Formateur = ({ formateur, responsables, callback }) => {
                           <>
                             <Text mb={4}>
                               <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Vous (
-                              {formateur.email}) avez téléchargé la liste.{" "}
+                              {formateur?.email}) avez téléchargé la liste.{" "}
                               <Link variant="action" onClick={() => downloadVoeuxAndReload({ responsable })}>
                                 Télécharger à nouveau
                               </Link>
@@ -196,20 +197,9 @@ export const Formateur = ({ formateur, responsables, callback }) => {
                       </>
                     )}
                   </>
-                ) : (
+                ) : new Date().getTime() <= new Date("2024/06/05").getTime() ? (
                   <>
                     <Text mb={4}>
-                      Aucun vœu n’a été exprimé pour cet organisme sur la période de formulation des demandes (du 9 au
-                      30 mai).
-                    </Text>
-                    <Text mb={4}>
-                      Si vous pensez qu’il s’agit d’une anomalie, vous pouvez{" "}
-                      <Link href="/support" variant="action">
-                        transmettre un signalement
-                      </Link>
-                      .
-                    </Text>
-                    {/* <Text mb={4}>
                       La liste des vœux exprimés sera rendue disponible dans la semaine du 5 juin. Un courriel de
                       notification{" "}
                       {isDiffusionAutorisee ? (
@@ -236,7 +226,21 @@ export const Formateur = ({ formateur, responsables, callback }) => {
                       Cette première liste pourra être mise à jour la semaine du 19 juin, pour prendre en compte les
                       modifications de vœux, les suppressions et les ajouts. Une notification courriel sera également
                       envoyée lors de cette mise à jour.
-                    </Text> */}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text mb={4}>
+                      Aucun vœu n’a été exprimé pour cet organisme sur la période de formulation des demandes (du 9 au
+                      30 mai).
+                    </Text>
+                    <Text mb={4}>
+                      Si vous pensez qu’il s’agit d’une anomalie, vous pouvez{" "}
+                      <Link href="/support" variant="action">
+                        transmettre un signalement
+                      </Link>
+                      .
+                    </Text>
                   </>
                 )}
               </Box>

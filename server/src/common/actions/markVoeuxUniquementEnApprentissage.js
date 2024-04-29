@@ -1,4 +1,4 @@
-const { Voeu } = require("../model/index.js");
+const { Voeu } = require("../model");
 
 function markVoeuxUniquementEnApprentissage(ine) {
   return Voeu.updateMany(

@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../common/hooks/responsableHooks";
-import { _put } from "../../common/httpClient";
+import { _put, _delete } from "../../common/httpClient";
 import { DelegationModal } from "../../common/components/responsable/modals/DelegationModal";
 import { UpdateDelegationModal } from "../../common/components/responsable/modals/UpdateDelegationModal";
 import { ErrorWarningLine } from "../../theme/components/icons/ErrorWarningLine";
@@ -31,32 +31,32 @@ import { isResponsableFormateur } from "../../common/utils/getUserType";
 import { FormateurStatut } from "../../common/components/responsable/fields/FormateurStatut";
 import { UserType } from "../../common/constants/UserType";
 import { UserStatut } from "../../common/constants/UserStatut";
+import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
 
-export const Formateur = ({ responsable, formateurs, callback }) => {
+export const Formateur = ({ responsable, callback }) => {
   const { uai } = useParams();
   const toast = useToast();
 
-  const formateur = formateurs?.find((formateur) => formateur?.uai === uai);
-
-  const etablissement = responsable?.etablissements_formateur?.find(
-    (etablissement) => etablissement.uai === formateur?.uai
-  );
+  const relation = responsable?.relations?.find((relation) => relation.etablissement_formateur.uai === uai);
+  // const responsable = relation.responsable ?? relation.etablissements_responsable;
+  const formateur = relation.formateur ?? relation.etablissements_formateur;
+  const delegue = relation.delegue;
 
   const downloadVoeux = useDownloadVoeux({ responsable, formateur });
 
   const cancelDelegation = useCallback(async () => {
-    await _put(`/api/responsable/formateurs/${formateur.uai}`, { diffusionAutorisee: false });
+    await _delete(`/api/responsable/delegation`, {
+      uai: formateur?.uai,
+    });
   }, [formateur]);
 
   const resendActivationEmail = useCallback(async () => {
     try {
-      await _put(`/api/responsable/formateurs/${formateur.uai}/resendActivationEmail`);
+      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendActivationEmail`);
 
       toast({
         title: "Courriel envoyé",
-        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${
-          formateur.email ?? etablissement.email
-        }`,
+        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${delegue.email}`,
         status: "success",
         duration: 9000,
         isClosable: true,
@@ -72,15 +72,15 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
         isClosable: true,
       });
     }
-  }, [formateur, etablissement, toast, callback]);
+  }, [formateur, delegue, toast, callback]);
 
   const resendNotificationEmail = useCallback(async () => {
     try {
-      await _put(`/api/responsable/formateurs/${formateur.uai}/resendNotificationEmail`);
+      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendNotificationEmail`);
 
       toast({
         title: "Courriel envoyé",
-        description: `Le courriel de notification de liste de candidats disponible a été renvoyé à l'adresse ${formateur.email}`,
+        description: `Le courriel de notification de liste de candidats disponible a été renvoyé à l'adresse ${formateur?.email}`,
         status: "success",
         duration: 9000,
         isClosable: true,
@@ -135,42 +135,41 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
     return <>Nous n'avons pas trouvé le formateur. </>;
   }
 
-  const isDiffusionAutorisee = etablissement?.diffusionAutorisee;
+  console.log({ responsable, formateur, delegue });
 
-  const hasVoeux = etablissement.nombre_voeux > 0;
+  // const isDiffusionAutorisee = etablissement?.diffusion_autorisee;
+  const isDiffusionAutorisee = !!delegue;
 
-  const voeuxTelechargementsFormateur = formateur.voeux_telechargements_responsable.filter(
-    (telechargement) => telechargement.siret === responsable.siret
-  );
+  const hasVoeux = relation.nombre_voeux > 0;
 
-  const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur.filter(
-    (telechargement) => telechargement.uai === formateur.uai
-  );
+  const voeuxTelechargementsDelegue =
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
+
+  const voeuxTelechargementsResponsable =
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
 
   const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
     ? !!voeuxTelechargementsResponsable.find(
-        (telechargement) =>
-          new Date(telechargement.date).getTime() >= new Date(etablissement.first_date_voeux).getTime()
+        (telechargement) => new Date(telechargement.date).getTime() >= new Date(relation.first_date_voeux).getTime()
       )
-    : !!voeuxTelechargementsFormateur?.find(
-        (telechargement) =>
-          new Date(telechargement.date).getTime() >= new Date(etablissement.first_date_voeux).getTime()
+    : !!voeuxTelechargementsDelegue?.find(
+        (telechargement) => new Date(telechargement.date).getTime() >= new Date(relation.first_date_voeux).getTime()
       );
 
   const voeuxTelecharges = !isDiffusionAutorisee
     ? !!voeuxTelechargementsResponsable.find(
-        (telechargement) => new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
+        (telechargement) => new Date(telechargement.date).getTime() >= new Date(relation.last_date_voeux).getTime()
       )
-    : !!voeuxTelechargementsFormateur.find(
-        (telechargement) => new Date(telechargement.date).getTime() >= new Date(etablissement.last_date_voeux).getTime()
+    : !!voeuxTelechargementsDelegue.find(
+        (telechargement) => new Date(telechargement.date).getTime() >= new Date(relation.last_date_voeux).getTime()
       );
   const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
-  const isResponsableFormateurCheck = isResponsableFormateur({ responsable, formateur });
+  const isResponsableFormateurCheck = false; // isResponsableFormateur({ responsable, formateur });
 
   const lastEmailDate =
-    formateur.emails && typeof formateur.emails.findLast === "function"
-      ? new Date(formateur.emails?.findLast(() => true)?.sendDates?.findLast(() => true))
+    delegue?.emails && typeof delegue.emails.findLast === "function"
+      ? new Date(delegue.emails?.findLast(() => true)?.sendDates?.findLast(() => true))
       : null;
 
   return (
@@ -182,7 +181,8 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
             <FormateurLibelle formateur={formateur} />
           </Heading>
           <Text mb={4}>
-            Adresse : {formateur.adresse} – Siret : {formateur.siret ?? "Inconnu"} – UAI : {formateur.uai ?? "Inconnu"}
+            Adresse : {formateur?.adresse} – Siret : {formateur?.siret ?? "Inconnu"} – UAI :{" "}
+            {formateur?.uai ?? "Inconnu"}
           </Text>
         </Box>
 
@@ -214,11 +214,11 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                   <Text as="b" style={{ textDecoration: "underline" }}>
                     Organisme responsable
                   </Text>{" "}
-                  : {responsable.raison_sociale}
+                  : {responsable?.raison_sociale}
                 </Text>
                 <Text mb={2}>
-                  Adresse : {responsable.adresse ?? "Inconnue"} – Siret : {responsable.siret ?? "Inconnu"} – UAI :{" "}
-                  {responsable.uai ?? "Inconnu"}
+                  Adresse : {responsable?.adresse ?? "Inconnue"} – Siret : {responsable?.siret ?? "Inconnu"} – UAI :{" "}
+                  {responsable?.uai ?? "Inconnu"}
                 </Text>
                 <Text mb={2}>
                   Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
@@ -241,18 +241,18 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
               <>
                 <Text mb={4}>
                   La délégation des droits de réception des listes de candidats a été activée pour cet organisme
-                  formateur.{" "}
+                  formateur?.{" "}
                 </Text>
                 <Text mb={4}>
-                  Personne habilitée à réceptionner les listes au sein de l'organisme formateur : {etablissement?.email}{" "}
+                  Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
+                  <FormateurEmail responsable={responsable} formateur={formateur} delegue={delegue} />{" "}
                   <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                     (modifier)
                   </Link>
                 </Text>
 
                 <UpdateDelegationModal
-                  responsable={responsable}
-                  formateur={formateur}
+                  relation={relation}
                   callback={callback}
                   isOpen={isOpenUpdateDelegationModal}
                   onClose={onCloseUpdateDelegationModal}
@@ -269,8 +269,7 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                 </Button>
 
                 <DelegationModal
-                  responsable={responsable}
-                  formateur={formateur}
+                  relation={relation}
                   callback={callback}
                   isOpen={isOpenDelegationModal}
                   onClose={onCloseDelegationModal}
@@ -287,21 +286,21 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
 
           {(isDiffusionAutorisee || isResponsableFormateurCheck) && (
             <Box mb={4}>
-              <Text display={"inline-flex"}>
+              <Text as="span">
                 <Box mr={2} display="inline-flex">
-                  <FormateurStatut responsable={responsable} formateur={formateur} callback={callback} />.
+                  <FormateurStatut relation={relation} callback={callback} />.
                 </Box>
 
-                {UserType.FORMATEUR === formateur.type &&
+                {UserType.DELEGUE === delegue.type &&
                   (() => {
                     switch (true) {
-                      case UserStatut.CONFIRME === formateur.statut:
+                      case UserStatut.CONFIRME === delegue.statut:
                         return (
                           <Link variant="action" onClick={resendActivationEmail}>
                             Générer un nouvel envoi de notification
                           </Link>
                         );
-                      // case UserStatut.ACTIVE === formateur.statut:
+                      // case UserStatut.ACTIVE === delegue.statut:
                       //   return (
                       //     <Link variant="action" onClick={resendNotificationEmail}>
                       //       Générer un nouvel envoi de notification
@@ -318,20 +317,20 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
           <Heading as="h4" size="sm" mb={4}>
             {hasUpdatedVoeux ? (
               <>
-                Une liste mise à jour de {etablissement.nombre_voeux} candidat
-                {etablissement.nombre_voeux > 1 ? "s" : ""} est disponible pour cet établissement.
+                Une liste mise à jour de {relation.nombre_voeux.toLocaleString()} candidat
+                {relation.nombre_voeux > 1 ? "s" : ""} est disponible pour cet établissement.
               </>
             ) : (
-              <>Nombre de candidats: {etablissement.nombre_voeux}</>
+              <>Nombre de candidats: {relation.nombre_voeux.toLocaleString()}</>
             )}
           </Heading>
 
           {hasVoeux ? (
             <>
               <Text mb={4}>
-                Date de mise à disposition : {new Date(etablissement.first_date_voeux).toLocaleDateString()}{" "}
-                {etablissement.last_date_voeux !== etablissement.first_date_voeux && (
-                  <>| Dernière mise à jour : {new Date(etablissement.last_date_voeux).toLocaleDateString()}</>
+                Date de mise à disposition : {new Date(relation.first_date_voeux).toLocaleDateString()}{" "}
+                {relation.last_date_voeux !== relation.first_date_voeux && (
+                  <>| Dernière mise à jour : {new Date(relation.last_date_voeux).toLocaleDateString()}</>
                 )}
               </Text>
               {hasUpdatedVoeux && (
@@ -345,7 +344,7 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                     <>
                       <Text display={"flex"} alignItems="center" mb={4}>
                         <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Le destinataire (
-                        {etablissement.email}) a bien téléchargé la liste de candidats.{" "}
+                        {delegue.email}) a bien téléchargé la liste de candidats.{" "}
                       </Text>
                       <Text>
                         Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par courriel.
@@ -357,8 +356,8 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                         <ErrorWarningLine mr={2} /> Vœux non téléchargés
                       </Text>
                       <Text>
-                        Vous avez autorisé les droits de diffusion directe à {etablissement.email}, mais cette personne
-                        n'a pas encore téléchargé la liste (
+                        Vous avez autorisé les droits de diffusion directe à {delegue.email}, mais cette personne n'a
+                        pas encore téléchargé la liste (
                         <Link href="#history" variant="action">
                           voir l'historique ci-dessous
                         </Link>
@@ -372,7 +371,7 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                   {voeuxTelecharges ? (
                     <Text display={"flex"} alignItems="center" mb={4}>
                       <SuccessLine verticalAlign="text-bottom" height="20px" width="20px" mr={2} /> Liste téléchargée
-                      par vous ({responsable.email}
+                      par vous ({responsable?.email}
                       ). &nbsp;
                       <Link variant="action" onClick={downloadVoeuxAndReload}>
                         Télécharger à nouveau
@@ -388,7 +387,7 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                 </>
               )}
             </>
-          ) : new Date().getTime() <= new Date("2023/06/05").getTime() ? (
+          ) : new Date().getTime() <= new Date("2024/06/05").getTime() ? (
             <>
               <Text mb={4}>
                 Les vœux exprimés en mai seront rendus disponibles dans la semaine du 5 juin 2023. Un courriel vous
@@ -444,13 +443,13 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
                     {(() => {
                       switch (true) {
-                        case UserStatut.CONFIRME === formateur.statut:
+                        case UserStatut.CONFIRME === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendActivationEmail}>
                               générer un nouvel envoi de notification courriel
                             </Link>
                           );
-                        case UserStatut.ACTIVE === formateur.statut:
+                        case UserStatut.ACTIVE === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendNotificationEmail}>
                               générer un nouvel envoi de notification courriel
@@ -491,8 +490,8 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                 <AccordionPanel pb={4}>
                   <Text mb={4}>
                     En procédant à ce téléchargement, vous annulez la délégation de droits précédemment accordée à{" "}
-                    {etablissement.email}. Vous devrez vous assurer par vos propres moyens que les jeunes ayant exprimé
-                    leurs vœux fassent l'objet d'une réponse rapide.
+                    {delegue.email}. Vous devrez vous assurer par vos propres moyens que les jeunes ayant exprimé leurs
+                    vœux fassent l'objet d'une réponse rapide.
                   </Text>
 
                   <Button variant="primary" mb={4} onClick={cancelDelegationAndDownloadVoeux}>
@@ -505,17 +504,17 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                 <h2>
                   <AccordionButton>
                     <Box as="span" flex="1" textAlign="left">
-                      Je télécharge la liste mais je souhaite que {etablissement.email} la télécharge également
+                      Je télécharge la liste mais je souhaite que {delegue.email} la télécharge également
                     </Box>
                     <AccordionIcon />
                   </AccordionButton>
                 </h2>
                 <AccordionPanel pb={4}>
                   <Text mb={4}>
-                    En procédant à ce téléchargement, la délégation accordée à {etablissement.email} reste en vigueur.
+                    En procédant à ce téléchargement, la délégation accordée à {delegue.email} reste en vigueur.
                   </Text>
                   <Text mb={4}>
-                    La liste restera considérée comme non téléchargée jusqu'à ce que {etablissement.email} procède au
+                    La liste restera considérée comme non téléchargée jusqu'à ce que {delegue.email} procède au
                     téléchargement : prenez contact avec la personne destinataire pour l'inviter à télécharger la liste.
                     Si la personne n'a pas reçu d'email de notification invitez-la à consulter ses spam, en lui
                     communiquant la date à laquelle la dernière notification lui a été envoyée (
@@ -526,13 +525,13 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
                     {(() => {
                       switch (true) {
-                        case UserStatut.CONFIRME === formateur.statut:
+                        case UserStatut.CONFIRME === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendActivationEmail}>
                               générer un nouvel envoi de notification courriel
                             </Link>
                           );
-                        case UserStatut.ACTIVE === formateur.statut:
+                        case UserStatut.ACTIVE === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendNotificationEmail}>
                               générer un nouvel envoi de notification courriel
@@ -579,9 +578,9 @@ export const Formateur = ({ responsable, formateurs, callback }) => {
           </Heading>
 
           {isResponsableFormateurCheck ? (
-            <History responsable={responsable} formateur={formateur} />
+            <History responsable={responsable} formateur={formateur} delegue={delegue} relation={relation} />
           ) : (
-            <History formateur={formateur} />
+            <History formateur={formateur} delegue={delegue} relation={relation} />
           )}
         </Box>
 

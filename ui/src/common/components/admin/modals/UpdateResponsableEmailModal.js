@@ -19,9 +19,9 @@ import {
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
-import { Yup } from "../../../Yup";
 import { _put } from "../../../httpClient";
 import { ResponsableLibelle } from "../../responsable/fields/ResponsableLibelle";
+import { emailConfirmationSchema } from "../../../utils/validationUtils";
 
 export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -53,9 +53,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
     [onClose, callback, responsable?.siret, toast]
   );
 
-  const hasDelegation = !!responsable.etablissements_formateur?.filter(
-    (etablissement) => etablissement.diffusionAutorisee
-  )?.length;
+  const hasDelegation = !!responsable.relations?.filter((relation) => !!relation.delegue)?.length;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
@@ -73,22 +71,16 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
             initialValues={{
               email: responsable.email,
             }}
-            validationSchema={Yup.object().shape({
-              email: Yup.string().email().required("Requis"),
-              email_confirmation: Yup.string()
-                .email()
-                .required("Requis")
-                .equalsTo(Yup.ref("email"), "L'email doit être identique à celui saisi plus haut."),
-            })}
+            validationSchema={emailConfirmationSchema}
             onSubmit={(form) => updateEmail({ form })}
           >
             <Form style={{ width: "100%" }} id="update-responsable-email-form">
               <Text mb={4}>
                 <strong>
                   L'interlocuteur dont vous vous apprêtez à modifier l'adresse courriel ({responsable.email}) est
-                  responsable de {responsable.etablissements_formateur?.length} organisme
-                  {responsable.etablissements_formateur?.length > 1 && "s"} formateur
-                  {responsable.etablissements_formateur?.length > 1 && "s"} (
+                  responsable de {responsable.relations?.length} organisme
+                  {responsable.relations?.length > 1 && "s"} formateur
+                  {responsable.relations?.length > 1 && "s"} (
                   <Link variant="action" href={`/admin/responsable/${responsable.siret}/formateurs`}>
                     voir la liste
                   </Link>

@@ -7,15 +7,17 @@ import { FormateurLibelle } from "../../../common/components/formateur/fields/Fo
 import { ResponsableLibelle } from "../../../common/components/responsable/fields/ResponsableLibelle";
 import { _get } from "../../../common/httpClient";
 import { OrganismeResponsableTag } from "../../../common/components/tags/OrganismeResponsable";
-import { ResponsableEmail } from "../../../common/components/admin/fields/ResponsableEmail";
+// import { ResponsableEmail } from "../../../common/components/admin/fields/ResponsableEmail";
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
+import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
 
 export const Responsables = () => {
-  const { uai } = useParams();
   const navigate = useNavigate();
+  const { uai } = useParams();
 
   const [formateur, setFormateur] = useState(undefined);
-  const [responsables, setResponsables] = useState(undefined);
+  // const [responsables, setResponsables] = useState(undefined);
+  // const [delegues, setDelegues] = useState(undefined);
   const mounted = useRef(false);
 
   const getFormateur = useCallback(async () => {
@@ -28,21 +30,31 @@ export const Responsables = () => {
     }
   }, [uai]);
 
-  const getResponsables = useCallback(async () => {
-    try {
-      const response = await _get(`/api/admin/formateurs/${uai}/responsables`);
+  // const getResponsables = useCallback(async () => {
+  //   try {
+  //     const response = await _get(`/api/admin/formateurs/${uai}/responsables`);
 
-      setResponsables(response);
-    } catch (error) {
-      setResponsables(undefined);
-      throw Error;
-    }
-  }, [uai, setResponsables]);
+  //     setResponsables(response);
+  //   } catch (error) {
+  //     setResponsables(undefined);
+  //     throw Error;
+  //   }
+  // }, [uai, setResponsables]);
+
+  // const getDelegues = useCallback(async () => {
+  //   try {
+  //     const response = await _get(`/api/admin/formateurs/${uai}/delegues`);
+
+  //     setDelegues(response);
+  //   } catch (error) {
+  //     setDelegues(undefined);
+  //     throw Error;
+  //   }
+  // }, [uai, setDelegues]);
 
   const reload = useCallback(async () => {
-    await getFormateur();
-    await getResponsables();
-  }, [getFormateur, getResponsables]);
+    await Promise.all([await getFormateur() /*, await getResponsables(), await getDelegues()*/]);
+  }, [getFormateur /*, getResponsables, getDelegues*/]);
 
   useEffect(() => {
     const run = async () => {
@@ -59,11 +71,11 @@ export const Responsables = () => {
   }, [reload]);
 
   useEffect(() => {
-    if (responsables?.length === 1) {
-      const responsable = responsables[0];
-      navigate(`/admin/responsable/${responsable.siret}/formateur/${formateur.uai}`, { replace: true });
+    if (formateur?.relations?.length === 1) {
+      const responsable = formateur?.relations[0].responsable;
+      navigate(`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`, { replace: true });
     }
-  }, [responsables, navigate, formateur?.uai]);
+  }, [formateur, navigate]);
 
   if (!formateur) {
     return;
@@ -80,7 +92,7 @@ export const Responsables = () => {
         }
       >
         <Box mb={12}>
-          {responsables && (
+          {formateur?.relations && (
             <Table mt={12}>
               <Thead>
                 <Tr>
@@ -89,22 +101,22 @@ export const Responsables = () => {
                   <Th width="450px">Raison sociale / Ville</Th>
                   <Th width="350px">Courriel habilité</Th>
 
-                  <Th width={"80px"}>Candidats</Th>
-                  <Th width={"80px"}>Restant à télécharger</Th>
+                  <Th width={"70px"}>Candidats</Th>
+                  <Th width={"70px"}>Restant à télécharger</Th>
                   <Th>Statut</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {responsables.map((responsable) => {
-                  const etablissement = responsable.etablissements_formateur?.find(
-                    (etablissement) => etablissement.uai === formateur.uai
-                  );
+                {formateur?.relations.map((relation) => {
+                  const responsable = relation.responsable ?? relation.etablissements_responsable;
+                  const delegue = relation.delegue;
+
                   return (
                     <Tr key={responsable?.uai}>
                       <Td>
                         <Link
                           variant="primary"
-                          href={`/admin/responsable/${responsable.siret}/formateur/${formateur.uai}`}
+                          href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}
                         >
                           Détail
                         </Link>
@@ -115,20 +127,25 @@ export const Responsables = () => {
                         </Text>
                       </Td>
                       <Td>
-                        <Text lineHeight={6}>
-                          <ResponsableEmail responsable={responsable} formateur={formateur} callback={reload} />
-                        </Text>
+                        <Box lineHeight={6}>
+                          <FormateurEmail
+                            responsable={responsable}
+                            formateur={formateur}
+                            delegue={delegue}
+                            callback={reload}
+                          />
+                        </Box>
                       </Td>
                       <Td>
-                        <Text>{etablissement?.nombre_voeux}</Text>
+                        <Text>{relation?.nombre_voeux.toLocaleString()}</Text>
                       </Td>
                       <Td>
-                        <Text>{etablissement?.nombre_voeux_restant}</Text>
+                        <Text>{relation?.nombre_voeux_restant.toLocaleString()}</Text>
                       </Td>
                       <Td>
-                        <Text lineHeight={6}>
-                          <ResponsableStatut responsable={responsable} formateur={formateur} />
-                        </Text>
+                        <Box lineHeight={6}>
+                          <ResponsableStatut responsable={responsable} formateur={formateur} delegue={delegue} />
+                        </Box>
                       </Td>
                     </Tr>
                   );
