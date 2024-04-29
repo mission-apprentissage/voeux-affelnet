@@ -228,19 +228,19 @@ module.exports = ({ sendEmail, resendEmail }) => {
             $match: {
               $and: [
                 {
-                  type: { $in: [UserType.FORMATEUR, UserType.RESPONSABLE] },
+                  type: type ? type : { $in: [UserType.FORMATEUR, UserType.RESPONSABLE] },
                 },
 
-                ...(type
-                  ? // [
-                    //     {
-                    //       type: UserType.ETABLISSEMENT,
-                    //       ...(type === UserType.FORMATEUR ? formateurFilter : {}),
-                    //       ...(type === UserType.RESPONSABLE ? responsableFilter : {}),
-                    //     },
-                    //   ]
-                    [{ type }]
-                  : []),
+                // ...(type
+                //   ? // [
+                //     //     {
+                //     //       type: UserType.ETABLISSEMENT,
+                //     //       ...(type === UserType.FORMATEUR ? formateurFilter : {}),
+                //     //       ...(type === UserType.RESPONSABLE ? responsableFilter : {}),
+                //     //     },
+                //     //   ]
+                //     [{ type }]
+                //   : []),
               ],
             },
           },
@@ -250,76 +250,53 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
           {
             $match: {
-              $or: [
+              $and: [
+                ...(academie || !!defaultAcademies?.length
+                  ? [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }]
+                  : []),
                 {
-                  // Formateur
-                  type: UserType.FORMATEUR,
-                  // ...formateurFilter,
-                  $and: [
-                    {},
-                    ...(text
-                      ? [
-                          {
-                            $or: [
-                              { siret: regexQuery },
-                              { uai: regexQuery },
-                              { raison_sociale: regexQuery },
-                              { email: regexQuery },
-                              { "relations.delegue.email": regexQuery },
-                              { "relations.etablissement_responsable.siret": regexQuery },
-                              { "relations.etablissement_responsable.uai": regexQuery },
-                            ],
-                          },
-                        ]
-                      : []),
-
-                    ...(academie || !!defaultAcademies?.length
-                      ? [
-                          {
-                            $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
-                          },
-                        ]
-                      : []),
-                  ],
-                },
-                {
-                  // Responsables
-                  type: UserType.RESPONSABLE,
-                  // ...responsableFilter,
-                  $and: [
-                    {},
-                    ...(text
-                      ? [
-                          {
-                            $or: [
-                              { siret: regexQuery },
-                              { uai: regexQuery },
-                              { raison_sociale: regexQuery },
-                              { email: regexQuery },
-                              { "relations.delegue.email": regexQuery },
-                              { "relations.etablissement_formateur.siret": regexQuery },
-                              { "relations.etablissement_formateur.uai": regexQuery },
-                            ],
-                          },
-                        ]
-                      : []),
-
-                    ...(academie || !!defaultAcademies?.length
-                      ? [
-                          {
-                            $or: [
-                              { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
+                  $or: [
+                    {
+                      // Formateur
+                      $and: [
+                        { type: UserType.FORMATEUR },
+                        ...(text
+                          ? [
                               {
-                                relations: {
-                                  $elemMatch: {
-                                    "formateur?.academie.code": { $in: academie ? [academie] : defaultAcademies },
-                                  },
-                                },
+                                $or: [
+                                  { siret: regexQuery },
+                                  { uai: regexQuery },
+                                  { raison_sociale: regexQuery },
+                                  { "relations.delegue.email": regexQuery },
+                                  { "relations.etablissement_responsable.siret": regexQuery },
+                                  { "relations.etablissement_responsable.uai": regexQuery },
+                                ],
                               },
-                            ],
-                          },
-                        ]
-                      : []),
+                            ]
+                          : []),
+                      ],
+                    },
+                    {
+                      // Responsables
+                      $and: [
+                        { type: UserType.RESPONSABLE },
+                        ...(text
+                          ? [
+                              {
+                                $or: [
+                                  { siret: regexQuery },
+                                  { uai: regexQuery },
+                                  { raison_sociale: regexQuery },
+                                  { email: regexQuery },
+                                  { "relations.delegue.email": regexQuery },
+                                  { "relations.etablissement_formateur.siret": regexQuery },
+                                  { "relations.etablissement_formateur.uai": regexQuery },
+                                ],
+                              },
+                            ]
+                          : []),
+                      ],
+                    },
                   ],
                 },
               ],
