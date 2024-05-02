@@ -18,7 +18,6 @@ module.exports = async (actions) => {
   app.use(require("./routes/activationRoutes")(actions));
   app.use(require("./routes/confirmationRoutes")(actions));
   app.use(require("./routes/responsablesRoutes.js")(actions));
-  app.use(require("./routes/formateursRoutes.js")(actions));
   app.use(require("./routes/deleguesRoutes.js")(actions));
   app.use(require("./routes/csaioRoutes.js")(actions));
   app.use(require("./routes/passwordRoutes")(actions));

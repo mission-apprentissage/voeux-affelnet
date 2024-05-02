@@ -1,175 +1,175 @@
 const { UserType } = require("../constants/UserType.js");
 const logger = require("../logger.js");
-const { Voeu, Responsable } = require("../model");
-const { sortDescending } = require("./dateUtils.js");
+const { /*Voeu, Responsable,*/ Relation, Delegue } = require("../model");
+// const { sortDescending } = require("./dateUtils.js");
 
-/**
- * Retourne les voeux_telechargements correspondants à l'UAI de l'établissement passé en paramètre
- *
- * @param {*} etablissement
- * @param {*} voeux_telechargements
- * @returns Array<{
-        uai: {
-          type: String,
-          required: true,
-          index: true,
-        },
-        date: {
-          type: Date,
-          required: true,
-          default: () => new Date(),
-        },
-      }>
- */
-const getTelechargements = (etablissement, voeux_telechargements) => {
-  return (
-    voeux_telechargements?.filter((t) => t.uai === etablissement.uai).sort((a, b) => sortDescending(a.date, b.date)) ??
-    []
-  );
-};
+// /**
+//  * Retourne les voeux_telechargements correspondants à l'UAI de l'établissement passé en paramètre
+//  *
+//  * @param {*} etablissement
+//  * @param {*} voeux_telechargements
+//  * @returns Array<{
+//         uai: {
+//           type: String,
+//           required: true,
+//           index: true,
+//         },
+//         date: {
+//           type: Date,
+//           required: true,
+//           default: () => new Date(),
+//         },
+//       }>
+//  */
+// const getTelechargements = (etablissement, voeux_telechargements) => {
+//   return (
+//     voeux_telechargements?.filter((t) => t.uai === etablissement.uai).sort((a, b) => sortDescending(a.date, b.date)) ??
+//     []
+//   );
+// };
 
-/**
- * Indique si les vœux ont tous été téléchargés pour un établissement donné en se basant sur les dates d'ajout et de téléchargement des vœux
- *
- * @param {*} etablissement
- * @param {*} voeux_telechargements
- * @returns boolean
- */
-const isTelechargementTotal = (etablissement, voeux_telechargements) => {
-  const telechargements = getTelechargements(etablissement, voeux_telechargements);
+// /**
+//  * Indique si les vœux ont tous été téléchargés pour un établissement donné en se basant sur les dates d'ajout et de téléchargement des vœux
+//  *
+//  * @param {*} etablissement
+//  * @param {*} voeux_telechargements
+//  * @returns boolean
+//  */
+// const isTelechargementTotal = (etablissement, voeux_telechargements) => {
+//   const telechargements = getTelechargements(etablissement, voeux_telechargements);
 
-  return !!telechargements.length && !!telechargements.filter((t) => t.date >= etablissement.voeux_date).length;
-};
+//   return !!telechargements.length && !!telechargements.filter((t) => t.date >= etablissement.voeux_date).length;
+// };
 
-/**
- * Indique si les vœux ont été partiellement téléchargés pour un établissement donné en se basant sur les dates d'ajout et de téléchargement des vœux
- *
- * @param {*} etablissement
- * @param {*} voeux_telechargements
- * @returns boolean
- */
-const isTelechargementPartiel = (etablissement, voeux_telechargements) => {
-  const telechargements = getTelechargements(etablissement, voeux_telechargements);
+// /**
+//  * Indique si les vœux ont été partiellement téléchargés pour un établissement donné en se basant sur les dates d'ajout et de téléchargement des vœux
+//  *
+//  * @param {*} etablissement
+//  * @param {*} voeux_telechargements
+//  * @returns boolean
+//  */
+// const isTelechargementPartiel = (etablissement, voeux_telechargements) => {
+//   const telechargements = getTelechargements(etablissement, voeux_telechargements);
 
-  return !!telechargements.length && !telechargements.filter((t) => t.date >= etablissement.voeux_date).length;
-};
+//   return !!telechargements.length && !telechargements.filter((t) => t.date >= etablissement.voeux_date).length;
+// };
 
-/**
- * Indique si aucun voeux n'a été téléchargés pour un établissement donné en se basant sur les dates d'ajout et de téléchargement des vœux
- *
- * @param {*} etablissement
- * @param {*} voeux_telechargements
- * @returns boolean
- */
-const isTelechargementAucun = (etablissement, voeux_telechargements) => {
-  const telechargements = getTelechargements(etablissement, voeux_telechargements);
+// /**
+//  * Indique si aucun voeux n'a été téléchargés pour un établissement donné en se basant sur les dates d'ajout et de téléchargement des vœux
+//  *
+//  * @param {*} etablissement
+//  * @param {*} voeux_telechargements
+//  * @returns boolean
+//  */
+// const isTelechargementAucun = (etablissement, voeux_telechargements) => {
+//   const telechargements = getTelechargements(etablissement, voeux_telechargements);
 
-  return !telechargements.length;
-};
+//   return !telechargements.length;
+// };
 
-/**
- * Indique si tous les voeux d'une liste d'établissements ont été téléchargés.
- *
- * @param {*} etablissements
- * @param {*} voeux_telechargements
- * @returns boolean
- */
-const areTelechargementsTotal = (etablissements, voeux_telechargements) => {
-  return (
-    etablissements?.filter((etablissement) => isTelechargementTotal(etablissement, voeux_telechargements)).length ===
-    etablissements?.length
-  );
-};
+// /**
+//  * Indique si tous les voeux d'une liste d'établissements ont été téléchargés.
+//  *
+//  * @param {*} etablissements
+//  * @param {*} voeux_telechargements
+//  * @returns boolean
+//  */
+// const areTelechargementsTotal = (etablissements, voeux_telechargements) => {
+//   return (
+//     etablissements?.filter((etablissement) => isTelechargementTotal(etablissement, voeux_telechargements)).length ===
+//     etablissements?.length
+//   );
+// };
 
-/**
- * Indique si au moins un établissement d'une liste possèdent des voeux ayant été partiellement téléchargés.
- *
- * @param {*} etablissements
- * @param {*} voeux_telechargements
- * @returns boolean
- */
-const areTelechargementsPartiel = (etablissements, voeux_telechargements) => {
-  return (
-    etablissements.filter((etablissement) => isTelechargementPartiel(etablissement, voeux_telechargements)).length >
-      0 ||
-    (etablissements.filter((etablissement) => isTelechargementAucun(etablissement, voeux_telechargements)).length > 0 &&
-      etablissements.filter((etablissement) => isTelechargementTotal(etablissement, voeux_telechargements)).length > 0)
-  );
-};
+// /**
+//  * Indique si au moins un établissement d'une liste possèdent des voeux ayant été partiellement téléchargés.
+//  *
+//  * @param {*} etablissements
+//  * @param {*} voeux_telechargements
+//  * @returns boolean
+//  */
+// const areTelechargementsPartiel = (etablissements, voeux_telechargements) => {
+//   return (
+//     etablissements.filter((etablissement) => isTelechargementPartiel(etablissement, voeux_telechargements)).length >
+//       0 ||
+//     (etablissements.filter((etablissement) => isTelechargementAucun(etablissement, voeux_telechargements)).length > 0 &&
+//       etablissements.filter((etablissement) => isTelechargementTotal(etablissement, voeux_telechargements)).length > 0)
+//   );
+// };
 
-/**
- * Indique si au moins un établissement d'une liste possèdent des voeux ayant été partiellement téléchargés.
- *
- * @param {*} etablissements
- * @param {*} voeux_telechargements
- * @returns boolean
- */
-const areTelechargementsAucun = (etablissements, voeux_telechargements) => {
-  return (
-    etablissements.filter((etablissement) => isTelechargementAucun(etablissement, voeux_telechargements)).length ===
-    etablissements.length
-  );
-};
+// /**
+//  * Indique si au moins un établissement d'une liste possèdent des voeux ayant été partiellement téléchargés.
+//  *
+//  * @param {*} etablissements
+//  * @param {*} voeux_telechargements
+//  * @returns boolean
+//  */
+// const areTelechargementsAucun = (etablissements, voeux_telechargements) => {
+//   return (
+//     etablissements.filter((etablissement) => isTelechargementAucun(etablissement, voeux_telechargements)).length ===
+//     etablissements.length
+//   );
+// };
 
-// TODO : Vérifier le nombre_voeux_restant des relations associées
 const allFilesAsAlreadyBeenDownloaded = async (user) => {
   logger.debug("allFilesAsAlreadyBeenDownloaded", user);
 
   switch (user.type) {
     case UserType.RESPONSABLE: {
-      const responsable = user; // await fillResponsable(user);
+      const responsable = user;
 
-      // logger.debug(
-      //   !responsable.etablissements_formateur.find(
-      //     (etablissement) =>
-      //       !etablissement.diffusion_autorisee &&
-      //       etablissement.nombre_voeux > 0 &&
-      //       !responsable.voeux_telechargements_formateur.find(
-      //         (telechargement) =>
-      //           telechargement.uai === etablissement.uai &&
-      //           new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
-      //       )
-      //   )
-      // );
+      const relations =
+        (await Relation.find({
+          "etablissement_responsable.siret": responsable.siret,
+        })) ?? [];
 
-      return !responsable.etablissements_formateur.find(
-        (etablissement) =>
-          !etablissement.diffusion_autorisee &&
-          etablissement.nombre_voeux > 0 &&
-          !responsable.voeux_telechargements_formateur.find(
-            (telechargement) =>
-              telechargement.uai === etablissement.uai &&
-              new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
-          )
-      );
+      if (!relations.length || !relations.find((relation) => relation.nombre_voeux_restant > 0)) {
+        return true;
+      }
+
+      const delegues = await Delegue.find({ "relations.etablissement_responsable.siret": responsable.siret });
+
+      if (
+        relations
+          .filter((relation) => {
+            const delegue = delegues.find((delegue) =>
+              delegue.relations.find(
+                (rel) =>
+                  rel.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+                  rel.etablissement_formateur.uai === relation.etablissement_formateur.uai &&
+                  rel.active === true
+              )
+            );
+
+            return !delegue;
+          })
+          .find((relation) => relation.nombre_voeux_restant > 0)
+      ) {
+        return false;
+      } else {
+        return true;
+      }
     }
 
-    case UserType.FORMATEUR: {
-      const formateur = user; //await fillFormateur(user);
+    case UserType.DELEGUE: {
+      const delegue = user;
 
-      const responsables = await Responsable.find({
-        etablissements_formateur: { $elemMatch: { uai: formateur?.uai } },
-      });
-
-      // const responsables = await Etablissement.find({
-      //   "etablissements_formateur.0": { $exists: true },
-      //   etablissements_formateur: { $elemMatch: { uai: formateur?.uai } },
-      // });
-
-      const etablissements = responsables.flatMap((responsable) =>
-        responsable.etablissements_formateur.filter((etablissement) => etablissement.uai === formateur?.uai)
-      );
-
-      return !etablissements.find(
-        (etablissement) =>
-          etablissement.diffusion_autorisee &&
-          etablissement.nombre_voeux > 0 &&
-          !formateur?.voeux_telechargements_responsable.find(
-            (telechargement) =>
-              telechargement.siret === etablissement.siret &&
-              new Date(telechargement.date).getTime() > new Date(etablissement.last_date_voeux).getTime()
+      const relations =
+        (await Promise.all(
+          delegue.relations.map(
+            async (relation) =>
+              await Relation.findOne({
+                "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+              })
           )
-      );
+        )) ?? [];
+
+      if (relations.find((relation) => relation.nomnre_voeux_restant > 0)) {
+        return false;
+      } else {
+        return true;
+      }
     }
 
     default: {
@@ -178,7 +178,6 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
   }
 };
 
-// TODO : Vérifier le last_voeux_date des relations associées
 const filesHaveUpdate = async (user) => {
   logger.debug("filesHaveUpdate", user);
 
@@ -186,53 +185,58 @@ const filesHaveUpdate = async (user) => {
     case UserType.RESPONSABLE: {
       const responsable = user;
 
-      logger.debug(
-        !!responsable.etablissements_formateur.find(
-          async (etablissement) =>
-            !etablissement.diffusion_autorisee &&
-            (await Voeu.countDocuments({
-              "etablissement_formateur.uai": etablissement.uai,
-              "etablissement_responsable.siret": responsable.siret,
-              "_meta.import_dates.1": { $exists: true },
-            })) > 0
-        )
-      );
+      const relations =
+        (await Relation.find({
+          "etablissement_responsable.siret": responsable.siret,
+        })) ?? [];
 
-      return !!responsable.etablissements_formateur.find(
-        async (etablissement) =>
-          !etablissement.diffusion_autorisee &&
-          (await Voeu.countDocuments({
-            "etablissement_formateur.uai": etablissement.uai,
-            "etablissement_responsable.siret": responsable.siret,
-            "_meta.import_dates.1": { $exists: true },
-          })) > 0
-      );
+      if (!relations.length || !relations.find((relation) => relation.nombre_voeux_restant > 0)) {
+        return false;
+      }
+
+      const delegues = await Delegue.find({ "relations.etablissement_responsable.siret": responsable.siret });
+
+      if (
+        relations
+          .filter((relation) => {
+            const delegue = delegues.find((delegue) =>
+              delegue.relations.find(
+                (rel) =>
+                  rel.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+                  rel.etablissement_formateur.uai === relation.etablissement_formateur.uai &&
+                  rel.active === true
+              )
+            );
+
+            return !delegue;
+          })
+          .find((relation) => relation.first_voeux_date !== relation.last_voeux_date)
+      ) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
-    case UserType.FORMATEUR: {
-      const formateur = user;
+    case UserType.DELEGUE: {
+      const delegue = user;
 
-      const responsables = await Responsable.find({
-        etablissements_formateur: { $elemMatch: { uai: formateur?.uai } },
-      });
+      const relations =
+        (await Promise.all(
+          delegue.relations.map(
+            async (relation) =>
+              await Relation.findOne({
+                "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+              })
+          )
+        )) ?? [];
 
-      // const responsables = await Etablissement.find({
-      //   etablissements_formateur: { $elemMatch: { uai: formateur?.uai } },
-      // });
-
-      const etablissements = responsables.flatMap((responsable) =>
-        responsable.etablissements_formateur.filter((etablissement) => etablissement.uai === formateur?.uai)
-      );
-
-      return !!etablissements.find(
-        async (etablissement) =>
-          etablissement.diffusion_autorisee &&
-          (await Voeu.countDocuments({
-            "etablissement_formateur.uai": formateur?.uai,
-            "etablissement_responsable.siret": etablissement.siret,
-            "_meta.import_dates.1": { $exists: true },
-          })) > 0
-      );
+      if (relations.find((relation) => relation.last_voeux_date !== relation.first_voeux_date)) {
+        return true;
+      } else {
+        return false;
+      }
     }
 
     default: {
@@ -241,11 +245,11 @@ const filesHaveUpdate = async (user) => {
   }
 };
 
-const filterForAcademie = (etablissement, user) => {
-  return user?.academies
-    ? user.academies.map((academie) => academie.code).includes(etablissement.academie?.code)
-    : true;
-};
+// const filterForAcademie = (etablissement, user) => {
+//   return user?.academies
+//     ? user.academies.map((academie) => academie.code).includes(etablissement.academie?.code)
+//     : true;
+// };
 
 // const fillResponsable = async (responsable, admin) => {
 //   if (!responsable) {
@@ -443,16 +447,16 @@ const filterForAcademie = (etablissement, user) => {
 // };
 
 module.exports = {
-  getTelechargements,
-  isTelechargementTotal,
-  isTelechargementPartiel,
-  isTelechargementAucun,
-  areTelechargementsTotal,
-  areTelechargementsPartiel,
-  areTelechargementsAucun,
+  // getTelechargements,
+  // isTelechargementTotal,
+  // isTelechargementPartiel,
+  // isTelechargementAucun,
+  // areTelechargementsTotal,
+  // areTelechargementsPartiel,
+  // areTelechargementsAucun,
   allFilesAsAlreadyBeenDownloaded,
   filesHaveUpdate,
-  filterForAcademie,
+  // filterForAcademie,
   // fillResponsable,
   // fillFormateur,
 };
