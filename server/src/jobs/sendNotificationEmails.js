@@ -7,9 +7,6 @@ const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/
 const {
   saveListAvailableEmailAutomaticSent: saveListAvailableEmailAutomaticSentForResponsable,
 } = require("../common/actions/history/responsable");
-// const {
-//   saveListAvailableEmailAutomaticSent: saveListAvailableEmailAutomaticSentForFormateur,
-// } = require("../common/actions/history/formateur");
 const {
   saveListAvailableEmailAutomaticSent: saveListAvailableEmailAutomaticSentForDelegue,
 } = require("../common/actions/history/delegue");
@@ -18,85 +15,56 @@ async function sendNotificationEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
 
-  const responsables = await Responsable.aggregate([
-    { $match: { type: UserType.RESPONSABLE } },
-    {
-      $lookup: {
-        from: Relation.collection.name,
-        let: { siret_responsable: "$siret" },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-                  // { $gt: ["$nombre_voeux", 0] },
-                  // { $gt: ["$nombre_voeux_restant", 0] },
-                ],
-              },
-            },
-          },
-          {
-            $lookup: {
-              from: Delegue.collection.name,
-              let: {
-                siret_responsable: "$etablissement_responsable.siret",
-                uai_formateur: "$etablissement_formateur.uai",
-              },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-                        { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
-                        { $eq: ["$active", true] },
-                      ],
-                    },
-                  },
-                },
-              ],
-              as: "delegue",
-            },
-          },
-          {
-            $unwind: {
-              path: "$delegue",
-              preserveNullAndEmptyArrays: true,
-            },
-          },
-        ],
-        as: "relations",
-      },
-    },
-    { $match: { "relations.0": { $exists: true }, "relations.delegue": null } },
-  ]);
+  const relations = await Relation.find({
+    $and: [
+      { $expr: { $gt: ["$nombre_voeux", 0] } },
+      { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
+      // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+      { $expr: { $eq: ["$first_date_voeux", "$last_date_voeux"] } },
+    ],
+  });
+  // console.log(relations);
 
-  const delegues = await Delegue.aggregate([
-    { $match: { type: UserType.DELEGUE, "relations.active": true } },
-    {
-      $lookup: {
-        from: Relation.collection.name,
-        let: { uai_formateur: "$uai", siret_responsable: "$siret" },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
-                  { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-                  // { $gt: ["$nombre_voeux", 0] },
-                  // { $gt: ["$nombre_voeux_restant", 0] },
-                ],
+  const delegues = (
+    (await Promise.all(
+      relations.map(
+        async (relation) =>
+          await Delegue.findOne({
+            type: UserType.DELEGUE,
+            relations: {
+              $elemMatch: {
+                "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+                active: true,
               },
             },
-          },
-        ],
-        as: "relations",
-      },
-    },
-    { $match: { "relations.0": { $exists: true } } },
-  ]);
+          })
+      )
+    )) ?? []
+  )
+    .filter((delegue) => !!delegue)
+    .reduce((acc, delegue) => {
+      if (!acc.find((d) => d.email === delegue.email)) {
+        acc.push(delegue);
+      }
+
+      return acc;
+    }, []);
+
+  const relationsDeleguees = delegues.flatMap((delegue) => delegue.relations.filter((relation) => relation.active));
+
+  const relationsNonDeleguees = relations.filter(
+    (relation) =>
+      !relationsDeleguees.find(
+        (relationDeleguee) =>
+          relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+          relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
+      )
+  );
+
+  const responsables = await Responsable.find({
+    siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
+  });
 
   logger.info(`Sending notification emails to ${responsables.length} responsables and ${delegues.length} delegues...`);
 
@@ -108,16 +76,13 @@ async function sendNotificationEmails(sendEmail, options = {}) {
           unsubscribe: false,
           statut: { $nin: [UserStatut.NON_CONCERNE] },
 
-          // "etablissements.voeux_date": { $exists: true },
           "emails.templateName": { $not: { $regex: "^notification_.*$" } },
 
-          // TODO : Vérifier si il y'a délégation ou non pour savoir à qui envoyer les mails de notifications
           $or: [
             {
               type: UserType.RESPONSABLE,
               _id: { $in: responsables.map((responsable) => responsable._id) },
             },
-            // { type: UserType.FORMATEUR },
             { type: UserType.DELEGUE, _id: { $in: delegues.map((delegue) => delegue._id) } },
           ],
         }),
@@ -125,26 +90,9 @@ async function sendNotificationEmails(sendEmail, options = {}) {
 
   await User.find(query)
     .lean()
-    .limit(limit)
+    // .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      // if (user.type === UserType.FORMATEUR) {
-      //   const responsable = await Responsable.findOne({
-      //     "etablissements.uai": user.username,
-      //     "etablissements.diffusion_autorisee": true,
-      //   });
-
-      //   if (!responsable) {
-      //     return;
-      //   }
-
-      //   const etablissement = responsable.etablissements_formateur?.find(
-      //     (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
-      //   );
-
-      //   user.email = user.email || etablissement?.email;
-      // }
-
       if (await allFilesAsAlreadyBeenDownloaded(user)) {
         return;
       }
@@ -165,9 +113,7 @@ async function sendNotificationEmails(sendEmail, options = {}) {
             case UserType.RESPONSABLE:
               await saveListAvailableEmailAutomaticSentForResponsable(user);
               break;
-            // case UserType.FORMATEUR:
-            //   await saveListAvailableEmailAutomaticSentForFormateur(user);
-            //   break;
+
             case UserType.DELEGUE:
               await saveListAvailableEmailAutomaticSentForDelegue(user);
               break;

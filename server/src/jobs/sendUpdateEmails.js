@@ -1,19 +1,72 @@
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 const logger = require("../common/logger");
-const { User, Responsable } = require("../common/model");
+const { User, Responsable, Relation, Delegue } = require("../common/model");
 const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
 
 const {
   saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForResponsable,
 } = require("../common/actions/history/responsable");
 const {
-  saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForFormateur,
-} = require("../common/actions/history/formateur");
+  saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForDelegue,
+} = require("../common/actions/history/delegue");
 
-async function sendNotificationEmails(sendEmail, options = {}) {
+async function sendUpdateEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+
+  const relations = await Relation.find({
+    $and: [
+      { $expr: { $gt: ["$nombre_voeux", 0] } },
+      { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
+      // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+      { $expr: { $eq: ["$first_date_voeux", "$last_date_voeux"] } },
+    ],
+  });
+  // console.log(relations);
+
+  const delegues = (
+    (await Promise.all(
+      relations.map(
+        async (relation) =>
+          await Delegue.findOne({
+            type: UserType.DELEGUE,
+            relations: {
+              $elemMatch: {
+                "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+                active: true,
+              },
+            },
+          })
+      )
+    )) ?? []
+  )
+    .filter((delegue) => !!delegue)
+    .reduce((acc, delegue) => {
+      if (!acc.find((d) => d.email === delegue.email)) {
+        acc.push(delegue);
+      }
+
+      return acc;
+    }, []);
+
+  const relationsDeleguees = delegues.flatMap((delegue) => delegue.relations.filter((relation) => relation.active));
+
+  const relationsNonDeleguees = relations.filter(
+    (relation) =>
+      !relationsDeleguees.find(
+        (relationDeleguee) =>
+          relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+          relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
+      )
+  );
+
+  const responsables = await Responsable.find({
+    siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
+  });
+
+  logger.info(`Sending update emails to ${responsables.length} responsables and ${delegues.length} delegues...`);
 
   const query = {
     ...(options.username ? { username: options.username } : {}),
@@ -23,44 +76,23 @@ async function sendNotificationEmails(sendEmail, options = {}) {
           unsubscribe: false,
           statut: { $nin: [UserStatut.NON_CONCERNE] },
 
-          "etablissements.voeux_date": { $exists: true },
           "emails.templateName": { $not: { $regex: "^update_.*$" } },
 
-          // TODO : Vérifier si il y'a délégation ou non pour savoir à qui envoyer les mails de notifications de mises à jour
           $or: [
             {
               type: UserType.RESPONSABLE,
-              etablissements: {
-                $elemMatch: { diffusion_autorisee: false, voeux_date: { $exists: true }, nombre_voeux: { $gt: 0 } },
-              },
+              _id: { $in: responsables.map((responsable) => responsable._id) },
             },
-            { type: UserType.FORMATEUR },
+            { type: UserType.DELEGUE, _id: { $in: delegues.map((delegue) => delegue._id) } },
           ],
         }),
   };
 
   await User.find(query)
     .lean()
-    .limit(limit)
+    // .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      if (user.type === UserType.FORMATEUR) {
-        const responsable = await Responsable.findOne({
-          "etablissements.uai": user.username,
-          "etablissements.diffusion_autorisee": true,
-        });
-
-        if (!responsable) {
-          return;
-        }
-
-        const etablissement = responsable.etablissements_formateur?.find(
-          (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
-        );
-
-        user.email = user.email || etablissement?.email;
-      }
-
       if (await allFilesAsAlreadyBeenDownloaded(user)) {
         return;
       }
@@ -81,8 +113,8 @@ async function sendNotificationEmails(sendEmail, options = {}) {
             case UserType.RESPONSABLE:
               await saveUpdatedListAvailableEmailAutomaticSentForResponsable(user);
               break;
-            case UserType.FORMATEUR:
-              await saveUpdatedListAvailableEmailAutomaticSentForFormateur(user);
+            case UserType.DELEGUE:
+              await saveUpdatedListAvailableEmailAutomaticSentForDelegue(user);
               break;
             default:
               break;
@@ -99,4 +131,4 @@ async function sendNotificationEmails(sendEmail, options = {}) {
   return stats;
 }
 
-module.exports = sendNotificationEmails;
+module.exports = sendUpdateEmails;

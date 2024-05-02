@@ -111,8 +111,7 @@ export const Relation = ({ delegue, callback }) => {
                 {responsable?.uai ?? "Inconnu"}
               </Text>
               <Text mb={2}>
-                Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
-                <ResponsableEmail responsable={responsable} />
+                Contact au sein de l’organisme responsable : <ResponsableEmail responsable={responsable} />
               </Text>
 
               {isDiffusionAutorisee ? (
