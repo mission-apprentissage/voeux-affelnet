@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { applySpeedGooseCacheLayer, SharedCacheStrategies } = require("speedgoose");
 const config = require("../config");
 const logger = require("./logger");
 
@@ -10,6 +11,15 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
     mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+    });
+
+    applySpeedGooseCacheLayer(mongoose, {
+      // redisUri: process.env.REDIS_URI,
+      sharedCacheStrategy: SharedCacheStrategies.IN_MEMORY,
+
+      // debugConfig: {
+      //   enable: true,
+      // },
     });
 
     // Get Mongoose to use the global promise library

@@ -1,7 +1,7 @@
 const express = require("express");
-const { oleoduc, transformIntoJSON, compose, transformIntoCSV } = require("oleoduc");
+const { /*oleoduc, transformIntoJSON,*/ compose, transformIntoCSV } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const { sendJsonStream } = require("../utils/httpUtils");
+// const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { User, Formateur, Responsable, Delegue, Relation } = require("../../common/model");
 const { getAcademies } = require("../../common/academies");
@@ -221,110 +221,114 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const regex = "(.*" + text + ".*)+";
       const regexQuery = { $regex: regex, $options: "i" };
 
-      const { find, pagination } = await aggregate(
-        User,
-        [
-          {
-            $match: {
-              $and: [
-                {
-                  type: type ? type : { $in: [UserType.FORMATEUR, UserType.RESPONSABLE] },
-                },
-
-                // ...(type
-                //   ? // [
-                //     //     {
-                //     //       type: UserType.ETABLISSEMENT,
-                //     //       ...(type === UserType.FORMATEUR ? formateurFilter : {}),
-                //     //       ...(type === UserType.RESPONSABLE ? responsableFilter : {}),
-                //     //     },
-                //     //   ]
-                //     [{ type }]
-                //   : []),
-              ],
-            },
-          },
-          {
-            $lookup: lookupRelations,
-          },
-
-          {
-            $match: {
-              $and: [
-                ...(academie || !!defaultAcademies?.length
-                  ? [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }]
-                  : []),
-                {
-                  $or: [
-                    {
-                      // Formateur
-                      $and: [
-                        { type: UserType.FORMATEUR },
-                        ...(text
-                          ? [
-                              {
-                                $or: [
-                                  { siret: regexQuery },
-                                  { uai: regexQuery },
-                                  { raison_sociale: regexQuery },
-                                  { "relations.delegue.email": regexQuery },
-                                  { "relations.etablissement_responsable.siret": regexQuery },
-                                  { "relations.etablissement_responsable.uai": regexQuery },
-                                ],
-                              },
-                            ]
-                          : []),
-                      ],
-                    },
-                    {
-                      // Responsables
-                      $and: [
-                        { type: UserType.RESPONSABLE },
-                        ...(text
-                          ? [
-                              {
-                                $or: [
-                                  { siret: regexQuery },
-                                  { uai: regexQuery },
-                                  { raison_sociale: regexQuery },
-                                  { email: regexQuery },
-                                  { "relations.delegue.email": regexQuery },
-                                  { "relations.etablissement_formateur.siret": regexQuery },
-                                  { "relations.etablissement_formateur.uai": regexQuery },
-                                ],
-                              },
-                            ]
-                          : []),
-                      ],
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-          {
-            $addFields: addCountFields,
-          },
-        ],
+      const pipeline = [
         {
-          page,
-          items_par_page,
-          select: { _id: 0, password: 0 },
-          sort: JSON.parse(sort ?? JSON.stringify({ type: -1 })),
-        }
-      );
+          $match: {
+            $and: [
+              {
+                type: type ? type : { $in: [UserType.FORMATEUR, UserType.RESPONSABLE] },
+              },
 
-      const stream = oleoduc(
-        find.cursor(),
-        transformIntoJSON({
-          arrayWrapper: {
-            pagination,
+              // ...(type
+              //   ? // [
+              //     //     {
+              //     //       type: UserType.ETABLISSEMENT,
+              //     //       ...(type === UserType.FORMATEUR ? formateurFilter : {}),
+              //     //       ...(type === UserType.RESPONSABLE ? responsableFilter : {}),
+              //     //     },
+              //     //   ]
+              //     [{ type }]
+              //   : []),
+            ],
           },
-          arrayPropertyName: "etablissements",
-        })
-      );
+        },
+        {
+          $lookup: lookupRelations,
+        },
 
-      return sendJsonStream(stream, res);
+        {
+          $match: {
+            $and: [
+              ...(academie || !!defaultAcademies?.length
+                ? [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }]
+                : []),
+              {
+                $or: [
+                  {
+                    // Formateur
+                    $and: [
+                      { type: UserType.FORMATEUR },
+                      ...(text
+                        ? [
+                            {
+                              $or: [
+                                { siret: regexQuery },
+                                { uai: regexQuery },
+                                { raison_sociale: regexQuery },
+                                { "relations.delegue.email": regexQuery },
+                                { "relations.etablissement_responsable.siret": regexQuery },
+                                { "relations.etablissement_responsable.uai": regexQuery },
+                              ],
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                  {
+                    // Responsables
+                    $and: [
+                      { type: UserType.RESPONSABLE },
+                      ...(text
+                        ? [
+                            {
+                              $or: [
+                                { siret: regexQuery },
+                                { uai: regexQuery },
+                                { raison_sociale: regexQuery },
+                                { email: regexQuery },
+                                { "relations.delegue.email": regexQuery },
+                                { "relations.etablissement_formateur.siret": regexQuery },
+                                { "relations.etablissement_formateur.uai": regexQuery },
+                              ],
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {
+          $addFields: addCountFields,
+        },
+      ];
+
+      const { results, pagination } = await aggregate(User, pipeline, {
+        page,
+        items_par_page,
+        select: { _id: 0, password: 0 },
+        sort: JSON.parse(sort ?? JSON.stringify({ type: -1 })),
+        cache: true,
+      });
+
+      res.json({
+        etablissements: results,
+        pagination,
+      });
+
+      // const stream = oleoduc(
+      //   find.cursor(),
+      //   transformIntoJSON({
+      //     arrayWrapper: {
+      //       pagination,
+      //     },
+      //     arrayPropertyName: "etablissements",
+      //   })
+      // );
+
+      // return sendJsonStream(stream, res);
     })
   );
 
