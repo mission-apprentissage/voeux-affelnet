@@ -13,8 +13,7 @@ const { findAcademieByUai } = require("../common/academies.js");
 const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 const { getSiretResponsableFromCleMinistereEducatif } = require("../common/utils/cleMinistereEducatifUtils");
 const { catalogue } = require("./utils/catalogue");
-const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/formateur");
-const { countVoeux } = require("./countVoeux");
+const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/relation");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -403,8 +402,6 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
       )}`
     );
   }
-
-  await countVoeux();
 
   await Promise.all(
     [...relations].map(async (relation) => {

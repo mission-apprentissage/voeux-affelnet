@@ -1,7 +1,4 @@
-const { oleoduc, writeData } = require("oleoduc");
-
-const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
-const { Responsable, Voeu, Relation } = require("../common/model");
+const { Voeu, Relation } = require("../model");
 
 const getVoeuxDate = async ({ siret, uai }) => {
   const voeuxDates = (
@@ -71,25 +68,7 @@ const getNombreVoeuxRestant = async ({ siret, uai }) => {
   );
 };
 
-const countVoeux = async () => {
-  const request = await Responsable.find().cursor();
-
-  await oleoduc(
-    request,
-    writeData(async (responsable) => {
-      await Promise.all(
-        responsable.etablissements_formateur.map(async (etablissement) => {
-          const voeuxDate = await getVoeuxDate({ siret: responsable.siret, uai: etablissement.uai });
-
-          return markVoeuxAsAvailable({ siret: responsable.siret, uai: etablissement.uai }, voeuxDate);
-        })
-      );
-    })
-  );
-};
-
 module.exports = {
-  countVoeux,
   getNombreVoeux,
   getNombreVoeuxRestant,
   getVoeuxDate,

@@ -9,7 +9,12 @@ const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
-const { getNombreVoeux, getFirstVoeuxDate, getLastVoeuxDate, getNombreVoeuxRestant } = require("./countVoeux");
+const {
+  getNombreVoeux,
+  getFirstVoeuxDate,
+  getLastVoeuxDate,
+  getNombreVoeuxRestant,
+} = require("../common/utils/voeuxUtils");
 const { findAcademieByUai } = require("../common/academies");
 
 const SIRET_RECENSEMENT = "99999999999999";

@@ -12,7 +12,7 @@ const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
-const { getVoeuxDate, getNombreVoeux } = require("./countVoeux");
+const { getVoeuxDate, getNombreVoeux } = require("../common/utils/voeuxUtils");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
