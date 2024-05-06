@@ -218,7 +218,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
         sort: Joi.string().default(JSON.stringify({ type: -1 })),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const regex = "(.*" + text + ".*)+";
+      const regex = "(.*" + text?.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*)+";
       const regexQuery = { $regex: regex, $options: "i" };
 
       const pipeline = [
