@@ -21,19 +21,6 @@ module.exports = {
       },
     };
   },
-  confirmation_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
-    return {
-      subject: `${prefix}Affelnet 2024  – Action requise pour la transmission des listes de candidats (UAI : ${formateur?.uai})`,
-      templateFile: getTemplateFile("confirmation_formateur"),
-      data: {
-        formateur,
-        token,
-        actionToken: createActionToken(formateur?.username),
-        voeux_email,
-      },
-    };
-  },
   confirmation_delegue: (delegue, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
@@ -96,19 +83,6 @@ module.exports = {
       },
     };
   },
-  activation_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
-    return {
-      subject: `${prefix}Affelnet 2024  – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${formateur?.uai})`,
-      templateFile: getTemplateFile("activation_formateur"),
-      data: {
-        formateur,
-        token,
-        actionToken: createActionToken(formateur?.username),
-        voeux_email,
-      },
-    };
-  },
   activation_delegue: (delegue, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
@@ -149,20 +123,6 @@ module.exports = {
       },
     };
   },
-  notification_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
-
-    return {
-      subject: `${prefix}Affelnet 2024  – La liste de candidats à l’apprentissage est téléchargeable (UAI : ${formateur?.uai})`,
-      templateFile: getTemplateFile("notification_formateur"),
-      data: {
-        formateur,
-        token,
-        actionToken: createActionToken(formateur?.username),
-        voeux_email,
-      },
-    };
-  },
   notification_delegue: (delegue, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
@@ -187,20 +147,6 @@ module.exports = {
         responsable,
         token,
         actionToken: createActionToken(responsable.username),
-        voeux_email,
-      },
-    };
-  },
-  update_formateur: (formateur, token, options = {}) => {
-    const prefix = options.resend ? "[Rappel] " : "";
-
-    return {
-      subject: `${prefix}Affelnet 2024  – Les listes de candidats à l’apprentissage ont été mises à jour (UAI : ${formateur?.uai})`,
-      templateFile: getTemplateFile("update_formateur"),
-      data: {
-        formateur,
-        token,
-        actionToken: createActionToken(formateur?.username),
         voeux_email,
       },
     };

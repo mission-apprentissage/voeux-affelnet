@@ -2,9 +2,7 @@ const Joi = require("@hapi/joi");
 const { diff } = require("deep-object-diff");
 const { oleoduc, transformData, writeData } = require("oleoduc");
 const { pick } = require("lodash");
-
 const CatalogueApi = require("../common/api/CatalogueApi");
-
 const { findAcademieByUai } = require("../common/academies");
 const { Responsable } = require("../common/model");
 const logger = require("../common/logger");
@@ -66,11 +64,6 @@ async function importResponsables(relationCsv, options = {}) {
 
                 return null;
               });
-
-            // organisme = await referentielApi.getOrganisme(siret_responsable).catch((error) => {
-            //   logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le référentiel`);
-            //   return null;
-            // });
 
             if (!organisme) {
               stats.failed++;

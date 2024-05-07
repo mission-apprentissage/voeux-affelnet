@@ -9,6 +9,10 @@ const saveUpdatedListDownloadedByResponsable = async ({ uai, siret }) => {
 
   const responsable = await Responsable.findOne({ siret }).select({ _id: 0, histories: 0 }).lean();
 
+  if (!relation) {
+    return;
+  }
+
   await Relation.updateOne(
     { _id: relation._id },
     {

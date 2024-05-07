@@ -2,17 +2,14 @@ const { oleoduc, filterData, writeData, accumulateData, flattenArray } = require
 const Joi = require("@hapi/joi");
 const { pick } = require("lodash");
 const { diff } = require("deep-object-diff");
-
 const CatalogueApi = require("../common/api/CatalogueApi");
-// const ReferentielApi = require("../common/api/ReferentielApi");
 const { findAcademieByUai } = require("../common/academies");
-const { Formateur /*, Responsable*/ } = require("../common/model");
+const { Formateur } = require("../common/model");
 const logger = require("../common/logger");
 const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
-// const { getVoeuxDate, getNombreVoeux } = require("./countVoeux");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -21,39 +18,7 @@ const schema = Joi.object({
   uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
-// async function buildEtablissements(sirets, formateur) {
-//   return Promise.all(
-//     [...new Set(sirets)].map(async (siret) => {
-//       // const voeu = await Voeu.findOne({ "etablissement_formateur.uai": uai });
-
-//       // const responsable = await Responsable.findOne({ siret }).lean();
-
-//       // if (!responsable) {
-//       //   console.warn(`Responsable ${siret} non trouvé`);
-//       // }
-//       // // eslint-disable-next-line
-//       // const existingEtablissement = formateur?.etablissements_responsable?.find(
-//       //   (etablissement) => etablissement.siret === siret
-//       // );
-
-//       // const voeux_date = await getVoeuxDate({ uai: formateur?.uai, siret });
-
-//       // const nombre_voeux = await getNombreVoeux({ uai: formateur?.uai, siret });
-
-//       return {
-//         siret,
-//         // uai: responsable?.uai,
-//         // // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
-//         // nombre_voeux,
-//         // voeux_date,
-//         // academie: responsable?.academie,
-//       };
-//     })
-//   );
-// }
-
 async function importFormateurs(formateursCsv, options = {}) {
-  // const referentielApi = options.referentielApi || new ReferentielApi();
   const catalogueApi = options.catalogueApi || (await new CatalogueApi());
 
   const stats = {
@@ -109,17 +74,8 @@ async function importFormateurs(formateursCsv, options = {}) {
       async ({ uai_formateur /*, siret_responsables*/ }) => {
         try {
           const found = await Formateur.findOne({ uai: uai_formateur }).lean();
-          // const responsables = await buildEtablissements(siret_responsables, found ?? { uai: uai_formateur });
-          let organisme;
 
-          // const organismes = (
-          //   await referentielApi
-          //     .searchOrganismes({ uais: uai_formateur, etat_administratif: "actif" })
-          //     .catch((error) => {
-          //       logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le référentiel`);
-          //       return null;
-          //     })
-          // )?.organismes;
+          let organisme;
 
           if (!found) {
             const organismes = (
@@ -150,17 +106,7 @@ async function importFormateurs(formateursCsv, options = {}) {
             return;
           }
 
-          // const updates = omitEmpty({
-          //   etablissements_responsable: responsables,
-          //   siret: organisme?.siret ?? found?.siret,
-          //   raison_sociale: organisme?.raison_sociale ?? found?.raison_sociale,
-          //   adresse: organisme?.adresse?.label ?? found?.adresse,
-          //   libelle_ville: organisme?.adresse?.localite ?? found?.libelle_ville,
-          //   academie: pick(findAcademieByUai(uai_formateur), ["code", "nom"]),
-          // });
-
           const updates = omitEmpty({
-            // etablissements_responsable: responsables,
             siret: organisme?.siret ?? found?.siret,
             raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
             adresse: organisme
@@ -196,13 +142,7 @@ async function importFormateurs(formateursCsv, options = {}) {
           } else if (res.modifiedCount) {
             stats.updated++;
 
-            const previous = pick(found, [
-              "siret",
-              // "etablissements_responsable",
-              "raison_sociale",
-              "libelle_ville",
-              "adresse",
-            ]);
+            const previous = pick(found, ["siret", "raison_sociale", "libelle_ville", "adresse"]);
 
             logger.info(
               `Formateur ${uai_formateur} / ${organisme?.siret ?? found?.siret} mis à jour \n${JSON.stringify(

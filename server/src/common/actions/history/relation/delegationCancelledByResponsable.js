@@ -7,6 +7,10 @@ const saveDelegationCancelledByResponsable = async ({ uai, siret, email }, respo
     "etablissement_responsable.siret": siret,
   }).lean();
 
+  if (!relation) {
+    return;
+  }
+
   await Relation.updateOne(
     { _id: relation._id },
     {

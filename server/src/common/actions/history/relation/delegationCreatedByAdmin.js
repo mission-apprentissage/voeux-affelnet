@@ -7,6 +7,10 @@ const saveDelegationCreatedByAdmin = async ({ uai, siret, email }, admin) => {
     "etablissement_responsable.siret": siret,
   }).lean();
 
+  if (!relation) {
+    return;
+  }
+
   await Relation.updateOne(
     { _id: relation._id },
     {

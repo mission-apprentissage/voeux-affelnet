@@ -7,6 +7,10 @@ const saveListAvailable = async ({ uai, siret, nombre_voeux }) => {
     "etablissement_responsable.siret": siret,
   }).lean();
 
+  if (!relation) {
+    return;
+  }
+
   await Relation.updateOne(
     { _id: relation._id },
     {
