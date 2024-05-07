@@ -11,7 +11,10 @@ const { parseCsv } = require("../common/utils/csvUtils");
 // const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
 const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
-const { getSiretResponsableFromCleMinistereEducatif } = require("../common/utils/cleMinistereEducatifUtils");
+const {
+  getSiretResponsableFromCleMinistereEducatif,
+  getSiretFormateurFromCleMinistereEducatif,
+} = require("../common/utils/cleMinistereEducatifUtils");
 const { catalogue } = require("./utils/catalogue");
 const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/relation");
 
@@ -149,7 +152,7 @@ const parseVoeuxCsv = async (source) => {
         line["SIRET UAI responsable"]
       );
 
-      const siretFormateurFromLine = getSiretResponsableFromCleMinistereEducatif(
+      const siretFormateurFromLine = getSiretFormateurFromCleMinistereEducatif(
         cle_ministere_educatif,
         line["SIRET UAI formateur"]
       );
