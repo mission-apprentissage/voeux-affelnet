@@ -355,40 +355,9 @@ const computeVoeuxStats = async (filter = {}) => {
         },
       },
       {
-        $lookup: {
-          from: Voeu.collection.name,
-          let: {
-            siret_responsable: "$etablissement_responsable.siret",
-            uai_formateur: "$etablissement_formateur.uai",
-          },
-          pipeline: [
-            {
-              $match: {
-                ...voeuxFilter,
-                $expr: {
-                  $and: [
-                    { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-                    { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "voeux",
-        },
-      },
-      {
-        $unwind: {
-          path: "$voeux",
-          preserveNullAndEmptyArrays: false,
-        },
-      },
-      {
         $group: {
           _id: null,
-          total: {
-            $sum: 1,
-          },
+          total: { $sum: "$nombre_voeux" },
         },
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
@@ -502,6 +471,29 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
+    nbVoeuxDiffusés: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          nombre_voeux: { $sum: "$nombre_voeux" },
+          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+        },
+      },
+      {
+        $addFields: {
+          total: {
+            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
     nbVoeuxDiffusésResponsable: Relation.aggregate([
       {
         $match: {
@@ -565,252 +557,100 @@ const computeVoeuxStats = async (filter = {}) => {
         },
       },
       { $match: { delegue: null } },
-
-      // TDDO : Comparer la date de (premier / dernier ??) import de chaque voeux avec la date de dernier téléchargement
-
-      // {
-      //   $lookup: {
-      //     from: Voeu.collection.name,
-      //     let: {
-      //       siret_responsable: "$etablissement_responsable.siret",
-      //       uai_formateur: "$etablissement_formateur.uai",
-      //     },
-      //     pipeline: [
-      //       {
-      //         $match: {
-      //           ...voeuxFilter,
-      //           $expr: {
-      //             $and: [
-      //               { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-      //               { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
-      //             ],
-      //           },
-      //         },
-      //       },
-      //     ],
-      //     as: "voeux",
-      //   },
-      // },
-      // {
-      //   $unwind: {
-      //     path: "$voeux",
-      //     preserveNullAndEmptyArrays: false,
-      //   },
-      // },
       {
         $group: {
           _id: null,
+          nombre_voeux: { $sum: "$nombre_voeux" },
+          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+        },
+      },
+      {
+        $addFields: {
           total: {
-            $sum: 1,
+            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
           },
         },
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    // nbVoeuxDiffusésResponsable: Responsable.aggregate([
-    //   {
-    //     $match: {
-    //       statut: { $ne: "non concerné" },
-    //     },
-    //   },
-    //   {
-    //     $match: { "voeux_telechargements.0": { $exists: true } },
-    //   },
-    //   {
-    //     $unwind: "$voeux_telechargements",
-    //   },
-    //   {
-    //     $unwind: "$etablissements",
-    //   },
-    //   {
-    //     $match: {
-    //       "etablissements.diffusionAutorisee": false,
-    //       "etablissements.uai": { $in: uais },
-    //       $expr: {
-    //         $eq: ["$etablissements.uai", "$voeux_telechargements.uai"],
-    //       },
-    //       ...etablissementsFilter,
-    //       ...academieFilter,
-    //     },
-    //   },
-    //   {
-    //     $sort: {
-    //       siret: 1,
-    //       "voeux_telechargements.uai": 1,
-    //       "voeux_telechargements.date": 1,
-    //       "etablissements.voeux_date": 1,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: { siret: "$siret", uai: "$etablissements.uai" },
-    //       siret: { $first: "$siret" },
-    //       uai: { $first: "$etablissements.uai" },
-    //       lastDownloadDates: { $addToSet: "$voeux_telechargements.date" },
-    //       importDates: { $addToSet: "$etablissements.voeux_date" },
-    //       lastDownloadDate: { $last: "$voeux_telechargements.date" },
-    //       importDate: { $first: "$etablissements.voeux_date" },
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "voeux",
-    //       let: {
-    //         siret: "$siret",
-    //         uai: "$uai",
-    //         lastDownloadDate: "$lastDownloadDate",
-    //       },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             ...voeuxFilter,
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$etablissement_responsable.siret", "$$siret"] },
-    //                 { $eq: ["$etablissement_formateur.uai", "$$uai"] },
-    //                 { $gt: ["$$lastDownloadDate", { $first: "$_meta.import_dates" }] },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $count: "nbVoeux",
-    //         },
-    //       ],
-    //       as: "res",
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$res",
-    //   },
-    //   {
-    //     $project: {
-    //       nbVoeux: "$res.nbVoeux",
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: null,
-    //       total: {
-    //         $sum: "$nbVoeux",
-    //       },
-    //     },
-    //   },
-    // ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+    nbVoeuxDiffusésFormateur: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: Delegue.collection.name,
+          let: {
+            uai_formateur: "$etablissement_formateur.uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                type: UserType.DELEGUE,
+              },
+            },
 
-    // nbVoeuxDiffusésFormateur: Responsable.aggregate([
-    //   {
-    //     $match: {
-    //       statut: { $ne: "non concerné" },
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$etablissements",
-    //   },
-    //   {
-    //     $match: {
-    //       "etablissements.diffusionAutorisee": true,
-    //       "etablissements.uai": { $in: uais },
-    //       ...etablissementsFilter,
-    //       ...academieFilter,
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "users",
-    //       let: {
-    //         uai: "$etablissements.uai",
-    //       },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             type: "Formateur",
-    //             $expr: { $eq: ["$uai", "$$uai"] },
-    //           },
-    //         },
-    //       ],
-    //       as: "formateur",
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$formateur",
-    //   },
-    //   {
-    //     $unwind: "$formateur?.etablissements_responsable",
-    //   },
-    //   {
-    //     $unwind: "$formateur?.voeux_telechargements_responsable",
-    //   },
-    //   {
-    //     $match: {
-    //       $expr: {
-    //         $eq: ["$formateur?.etablissements_responsable.siret", "$formateur?.voeux_telechargements_responsable.siret"],
-    //       },
-    //     },
-    //   },
-    //   {
-    //     $sort: {
-    //       "formateur?.uai": 1,
-    //       "formateur?.voeux_telechargements_responsable.siret": 1,
-    //       "formateur?.voeux_telechargements_responsable.date": 1,
-    //       "etablissements.voeux_date": 1,
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: { uai: "$formateur?.uai", siret: "$siret" },
-    //       uai: { $first: "$formateur?.uai" },
-    //       siret: { $first: "$siret" },
-    //       lastDownloadDates: { $addToSet: "$formateur?.voeux_telechargements_responsable.date" },
-    //       importDates: { $addToSet: "$etablissements.voeux_date" },
-    //       lastDownloadDate: { $last: "$formateur?.voeux_telechargements_responsable.date" },
-    //       importDate: { $first: "$etablissements.voeux_date" },
-    //     },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "voeux",
-    //       let: {
-    //         siret: "$siret",
-    //         uai: "$uai",
-    //         lastDownloadDate: "$lastDownloadDate",
-    //       },
-    //       pipeline: [
-    //         {
-    //           $match: {
-    //             $expr: {
-    //               $and: [
-    //                 { $eq: ["$etablissement_responsable.siret", "$$siret"] },
-    //                 { $eq: ["$etablissement_formateur.uai", "$$uai"] },
-    //                 { $gt: ["$$lastDownloadDate", { $first: "$_meta.import_dates" }] },
-    //               ],
-    //             },
-    //           },
-    //         },
-    //         {
-    //           $count: "nbVoeux",
-    //         },
-    //       ],
-    //       as: "res",
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$res",
-    //   },
-    //   {
-    //     $project: {
-    //       nbVoeux: "$res.nbVoeux",
-    //     },
-    //   },
-    //   {
-    //     $group: {
-    //       _id: null,
-    //       total: {
-    //         $sum: "$nbVoeux",
-    //       },
-    //     },
-    //   },
-    // ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+            {
+              $unwind: {
+                path: "$relations",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                    { $eq: ["$relations.active", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                root: {
+                  $first: "$$ROOT",
+                },
+              },
+            },
+            {
+              $replaceRoot: {
+                newRoot: "$root",
+              },
+            },
+            {
+              $project: { password: 0 },
+            },
+          ],
+          as: "delegue",
+        },
+      },
+      {
+        $unwind: {
+          path: "$delegue",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $match: { delegue: { $ne: null } } },
+      {
+        $group: {
+          _id: null,
+          nombre_voeux: { $sum: "$nombre_voeux" },
+          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+        },
+      },
+      {
+        $addFields: {
+          total: {
+            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
   });
 };
 
@@ -1241,8 +1081,14 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $match: {
-            nombre_voeux: { $ne: 0 },
-            nombre_voeux_restant: 0,
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $eq: ["$nombre_voeux_restant", 0] },
+              },
+            ],
           },
         },
         {
@@ -1271,8 +1117,14 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $match: {
-            nombre_voeux: { $ne: 0 },
-            nombre_voeux_restant: 0,
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $eq: ["$nombre_voeux_restant", 0] },
+              },
+            ],
           },
         },
         {
@@ -1285,7 +1137,41 @@ const computeProgressesStats = async (filter = {}) => {
         },
       ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-      // nbVoeux:
+      nbVoeux: Relation.aggregate([
+        {
+          $match: {
+            ...relationEtablissementsFilter,
+            ...relationAcademieFilter,
+          },
+        },
+        {
+          $group: {
+            _id: "$etablissement_formateur.uai",
+            nombre_voeux: { $sum: "$nombre_voeux" },
+            nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+          },
+        },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $eq: ["$nombre_voeux_restant", 0] },
+              },
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: "$nombre_voeux",
+            },
+          },
+        },
+      ]).then((res) => (res.length > 0 ? res[0].total : 0)),
     }),
 
     partialDownload: await promiseAllProps({
@@ -1303,7 +1189,21 @@ const computeProgressesStats = async (filter = {}) => {
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
         },
-        { $match: { nombre_voeux: { $nin: [0, "$nombre_voeux_restant"] }, nombre_voeux_restant: { $ne: 0 } } },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux_restant", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux", "$nombre_voeux_restant"] },
+              },
+            ],
+          },
+        },
         {
           $group: {
             _id: null,
@@ -1328,12 +1228,65 @@ const computeProgressesStats = async (filter = {}) => {
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
         },
-        { $match: { nombre_voeux: { $nin: [0, "$nombre_voeux_restant"] }, nombre_voeux_restant: { $ne: 0 } } },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux_restant", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux", "$nombre_voeux_restant"] },
+              },
+            ],
+          },
+        },
         {
           $group: {
             _id: null,
             total: {
               $sum: 1,
+            },
+          },
+        },
+      ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+      nbVoeux: Relation.aggregate([
+        {
+          $match: {
+            ...relationEtablissementsFilter,
+            ...relationAcademieFilter,
+          },
+        },
+        {
+          $group: {
+            _id: "$etablissement_formateur.uai",
+            nombre_voeux: { $sum: "$nombre_voeux" },
+            nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+          },
+        },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux_restant", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux", "$nombre_voeux_restant"] },
+              },
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: "$nombre_voeux_restant",
             },
           },
         },
@@ -1355,7 +1308,21 @@ const computeProgressesStats = async (filter = {}) => {
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
         },
-        { $match: { nombre_voeux: { $eq: "$nombre_voeux_restant", $ne: 0 } } },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux_restant", 0] },
+              },
+              {
+                $expr: { $eq: ["$nombre_voeux", "$nombre_voeux_restant"] },
+              },
+            ],
+          },
+        },
         {
           $group: {
             _id: null,
@@ -1380,7 +1347,21 @@ const computeProgressesStats = async (filter = {}) => {
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
         },
-        { $match: { nombre_voeux: { $eq: "$nombre_voeux_restant", $ne: 0 } } },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux_restant", 0] },
+              },
+              {
+                $expr: { $eq: ["$nombre_voeux", "$nombre_voeux_restant"] },
+              },
+            ],
+          },
+        },
         {
           $group: {
             _id: null,
@@ -1390,7 +1371,47 @@ const computeProgressesStats = async (filter = {}) => {
           },
         },
       ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+      nbVoeux: Relation.aggregate([
+        {
+          $match: {
+            ...relationEtablissementsFilter,
+            ...relationAcademieFilter,
+          },
+        },
+        {
+          $group: {
+            _id: "$etablissement_formateur.uai",
+            nombre_voeux: { $sum: "$nombre_voeux" },
+            nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+          },
+        },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux_restant", 0] },
+              },
+              {
+                $expr: { $eq: ["$nombre_voeux", "$nombre_voeux_restant"] },
+              },
+            ],
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: "$nombre_voeux",
+            },
+          },
+        },
+      ]).then((res) => (res.length > 0 ? res[0].total : 0)),
     }),
+
     noVoeux: await promiseAllProps({
       nbResponsable: Relation.aggregate([
         {
@@ -1406,7 +1427,15 @@ const computeProgressesStats = async (filter = {}) => {
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
         },
-        { $match: { nombre_voeux: 0 } },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $eq: ["$nombre_voeux", 0] },
+              },
+            ],
+          },
+        },
         {
           $group: {
             _id: null,
@@ -1431,7 +1460,15 @@ const computeProgressesStats = async (filter = {}) => {
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
         },
-        { $match: { nombre_voeux: 0 } },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $eq: ["$nombre_voeux", 0] },
+              },
+            ],
+          },
+        },
         {
           $group: {
             _id: null,

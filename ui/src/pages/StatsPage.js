@@ -191,10 +191,8 @@ function StatsPage() {
             <StatGroup mb={4}>
               <Stat>
                 <StatLabel>Nombre de candidatures téléchargées</StatLabel>
-                <StatNumber>
-                  {(voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur)?.toLocaleString()}
-                </StatNumber>
-                {(!!voeux?.nbVoeuxDiffusésResponsable || !!voeux?.nbVoeuxDiffusésFormateur) && (
+                <StatNumber>{voeux?.nbVoeuxDiffusés?.toLocaleString()}</StatNumber>
+                {!!voeux?.nbVoeuxDiffusés && (
                   <StatHelpText>
                     (soit{" "}
                     {
@@ -265,7 +263,7 @@ function StatsPage() {
                   {/*(
                   {+((progresses?.noDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
                   %)*/}{" "}
-                  et {+progresses?.noDownload?.nbVoeux?.toLocaleString()} candidatures{" "}
+                  et {progresses?.noDownload?.nbVoeux?.toLocaleString()} candidatures{" "}
                   {/*(
                   {+((progresses?.noDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
                   %)*/}
