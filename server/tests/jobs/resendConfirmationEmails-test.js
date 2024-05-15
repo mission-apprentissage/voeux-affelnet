@@ -28,7 +28,7 @@ describe("resendConfirmationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].replyTo, "candidats-apprentissage@education.gouv.fr");
+    assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
       // "[Rappel] Affelnet apprentissage – Information requise pour la transmission des vœux 2022 (Siret : 11111111100006)"

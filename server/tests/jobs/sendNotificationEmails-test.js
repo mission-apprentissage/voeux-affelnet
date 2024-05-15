@@ -30,7 +30,7 @@ describe("sendNotificationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].replyTo, "candidats-apprentissage@education.gouv.fr");
+    assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[0].subject, "De nouveaux vœux Affelnet sont téléchargeables");
     assert.deepStrictEqual(stats, {
       total: 1,

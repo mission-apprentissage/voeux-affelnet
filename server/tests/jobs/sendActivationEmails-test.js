@@ -29,7 +29,7 @@ describe("sendActivationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 2);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].replyTo, "candidats-apprentissage@education.gouv.fr");
+    assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[1].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[0].subject, "Activation de votre compte");
     assert.deepStrictEqual(stats, {
