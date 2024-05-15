@@ -48,7 +48,8 @@ const checkUsername = async (username, { path, createError }) => {
     if (!username?.match(siretFormat) && !username?.match(uaiFormat)) {
       return createError({
         path,
-        message: "Vous devez indiquer un numéro de Siret ou Uai valide",
+        message:
+          "Si vous représentez un organisme responsable, vous devez indiquer un Siret valide (14 chiffres). Si vous avez reçu une délégation pour l’accès aux candidatures, vous devez indiquer une adresse courriel valide et déclarée par l’organisme responsable.",
       });
     } else {
       const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (Identifiant ${username})`;

@@ -85,7 +85,7 @@ export const Formateurs = () => {
         <Box mb={12}>
           <Text mb={4}>
             <strong>
-              Voici la listes des organismes formateurs pour lesquels l'organisme a été identifié comme responsable?.
+              Voici la listes des organismes formateurs pour lesquels l'organisme a été identifié comme responsable.
             </strong>
           </Text>
         </Box>
