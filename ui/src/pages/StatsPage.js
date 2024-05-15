@@ -119,7 +119,7 @@ function StatsPage() {
               </Stat>
 
               <Stat>
-                <StatLabel>Nombre d'établissements d'accueil</StatLabel>
+                <StatLabel>Nombre d’établissements d’accueil porteurs de candidatures</StatLabel>
                 <StatNumber>{organismes?.totalAccueil?.toLocaleString()}</StatNumber>
               </Stat>
             </StatGroup>
