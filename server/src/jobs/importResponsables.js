@@ -10,6 +10,7 @@ const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
+const { getCsvContent } = require("./utils/csv");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -19,8 +20,10 @@ const schema = Joi.object({
   uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
-async function importResponsables(relationCsv, options = {}) {
+async function importResponsables(relationCsv, responsablesOverwriteCsv, options = {}) {
   const catalogueApi = options.catalogueApi || (await new CatalogueApi());
+
+  const overwriteArray = await getCsvContent(responsablesOverwriteCsv);
 
   const stats = {
     total: 0,
@@ -54,32 +57,45 @@ async function importResponsables(relationCsv, options = {}) {
 
         try {
           const found = await Responsable.findOne({ siret: siret_responsable }).lean();
+
+          const foundOverwrite = overwriteArray.find((record) => record["Siret"] === siret_responsable);
+
+          if (foundOverwrite) {
+            logger.info(`Responsable ${siret_responsable} trouvé dans le fichier de surcharge`);
+          }
+
           let organisme;
 
           if (!found) {
             organisme = await catalogueApi
-              .getEtablissement({ siret: siret_responsable, published: true })
+              .getEtablissement({
+                siret: siret_responsable,
+                ...(foundOverwrite ? { uai: foundOverwrite.UAI } : {}),
+                published: true,
+              })
               .catch((error) => {
                 logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le catalogue`);
 
                 return null;
               });
 
-            if (!organisme) {
+            if (!foundOverwrite && !organisme) {
               stats.failed++;
               logger.error(`Le responsable ${siret_responsable} n'est pas dans le catalogue`);
               return;
             }
           }
 
-          if (!found?.uai && !organisme?.uai) {
+          if (!foundOverwrite?.UAI && !found?.uai && !organisme?.uai) {
             stats.failed++;
-            logger.error(`Le responsable ${siret_responsable} n'a pas d'UAI dans le catalogue`);
+            logger.error(`Impossible de trouver l'UAI du responsable ${siret_responsable}`);
             return;
           }
 
+          const uai = foundOverwrite?.UAI ?? organisme?.uai ?? found?.uai;
+
           const updates = omitEmpty({
-            uai: organisme?.uai ?? found?.uai,
+            uai,
             raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
             adresse: organisme
               ? [
@@ -93,8 +109,12 @@ async function importResponsables(relationCsv, options = {}) {
                   .join(" ")
               : found?.adresse,
             libelle_ville: organisme?.localite ?? found?.libelle_ville,
-            academie: pick(findAcademieByUai(organisme?.uai ?? found?.uai), ["code", "nom"]),
+            academie: pick(findAcademieByUai(uai), ["code", "nom"]),
           });
+
+          if (foundOverwrite?.UAI) {
+            console.log({ siret_responsable, updates });
+          }
 
           const res = await Responsable.updateOne(
             { siret: siret_responsable },
@@ -118,7 +138,7 @@ async function importResponsables(relationCsv, options = {}) {
             const previous = pick(found, ["uai", "raison_sociale", "academie", "adresse", "libelle_ville"]);
 
             logger.info(
-              `Responsable ${siret_responsable} / ${organisme?.uai ?? found?.uai} mis à jour \n${JSON.stringify(
+              `Responsable ${siret_responsable} / ${uai} mis à jour \n${JSON.stringify(
                 diff(previous, updates),
                 null,
                 2

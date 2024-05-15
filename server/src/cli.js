@@ -64,6 +64,11 @@ cli
   .description("Permet de créer le fichier des CFA")
   .option("--affelnet <affelnet>", "Le fichier CSV contentant l'offre de formation Affelnet", createReadStream)
   .option(
+    "--overwrite <affelnetOverwrite>",
+    "Le fichier CSV contentant l'offre de formation corrigée Affelnet",
+    createReadStream
+  )
+  .option(
     "--additionalRelations <additionalRelations>",
     "Le fichier CSV contenant les relations complémentaires",
     createReadStream
@@ -88,15 +93,19 @@ cli
   });
 
 cli
-  .command("importResponsables <responsableCsv>")
+  .command("importResponsables <relationsCsv> <responsableOverwriteCsv>")
   .description(
-    "Créé les comptes des responsables à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+    "Créé les comptes des responsables à partir du fichier des relations, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
   )
-  .action((responsableCsv) => {
+  .action((relationsCsv, responsableOverwriteCsv) => {
     runScript(() => {
-      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
+      const responsableInput = relationsCsv ? createReadStream(relationsCsv) : null;
+      const responsableOverwriteInput = responsableOverwriteCsv ? createReadStream(responsableOverwriteCsv) : null;
 
-      return importResponsables(input);
+      console.log("responsableInput", responsableInput);
+      console.log("responsableOverwriteInput", responsableOverwriteInput);
+
+      return importResponsables(responsableInput, responsableOverwriteInput);
     });
   });
 
@@ -126,15 +135,19 @@ cli
   });
 
 cli
-  .command("importFormateurs <formateurCsv>")
+  .command("importFormateurs <relationsCsv> <formateurOverwriteCsv>")
   .description(
-    "Créé les comptes des formateurs à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+    "Créé les comptes des formateurs à partir du fichier des relations <relationsCsv>, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
   )
-  .action((formateurCsv) => {
+  .action((relationsCsv, formateurOverwriteCsv) => {
     runScript(() => {
-      const input = formateurCsv ? createReadStream(formateurCsv) : process.stdin;
+      const formateurInput = relationsCsv ? createReadStream(relationsCsv) : null;
+      const formateurOverwriteInput = formateurOverwriteCsv ? createReadStream(formateurOverwriteCsv) : null;
 
-      return importFormateurs(input);
+      console.log("formateurInput", formateurInput);
+      console.log("formateurOverwriteInput", formateurOverwriteInput);
+
+      return importFormateurs(formateurInput, formateurOverwriteInput);
     });
   });
 
@@ -163,13 +176,15 @@ cli
   });
 
 cli
-  .command("importRelations [<relationCsv>]")
+  .command("importRelations <relationsCsv> <responsablesOverwriteCsv> <formateursOverwriteCsv>")
   .description("Importe les formations depuis le fichier transmis par Affelnet")
-  .action((relationCsv) => {
+  .action((relationsCsv, responsablesOverwriteCsv, formateursOverwriteCsv) => {
     runScript(() => {
-      const input = relationCsv ? createReadStream(relationCsv) : null;
+      const relationsInput = relationsCsv ? createReadStream(relationsCsv) : null;
+      const responsablesOverwriteInput = responsablesOverwriteCsv ? createReadStream(responsablesOverwriteCsv) : null;
+      const formateursOverwriteInput = formateursOverwriteCsv ? createReadStream(formateursOverwriteCsv) : null;
 
-      return importRelations(input);
+      return importRelations(relationsInput, responsablesOverwriteInput, formateursOverwriteInput);
     });
   });
 

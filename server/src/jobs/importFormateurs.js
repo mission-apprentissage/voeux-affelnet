@@ -10,6 +10,7 @@ const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
 const { siretFormat, uaiFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
+const { getCsvContent } = require("./utils/csv");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -18,8 +19,10 @@ const schema = Joi.object({
   uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
-async function importFormateurs(formateursCsv, options = {}) {
+async function importFormateurs(relationsCsv, formateursOverwriteCsv, options = {}) {
   const catalogueApi = options.catalogueApi || (await new CatalogueApi());
+
+  const overwriteArray = await getCsvContent(formateursOverwriteCsv);
 
   const stats = {
     total: 0,
@@ -30,7 +33,7 @@ async function importFormateurs(formateursCsv, options = {}) {
   };
 
   await oleoduc(
-    formateursCsv,
+    relationsCsv,
     parseCsv({
       on_record: (record) => omitEmpty(record),
     }),
@@ -75,23 +78,35 @@ async function importFormateurs(formateursCsv, options = {}) {
         try {
           const found = await Formateur.findOne({ uai: uai_formateur }).lean();
 
+          const foundOverwrite = overwriteArray.find((record) => record["UAI"] === uai_formateur);
+
+          if (foundOverwrite) {
+            logger.info(`Formateur ${uai_formateur} trouvé dans le fichier de surcharge`);
+          }
+
           let organisme;
 
           if (!found) {
             const organismes = (
-              await catalogueApi.getEtablissements({ uai: uai_formateur, published: true }).catch((error) => {
-                logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le catalogue`);
-                return null;
-              })
+              await catalogueApi
+                .getEtablissements({
+                  uai: uai_formateur,
+                  ...(foundOverwrite ? { siret: foundOverwrite.Siret } : {}),
+                  published: true,
+                })
+                .catch((error) => {
+                  logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le catalogue`);
+                  return null;
+                })
             )?.etablissements;
 
-            if (organismes?.length > 1) {
+            if (!foundOverwrite && organismes?.length > 1) {
               logger.error(`Multiples organismes trouvés dans le catalogue pour l'UAI ${uai_formateur}`);
               stats.failed++;
               return;
             }
 
-            if (!organismes?.length) {
+            if (!foundOverwrite && !organismes?.length) {
               logger.error(`Le formateur ${uai_formateur} n'est pas dans le catalogue`);
               stats.failed++;
               return;
@@ -100,14 +115,16 @@ async function importFormateurs(formateursCsv, options = {}) {
             organisme = organismes[0];
           }
 
-          if (!found?.siret && !organisme?.siret) {
+          if (!foundOverwrite?.Siret && !found?.siret && !organisme?.siret) {
             stats.failed++;
-            logger.error(`Le formateur ${uai_formateur} n'a pas de siret dans le catalogue`);
+            logger.error(`Impossible de trouver le siret du formateur ${uai_formateur}`);
             return;
           }
 
+          const siret = foundOverwrite?.Siret ?? organisme?.siret ?? found?.siret;
+
           const updates = omitEmpty({
-            siret: organisme?.siret ?? found?.siret,
+            siret,
             raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
             adresse: organisme
               ? [
@@ -124,6 +141,8 @@ async function importFormateurs(formateursCsv, options = {}) {
             academie: pick(findAcademieByUai(uai_formateur), ["code", "nom"]),
           });
 
+          // console.log({ uai_formateur, updates });
+
           const res = await Formateur.updateOne(
             { uai: uai_formateur },
             {
@@ -136,6 +155,10 @@ async function importFormateurs(formateursCsv, options = {}) {
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
+          if (foundOverwrite?.Siret) {
+            console.log({ uai_formateur, updates });
+          }
+
           if (res.upsertedCount) {
             stats.created++;
             logger.info(`Formateur ${uai_formateur} ajouté`);
@@ -145,7 +168,7 @@ async function importFormateurs(formateursCsv, options = {}) {
             const previous = pick(found, ["siret", "raison_sociale", "libelle_ville", "adresse"]);
 
             logger.info(
-              `Formateur ${uai_formateur} / ${organisme?.siret ?? found?.siret} mis à jour \n${JSON.stringify(
+              `Formateur ${uai_formateur} / ${updates?.siret} mis à jour \n${JSON.stringify(
                 diff(previous, updates),
                 null,
                 2

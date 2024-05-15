@@ -16,6 +16,7 @@ const {
   getNombreVoeuxRestant,
 } = require("../common/utils/voeuxUtils");
 const { findAcademieByUai } = require("../common/academies");
+const { getCsvContent } = require("./utils/csv");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -24,7 +25,10 @@ const schema = Joi.object({
   uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
-async function importRelations(relationsCsv) {
+async function importRelations(relationsCsv, responsableOverwriteCsv, formateurOverwriteCsv) {
+  const responsableOverwriteArray = await getCsvContent(responsableOverwriteCsv);
+  const formateurOverwriteArray = await getCsvContent(formateurOverwriteCsv);
+
   const stats = {
     total: 0,
     created: 0,
@@ -71,6 +75,11 @@ async function importRelations(relationsCsv) {
         }
 
         try {
+          const responsableOverwrite = responsableOverwriteArray.find(
+            (record) => record["Siret"] === siret_responsable
+          );
+          const formateurOverwrite = formateurOverwriteArray.find((record) => record["UAI"] === uai_formateur);
+
           const found = await Relation.findOne({
             "etablissement_formateur.uai": uai_formateur,
             "etablissement_responsable.siret": siret_responsable,
@@ -81,10 +90,10 @@ async function importRelations(relationsCsv) {
           const updates = {
             etablissement_formateur: {
               uai: uai_formateur,
-              siret: formateur?.siret,
+              siret: formateurOverwrite?.Siret ?? formateur?.siret,
             },
             etablissement_responsable: {
-              uai: responsable?.uai,
+              uai: responsableOverwrite?.UAI ?? responsable?.uai,
               siret: siret_responsable,
             },
             first_date_voeux: await getFirstVoeuxDate({ uai: uai_formateur, siret: siret_responsable }),

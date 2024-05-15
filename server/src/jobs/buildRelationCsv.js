@@ -9,7 +9,7 @@ const {
   transformData,
 } = require("oleoduc");
 const { Readable } = require("stream");
-const { getRelationsFromOffreDeFormation } = require("./utils/getRelationsFromOffreDeFormation.js");
+const { streamOffreDeFormation } = require("./utils/offreDeFormation.js");
 const { parseCsv } = require("../common/utils/csvUtils.js");
 
 function parseAdditionalRelationsCsv(csv) {
@@ -27,7 +27,7 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
   const invalids = [];
 
   const streams = [
-    await getRelationsFromOffreDeFormation({
+    await streamOffreDeFormation({
       ...options,
       onConflict: (c) => {
         stats.conflicts++;

@@ -1,19 +1,23 @@
 const logger = require("../../common/logger.js");
 const { compose, transformData, filterData, accumulateData, flattenArray } = require("oleoduc");
-const { Responsable /*Etablissement*/ } = require("../../common/model");
-const { getFromStorage } = require("../../common/utils/ovhUtils.js");
-const { parseCsv } = require("../../common/utils/csvUtils.js");
+const { Responsable /*Etablissement*/ } = require("../../common/model/index.js");
 const { catalogue } = require("./catalogue.js");
-// const { referentiel } = require("./referentiel.js");
 const { getSiretResponsableFromCleMinistereEducatif } = require("../../common/utils/cleMinistereEducatifUtils.js");
+const { getCsvContent } = require("./csv.js");
+const { parseCsv } = require("../../common/utils/csvUtils.js");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
-async function getOffreDeFormationCsv(csv) {
-  const stream = csv || (await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-07-06-2022.csv"));
+const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
+  // console.log("originalCsv", originalCsv);
+  // console.log("overwriteCsv", overwriteCsv);
+
+  const overwriteArray = await getCsvContent(overwriteCsv);
+
+  console.log(overwriteArray);
 
   return compose(
-    stream,
+    originalCsv,
     parseCsv({
       on_record: (record) => {
         return Object.keys(record).reduce((acc, curr) => {
@@ -21,9 +25,32 @@ async function getOffreDeFormationCsv(csv) {
           return acc;
         }, {});
       },
+    }),
+    transformData(async (data) => {
+      if (overwriteArray) {
+        const academie = data["ACADEMIE"];
+        const code_offre = data["CODE_OFFRE"];
+        const affelnet_id = `${academie}/${code_offre}`;
+
+        const overwriteItem = overwriteArray.find((item) => item["Affelnet_id"] === affelnet_id);
+        if (overwriteItem) {
+          logger.warn(`Données écrasées pour la formation ${affelnet_id}`, {
+            SIRET_UAI_GESTIONNAIRE: overwriteItem["Siret responsable"],
+            UAI_FORMATEUR: overwriteItem["UAI formateur"],
+          });
+
+          return {
+            ...data,
+            SIRET_UAI_GESTIONNAIRE: overwriteItem["Siret responsable"],
+            UAI_FORMATEUR: overwriteItem["UAI formateur"],
+          };
+        }
+      }
+
+      return data;
     })
   );
-}
+};
 
 function filterConflicts(onConflict = () => ({})) {
   const memo = [];
@@ -38,7 +65,7 @@ function filterConflicts(onConflict = () => ({})) {
     if (!memo.includes(uai_etablissement)) {
       memo.push(uai_etablissement);
       onConflict({
-        uai: uai_etablissement,
+        uai_accueil: uai_etablissement,
         sirets: alternatives.sirets.join(","),
         emails: alternatives.emails.join(","),
       });
@@ -47,71 +74,17 @@ function filterConflicts(onConflict = () => ({})) {
   });
 }
 
-async function getRelationsFromOffreDeFormation(options = {}) {
-  const { /*findFormateurUai, findResponsableSiretAndEmail, */ findFormation } = await catalogue();
-  // const { findEmail, findSiretResponsable } = await referentiel();
-  const { onConflict = () => ({}), affelnet } = options;
+async function streamOffreDeFormation(options = {}) {
+  const { findFormation } = await catalogue();
 
-  // async function searchResponsableSiretAndEmail({ uai, cle_ministere_educatif, siret_responsable }) {
-  //   logger.debug(`searchResponsableSiretAndEmail '${uai}', '${cle_ministere_educatif}', '${siret_responsable}'`);
-  //   const { formations, alternatives } = await findResponsableSiretAndEmail({
-  //     uai,
-  //     cle_ministere_educatif,
-  //     siret_responsable,
-  //   });
+  const { onConflict = () => ({}), affelnet, overwrite } = options;
 
-  //   const siret = siret_responsable.length
-  //     ? siret_responsable
-  //     : formations[0]?.etablissement_gestionnaire_siret ?? (await findSiretResponsable(uai));
-
-  //   const email = formations[0]?.etablissement_gestionnaire_courriel?.split("##")[0] || (await findEmail(siret));
-
-  //   if (alternatives.length) {
-  //     logger.warn({ uai, cle_ministere_educatif, siret_responsable, formations, alternatives });
-  //   }
-
-  //   return {
-  //     siret,
-  //     email,
-  //     alternatives,
-  //   };
-  // }
-
-  // async function searchFormateurUai({ uai, cle_ministere_educatif, siret_responsable }) {
-  //   const { formations, alternatives } = await findFormateurUai({
-  //     uai,
-  //     cle_ministere_educatif,
-  //     siret_responsable,
-  //   });
-
-  //   if (!formations?.length) {
-  //     // logger.warn(`Pas de formations permettant de retrouver l'UAI du formateur à partir de l'UAI du lieu ${uai}`);
-  //     return {
-  //       uai_formateur: null,
-  //       alternatives: [],
-  //     };
-  //   }
-
-  //   const uai_formateur = formations[0]?.etablissement_formateur_uai;
-
-  //   if (alternatives.length) {
-  //     logger.warn({ uai, cle_ministere_educatif, siret_responsable, formations, alternatives });
-  //   }
-
-  //   // if (uai_formateur !== uai) {
-  //   //   logger.info(`${uai_formateur} trouvé à la place de ${uai}`);
-  //   // }
-
-  //   return {
-  //     uai_formateur,
-  //     alternatives,
-  //   };
-  // }
+  console.log({ affelnet, overwrite });
 
   return compose(
-    await getOffreDeFormationCsv(affelnet),
+    await fixOffreDeFormation(affelnet, overwrite),
 
-    // Permet de n'avoir qu'une ligne pour une unique ensemble {uai / siret_responsable / cle_ministere_educatif}
+    // Permet de n'avoir qu'une ligne pour une unique ensemble {uai_accueil / siret_responsable / cle_ministere_educatif}
     accumulateData(
       async (accumulator, data) => {
         const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
@@ -125,7 +98,7 @@ async function getRelationsFromOffreDeFormation(options = {}) {
         ].includes(libelleTypeEtablissement)
           ? SIRET_RECENSEMENT
           : getSiretResponsableFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_GESTIONNAIRE"]);
-        const uai = data["UAI"]?.toUpperCase();
+        const uai_accueil = data["UAI"]?.toUpperCase();
         let uai_formateur = data["UAI_FORMATEUR"]?.toUpperCase();
         // let uai_responsable = data["UAI_RESPONSABLE"]?.toUpperCase();
 
@@ -134,14 +107,14 @@ async function getRelationsFromOffreDeFormation(options = {}) {
         const affelnet_id = `${academie}/${code_offre}`;
 
         if (siret_responsable === SIRET_RECENSEMENT) {
-          logger.debug(`${affelnet_id} / Siret recensement détecté pour l'uai d'accueil ${uai}`);
+          logger.debug(`${affelnet_id} / Siret recensement détecté pour l'uai_accueil d'accueil ${uai_accueil}`);
           return accumulator;
         }
 
         try {
           if (!uai_formateur?.length) {
             // logger.debug(
-            //   `${affelnet_id} / Recherche de l'UAI formateur pour ${uai} (${cle_ministere_educatif}, ${siret_responsable})`
+            //   `${affelnet_id} / Recherche de l'UAI formateur pour ${uai_accueil} (${cle_ministere_educatif}, ${siret_responsable})`
             // );
             logger.debug(`${affelnet_id} / Recherche de l'UAI formateur`);
 
@@ -149,17 +122,17 @@ async function getRelationsFromOffreDeFormation(options = {}) {
 
             uai_formateur = formation?.etablissement_formateur_uai;
             // uai_formateur = (
-            //   await searchFormateurUai({ cle_ministere_educatif, siret_responsable, uai })
+            //   await searchFormateurUai({ cle_ministere_educatif, siret_responsable, uai_accueil })
             // )?.uai_formateur?.toUpperCase();
 
             if (!uai_formateur?.length) {
               logger.error(`${affelnet_id} / UAI formateur introuvable`);
               // logger.error(
-              //   `${affelnet_id} / UAI formateur introuvable pour l'UAI d'accueil ${uai} (${cle_ministere_educatif}, ${siret_responsable})`
+              //   `${affelnet_id} / UAI formateur introuvable pour l'UAI d'accueil ${uai_accueil} (${cle_ministere_educatif}, ${siret_responsable})`
               // );
               return accumulator;
             } else {
-              logger.info(`${affelnet_id} / UAI formateur trouvé pour ${uai} : ${uai_formateur}`);
+              logger.info(`${affelnet_id} / UAI formateur trouvé pour ${uai_accueil} : ${uai_formateur}`);
             }
           }
 
@@ -360,4 +333,4 @@ async function getRelationsFromOffreDeFormation(options = {}) {
   );
 }
 
-module.exports = { getRelationsFromOffreDeFormation };
+module.exports = { streamOffreDeFormation };
