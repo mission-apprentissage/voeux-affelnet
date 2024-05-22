@@ -70,7 +70,7 @@ function StatusErrorMessage({ error, username, actionToken }) {
               ).
             </Text>
             <Text mb={4}>
-              C’est à cette adresse que les listes de candidats seront transmises, à partir de la semaine du 5 juin.
+              C’est à cette adresse que les listes de candidats seront transmises, à partir de la semaine du 3 juin.
             </Text>
             <Text mb={4}>
               Vous pouvez désormais définir votre mot de passe en suivant ce lien si ce n'est déjà fait :{" "}
@@ -146,21 +146,19 @@ const ConfirmationPage = () => {
               {showForm && (
                 <Box>
                   <Text mb={4}>
-                    Afin d’accéder au téléchargement des candidats en apprentissage exprimés via Affelnet, veuillez
-                    confirmer{" "}
+                    Afin d’accéder au téléchargement des listes de candidats en apprentissage, veuillez confirmer{" "}
                     {data.type === "Responsable" ? (
-                      <>l’adresse courriel du directeur général de votre établissement (Siret: {username})</>
+                      <>l’adresse courriel du directeur de votre établissement (Siret: {username})</>
                     ) : (
                       <>
-                        l'adresse courriel renseignée par le directeur général de l'établissement responsable pour
-                        délégation des droits de téléchargements des listes de candidats à votre compte (UAI: {username}
-                        )
+                        l'adresse courriel renseignée par le directeur de l'établissement responsable pour délégation
+                        des droits de téléchargements des listes de candidats à votre compte (UAI: {username})
                       </>
                     )}
                   </Text>
                   <Text mb={8}>
                     Cette étape est indispensable pour vous permettre de recevoir les listes de candidats qui seront
-                    diffusées à partir de la semaine du 5 juin.
+                    diffusées à partir de la semaine du 3 juin.
                   </Text>
 
                   <Formik

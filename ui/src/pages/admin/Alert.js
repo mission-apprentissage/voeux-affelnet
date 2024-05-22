@@ -101,18 +101,6 @@ export const Alert = () => {
   return (
     <Box w="100%" pt={[4, 8]} px={[1, 1, 12, 24]}>
       <Container maxW="xl">
-        <Breadcrumb separator={<ArrowDropRightLine color="grey.600" />} textStyle="xs">
-          <BreadcrumbItem>
-            <BreadcrumbLink as={NavLink} to="/" color="grey.600" textDecoration="underline">
-              Accueil
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbItem isCurrentPage>
-            <BreadcrumbLink>Message de maintenance</BreadcrumbLink>
-          </BreadcrumbItem>
-        </Breadcrumb>
-      </Container>
-      <Container maxW="xl">
         <Center verticalAlign="center">
           <Box mt={10} width={["auto", "50rem"]}>
             <Heading textStyle="h2" marginBottom="2w">

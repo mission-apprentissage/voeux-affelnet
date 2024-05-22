@@ -11,7 +11,7 @@ module.exports = {
   confirmation_responsable: (responsable, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet 2024  – Action requise pour la transmission des listes de candidats (Siret : ${responsable.siret})`,
+      subject: `${prefix}Affelnet 2024  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (Siret : ${responsable.siret})`,
       templateFile: getTemplateFile("confirmation_responsable"),
       data: {
         responsable,
@@ -86,7 +86,7 @@ module.exports = {
   activation_delegue: (delegue, token, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
     return {
-      subject: `${prefix}Affelnet 2024  – Veuillez activer votre compte pour l'accès aux listes de candidats`,
+      subject: `${prefix}Affelnet 2024  – Veuillez activer votre compte pour l'accès aux listes de candidats aux offres de formation en apprentissage`,
       templateFile: getTemplateFile("activation_delegue"),
       data: {
         delegue,

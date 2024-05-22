@@ -286,9 +286,9 @@ function LoginPage() {
                               de connexion (les mots de passe créés en 2022 ne seront pas utilisables).
                             </ListItem>
                             <ListItem>
-                              Semaine du 5 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
+                              Semaine du 3 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
                             </ListItem>
-                            <ListItem>Semaine du 19 juin : diffusion des listes mises à jour.</ListItem>
+                            <ListItem>Semaine du 18 juin : diffusion des listes mises à jour.</ListItem>
                           </UnorderedList>
                         </Text>
                       </AccordionPanel>

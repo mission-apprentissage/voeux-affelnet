@@ -79,6 +79,15 @@ const Header = () => {
                       <MenuDivider />
                     </>
                   )}
+
+                  {auth.permissions?.isAdmin && !auth.academies?.length && (
+                    <>
+                      <MenuItem as={NavLink} to="/admin/alert">
+                        Gestion des messages d'alerte
+                      </MenuItem>
+                      <MenuDivider />
+                    </>
+                  )}
                   <MenuItem onClick={logout}>Déconnexion</MenuItem>
                 </MenuList>
               </Menu>

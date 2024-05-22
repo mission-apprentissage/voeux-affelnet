@@ -200,7 +200,7 @@ export const Formateur = ({ formateur, responsables, callback }) => {
                 ) : new Date().getTime() <= new Date("2024/06/05").getTime() ? (
                   <>
                     <Text mb={4}>
-                      La liste des vœux exprimés sera rendue disponible dans la semaine du 5 juin. Un courriel de
+                      La liste des vœux exprimés sera rendue disponible dans la semaine du 3 juin. Un courriel de
                       notification{" "}
                       {isDiffusionAutorisee ? (
                         <>vous sera envoyé pour vous </>
@@ -223,7 +223,7 @@ export const Formateur = ({ formateur, responsables, callback }) => {
                       )}
                     </Text>
                     <Text mb={4}>
-                      Cette première liste pourra être mise à jour la semaine du 19 juin, pour prendre en compte les
+                      Cette première liste pourra être mise à jour la semaine du 18 juin, pour prendre en compte les
                       modifications de vœux, les suppressions et les ajouts. Une notification courriel sera également
                       envoyée lors de cette mise à jour.
                     </Text>

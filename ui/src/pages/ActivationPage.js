@@ -73,7 +73,7 @@ function ActivationPage() {
   );
 
   const showForm = !loading && !message && !error;
-  const title = `Activation de votre compte ${username}`;
+  const title = `Veuillez définir votre mot de passe de connexion`;
 
   return (
     <Center height="100vh" verticalAlign="center">
@@ -88,10 +88,6 @@ function ActivationPage() {
             {loading && <div>En cours de chargement...</div>}
             {showForm && (
               <Box>
-                <Text mb={8}>
-                  Afin d’accéder au service de téléchargement des listes de vœux exprimés via Affelnet, nous vous prions
-                  d’activer votre compte en créant un mot de passe.
-                </Text>
                 <Formik
                   initialValues={{
                     password: "",
