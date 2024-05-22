@@ -146,7 +146,7 @@ export const Formateur = () => {
   if (!formateur) {
     return (
       <>
-        Nous n'avons pas trouvé le formateur?.{" "}
+        Nous n'avons pas trouvé le formateur.{" "}
         <Link variant="action" href="/support">
           Signaler un problème
         </Link>

@@ -158,7 +158,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
                     <Text mb={4}>
                       <strong>
                         La personne à laquelle vous allez déléguer le droit de réception des listes doit impérativement
-                        exercer au sein de l'établissement formateur?.
+                        exercer au sein de l'établissement formateur.
                       </strong>
                     </Text>
                     <Text mb={4}>

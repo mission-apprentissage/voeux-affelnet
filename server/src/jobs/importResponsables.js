@@ -112,9 +112,9 @@ async function importResponsables(relationCsv, responsablesOverwriteCsv, options
             academie: pick(findAcademieByUai(uai), ["code", "nom"]),
           });
 
-          if (foundOverwrite?.UAI) {
-            console.log({ siret_responsable, updates });
-          }
+          // if (foundOverwrite?.UAI) {
+          //   console.log({ siret_responsable, updates });
+          // }
 
           const res = await Responsable.updateOne(
             { siret: siret_responsable },

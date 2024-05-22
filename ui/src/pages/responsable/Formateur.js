@@ -241,7 +241,7 @@ export const Formateur = ({ responsable, callback }) => {
               <>
                 <Text mb={4}>
                   La délégation des droits de réception des listes de candidats a été activée pour cet organisme
-                  formateur?.{" "}
+                  formateur.{" "}
                 </Text>
                 <Text mb={4}>
                   Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}

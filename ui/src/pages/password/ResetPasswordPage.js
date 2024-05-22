@@ -1,7 +1,20 @@
+import { useState } from "react";
 import queryString from "query-string";
 import { Formik, Field, Form } from "formik";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Box, Center, FormControl, FormErrorMessage, FormLabel, Heading, Input, Button, Grid } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  Input,
+  Button,
+  Grid,
+  InputRightElement,
+  InputGroup,
+} from "@chakra-ui/react";
 
 import { Yup } from "../../common/Yup";
 import { _post } from "../../common/httpClient";
@@ -9,6 +22,7 @@ import useAuth from "../../common/hooks/useAuth";
 import decodeJWT from "../../common/utils/decodeJWT";
 import ErrorMessage from "../../common/components/ErrorMessage";
 import { AlertMessage } from "../../common/components/layout/AlertMessage";
+import { EyeFill, EyeOffFill } from "../../theme/components/icons";
 
 function ResetPasswordPage() {
   const [, setAuth] = useAuth();
@@ -16,6 +30,8 @@ function ResetPasswordPage() {
   const location = useLocation();
   const { resetPasswordToken } = queryString.parse(location.search);
   const username = decodeJWT(resetPasswordToken).sub;
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleShowPassword = () => setShowPassword(!showPassword);
 
   const changePassword = async (values, { setStatus }) => {
     try {
@@ -69,7 +85,18 @@ function ResetPasswordPage() {
                         return (
                           <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                             <FormLabel>Nouveau mot de passe</FormLabel>
-                            <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." />
+                            <InputGroup size="md">
+                              <Input
+                                {...field}
+                                id={field.name}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Votre mot de passe..."
+                              />
+
+                              <InputRightElement width="4.5rem">
+                                <Box onClick={toggleShowPassword}>{showPassword ? <EyeOffFill /> : <EyeFill />}</Box>
+                              </InputRightElement>
+                            </InputGroup>
                             <FormErrorMessage>{meta.error}</FormErrorMessage>
                           </FormControl>
                         );

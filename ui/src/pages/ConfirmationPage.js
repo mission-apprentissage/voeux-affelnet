@@ -103,7 +103,9 @@ const ConfirmationPage = () => {
   const [message, setMessage] = useState();
   const [inputDisabled, setInputDisabled] = useState(true);
 
-  const [title, setTitle] = useState(<>{`Confirmation de l'email pour votre compte ${username}`}</>);
+  const [title, setTitle] = useState(
+    <>{`Veuillez confirmer ou modifier l’adresse courriel du directeur d’établissement`}</>
+  );
 
   const accept = async (values) => {
     try {

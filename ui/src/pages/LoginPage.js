@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import {
@@ -18,7 +18,10 @@ import {
   Grid,
   Heading,
   HStack,
+  IconButton,
   Input,
+  InputGroup,
+  InputRightElement,
   Link,
   ListItem,
   Text,
@@ -35,6 +38,7 @@ import decodeJWT from "../common/utils/decodeJWT";
 import { useFetch } from "../common/hooks/useFetch";
 import { UserStatut } from "../common/constants/UserStatut";
 import { AlertMessage } from "../common/components/layout/AlertMessage";
+import { EyeFill, EyeOffFill } from "../theme/components/icons";
 
 const mailVoeux = process.env.REACT_APP_VOEUX_AFFELNET_EMAIL;
 
@@ -73,6 +77,9 @@ function LoginPage() {
   const navigate = useNavigate();
   const query = useQuery();
   const alreadyActivated = query.get("alreadyActivated");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleShowPassword = () => setShowPassword(!showPassword);
 
   const location = useLocation();
   const { actionToken } = queryString.parse(location.search);
@@ -160,7 +167,20 @@ function LoginPage() {
                             return (
                               <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                                 <FormLabel name={field.name}>Mot de passe</FormLabel>
-                                <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." />
+                                <InputGroup size="md">
+                                  <Input
+                                    {...field}
+                                    id={field.name}
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Votre mot de passe..."
+                                  />
+
+                                  <InputRightElement width="4.5rem">
+                                    <Box onClick={toggleShowPassword}>
+                                      {showPassword ? <EyeOffFill /> : <EyeFill />}
+                                    </Box>
+                                  </InputRightElement>
+                                </InputGroup>
                                 <FormErrorMessage>{meta.error || "Mot de passe invalide"}</FormErrorMessage>
                               </FormControl>
                             );

@@ -1,6 +1,6 @@
 const { DateTime } = require("luxon");
 const logger = require("../common/logger");
-const { User, Responsable } = require("../common/model");
+const { User } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
 
@@ -9,9 +9,9 @@ const {
   saveAccountConfirmationEmailAutomaticResent: saveAccountConfirmationEmailAutomaticResentAsResponsable,
 } = require("../common/actions/history/responsable");
 const {
-  saveAccountConfirmationEmailManualResent: saveAccountConfirmationEmailManualResentAsFormateur,
-  saveAccountConfirmationEmailAutomaticResent: saveAccountConfirmationEmailAutomaticResentAsFormateur,
-} = require("../common/actions/history/formateur");
+  saveAccountConfirmationEmailManualResent: saveAccountConfirmationEmailManualResentAsDelegue,
+  saveAccountConfirmationEmailAutomaticResent: saveAccountConfirmationEmailAutomaticResentAsDelegue,
+} = require("../common/actions/history/delegue");
 
 async function resendConfirmationEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
@@ -62,23 +62,6 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
     .eachAsync(async (user) => {
       const previous = user.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
-      if (user.type === UserType.FORMATEUR) {
-        const responsable = await Responsable.findOne({
-          "etablissements.uai": user.username,
-          "etablissements.diffusion_autorisee": true,
-        });
-
-        if (!responsable) {
-          return;
-        }
-
-        const etablissement = responsable.etablissements_formateur?.find(
-          (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
-        );
-
-        user.email = etablissement?.email;
-      }
-
       try {
         logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);
         await resendEmail(previous.token, { retry: options.retry, user });
@@ -89,10 +72,10 @@ async function resendConfirmationEmails(resendEmail, options = {}) {
               ? await saveAccountConfirmationEmailManualResentAsResponsable(user, options.sender)
               : await saveAccountConfirmationEmailAutomaticResentAsResponsable(user);
             break;
-          case UserType.FORMATEUR:
+          case UserType.DELEGUE:
             options.sender
-              ? await saveAccountConfirmationEmailManualResentAsFormateur(user, options.sender)
-              : await saveAccountConfirmationEmailAutomaticResentAsFormateur(user);
+              ? await saveAccountConfirmationEmailManualResentAsDelegue(user, options.sender)
+              : await saveAccountConfirmationEmailAutomaticResentAsDelegue(user);
             break;
           default:
             break;
