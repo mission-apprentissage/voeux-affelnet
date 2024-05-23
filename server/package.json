@@ -7,6 +7,7 @@
   "license": "MIT",
   "main": "src/index.js",
   "scripts": {
+    "start-prod": "node src/index.js",
     "start": "nodemon --ignore tests/ src/index.js",
     "debug": "nodemon --inspect=0.0.0.0 --signal SIGINT --ignore tests/ src/index.js",
     "test": "mocha --recursive --exit --timeout 5000 tests/",

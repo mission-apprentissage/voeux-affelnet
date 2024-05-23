@@ -29,4 +29,4 @@ defaultSemverRangePrefix: ''\n\
 COPY ./ /app
 COPY --from=builder /tmp/node_modules /app/node_modules
 
-CMD ["yarn", "start"]
+CMD ["yarn", "start-prod"]
