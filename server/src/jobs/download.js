@@ -319,9 +319,9 @@ async function download(output, options = {}) {
           return histories?.[histories.length - 1]?.action;
         },
 
-        Vœux: ({ first_voeux_date }) => {
-          return ouiNon(first_voeux_date);
-        },
+        // Vœux: ({ first_voeux_date }) => {
+        //   return ouiNon(first_voeux_date);
+        // },
 
         "Nombre de vœux": async ({ nombre_voeux }) => nombre_voeux,
 
