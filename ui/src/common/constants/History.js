@@ -188,7 +188,7 @@ export const DelegueHistoryItems = new Map([
     DelegueActions.ACCOUNT_CONFIRMED,
     {
       component: ({ email }) =>
-        `${email} a confirmé son adresse courriel. La personne est invitée à cliquer sur un lien pour créer son mot de passe de connexion.`,
+        `${email} a confirmé son adresse courriel. La personne est invitée à créer son mot de passe de connexion.`,
     },
   ],
   [
@@ -332,7 +332,7 @@ export const ResponsableHistoryItems = new Map([
     ResponsableActions.ACCOUNT_CONFIRMED,
     {
       component: ({ email }) =>
-        `${email} a confirmé son adresse courriel. La personne est invitée à cliquer sur un lien pour créer son mot de passe de connexion.`,
+        `${email} a confirmé son adresse courriel. La personne est invitée à créer son mot de passe de connexion.`,
     },
   ],
   // [ResponsableActions.ACCOUNT_CREATED, { component: ({}) => `` }],
