@@ -114,12 +114,14 @@ export const Formateurs = () => {
                   return (
                     <Tr key={formateur?.uai}>
                       <Td>
-                        <Link
-                          variant="primary"
-                          href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}
-                        >
-                          Détail
-                        </Link>
+                        {relation?.formateur && (
+                          <Link
+                            variant="primary"
+                            href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}
+                          >
+                            Détail
+                          </Link>
+                        )}
                       </Td>
                       <Td>
                         <Text lineHeight={6}>

@@ -26,20 +26,17 @@ export const FormateursAvecVoeux = ({ responsable, callback }) => {
       </Thead>
       <Tbody>
         {relations.map((relation, index) => {
-          const formateur =
-            relation.formateur ?? relation.etablissements_formateur ?? relation.etablissements_formateur;
+          const formateur = relation.formateur ?? relation.etablissement_formateur;
           const delegue = relation.delegue;
-
-          // if (!formateur) {
-          //   return <Fragment key={index} />;
-          // }
 
           return (
             <Tr key={index}>
               <Td>
-                <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
-                  Détail
-                </Link>
+                {relation.formateur && (
+                  <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
+                    Détail
+                  </Link>
+                )}
               </Td>
               <Td>
                 <Text lineHeight={6}>

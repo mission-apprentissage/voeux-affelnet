@@ -23,20 +23,17 @@ export const FormateursSansVoeux = ({ responsable, callback }) => {
       </Thead>
       <Tbody>
         {relations.map((relation) => {
-          const formateur = relation.formateur ?? relation.etablissements_formateur;
-
-          if (!formateur) {
-            return <></>;
-          }
-
+          const formateur = relation.formateur ?? relation.etablissement_formateur;
           const delegue = relation.delegue;
 
           return (
             <Tr key={formateur?.uai}>
               <Td>
-                <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
-                  Détail
-                </Link>
+                {relation.formateur && (
+                  <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
+                    Détail
+                  </Link>
+                )}
               </Td>
               <Td>
                 <Text lineHeight={6}>
