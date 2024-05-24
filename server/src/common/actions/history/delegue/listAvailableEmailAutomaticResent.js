@@ -1,9 +1,9 @@
 const { DelegueActions } = require("../../../constants/History");
 const { Delegue } = require("../../../model");
 
-const saveListAvailableEmailAutomaticResent = async ({ uai, email }) => {
+const saveListAvailableEmailAutomaticResent = async ({ _id, email }) => {
   await Delegue.updateOne(
-    { uai },
+    { _id },
     {
       $push: {
         histories: {
