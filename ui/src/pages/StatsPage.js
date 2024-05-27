@@ -107,31 +107,113 @@ function StatsPage() {
               Organismes
             </Heading>
             <StatGroup mb={4}>
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre d'organismes responsables</StatLabel>
                 <StatNumber>{organismes?.totalResponsable?.toLocaleString()}</StatNumber>
                 Dont {organismes?.totalResponsableMultiOrganismes?.toLocaleString()} responsables multi-organismes
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre d'établissements formateurs</StatLabel>
                 <StatNumber>{organismes?.totalFormateur?.toLocaleString()}</StatNumber>
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre d’établissements d’accueil porteurs de candidatures</StatLabel>
                 <StatNumber>{organismes?.totalAccueil?.toLocaleString()}</StatNumber>
               </Stat>
             </StatGroup>
           </Box>
+
           <Divider m={8} />
+
+          <Box>
+            <Heading as="h4" size="md" mb={8}>
+              Créations de compte
+            </Heading>
+
+            <StatGroup mb={8}>
+              <Stat mr={2}>
+                <StatLabel>Nombre d’organismes responsables qui n'ont pas confirmé leur adresse courriel </StatLabel>
+                <StatNumber>
+                  {(
+                    organismes?.totalResponsable -
+                    organismes?.totalResponsableActivated -
+                    organismes?.totalResponsableConfirmed
+                  )?.toLocaleString()}
+                </StatNumber>
+                <StatHelpText>
+                  (soit{" "}
+                  {
+                    +(
+                      ((organismes?.totalResponsable -
+                        organismes?.totalResponsableActivated -
+                        organismes?.totalResponsableConfirmed) *
+                        100) /
+                      organismes?.totalResponsable
+                    ).toFixed(2)
+                  }
+                  % des responsables)
+                </StatHelpText>
+              </Stat>
+
+              <Stat mr={2}>
+                <StatLabel>
+                  Nombre d’organismes responsables ayant confirmé leur adresse courriel mais n'ayant pas créé leur mot
+                  de passe
+                </StatLabel>
+                <StatNumber>{organismes?.totalResponsableConfirmed?.toLocaleString()}</StatNumber>
+
+                <StatHelpText>
+                  (soit {+((organismes?.totalResponsableConfirmed * 100) / organismes?.totalResponsable).toFixed(2)}%
+                  des responsables)
+                </StatHelpText>
+              </Stat>
+
+              <Stat mr={2}>
+                <StatLabel>Nombre d’organismes responsables ayant créer leur compte</StatLabel>
+                <StatNumber>{organismes?.totalResponsableActivated?.toLocaleString()}</StatNumber>
+                <StatHelpText>
+                  (soit {+((organismes?.totalResponsableActivated * 100) / organismes?.totalResponsable).toFixed(2)}%
+                  des responsables)
+                </StatHelpText>
+              </Stat>
+            </StatGroup>
+
+            <StatGroup mb={4}>
+              <Stat mr={2}>
+                <StatLabel>Nombre de personne ayant reçu une délégation</StatLabel>
+                <StatNumber>{organismes?.totalDelegue?.toLocaleString()}</StatNumber>
+              </Stat>
+
+              <Stat mr={2}>
+                <StatLabel> Nombre de personne ayant reçu une délégation n'ayant pas créé leur mot de passe</StatLabel>
+                <StatNumber>
+                  {organismes?.totalDelegue - organismes?.totalDelegueActivated?.toLocaleString()}
+                </StatNumber>
+                <StatHelpText>
+                  (soit{" "}
+                  {
+                    +(
+                      ((organismes?.totalDelegue - organismes?.totalDelegueActivated) * 100) /
+                      organismes?.totalDelegue
+                    ).toFixed(2)
+                  }
+                  % des personnes déléguées)
+                </StatHelpText>
+              </Stat>
+            </StatGroup>
+          </Box>
+
+          <Divider m={8} />
+
           <Box>
             <Heading as="h4" size="md" mb={8}>
               Délégations
             </Heading>
 
             <StatGroup mb={4}>
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>
                   Responsables ayant procédé à au moins une <br />
                   délégation de droit de réception des listes de candidats
@@ -145,7 +227,7 @@ function StatsPage() {
                 </StatHelpText>
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>
                   Formateurs pour lesquels une délégation de <br />
                   droit de réception des listes de candidats a été accordée
@@ -160,23 +242,23 @@ function StatsPage() {
               Candidatures
             </Heading>
             <StatGroup mb={4}>
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre de candidatures</StatLabel>
                 <StatNumber>{voeux?.total?.toLocaleString()}</StatNumber>
                 <StatHelpText>et {voeux?.nbVoeuxNonDiffusable?.toLocaleString()} non diffusables</StatHelpText>
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre d'apprenants</StatLabel>
                 <StatNumber>{voeux?.apprenants?.toLocaleString()}</StatNumber>
               </Stat>
 
-              {/* <Stat>
+              {/* <Stat mr={2}>
                 <StatLabel>Responsables inconnus</StatLabel>
                 <StatNumber>{voeux?.responsablesInconnus}</StatNumber>
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Formateurs inconnus</StatLabel>
                 <StatNumber>{voeux?.formateursInconnus}</StatNumber>
               </Stat> */}
@@ -189,7 +271,7 @@ function StatsPage() {
             </Heading>
 
             <StatGroup mb={4}>
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre de candidatures téléchargées</StatLabel>
                 <StatNumber>{voeux?.nbVoeuxDiffusés?.toLocaleString()}</StatNumber>
                 {!!voeux?.nbVoeuxDiffusés && (
@@ -206,7 +288,7 @@ function StatsPage() {
                 )}
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre de candidatures téléchargées par les responsables</StatLabel>
                 <StatNumber>{voeux?.nbVoeuxDiffusésResponsable?.toLocaleString()}</StatNumber>
 
@@ -224,7 +306,7 @@ function StatsPage() {
                 )}
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 <StatLabel>Nombre de candidatures téléchargées par les délégués</StatLabel>
                 <StatNumber>{voeux?.nbVoeuxDiffusésFormateur?.toLocaleString()}</StatNumber>
                 {!!voeux?.nbVoeuxDiffusésFormateur && (
@@ -250,7 +332,7 @@ function StatsPage() {
             </Heading>
 
             <StatGroup mb={4}>
-              <Stat>
+              <Stat mr={2}>
                 {/* Nombre d’organismes responsables n’ayant pas téléchargé leur(s) liste(s) : 173 (17,5%), pour 292 organismes formateurs et 13962 candidatures (11,5%) */}
                 <StatLabel>Nombre d’organismes responsables n’ayant pas téléchargé leur(s) liste(s)</StatLabel>
                 <StatNumber>
@@ -270,7 +352,7 @@ function StatsPage() {
                 </StatHelpText>
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 {/* Nombre d’organismes responsables n’ayant pas téléchargé la dernière mise à jour de leur(s) liste(s) : 163 (16,5%), pour 283 organismes formateurs et 5682 candidatures (4,7%) */}
                 <StatLabel>
                   Nombre d’organismes responsables n’ayant pas téléchargé la dernière mise à jour de leur(s) liste(s)
@@ -294,7 +376,7 @@ function StatsPage() {
             </StatGroup>
 
             <StatGroup mb={4}>
-              <Stat>
+              <Stat mr={2}>
                 {/* Nombre d’organisme responsables ayant téléchargé l’intégralité des candidatures : 699 (70,7%), pour 1124 organismes formateurs et 83826 candidatures (69%) */}
                 <StatLabel>Nombre d’organisme responsables ayant téléchargé l’intégralité des candidatures</StatLabel>
 
@@ -315,7 +397,7 @@ function StatsPage() {
                 </StatHelpText>
               </Stat>
 
-              <Stat>
+              <Stat mr={2}>
                 {/* Nombre d’organismes responsables sans candidatures : 54 (5,5%), pour 81 organismes formateurs. */}
                 <StatLabel>Nombre d’organismes responsables sans candidatures</StatLabel>
                 <StatNumber>

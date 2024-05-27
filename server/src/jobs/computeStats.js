@@ -2,6 +2,7 @@ const { Responsable, Formateur, Voeu, Relation, Delegue } = require("../common/m
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
 const { UserType } = require("../common/constants/UserType");
+const { UserStatut } = require("../common/constants/UserStatut");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -54,6 +55,100 @@ const computeOrganismesStats = async (filter = {}) => {
         $group: {
           _id: "$etablissement_responsable.siret",
           siret: { $first: "$etablissement_responsable.siret" },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    totalResponsableConfirmed: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $group: {
+          _id: "$etablissement_responsable.siret",
+          siret: { $first: "$etablissement_responsable.siret" },
+        },
+      },
+      {
+        $lookup: {
+          from: Responsable.collection.name,
+          let: {
+            siret_responsable: "$siret",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", UserType.RESPONSABLE] }],
+                },
+              },
+            },
+          ],
+          as: "responsable",
+        },
+      },
+      { $unwind: "$responsable" },
+      {
+        $match: {
+          "responsable.statut": UserStatut.CONFIRME,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    totalResponsableActivated: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $group: {
+          _id: "$etablissement_responsable.siret",
+          siret: { $first: "$etablissement_responsable.siret" },
+        },
+      },
+      {
+        $lookup: {
+          from: Responsable.collection.name,
+          let: {
+            siret_responsable: "$siret",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", UserType.RESPONSABLE] }],
+                },
+              },
+            },
+          ],
+          as: "responsable",
+        },
+      },
+      { $unwind: "$responsable" },
+      {
+        $match: {
+          "responsable.statut": UserStatut.ACTIVE,
         },
       },
       {
@@ -160,6 +255,161 @@ const computeOrganismesStats = async (filter = {}) => {
         },
       },
       { $match: { "uais.1": { $exists: true } } },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    totalDelegue: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: Delegue.collection.name,
+          let: {
+            siret_responsable: "$etablissement_responsable.siret",
+            uai_formateur: "$etablissement_formateur.uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                type: UserType.DELEGUE,
+              },
+            },
+
+            {
+              $unwind: {
+                path: "$relations",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                    { $eq: ["$relations.active", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                root: {
+                  $first: "$$ROOT",
+                },
+              },
+            },
+            {
+              $replaceRoot: {
+                newRoot: "$root",
+              },
+            },
+            {
+              $project: { password: 0 },
+            },
+          ],
+          as: "delegue",
+        },
+      },
+      {
+        $unwind: {
+          path: "$delegue",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      { $group: { _id: "$delegue._id", delegue: { $first: "$delegue" } } },
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    totalDelegueActivated: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: Delegue.collection.name,
+          let: {
+            siret_responsable: "$etablissement_responsable.siret",
+            uai_formateur: "$etablissement_formateur.uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                type: UserType.DELEGUE,
+              },
+            },
+
+            {
+              $unwind: {
+                path: "$relations",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                    { $eq: ["$relations.active", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                root: {
+                  $first: "$$ROOT",
+                },
+              },
+            },
+            {
+              $replaceRoot: {
+                newRoot: "$root",
+              },
+            },
+            {
+              $project: { password: 0 },
+            },
+          ],
+          as: "delegue",
+        },
+      },
+      {
+        $unwind: {
+          path: "$delegue",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      { $group: { _id: "$delegue.username", delegue: { $first: "$delegue" } } },
+      {
+        $match: {
+          "delegue.statut": UserStatut.ACTIVE,
+        },
+      },
       {
         $group: {
           _id: null,

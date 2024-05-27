@@ -35,7 +35,10 @@ async function importRelations(relationsCsv, responsableOverwriteCsv, formateurO
     updated: 0,
     invalid: 0,
     failed: 0,
+    removed: 0,
   };
+
+  const relations = [];
 
   await oleoduc(
     relationsCsv,
@@ -73,6 +76,8 @@ async function importRelations(relationsCsv, responsableOverwriteCsv, formateurO
         if (!uai_formateur?.length || !siret_responsable?.length) {
           throw new Error(`uai_formateur ou siret_responsable invalide`);
         }
+
+        relations.push({ uai_formateur, siret_responsable });
 
         try {
           const responsableOverwrite = responsableOverwriteArray.find(
@@ -144,6 +149,24 @@ async function importRelations(relationsCsv, responsableOverwriteCsv, formateurO
       { parallel: 10 }
     )
   );
+
+  const existingRelations = await Relation.find({});
+
+  for await (const existingRelation of existingRelations) {
+    if (
+      !relations.find(
+        (relation) =>
+          relation.uai_formateur === existingRelation.etablissement_formateur?.uai &&
+          relation.siret_responsable === existingRelation.etablissement_responsable?.siret
+      )
+    ) {
+      logger.warn(
+        `La relation ${existingRelation.etablissement_responsable?.siret} / ${existingRelation.etablissement_formateur?.uai} n'est plus présente dans le fichier d'import`
+      );
+      await Relation.deleteOne({ _id: existingRelation._id });
+      stats.removed++;
+    }
+  }
 
   return stats;
 }
