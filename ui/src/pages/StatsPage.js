@@ -159,8 +159,8 @@ function StatsPage() {
 
               <Stat mr={2}>
                 <StatLabel>
-                  Nombre d’organismes responsables ayant confirmé leur adresse courriel mais n'ayant pas créé leur mot
-                  de passe
+                  Nombre d’organismes responsables ayant confirmé leur adresse courriel mais n'ayant pas encore créé
+                  leur mot de passe
                 </StatLabel>
                 <StatNumber>{organismes?.totalResponsableConfirmed?.toLocaleString()}</StatNumber>
 
@@ -171,7 +171,7 @@ function StatsPage() {
               </Stat>
 
               <Stat mr={2}>
-                <StatLabel>Nombre d’organismes responsables ayant créer leur compte</StatLabel>
+                <StatLabel>Nombre d’organismes responsables ayant finalisé la création de leur compte</StatLabel>
                 <StatNumber>{organismes?.totalResponsableActivated?.toLocaleString()}</StatNumber>
                 <StatHelpText>
                   (soit {+((organismes?.totalResponsableActivated * 100) / organismes?.totalResponsable).toFixed(2)}%
@@ -187,7 +187,10 @@ function StatsPage() {
               </Stat>
 
               <Stat mr={2}>
-                <StatLabel> Nombre de personne ayant reçu une délégation n'ayant pas créé leur mot de passe</StatLabel>
+                <StatLabel>
+                  {" "}
+                  Nombre de personne ayant reçu une délégation mais n'ayant pas encore créé leur mot de passe
+                </StatLabel>
                 <StatNumber>
                   {organismes?.totalDelegue - organismes?.totalDelegueActivated?.toLocaleString()}
                 </StatNumber>
@@ -202,6 +205,8 @@ function StatsPage() {
                   % des personnes déléguées)
                 </StatHelpText>
               </Stat>
+
+              <Stat mr={2}></Stat>
             </StatGroup>
           </Box>
 
@@ -234,6 +239,8 @@ function StatsPage() {
                 </StatLabel>
                 <StatNumber>{organismes?.totalFormateurAvecDelegation?.toLocaleString()}</StatNumber>
               </Stat>
+
+              <Stat mr={2}></Stat>
             </StatGroup>
           </Box>
           <Divider m={8} />
@@ -252,6 +259,8 @@ function StatsPage() {
                 <StatLabel>Nombre d'apprenants</StatLabel>
                 <StatNumber>{voeux?.apprenants?.toLocaleString()}</StatNumber>
               </Stat>
+
+              <Stat mr={2}></Stat>
 
               {/* <Stat mr={2}>
                 <StatLabel>Responsables inconnus</StatLabel>
@@ -373,6 +382,8 @@ function StatsPage() {
                   %)*/}
                 </StatHelpText>
               </Stat>
+
+              <Stat mr={2}></Stat>
             </StatGroup>
 
             <StatGroup mb={4}>
@@ -411,6 +422,8 @@ function StatsPage() {
                   ({+((progresses?.noVoeux?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}%)*/}
                 </StatHelpText>
               </Stat>
+
+              <Stat mr={2}></Stat>
             </StatGroup>
           </Box>
 
