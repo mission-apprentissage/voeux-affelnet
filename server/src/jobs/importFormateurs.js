@@ -87,7 +87,7 @@ async function importFormateurs(relationsCsv, formateursOverwriteCsv, options = 
           let organisme;
 
           if (!found) {
-            const organismes = (
+            let organismes = (
               await catalogueApi
                 .getEtablissements({
                   uai: uai_formateur,
@@ -101,9 +101,35 @@ async function importFormateurs(relationsCsv, formateursOverwriteCsv, options = 
             )?.etablissements;
 
             if (!foundOverwrite && organismes?.length > 1) {
-              logger.error(`Multiples organismes trouvés dans le catalogue pour l'UAI ${uai_formateur}`);
-              stats.failed++;
-              return;
+              const formations = (
+                await catalogueApi.getFormations({
+                  published: true,
+                  catalogue_published: true,
+                  etablissement_formateur_uai: uai_formateur,
+                  affelnet_perimetre: true,
+                })
+              ).formations;
+
+              const sirets = formations.reduce((acc, formation) => {
+                acc.add(formation.etablissement_formateur_siret);
+                return acc;
+              }, new Set());
+
+              if (sirets.size === 1) {
+                organismes = (await catalogueApi.getEtablissements({ siret: [...sirets][0], published: true }))
+                  ?.etablissements;
+              }
+
+              if (organismes?.length !== 1) {
+                logger.error(
+                  `Multiples organismes trouvés dans le catalogue pour l'UAI ${uai_formateur} et pas de siret unique trouvé dans les formations (${[
+                    ...sirets,
+                  ].join(", ")}})`
+                );
+
+                stats.failed++;
+                return;
+              }
             }
 
             if (!foundOverwrite && !organismes?.length) {
@@ -155,9 +181,9 @@ async function importFormateurs(relationsCsv, formateursOverwriteCsv, options = 
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
-          if (foundOverwrite?.Siret) {
-            console.log({ uai_formateur, updates });
-          }
+          // if (foundOverwrite?.Siret) {
+          //   console.log({ uai_formateur, updates });
+          // }
 
           if (res.upsertedCount) {
             stats.created++;

@@ -102,8 +102,8 @@ cli
       const responsableInput = relationsCsv ? createReadStream(relationsCsv) : null;
       const responsableOverwriteInput = responsableOverwriteCsv ? createReadStream(responsableOverwriteCsv) : null;
 
-      console.log("responsableInput", responsableInput);
-      console.log("responsableOverwriteInput", responsableOverwriteInput);
+      // console.log("responsableInput", responsableInput);
+      // console.log("responsableOverwriteInput", responsableOverwriteInput);
 
       return importResponsables(responsableInput, responsableOverwriteInput);
     });
@@ -144,8 +144,8 @@ cli
       const formateurInput = relationsCsv ? createReadStream(relationsCsv) : null;
       const formateurOverwriteInput = formateurOverwriteCsv ? createReadStream(formateurOverwriteCsv) : null;
 
-      console.log("formateurInput", formateurInput);
-      console.log("formateurOverwriteInput", formateurOverwriteInput);
+      // console.log("formateurInput", formateurInput);
+      // console.log("formateurOverwriteInput", formateurOverwriteInput);
 
       return importFormateurs(formateurInput, formateurOverwriteInput);
     });
