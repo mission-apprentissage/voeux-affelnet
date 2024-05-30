@@ -439,6 +439,7 @@ function StatsPage() {
                 <Tr>
                   <Th>Académie</Th>
                   <Th>Nombre d'organismes responsables</Th>
+                  <Th>Ayant finalisé la création de leur compte</Th>
                   <Th>Nombre d'organismes formateurs</Th>
                   <Th>Nombre de candidatures</Th>
                   <Th>Nombre de candidatures téléchargées</Th>
@@ -453,6 +454,7 @@ function StatsPage() {
                     <Tr key={academie.code}>
                       <Td>{academie.nom}</Td>
                       <Td>{organismes?.totalResponsable?.toLocaleString()}</Td>
+                      <Td>{organismes?.totalResponsableActivated?.toLocaleString()}</Td>
                       <Td>{organismes?.totalFormateur?.toLocaleString()}</Td>
                       <Td>{voeux?.total?.toLocaleString()}</Td>
                       <Td>
