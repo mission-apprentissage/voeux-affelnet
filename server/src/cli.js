@@ -224,18 +224,20 @@ cli
 cli
   .command("importVoeux")
   .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
-  .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
+  .argument("<file>", "Le fichier CSV contentant les voeux ")
+  .argument("<overwriteFile", "Le fichier CSV écransant les offres de formation")
   .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
-  .action((file, options) => {
+  .action((file, overwriteFile, options) => {
     runScript(async () => {
-      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+      const inputFile = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
+      const inputOverwriteFile = overwriteFile ? createReadStream(overwriteFile, { encoding: "UTF-8" }) : null;
 
       let importDate = new Date();
       if (options.refresh) {
         importDate = await getLatestImportDate();
       }
 
-      return importVoeux(input, { importDate });
+      return importVoeux(inputFile, inputOverwriteFile, { importDate });
     });
   });
 

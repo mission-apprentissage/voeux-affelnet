@@ -1,13 +1,12 @@
 const { oleoduc, transformData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const { pickBy, isEmpty, uniqBy, pick } = require("lodash");
+const { isEmpty, uniqBy, pick } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
 const { Voeu, Mef, Formateur, Responsable } = require("../common/model");
 const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
-const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
-const { parseCsv } = require("../common/utils/csvUtils");
+const { deepOmitEmpty, flattenObject } = require("../common/utils/objectUtils");
 // const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
 const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
@@ -17,6 +16,7 @@ const {
 } = require("../common/utils/cleMinistereEducatifUtils");
 const { catalogue } = require("./utils/catalogue");
 const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/relation");
+const { fixExtractionVoeux } = require("./utils/extractionVoeux.js");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -119,18 +119,19 @@ const pickAcademie = (academie) => {
   return isEmpty(res) ? null : res;
 };
 
-const parseVoeuxCsv = async (source) => {
+const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
   const { findFormation } = await catalogue();
 
   return oleoduc(
-    source,
-    parseCsv({
-      quote: '"',
-      on_record: (record) => {
-        const filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
-        return trimValues(filtered);
-      },
-    }),
+    // sourceCsv,
+    // parseCsv({
+    //   quote: '"',
+    //   on_record: (record) => {
+    //     const filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
+    //     return trimValues(filtered);
+    //   },
+    // }),
+    await fixExtractionVoeux(sourceCsv, overwriteCsv),
     transformData(async (line) => {
       // logger.info({ line });
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
@@ -138,12 +139,13 @@ const parseVoeuxCsv = async (source) => {
       const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase();
       const cle_ministere_educatif = line["clé ministère éducatif"]?.toUpperCase();
 
-      // TODO : Mettre à jour le nom de colonnes quand on aura reçu le premier fichier
-      const uaiEtablissementFormateur = line["Code UAI étab. formateur"]?.toUpperCase();
-      const uaiEtablissementResponsable = line["Code UAI étab. responsable"]?.toUpperCase();
+      const uaiEtablissementFormateur = line["UAI Établissement formateur"]?.toUpperCase();
+      const uaiEtablissementResponsable = line["UAI Établissement responsable"]?.toUpperCase();
 
       const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase();
-      const academieDuVoeu = pickAcademie(findAcademieByName(line["Académie possédant le dossier élève"]));
+      const academieDuVoeu = pickAcademie(
+        findAcademieByName(line["Académie possédant le dossier élève et l'offre de formation"])
+      );
       const academieOrigine = pickAcademie(findAcademieByUai(uaiCIO || uaiEtablissementOrigine));
       const academieAccueil = pickAcademie(findAcademieByUai(uaiEtablissementAccueil));
 
@@ -284,7 +286,7 @@ const hasAnomaliesOnMandatoryFields = (anomalies) => {
   );
 };
 
-const importVoeux = async (voeuxCsvStream, options = {}) => {
+const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
   const stats = {
     total: 0,
     created: 0,
@@ -303,7 +305,7 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
   const ids = new Set();
 
   await oleoduc(
-    await (async () => await parseVoeuxCsv(voeuxCsvStream))(),
+    await (async () => await parseVoeuxCsv(voeuxCsvStream, overwriteFile))(),
     writeData(
       async (data) => {
         // logger.info({ data });
