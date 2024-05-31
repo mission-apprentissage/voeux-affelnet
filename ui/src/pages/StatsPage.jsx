@@ -454,7 +454,10 @@ function StatsPage() {
                     <Tr key={academie.code}>
                       <Td>{academie.nom}</Td>
                       <Td>{organismes?.totalResponsable?.toLocaleString()}</Td>
-                      <Td>{organismes?.totalResponsableActivated?.toLocaleString()}</Td>
+                      <Td>
+                        {organismes?.totalResponsableActivated?.toLocaleString()} (
+                        {+((organismes?.totalResponsableActivated * 100) / organismes?.totalResponsable).toFixed(2)}%)
+                      </Td>
                       <Td>{organismes?.totalFormateur?.toLocaleString()}</Td>
                       <Td>{voeux?.total?.toLocaleString()}</Td>
                       <Td>

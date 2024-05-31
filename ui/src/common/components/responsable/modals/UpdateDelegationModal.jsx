@@ -27,7 +27,7 @@ import { Formik, Form, Field } from "formik";
 
 import { _delete, _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
-import { FormateurEmail } from "../../responsable/fields/FormateurEmail";
+import { FormateurEmail } from "../fields/FormateurEmail";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
 
 export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) => {
