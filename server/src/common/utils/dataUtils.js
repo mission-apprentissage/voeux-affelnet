@@ -165,7 +165,7 @@ const allFilesAsAlreadyBeenDownloaded = async (user) => {
           )
         )) ?? [];
 
-      if (relations.find((relation) => relation.nomnre_voeux_restant > 0)) {
+      if (relations.find((relation) => relation.nombre_voeux_restant > 0)) {
         return false;
       } else {
         return true;
