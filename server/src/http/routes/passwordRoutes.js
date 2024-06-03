@@ -11,7 +11,7 @@ const { changePassword } = require("../../common/actions/changePassword");
 module.exports = ({ sendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
   const { checkResetPasswordToken } = authMiddleware();
-  const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
+  // const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 
   /**
    * Envoi un mail de récupération de mot de passe
@@ -23,9 +23,9 @@ module.exports = ({ sendEmail }) => {
         username: Joi.string().required(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
-      const user = await getUser(fixed?.replace(/\s/g, "")?.trim());
-      // TODO : à réactiver !
+      // const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
+      const user = await getUser(username?.replace(/\s/g, "")?.trim());
+
       if (!user || !user.password) {
         throw Boom.badRequest(`Utilisateur ${username} invalide`);
       }
