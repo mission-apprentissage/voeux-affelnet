@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Box, Alert, AlertIcon, AlertDescription, Text, Flex } from "@chakra-ui/react";
-import { _get } from "../../../common/httpClient";
+import { _get } from "../../httpClient";
 
 export const AlertMessage = () => {
   const [messages, setMessages] = useState([]);
