@@ -221,7 +221,7 @@ function LoginPage() {
               </Alert>
             ) : (
               <Alert display={"flex"} flexDirection={"column"}>
-                <Text mb={4}>
+                {/* <Text mb={4}>
                   Le service de diffusion des candidatures sera accessible dans la semaine du 21 mai 2024 : un courriel
                   sera envoyé aux organismes responsables des offres pour leur permettre de confirmer l'adresse courriel
                   de la personne habilitée, et créer le mot de passe d'accès au service pour 2024.
@@ -263,6 +263,38 @@ function LoginPage() {
                   <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                     {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
                   </Link>
+                </Text> */}
+
+                <Text mb={4}>
+                  Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, entre 9h00 et 10h20. Les
+                  contacts habilités en ont été informés par courriel : directeur·trices au sein des organismes
+                  responsables, ainsi que les personnes ayant reçu une délégation de droit d’accès au sein des
+                  organismes formateurs.
+                </Text>
+                <Text mb={4}>
+                  Si vous n’avez pas été destinataires de ces listes et que vous pensez qu’il s’agit d’une erreur :
+                  <UnorderedList>
+                    <ListItem>
+                      {" "}
+                      Veuillez vérifier dans vos spams, ou solliciter votre service informatique pour vérification.
+                      L’émetteur du message est :{" "}
+                      <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                      </Link>
+                    </ListItem>
+                    <ListItem>
+                      {" "}
+                      Après vérification des spams, vous pouvez faire un signalement en envoyant un message à{" "}
+                      <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                      </Link>{" "}
+                      en indiquant vos numéros Siret et UAI.
+                    </ListItem>
+                  </UnorderedList>
+                </Text>
+                <Text mb={4}>
+                  En cas de mise à jour de ces listes, une deuxième et dernière version sera diffusée entre le 18 juin
+                  et le 21 juin 2024. Les personnes habilitées en seront également informées par courriel.
                 </Text>
 
                 {/* <Text mb={4}>
