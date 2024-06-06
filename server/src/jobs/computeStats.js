@@ -906,186 +906,186 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    //   nbVoeuxDiffusés: Relation.aggregate([
-    //     {
-    //       $match: {
-    //         ...relationEtablissementsFilter,
-    //         ...relationAcademieFilter,
-    //       },
-    //     },
-    //     {
-    //       $group: {
-    //         _id: null,
-    //         nombre_voeux: { $sum: "$nombre_voeux" },
-    //         nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
-    //       },
-    //     },
-    //     {
-    //       $addFields: {
-    //         total: {
-    //           $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
-    //         },
-    //       },
-    //     },
-    //   ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+    nbVoeuxDiffusés: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          nombre_voeux: { $sum: "$nombre_voeux" },
+          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+        },
+      },
+      {
+        $addFields: {
+          total: {
+            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    //   nbVoeuxDiffusésResponsable: Relation.aggregate([
-    //     {
-    //       $match: {
-    //         ...relationEtablissementsFilter,
-    //         ...relationAcademieFilter,
-    //       },
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: Delegue.collection.name,
-    //         let: {
-    //           uai_formateur: "$etablissement_formateur.uai",
-    //         },
-    //         pipeline: [
-    //           {
-    //             $match: {
-    //               type: UserType.DELEGUE,
-    //             },
-    //           },
+    nbVoeuxDiffusésResponsable: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: Delegue.collection.name,
+          let: {
+            uai_formateur: "$etablissement_formateur.uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                type: UserType.DELEGUE,
+              },
+            },
 
-    //           {
-    //             $unwind: {
-    //               path: "$relations",
-    //               preserveNullAndEmptyArrays: true,
-    //             },
-    //           },
-    //           {
-    //             $match: {
-    //               $expr: {
-    //                 $and: [
-    //                   { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-    //                   { $eq: ["$relations.active", true] },
-    //                 ],
-    //               },
-    //             },
-    //           },
-    //           {
-    //             $group: {
-    //               _id: "$_id",
-    //               root: {
-    //                 $first: "$$ROOT",
-    //               },
-    //             },
-    //           },
-    //           {
-    //             $replaceRoot: {
-    //               newRoot: "$root",
-    //             },
-    //           },
-    //           {
-    //             $project: { password: 0 },
-    //           },
-    //         ],
-    //         as: "delegue",
-    //       },
-    //     },
-    //     {
-    //       $unwind: {
-    //         path: "$delegue",
-    //         preserveNullAndEmptyArrays: true,
-    //       },
-    //     },
-    //     { $match: { delegue: null } },
-    //     {
-    //       $group: {
-    //         _id: null,
-    //         nombre_voeux: { $sum: "$nombre_voeux" },
-    //         nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
-    //       },
-    //     },
-    //     {
-    //       $addFields: {
-    //         total: {
-    //           $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
-    //         },
-    //       },
-    //     },
-    //   ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+            {
+              $unwind: {
+                path: "$relations",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                    { $eq: ["$relations.active", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                root: {
+                  $first: "$$ROOT",
+                },
+              },
+            },
+            {
+              $replaceRoot: {
+                newRoot: "$root",
+              },
+            },
+            {
+              $project: { password: 0 },
+            },
+          ],
+          as: "delegue",
+        },
+      },
+      {
+        $unwind: {
+          path: "$delegue",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $match: { delegue: null } },
+      {
+        $group: {
+          _id: null,
+          nombre_voeux: { $sum: "$nombre_voeux" },
+          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+        },
+      },
+      {
+        $addFields: {
+          total: {
+            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    //   nbVoeuxDiffusésFormateur: Relation.aggregate([
-    //     {
-    //       $match: {
-    //         ...relationEtablissementsFilter,
-    //         ...relationAcademieFilter,
-    //       },
-    //     },
-    //     {
-    //       $lookup: {
-    //         from: Delegue.collection.name,
-    //         let: {
-    //           uai_formateur: "$etablissement_formateur.uai",
-    //         },
-    //         pipeline: [
-    //           {
-    //             $match: {
-    //               type: UserType.DELEGUE,
-    //             },
-    //           },
+    nbVoeuxDiffusésFormateur: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: Delegue.collection.name,
+          let: {
+            uai_formateur: "$etablissement_formateur.uai",
+          },
+          pipeline: [
+            {
+              $match: {
+                type: UserType.DELEGUE,
+              },
+            },
 
-    //           {
-    //             $unwind: {
-    //               path: "$relations",
-    //               preserveNullAndEmptyArrays: true,
-    //             },
-    //           },
-    //           {
-    //             $match: {
-    //               $expr: {
-    //                 $and: [
-    //                   { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-    //                   { $eq: ["$relations.active", true] },
-    //                 ],
-    //               },
-    //             },
-    //           },
-    //           {
-    //             $group: {
-    //               _id: "$_id",
-    //               root: {
-    //                 $first: "$$ROOT",
-    //               },
-    //             },
-    //           },
-    //           {
-    //             $replaceRoot: {
-    //               newRoot: "$root",
-    //             },
-    //           },
-    //           {
-    //             $project: { password: 0 },
-    //           },
-    //         ],
-    //         as: "delegue",
-    //       },
-    //     },
-    //     {
-    //       $unwind: {
-    //         path: "$delegue",
-    //         preserveNullAndEmptyArrays: true,
-    //       },
-    //     },
-    //     { $match: { delegue: { $ne: null } } },
-    //     {
-    //       $group: {
-    //         _id: null,
-    //         nombre_voeux: { $sum: "$nombre_voeux" },
-    //         nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
-    //       },
-    //     },
-    //     {
-    //       $addFields: {
-    //         total: {
-    //           $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
-    //         },
-    //       },
-    //     },
-    //   ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+            {
+              $unwind: {
+                path: "$relations",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                    { $eq: ["$relations.active", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                root: {
+                  $first: "$$ROOT",
+                },
+              },
+            },
+            {
+              $replaceRoot: {
+                newRoot: "$root",
+              },
+            },
+            {
+              $project: { password: 0 },
+            },
+          ],
+          as: "delegue",
+        },
+      },
+      {
+        $unwind: {
+          path: "$delegue",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $match: { delegue: { $ne: null } } },
+      {
+        $group: {
+          _id: null,
+          nombre_voeux: { $sum: "$nombre_voeux" },
+          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+        },
+      },
+      {
+        $addFields: {
+          total: {
+            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
   });
 };
 

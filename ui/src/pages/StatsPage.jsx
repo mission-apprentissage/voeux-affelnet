@@ -295,7 +295,7 @@ function StatsPage() {
                     {
                       +(
                         ((voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur) * 100) /
-                        voeux?.total
+                        voeux?.totalDiffusable
                       ).toFixed(2)
                     }
                     % de l’ensemble des candidatures)
