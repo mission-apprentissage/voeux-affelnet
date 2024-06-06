@@ -252,7 +252,13 @@ function StatsPage() {
               <Stat mr={2}>
                 <StatLabel>Nombre de candidatures</StatLabel>
                 <StatNumber>{voeux?.total?.toLocaleString()}</StatNumber>
-                <StatHelpText>et {voeux?.nbVoeuxNonDiffusable?.toLocaleString()} non diffusables</StatHelpText>
+                <StatHelpText>dont {voeux?.totalRecensement?.toLocaleString()} voeux de recensement</StatHelpText>
+              </Stat>
+
+              <Stat mr={2}>
+                <StatLabel>Nombre de candidatures diffusables</StatLabel>
+                <StatNumber>{voeux?.totalDiffusable?.toLocaleString()}</StatNumber>
+                <StatHelpText>et {voeux?.totalNonDiffusable?.toLocaleString()} non diffusables</StatHelpText>
               </Stat>
 
               <Stat mr={2}>
@@ -260,7 +266,7 @@ function StatsPage() {
                 <StatNumber>{voeux?.apprenants?.toLocaleString()}</StatNumber>
               </Stat>
 
-              <Stat mr={2}></Stat>
+              {/* <Stat mr={2}></Stat> */}
 
               {/* <Stat mr={2}>
                 <StatLabel>Responsables inconnus</StatLabel>

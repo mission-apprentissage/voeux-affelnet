@@ -36,7 +36,7 @@ const computeOrganismesStats = async (filter = {}) => {
 
   const relationEtablissementsFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
-    "etablissement_formateur.siret": { $nin: UAIS_RECENSEMENT },
+    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
   };
 
   const relationAcademieFilter = {
@@ -584,12 +584,14 @@ const computeVoeuxStats = async (filter = {}) => {
   const formateurs = await Formateur.aggregate([{ $project: { uai: "$uai" } }]);
 
   const voeuxFilter = {
+    "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
+    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
     "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
   };
 
   const relationEtablissementsFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
-    "etablissement_formateur.siret": { $nin: UAIS_RECENSEMENT },
+    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
   };
 
   const relationAcademieFilter = {
@@ -597,20 +599,31 @@ const computeVoeuxStats = async (filter = {}) => {
   };
 
   return promiseAllProps({
-    total: Relation.aggregate([
+    total: Voeu.aggregate([
       {
         $match: {
-          ...relationEtablissementsFilter,
-          ...relationAcademieFilter,
+          ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}),
         },
       },
       {
-        $group: {
-          _id: null,
-          total: { $sum: "$nombre_voeux" },
-        },
+        $count: "total",
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    // totalDiffusable: Relation.aggregate([
+    //   {
+    //     $match: {
+    //       ...relationEtablissementsFilter,
+    //       ...relationAcademieFilter,
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: null,
+    //       total: { $sum: "$nombre_voeux" },
+    //     },
+    //   },
+    // ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
     apprenants: Relation.aggregate([
       {
@@ -629,13 +642,17 @@ const computeVoeuxStats = async (filter = {}) => {
           pipeline: [
             {
               $match: {
-                ...voeuxFilter,
-                $expr: {
-                  $and: [
-                    { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-                    { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
-                  ],
-                },
+                $and: [
+                  { ...voeuxFilter },
+                  {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
+                        { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
+                      ],
+                    },
+                  },
+                ],
               },
             },
           ],
@@ -667,10 +684,16 @@ const computeVoeuxStats = async (filter = {}) => {
     responsablesInconnus: Voeu.aggregate([
       {
         $match: {
-          "etablissement_responsable.siret": {
-            $nin: responsables.map((responsable) => responsable.siret),
-          },
-          ...(filter?.["academie.code"] ? { "etablissement_accueil.academie.code": filter["academie.code"] } : {}),
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
+            {
+              "etablissement_responsable.siret": {
+                $exists: true,
+                $nin: responsables.map((responsable) => responsable.siret),
+              },
+            },
+          ],
         },
       },
       {
@@ -683,13 +706,67 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
+    responsablesInconnusNbVoeux: Voeu.aggregate([
+      {
+        $match: {
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
+            {
+              "etablissement_responsable.siret": {
+                $exists: true,
+                $nin: responsables.map((responsable) => responsable.siret),
+              },
+            },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: "$etablissement_responsable.siret",
+          nbVoeux: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$nbVoeux" },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    responsablesUndefinedNbVoeux: Voeu.aggregate([
+      {
+        $match: {
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
+            {
+              "etablissement_responsable.siret": {
+                $exists: false,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $count: "total",
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
     formateursInconnus: Voeu.aggregate([
       {
         $match: {
-          "etablissement_formateur.uai": {
-            $nin: formateurs.map((formateur) => formateur?.uai),
-          },
-          ...(filter?.["academie.code"] ? { "etablissement_accueil.academie.code": filter["academie.code"] } : {}),
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
+            {
+              "etablissement_formateur.uai": {
+                $exists: true,
+                $nin: formateurs.map((formateur) => formateur?.uai),
+              },
+            },
+          ],
         },
       },
       {
@@ -702,25 +779,66 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    nbVoeuxNonDiffusable: Voeu.aggregate([
+    formateursInconnusNbVoeux: Voeu.aggregate([
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}),
-          $or: [
-            { "etablissement_responsable.siret": { $exists: false } },
-            {
-              "etablissement_responsable.siret": {
-                $nin: responsables.map((responsable) => responsable.siret),
-              },
-            },
-            { "etablissement_formateur.uai": { $exists: false } },
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
             {
               "etablissement_formateur.uai": {
+                $exists: true,
                 $nin: formateurs.map((formateur) => formateur?.uai),
               },
             },
           ],
-          "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
+        },
+      },
+      {
+        $group: {
+          _id: "$etablissement_formateur.uai",
+          nbVoeux: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$nbVoeux" },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    formateursUndefinedNbVoeux: Voeu.aggregate([
+      {
+        $match: {
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
+            {
+              "etablissement_formateur.uai": {
+                $exists: false,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $count: "total",
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+    totalRecensement: Voeu.aggregate([
+      {
+        $match: {
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            {
+              $or: [
+                { "etablissement_responsable.siret": { $eq: SIRET_RECENSEMENT } },
+                { "etablissement_formateur.uai": { $in: UAIS_RECENSEMENT } },
+                { "etablissement_accueil.uai": { $in: UAIS_RECENSEMENT } },
+              ],
+            },
+          ],
         },
       },
       {
@@ -731,193 +849,250 @@ const computeVoeuxStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    nbVoeuxDiffusés: Relation.aggregate([
+    totalDiffusable: Voeu.aggregate([
       {
         $match: {
-          ...relationEtablissementsFilter,
-          ...relationAcademieFilter,
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          nombre_voeux: { $sum: "$nombre_voeux" },
-          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
-        },
-      },
-      {
-        $addFields: {
-          total: {
-            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
-          },
-        },
-      },
-    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
 
-    nbVoeuxDiffusésResponsable: Relation.aggregate([
-      {
-        $match: {
-          ...relationEtablissementsFilter,
-          ...relationAcademieFilter,
-        },
-      },
-      {
-        $lookup: {
-          from: Delegue.collection.name,
-          let: {
-            uai_formateur: "$etablissement_formateur.uai",
-          },
-          pipeline: [
+            { "etablissement_responsable.siret": { $exists: true } },
             {
-              $match: {
-                type: UserType.DELEGUE,
+              "etablissement_responsable.siret": {
+                $in: responsables.map((responsable) => responsable.siret),
               },
             },
-
+            { "etablissement_formateur.uai": { $exists: true } },
             {
-              $unwind: {
-                path: "$relations",
-                preserveNullAndEmptyArrays: true,
+              "etablissement_formateur.uai": {
+                $in: formateurs.map((formateur) => formateur?.uai),
               },
-            },
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-                    { $eq: ["$relations.active", true] },
-                  ],
-                },
-              },
-            },
-            {
-              $group: {
-                _id: "$_id",
-                root: {
-                  $first: "$$ROOT",
-                },
-              },
-            },
-            {
-              $replaceRoot: {
-                newRoot: "$root",
-              },
-            },
-            {
-              $project: { password: 0 },
             },
           ],
-          as: "delegue",
         },
       },
       {
-        $unwind: {
-          path: "$delegue",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      { $match: { delegue: null } },
-      {
-        $group: {
-          _id: null,
-          nombre_voeux: { $sum: "$nombre_voeux" },
-          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
-        },
-      },
-      {
-        $addFields: {
-          total: {
-            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
-          },
-        },
+        $count: "total",
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    nbVoeuxDiffusésFormateur: Relation.aggregate([
+    totalNonDiffusable: Voeu.aggregate([
       {
         $match: {
-          ...relationEtablissementsFilter,
-          ...relationAcademieFilter,
-        },
-      },
-      {
-        $lookup: {
-          from: Delegue.collection.name,
-          let: {
-            uai_formateur: "$etablissement_formateur.uai",
-          },
-          pipeline: [
+          $and: [
+            { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
+            { ...voeuxFilter },
             {
-              $match: {
-                type: UserType.DELEGUE,
-              },
-            },
-
-            {
-              $unwind: {
-                path: "$relations",
-                preserveNullAndEmptyArrays: true,
-              },
-            },
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-                    { $eq: ["$relations.active", true] },
-                  ],
+              $or: [
+                { "etablissement_responsable.siret": { $exists: false } },
+                {
+                  "etablissement_responsable.siret": {
+                    $nin: responsables.map((responsable) => responsable.siret),
+                  },
                 },
-              },
-            },
-            {
-              $group: {
-                _id: "$_id",
-                root: {
-                  $first: "$$ROOT",
+                { "etablissement_formateur.uai": { $exists: false } },
+                {
+                  "etablissement_formateur.uai": {
+                    $nin: formateurs.map((formateur) => formateur?.uai),
+                  },
                 },
-              },
-            },
-            {
-              $replaceRoot: {
-                newRoot: "$root",
-              },
-            },
-            {
-              $project: { password: 0 },
+              ],
             },
           ],
-          as: "delegue",
         },
       },
       {
-        $unwind: {
-          path: "$delegue",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      { $match: { delegue: { $ne: null } } },
-      {
-        $group: {
-          _id: null,
-          nombre_voeux: { $sum: "$nombre_voeux" },
-          nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
-        },
-      },
-      {
-        $addFields: {
-          total: {
-            $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
-          },
-        },
+        $count: "total",
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    //   nbVoeuxDiffusés: Relation.aggregate([
+    //     {
+    //       $match: {
+    //         ...relationEtablissementsFilter,
+    //         ...relationAcademieFilter,
+    //       },
+    //     },
+    //     {
+    //       $group: {
+    //         _id: null,
+    //         nombre_voeux: { $sum: "$nombre_voeux" },
+    //         nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+    //       },
+    //     },
+    //     {
+    //       $addFields: {
+    //         total: {
+    //           $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+    //         },
+    //       },
+    //     },
+    //   ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    //   nbVoeuxDiffusésResponsable: Relation.aggregate([
+    //     {
+    //       $match: {
+    //         ...relationEtablissementsFilter,
+    //         ...relationAcademieFilter,
+    //       },
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: Delegue.collection.name,
+    //         let: {
+    //           uai_formateur: "$etablissement_formateur.uai",
+    //         },
+    //         pipeline: [
+    //           {
+    //             $match: {
+    //               type: UserType.DELEGUE,
+    //             },
+    //           },
+
+    //           {
+    //             $unwind: {
+    //               path: "$relations",
+    //               preserveNullAndEmptyArrays: true,
+    //             },
+    //           },
+    //           {
+    //             $match: {
+    //               $expr: {
+    //                 $and: [
+    //                   { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+    //                   { $eq: ["$relations.active", true] },
+    //                 ],
+    //               },
+    //             },
+    //           },
+    //           {
+    //             $group: {
+    //               _id: "$_id",
+    //               root: {
+    //                 $first: "$$ROOT",
+    //               },
+    //             },
+    //           },
+    //           {
+    //             $replaceRoot: {
+    //               newRoot: "$root",
+    //             },
+    //           },
+    //           {
+    //             $project: { password: 0 },
+    //           },
+    //         ],
+    //         as: "delegue",
+    //       },
+    //     },
+    //     {
+    //       $unwind: {
+    //         path: "$delegue",
+    //         preserveNullAndEmptyArrays: true,
+    //       },
+    //     },
+    //     { $match: { delegue: null } },
+    //     {
+    //       $group: {
+    //         _id: null,
+    //         nombre_voeux: { $sum: "$nombre_voeux" },
+    //         nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+    //       },
+    //     },
+    //     {
+    //       $addFields: {
+    //         total: {
+    //           $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+    //         },
+    //       },
+    //     },
+    //   ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    //   nbVoeuxDiffusésFormateur: Relation.aggregate([
+    //     {
+    //       $match: {
+    //         ...relationEtablissementsFilter,
+    //         ...relationAcademieFilter,
+    //       },
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: Delegue.collection.name,
+    //         let: {
+    //           uai_formateur: "$etablissement_formateur.uai",
+    //         },
+    //         pipeline: [
+    //           {
+    //             $match: {
+    //               type: UserType.DELEGUE,
+    //             },
+    //           },
+
+    //           {
+    //             $unwind: {
+    //               path: "$relations",
+    //               preserveNullAndEmptyArrays: true,
+    //             },
+    //           },
+    //           {
+    //             $match: {
+    //               $expr: {
+    //                 $and: [
+    //                   { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+    //                   { $eq: ["$relations.active", true] },
+    //                 ],
+    //               },
+    //             },
+    //           },
+    //           {
+    //             $group: {
+    //               _id: "$_id",
+    //               root: {
+    //                 $first: "$$ROOT",
+    //               },
+    //             },
+    //           },
+    //           {
+    //             $replaceRoot: {
+    //               newRoot: "$root",
+    //             },
+    //           },
+    //           {
+    //             $project: { password: 0 },
+    //           },
+    //         ],
+    //         as: "delegue",
+    //       },
+    //     },
+    //     {
+    //       $unwind: {
+    //         path: "$delegue",
+    //         preserveNullAndEmptyArrays: true,
+    //       },
+    //     },
+    //     { $match: { delegue: { $ne: null } } },
+    //     {
+    //       $group: {
+    //         _id: null,
+    //         nombre_voeux: { $sum: "$nombre_voeux" },
+    //         nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+    //       },
+    //     },
+    //     {
+    //       $addFields: {
+    //         total: {
+    //           $subtract: ["$nombre_voeux", "$nombre_voeux_restant"],
+    //         },
+    //       },
+    //     },
+    //   ]).then((res) => (res.length > 0 ? res[0].total : 0)),
   });
 };
 
 const computeProgressesStats = async (filter = {}) => {
   const relationEtablissementsFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
-    "etablissement_formateur.siret": { $nin: UAIS_RECENSEMENT },
+    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
   };
 
   const relationAcademieFilter = {
