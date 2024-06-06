@@ -708,7 +708,17 @@ const computeVoeuxStats = async (filter = {}) => {
           ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}),
           $or: [
             { "etablissement_responsable.siret": { $exists: false } },
+            {
+              "etablissement_responsable.siret": {
+                $nin: responsables.map((responsable) => responsable.siret),
+              },
+            },
             { "etablissement_formateur.uai": { $exists: false } },
+            {
+              "etablissement_formateur.uai": {
+                $nin: formateurs.map((formateur) => formateur?.uai),
+              },
+            },
           ],
           "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
         },
