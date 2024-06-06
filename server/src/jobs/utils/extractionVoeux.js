@@ -1,4 +1,4 @@
-const logger = require("../../common/logger.js");
+// const logger = require("../../common/logger.js");
 const { compose, transformData } = require("oleoduc");
 const { getCsvContent } = require("./csv.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
@@ -30,10 +30,10 @@ const fixExtractionVoeux = async (originalCsv, overwriteCsv) => {
 
         const overwriteItem = overwriteArray.find((item) => item["Affelnet_id"] === affelnet_id);
         if (overwriteItem) {
-          logger.warn(`Données écrasées pour la formation ${affelnet_id}`, {
-            "SIRET UAI gestionnaire": overwriteItem["Siret responsable"],
-            "UAI Établissement formateur": overwriteItem["UAI formateur"],
-          });
+          // logger.warn(`Données écrasées pour la formation ${affelnet_id}`, {
+          //   "SIRET UAI gestionnaire": overwriteItem["Siret responsable"],
+          //   "UAI Établissement formateur": overwriteItem["UAI formateur"],
+          // });
 
           return {
             ...data,

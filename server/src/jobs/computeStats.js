@@ -705,7 +705,7 @@ const computeVoeuxStats = async (filter = {}) => {
     nbVoeuxNonDiffusable: Voeu.aggregate([
       {
         $match: {
-          ...(filter?.["academie.code"] ? { "etablissement_accueil.academie.code": filter["academie.code"] } : {}),
+          ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}),
           $or: [
             { "etablissement_responsable.siret": { $exists: false } },
             { "etablissement_formateur.uai": { $exists: false } },

@@ -159,23 +159,28 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
         line["SIRET UAI formateur"]
       );
 
-      const academie = academieDuVoeu;
-      const code_offre = line["Code offre de formation (vœu)"];
-      const affelnet_id = `${academie}/${code_offre}`;
-
       let siretResponsable = siretResponsableFromLine;
       let siretFormateur = siretFormateurFromLine;
       let uaiResponsable = uaiEtablissementResponsable;
       let uaiFormateur = uaiEtablissementFormateur;
 
+      const academie = academieDuVoeu?.nom.toUpperCase();
+      const code_offre = line["Code offre de formation (vœu)"];
+      const affelnet_id = `${academie}/${code_offre}`;
+
       if (
         (!siretResponsable || !uaiResponsable || !siretFormateur || !uaiFormateur) &&
         (affelnet_id || cle_ministere_educatif)
       ) {
-        let formation = await findFormation({ cle_ministere_educatif });
+        let formation;
+
+        if (cle_ministere_educatif?.length) {
+          formation = await findFormation({ published: true, cle_ministere_educatif });
+        }
 
         if (!formation) {
-          formation = await findFormation({ affelnet_id });
+          console.log({ affelnet_id });
+          formation = await findFormation({ published: true, affelnet_id });
         }
 
         if (formation) {
