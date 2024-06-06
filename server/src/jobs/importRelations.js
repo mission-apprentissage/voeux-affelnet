@@ -128,6 +128,7 @@ async function importRelations(relationsCsv, responsableOverwriteCsv, formateurO
               "first_date_voeux",
               "last_date_voeux",
               "nombre_voeux",
+              "nombre_voeux_restant",
               "academie",
             ]);
 

@@ -46,17 +46,19 @@ const getNombreVoeux = async ({ siret, uai }) => {
 };
 
 const getNombreVoeuxRestant = async ({ siret, uai }) => {
-  const relation = Relation.findOne({
+  const relation = await Relation.findOne({
     "etablissement_responsable.siret": siret,
     "etablissement_formateur.uai": uai,
   });
 
   const lastDownloadDate = relation.voeux_telechargements?.[relation.voeux_telechargements.length - 1]?.date;
 
+  // console.log("lastDownloadDate", lastDownloadDate);
+
   return (
     (await Voeu.countDocuments({
-      "etablissement_formateur.uai": uai,
       "etablissement_responsable.siret": siret,
+      "etablissement_formateur.uai": uai,
       ...(lastDownloadDate
         ? {
             $expr: {
