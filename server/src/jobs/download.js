@@ -372,13 +372,22 @@ async function download(output, options = {}) {
           delegue,
         }) => {
           if (delegue) {
-            const voeuxTelechargementsDelegue = !!voeux_telechargements.filter(
+            const voeuxTelechargementsDelegue = voeux_telechargements.filter(
               (telechargement) => telechargement.userType === UserType.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
               ? new Date(voeuxTelechargementsDelegue?.[voeuxTelechargementsDelegue?.length - 1]?.date)
               : null;
+
+            console.log({
+              responsable,
+              formateur,
+              delegue,
+              voeux_telechargements,
+              voeuxTelechargementsDelegue,
+              lastVoeuxTelechargementDateByDelegue,
+            });
 
             return number(
               lastVoeuxTelechargementDateByDelegue
@@ -392,7 +401,7 @@ async function download(output, options = {}) {
                 : 0
             );
           } else {
-            const voeuxTelechargementsResponsable = !!voeux_telechargements.filter(
+            const voeuxTelechargementsResponsable = voeux_telechargements.filter(
               (telechargement) => telechargement.userType === UserType.RESPONSABLE
             );
 
@@ -490,7 +499,7 @@ async function download(output, options = {}) {
 
         "Vœux à retélécharger pour mise à jour": async ({ responsable, formateur, delegue, voeux_telechargements }) => {
           if (delegue) {
-            const voeuxTelechargementsDelegue = !!voeux_telechargements.filter(
+            const voeuxTelechargementsDelegue = voeux_telechargements.filter(
               (telechargement) => telechargement.userType === UserType.DELEGUE
             );
 
@@ -519,7 +528,7 @@ async function download(output, options = {}) {
                 : 0
             );
           } else {
-            const voeuxTelechargementsResponsable = !!voeux_telechargements.filter(
+            const voeuxTelechargementsResponsable = voeux_telechargements.filter(
               (telechargement) => telechargement.userType === UserType.RESPONSABLE
             );
 
@@ -557,7 +566,7 @@ async function download(output, options = {}) {
           voeux_telechargements,
         }) => {
           if (delegue) {
-            const voeuxTelechargementsDelegue = !!voeux_telechargements.filter(
+            const voeuxTelechargementsDelegue = voeux_telechargements.filter(
               (telechargement) => telechargement.userType === UserType.DELEGUE
             );
 
@@ -580,7 +589,7 @@ async function download(output, options = {}) {
                   })
             );
           } else {
-            const voeuxTelechargementsResponsable = !!voeux_telechargements.filter(
+            const voeuxTelechargementsResponsable = voeux_telechargements.filter(
               (telechargement) => telechargement.userType === UserType.RESPONSABLE
             );
 
