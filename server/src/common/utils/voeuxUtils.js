@@ -51,7 +51,7 @@ const getNombreVoeuxRestant = async ({ siret, uai }) => {
     "etablissement_formateur.uai": uai,
   });
 
-  const lastDownloadDate = relation.voeux_telechargements?.[relation.voeux_telechargements.length - 1]?.date;
+  const lastDownloadDate = relation?.voeux_telechargements?.[relation?.voeux_telechargements.length - 1]?.date;
 
   // console.log("lastDownloadDate", lastDownloadDate);
 
