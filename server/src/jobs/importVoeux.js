@@ -132,6 +132,27 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
     //   },
     // }),
     await fixExtractionVoeux(sourceCsv, overwriteCsv),
+    // filterData((line) => {
+    //   const academieDuVoeu = pickAcademie(
+    //     findAcademieByName(line["Académie possédant le dossier élève et l'offre de formation"])
+    //   );
+
+    //   const academie = academieDuVoeu?.nom.toUpperCase();
+    //   const code_offre = line["Code offre de formation (vœu)"];
+    //   const affelnet_id = `${academie}/${code_offre}`;
+
+    //   if (affelnet_id === "PARIS/07525500") {
+    //     return true;
+    //     //   console.log({
+    //     //     affelnet_id,
+    //     //     siretResponsable,
+    //     //     siretFormateur,
+    //     //     uaiResponsable,
+    //     //     uaiFormateur,
+    //     //   });
+    //   }
+    // }),
+
     transformData(async (line) => {
       // logger.info({ line });
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
@@ -167,6 +188,16 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const academie = academieDuVoeu?.nom.toUpperCase();
       const code_offre = line["Code offre de formation (vœu)"];
       const affelnet_id = `${academie}/${code_offre}`;
+
+      // if (affelnet_id === "PARIS/07525500") {
+      //   console.log({
+      //     affelnet_id,
+      //     siretResponsable,
+      //     siretFormateur,
+      //     uaiResponsable,
+      //     uaiFormateur,
+      //   });
+      // }
 
       if (
         (!siretResponsable || !uaiResponsable || !siretFormateur || !uaiFormateur) &&

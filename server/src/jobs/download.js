@@ -497,7 +497,7 @@ async function download(output, options = {}) {
         //   }
         // },
 
-        "Vœux à retélécharger pour mise à jour": async ({ responsable, formateur, delegue, voeux_telechargements }) => {
+        "Vœux à télécharger pour mise à jour": async ({ responsable, formateur, delegue, voeux_telechargements }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
               (telechargement) => telechargement.userType === UserType.DELEGUE
