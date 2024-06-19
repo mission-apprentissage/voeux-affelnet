@@ -155,7 +155,7 @@ module.exports = {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
-      subject: `${prefix}Affelnet 2024  – Les listes de candidats à l’apprentissage ont été mises à jour (UAI : ${delegue.uai})`,
+      subject: `${prefix}Affelnet 2024  – Les listes de candidats à l’apprentissage ont été mises à jour`,
       templateFile: getTemplateFile("update_delegue"),
       data: {
         delegue,
