@@ -31,7 +31,7 @@ const fixExtractionVoeux = async (originalCsv, overwriteCsv) => {
         const overwriteItem = overwriteArray.find((item) => item["Affelnet_id"] === affelnet_id);
         if (overwriteItem) {
           // logger.warn(`Données écrasées pour la formation ${affelnet_id}`, {
-          //   "SIRET UAI responsable": overwriteItem["Siret responsable"],
+          //   "SIRET UAI gestionnaire": overwriteItem["Siret responsable"],
           //   "UAI Établissement responsable": overwriteItem["UAI responsable"],
           //   "SIRET UAI formateur": overwriteItem["Siret formateur"],
           //   "UAI Établissement formateur": overwriteItem["UAI formateur"],
@@ -39,7 +39,7 @@ const fixExtractionVoeux = async (originalCsv, overwriteCsv) => {
 
           return {
             ...data,
-            "SIRET UAI responsable": overwriteItem["Siret responsable"],
+            "SIRET UAI gestionnaire": overwriteItem["Siret responsable"],
             "UAI Établissement responsable": overwriteItem["UAI responsable"],
             "SIRET UAI formateur": overwriteItem["Siret formateur"],
             "UAI Établissement formateur": overwriteItem["UAI formateur"],

@@ -42,6 +42,8 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
           return {
             ...data,
             SIRET_UAI_GESTIONNAIRE: overwriteItem["Siret responsable"],
+            UAI_RESPONSABLE: overwriteItem["UAI responsable"],
+            SIRET_UAI_FORMATEUR: overwriteItem["Siret formateur"],
             UAI_FORMATEUR: overwriteItem["UAI formateur"],
           };
         }
@@ -102,9 +104,16 @@ async function streamOffreDeFormation(options = {}) {
         let uai_formateur = data["UAI_FORMATEUR"]?.toUpperCase();
         // let uai_responsable = data["UAI_RESPONSABLE"]?.toUpperCase();
 
+        if (siret_responsable === "19850144700033" || uai_formateur.includes("0851372E")) {
+          console.log({ siret_responsable, uai_formateur });
+        }
         const academie = data["ACADEMIE"];
         const code_offre = data["CODE_OFFRE"];
         const affelnet_id = `${academie}/${code_offre}`;
+
+        if (affelnet_id === "NANTES/APP11565") {
+          console.log({ siret_responsable, uai_formateur, uai_accueil, data });
+        }
 
         if (siret_responsable === SIRET_RECENSEMENT) {
           logger.debug(`${affelnet_id} / Siret recensement détecté pour l'uai_accueil d'accueil ${uai_accueil}`);
@@ -118,7 +127,15 @@ async function streamOffreDeFormation(options = {}) {
             // );
             logger.debug(`${affelnet_id} / Recherche de l'UAI formateur`);
 
-            const formation = await findFormation({ affelnet_id });
+            let formation;
+
+            if (!formation) {
+              formation = await findFormation({ published: true, affelnet_id });
+            }
+
+            if (!formation) {
+              formation = await findFormation({ affelnet_id });
+            }
 
             uai_formateur = formation?.etablissement_formateur_uai;
             // uai_formateur = (
@@ -172,12 +189,12 @@ async function streamOffreDeFormation(options = {}) {
           }
 
           if (
-            !accumulator.filter(
+            !accumulator.find(
               (acc) =>
                 acc.affelnet_id === affelnet_id &&
                 acc.uai_formateur === uai_formateur &&
                 acc.siret_responsable === siret_responsable
-            ).length
+            )
           ) {
             accumulator.push({ uai_formateur, affelnet_id, siret_responsable });
           }
@@ -310,7 +327,7 @@ async function streamOffreDeFormation(options = {}) {
 
             return {
               uai_formateurs: uai_formateur?.toUpperCase(),
-              siret_responsable: formation?.etablissement_gestionnaire_siret,
+              siret_responsable: siret_responsable ?? formation?.etablissement_gestionnaire_siret,
               email_responsable: formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
             };
           } catch (e) {

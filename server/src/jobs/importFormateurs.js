@@ -94,11 +94,25 @@ async function importFormateurs(relationsCsv, formateursOverwriteCsv, options = 
                   ...(foundOverwrite ? { siret: foundOverwrite.Siret } : {}),
                   published: true,
                 })
-                .catch((error) => {
-                  logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le catalogue`);
+                .catch(() => {
+                  // logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le catalogue`);
                   return null;
                 })
             )?.etablissements;
+
+            if (!organismes?.length) {
+              organismes = (
+                await catalogueApi
+                  .getEtablissements({
+                    uai: uai_formateur,
+                    ...(foundOverwrite ? { siret: foundOverwrite.Siret } : {}),
+                  })
+                  .catch(() => {
+                    // logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le catalogue`);
+                    return null;
+                  })
+              )?.etablissements;
+            }
 
             if (!foundOverwrite && organismes?.length > 1) {
               const formations = (

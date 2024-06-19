@@ -73,11 +73,24 @@ async function importResponsables(relationCsv, responsablesOverwriteCsv, options
                 ...(foundOverwrite ? { uai: foundOverwrite.UAI } : {}),
                 published: true,
               })
-              .catch((error) => {
-                logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le catalogue`);
+              .catch(() => {
+                // logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le catalogue`);
 
                 return null;
               });
+
+            if (!organisme) {
+              organisme = await catalogueApi
+                .getEtablissement({
+                  siret: siret_responsable,
+                  ...(foundOverwrite ? { uai: foundOverwrite.UAI } : {}),
+                })
+                .catch(() => {
+                  // logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le catalogue`);
+
+                  return null;
+                });
+            }
 
             if (!foundOverwrite && !organisme) {
               stats.failed++;

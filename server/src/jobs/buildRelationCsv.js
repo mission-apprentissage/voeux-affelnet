@@ -1,5 +1,5 @@
 const {
-  compose,
+  // compose,
   transformIntoCSV,
   oleoduc,
   accumulateData,
@@ -10,11 +10,12 @@ const {
 } = require("oleoduc");
 const { Readable } = require("stream");
 const { streamOffreDeFormation } = require("./utils/offreDeFormation.js");
-const { parseCsv } = require("../common/utils/csvUtils.js");
+// const { parseCsv } = require("../common/utils/csvUtils.js");
+const { getCsvContent } = require("./utils/csv.js");
 
-function parseAdditionalRelationsCsv(csv) {
-  return compose(csv, parseCsv());
-}
+// function parseAdditionalRelationsCsv(csv) {
+//   return compose(csv, parseCsv());
+// }
 
 async function buildRelationCsv({ outputRelations, outputInvalids }, options = {}) {
   const stats = {
@@ -36,14 +37,44 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
     }),
   ];
 
+  let overwriteEmails = new Map();
+
   if (options.additionalRelations) {
     // Format : siret_responsable, email_responsable, uai_formateurs
-    streams.push(parseAdditionalRelationsCsv(options.additionalRelations));
+    // streams.push(parseAdditionalRelationsCsv(options.additionalRelations));
+
+    overwriteEmails = new Map(
+      (await getCsvContent(options.additionalRelations)).map(({ siret_responsable, email_responsable }) => [
+        siret_responsable,
+        email_responsable,
+      ])
+    );
   }
 
   await oleoduc(
     mergeStreams(...streams),
+
     transformData(({ siret_responsable, email_responsable, uai_formateurs }) => {
+      // if (siret_responsable === "19850144700033" || uai_formateurs.includes("0851372E")) {
+      //   console.log({
+      //     siret_responsable,
+      //     email_responsable: email_responsable,
+      //     overwrite_email: overwriteEmails.get(siret_responsable),
+      //     uai_formateurs,
+      //   });
+      // }
+
+      return {
+        siret_responsable,
+        email_responsable: email_responsable ?? overwriteEmails.get(siret_responsable),
+        uai_formateurs,
+      };
+    }),
+    transformData(({ siret_responsable, email_responsable, uai_formateurs }) => {
+      if (siret_responsable === "19850144700033" || uai_formateurs.includes("0851372E")) {
+        console.log({ siret_responsable, email_responsable, uai_formateurs });
+      }
+
       const sanitized_siret_responsable = siret_responsable?.replace(/\s+/g, "")?.toLowerCase();
       const sanitized_email_responsable = email_responsable?.replace(/\s+/g, "");
       const sanitized_uai_formateurs = uai_formateurs

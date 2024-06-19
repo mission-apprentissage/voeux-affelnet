@@ -141,15 +141,8 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
     //   const code_offre = line["Code offre de formation (vœu)"];
     //   const affelnet_id = `${academie}/${code_offre}`;
 
-    //   if (affelnet_id === "PARIS/07525500") {
+    //   if (affelnet_id === "LYON/APP11412") {
     //     return true;
-    //     //   console.log({
-    //     //     affelnet_id,
-    //     //     siretResponsable,
-    //     //     siretFormateur,
-    //     //     uaiResponsable,
-    //     //     uaiFormateur,
-    //     //   });
     //   }
     // }),
 
@@ -172,7 +165,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
 
       const siretResponsableFromLine = getSiretResponsableFromCleMinistereEducatif(
         cle_ministere_educatif,
-        line["SIRET UAI responsable"]
+        line["SIRET UAI gestionnaire"]
       );
 
       const siretFormateurFromLine = getSiretFormateurFromCleMinistereEducatif(
@@ -189,7 +182,9 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const code_offre = line["Code offre de formation (vœu)"];
       const affelnet_id = `${academie}/${code_offre}`;
 
-      // if (affelnet_id === "PARIS/07525500") {
+      console.log({ affelnet_id });
+
+      // if (affelnet_id === "LYON/APP11364") {
       //   console.log({
       //     affelnet_id,
       //     siretResponsable,
@@ -210,8 +205,11 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
         }
 
         if (!formation) {
-          console.log({ affelnet_id });
           formation = await findFormation({ published: true, affelnet_id });
+        }
+
+        if (!formation) {
+          formation = await findFormation({ affelnet_id });
         }
 
         if (formation) {
