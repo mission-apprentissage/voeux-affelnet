@@ -120,12 +120,12 @@ export const Relations = ({ delegue, callback }) => {
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <FormateurLibelle formateur={formateur} />
+                          <ResponsableLibelle responsable={responsable} />
                         </Text>
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <ResponsableLibelle responsable={responsable} />
+                          <FormateurLibelle formateur={formateur} />
                         </Text>
                       </Td>
                       <Td>
