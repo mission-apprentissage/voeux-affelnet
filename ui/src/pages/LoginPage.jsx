@@ -266,10 +266,11 @@ function LoginPage() {
                 </Text> */}
 
                 <Text mb={4}>
-                  Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, entre 9h00 et 10h20. Les
-                  contacts habilités en ont été informés par courriel : directeur·trices au sein des organismes
-                  responsables, ainsi que les personnes ayant reçu une délégation de droit d’accès au sein des
-                  organismes formateurs.
+                  Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, puis ont été mises à jour
+                  le 20 juin (pour tenir compte des ajouts ou suppressions de candidatures, ainsi que des modifications
+                  sur des candidatures préexistantes). Des courriels ont été diffusés aux contacts habilités :
+                  directeur·trices au sein des organismes responsables, ainsi que les personnes ayant reçu une
+                  délégation de droit d’accès au sein des organismes formateurs.
                 </Text>
                 <Text mb={4}>
                   Si vous n’avez pas été destinataires de ces listes et que vous pensez qu’il s’agit d’une erreur :
@@ -291,10 +292,6 @@ function LoginPage() {
                       en indiquant vos numéros Siret et UAI.
                     </ListItem>
                   </UnorderedList>
-                </Text>
-                <Text mb={4}>
-                  En cas de mise à jour de ces listes, une deuxième et dernière version sera diffusée entre le 18 juin
-                  et le 21 juin 2024. Les personnes habilitées en seront également informées par courriel.
                 </Text>
 
                 {/* <Text mb={4}>
