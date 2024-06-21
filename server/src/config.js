@@ -21,7 +21,7 @@ module.exports = {
     },
     resetPasswordToken: {
       jwtSecret: env.get("VOEUX_AFFELNET_AUTH_RESET_PASSWORD_TOKEN_JWT_SECRET").default("91011").asString(),
-      expiresIn: "1h",
+      expiresIn: "2h",
     },
   },
   log: {
