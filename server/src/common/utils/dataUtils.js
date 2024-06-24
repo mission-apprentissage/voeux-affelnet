@@ -190,7 +190,7 @@ const filesHaveUpdate = async (user) => {
           "etablissement_responsable.siret": responsable.siret,
         })) ?? [];
 
-      if (!relations.length || !relations.find((relation) => relation.nombre_voeux_restant > 0)) {
+      if (!relations.length /* || !relations.find((relation) => relation.nombre_voeux_restant > 0)*/) {
         return false;
       }
 
