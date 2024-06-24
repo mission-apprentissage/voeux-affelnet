@@ -25,7 +25,7 @@ describe("passwordRoutes", () => {
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "user1@apprentissage.beta.gouv.fr");
     assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "Réinitialisation du mot de passe (lien valable 1 heure)");
+    assert.strictEqual(emailsSent[0].subject, "Réinitialisation du mot de passe (lien valable 2 heures)");
   });
 
   it("Vérifie qu'un cfa peut faire une demande de réinitialisation de mot de passe en lower case", async () => {

@@ -167,7 +167,7 @@ module.exports = {
   },
   reset_password: (user, token) => {
     return {
-      subject: "Réinitialisation du mot de passe (lien valable 1 heure)",
+      subject: "Réinitialisation du mot de passe (lien valable 2 heures)",
       templateFile: getTemplateFile("reset_password"),
       data: {
         user,
