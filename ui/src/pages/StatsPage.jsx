@@ -466,22 +466,12 @@ function StatsPage() {
                         {+((organismes?.totalResponsableActivated * 100) / organismes?.totalResponsable).toFixed(2)}%)
                       </Td>
                       <Td>{organismes?.totalFormateur?.toLocaleString()}</Td>
-                      <Td>{voeux?.total?.toLocaleString()}</Td>
+                      <Td>{voeux?.nbVoeux?.toLocaleString()}</Td>
                       <Td>
-                        {(voeux?.nbVoeuxDiffusésFormateur + voeux?.nbVoeuxDiffusésResponsable)?.toLocaleString()}{" "}
-                        {voeux?.total > 0 && (
+                        {voeux?.nbVoeuxDiffusés?.toLocaleString()}{" "}
+                        {voeux?.nbVoeux > 0 && (
                           <>
-                            (
-                            <b>
-                              {
-                                +(
-                                  ((voeux?.nbVoeuxDiffusésResponsable + voeux?.nbVoeuxDiffusésFormateur) * 100) /
-                                  voeux?.total
-                                ).toFixed(2)
-                              }
-                              %
-                            </b>
-                            )
+                            (<b>{+((voeux?.nbVoeuxDiffusés * 100) / voeux?.nbVoeux).toFixed(2)}%</b>)
                           </>
                         )}
                       </Td>

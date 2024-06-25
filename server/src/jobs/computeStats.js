@@ -590,8 +590,8 @@ const computeVoeuxStats = async (filter = {}) => {
   };
 
   const relationEtablissementsFilter = {
-    "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
-    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
+    "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT, $in: responsables.map(({ siret }) => siret) },
+    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT, $in: formateurs.map(({ uai }) => uai) },
   };
 
   const relationAcademieFilter = {
@@ -903,6 +903,21 @@ const computeVoeuxStats = async (filter = {}) => {
       },
       {
         $count: "total",
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    nbVoeux: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$nombre_voeux" },
+        },
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 

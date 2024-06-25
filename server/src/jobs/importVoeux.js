@@ -132,20 +132,6 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
     //   },
     // }),
     await fixExtractionVoeux(sourceCsv, overwriteCsv),
-    // filterData((line) => {
-    //   const academieDuVoeu = pickAcademie(
-    //     findAcademieByName(line["Académie possédant le dossier élève et l'offre de formation"])
-    //   );
-
-    //   const academie = academieDuVoeu?.nom.toUpperCase();
-    //   const code_offre = line["Code offre de formation (vœu)"];
-    //   const affelnet_id = `${academie}/${code_offre}`;
-
-    //   if (affelnet_id === "LYON/APP11412") {
-    //     return true;
-    //   }
-    // }),
-
     transformData(async (line) => {
       // logger.info({ line });
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
@@ -181,18 +167,6 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const academie = academieDuVoeu?.nom.toUpperCase();
       const code_offre = line["Code offre de formation (vœu)"];
       const affelnet_id = `${academie}/${code_offre}`;
-
-      console.log({ affelnet_id });
-
-      // if (affelnet_id === "LYON/APP11364") {
-      //   console.log({
-      //     affelnet_id,
-      //     siretResponsable,
-      //     siretFormateur,
-      //     uaiResponsable,
-      //     uaiFormateur,
-      //   });
-      // }
 
       if (
         (!siretResponsable || !uaiResponsable || !siretFormateur || !uaiFormateur) &&
@@ -342,7 +316,6 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
     await (async () => await parseVoeuxCsv(voeuxCsvStream, overwriteFile))(),
     writeData(
       async (data) => {
-        // logger.info({ data });
         const key = JSON.stringify({
           siret: data.etablissement_responsable.siret,
           uai: data.etablissement_formateur.uai,
@@ -453,15 +426,15 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
 
       if (
         await Voeu.countDocuments({
-          "etablissement_formateur.uai": uai,
           "etablissement_responsable.siret": siret,
+          "etablissement_formateur.uai": uai,
           "_meta.import_dates": { $in: [importDate] },
         })
       ) {
         if (
           await Voeu.countDocuments({
-            "etablissement_formateur.uai": uai,
             "etablissement_responsable.siret": siret,
+            "etablissement_formateur.uai": uai,
             "_meta.import_dates": { $nin: [importDate] },
           })
         ) {
