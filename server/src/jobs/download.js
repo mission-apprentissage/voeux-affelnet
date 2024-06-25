@@ -126,6 +126,7 @@ async function download(output, options = {}) {
           formateur: { $exists: true },
         },
       },
+      { $sort: { "academie.code": 1, nombre_voeux: -1 } },
     ]).cursor(),
 
     transformIntoCSV({
@@ -323,7 +324,7 @@ async function download(output, options = {}) {
         //   return ouiNon(first_voeux_date);
         // },
 
-        "Nombre de vœux": async ({ nombre_voeux }) => nombre_voeux,
+        "Nombre de vœux": async ({ nombre_voeux }) => number(nombre_voeux),
 
         "Date du dernier import de vœux": ({ last_date_voeux }) => {
           return date(last_date_voeux);
