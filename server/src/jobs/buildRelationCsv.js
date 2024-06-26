@@ -55,15 +55,6 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
     mergeStreams(...streams),
 
     transformData(({ siret_responsable, email_responsable, uai_formateurs }) => {
-      // if (siret_responsable === "19850144700033" || uai_formateurs.includes("0851372E")) {
-      //   console.log({
-      //     siret_responsable,
-      //     email_responsable: email_responsable,
-      //     overwrite_email: overwriteEmails.get(siret_responsable),
-      //     uai_formateurs,
-      //   });
-      // }
-
       return {
         siret_responsable,
         email_responsable: email_responsable ?? overwriteEmails.get(siret_responsable),
@@ -71,10 +62,6 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
       };
     }),
     transformData(({ siret_responsable, email_responsable, uai_formateurs }) => {
-      if (siret_responsable === "19850144700033" || uai_formateurs.includes("0851372E")) {
-        console.log({ siret_responsable, email_responsable, uai_formateurs });
-      }
-
       const sanitized_siret_responsable = siret_responsable?.replace(/\s+/g, "")?.toLowerCase();
       const sanitized_email_responsable = email_responsable?.replace(/\s+/g, "");
       const sanitized_uai_formateurs = uai_formateurs

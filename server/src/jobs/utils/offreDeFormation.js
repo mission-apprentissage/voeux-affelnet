@@ -104,16 +104,9 @@ async function streamOffreDeFormation(options = {}) {
         let uai_formateur = data["UAI_FORMATEUR"]?.toUpperCase();
         // let uai_responsable = data["UAI_RESPONSABLE"]?.toUpperCase();
 
-        if (siret_responsable === "19850144700033" || uai_formateur.includes("0851372E")) {
-          console.log({ siret_responsable, uai_formateur });
-        }
         const academie = data["ACADEMIE"];
         const code_offre = data["CODE_OFFRE"];
         const affelnet_id = `${academie}/${code_offre}`;
-
-        if (affelnet_id === "NANTES/APP11565") {
-          console.log({ siret_responsable, uai_formateur, uai_accueil, data });
-        }
 
         if (siret_responsable === SIRET_RECENSEMENT) {
           logger.debug(`${affelnet_id} / Siret recensement détecté pour l'uai_accueil d'accueil ${uai_accueil}`);
