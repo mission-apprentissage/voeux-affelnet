@@ -93,12 +93,12 @@ async function sendNotificationEmails(sendEmail, options = {}) {
     // .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      if (await allFilesAsAlreadyBeenDownloaded(user)) {
+      if (!options.force && (await allFilesAsAlreadyBeenDownloaded(user))) {
         // console.log("allFilesAsAlreadyBeenDownloaded");
         return;
       }
 
-      if (await filesHaveUpdate(user)) {
+      if (!options.force && (await filesHaveUpdate(user))) {
         // console.log("filesHaveUpdate");
         return;
       }

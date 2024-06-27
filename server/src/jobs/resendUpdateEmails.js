@@ -150,11 +150,11 @@ async function resendUpdateEmails(resendEmail, options = {}) {
     // .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      if (await allFilesAsAlreadyBeenDownloaded(user)) {
+      if (!options.force && (await allFilesAsAlreadyBeenDownloaded(user))) {
         return;
       }
 
-      if (await !filesHaveUpdate(user)) {
+      if (!options.force && (await !filesHaveUpdate(user))) {
         return;
       }
 
