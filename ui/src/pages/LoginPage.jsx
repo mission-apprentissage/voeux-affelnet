@@ -266,16 +266,13 @@ function LoginPage() {
                 </Text> */}
 
                 <Text mb={4}>
-                  Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, puis ont été mises à jour
-                  le 20 juin pour une partie des organismes. Des courriels ont été diffusés aux contacts habilités :
-                  directeur·trices au sein des organismes responsables, ainsi que les personnes ayant reçu une
+                  Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, puis ont été mises à
+                  jour, selon les organismes, le 20 juin, le 24 juin ou le 27 juin. Des courriels ont été diffusés aux
+                  contacts habilités : directeur·trices au sein des organismes responsables, ou personnes ayant reçu une
                   délégation de droit d’accès au sein des organismes formateurs.
                 </Text>
 
-                <Text mb={4}>
-                  Une dernière mise à jour sera diffusée en début de semaine du 24 juin, les organismes concernés en
-                  seront informés par courriel.
-                </Text>
+                <Text mb={4}>Aucune autre mise à jour ne sera diffusée pour 2024.</Text>
                 <Text mb={4}>
                   Si vous n’avez pas été destinataires de ces listes et que vous pensez qu’il s’agit d’une erreur :
                   <UnorderedList>
