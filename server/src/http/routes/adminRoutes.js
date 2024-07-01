@@ -1,11 +1,11 @@
 const express = require("express");
-const { oleoduc, transformIntoJSON, transformData, compose, transformIntoCSV } = require("oleoduc");
+const { /*oleoduc, transformIntoJSON,*/ compose, transformIntoCSV } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const { sendJsonStream } = require("../utils/httpUtils");
+// const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { User, Gestionnaire, /*Log,*/ Voeu, Formateur } = require("../../common/model");
+const { User, Formateur, Responsable, Delegue, Relation } = require("../../common/model");
 const { getAcademies } = require("../../common/academies");
-const { paginate } = require("../../common/utils/mongooseUtils");
+const { aggregate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
@@ -20,12 +20,149 @@ const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 const sendActivationEmails = require("../../jobs/sendActivationEmails");
 const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history/responsable");
-const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/formateur");
-const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/formateur");
-const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/formateur");
+const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/relation");
+const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/relation");
+const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/relation");
 const { UserType } = require("../../common/constants/UserType");
 const { download } = require("../../jobs/download");
-const { fillFormateur, filterForAcademie, fillGestionnaire } = require("../../common/utils/dataUtils");
+const logger = require("../../common/logger.js");
+const Boom = require("boom");
+
+const lookupRelations = {
+  from: Relation.collection.name,
+  let: { userSiret: "$siret", userUai: "$uai", userType: "$type" },
+  pipeline: [
+    {
+      $match: {
+        $expr: {
+          $or: [
+            {
+              $and: [
+                { $eq: ["$$userType", UserType.FORMATEUR] },
+                { $eq: ["$etablissement_formateur.uai", "$$userUai"] },
+              ],
+            },
+            {
+              $and: [
+                { $eq: ["$$userType", UserType.RESPONSABLE] },
+                { $eq: ["$etablissement_responsable.siret", "$$userSiret"] },
+              ],
+            },
+          ],
+        },
+      },
+    },
+
+    {
+      $lookup: {
+        from: Formateur.collection.name,
+        localField: "etablissement_formateur.uai",
+        foreignField: "uai",
+        pipeline: [
+          {
+            $match: {
+              type: UserType.FORMATEUR,
+            },
+          },
+        ],
+        as: "formateur",
+      },
+    },
+
+    {
+      $lookup: {
+        from: Responsable.collection.name,
+        localField: "etablissement_responsable.siret",
+        foreignField: "siret",
+        pipeline: [
+          {
+            $match: {
+              type: UserType.RESPONSABLE,
+            },
+          },
+        ],
+        as: "responsable",
+      },
+    },
+
+    {
+      $lookup: {
+        from: Delegue.collection.name,
+        let: {
+          siret_responsable: "$etablissement_responsable.siret",
+          uai_formateur: "$etablissement_formateur.uai",
+        },
+        pipeline: [
+          {
+            $match: {
+              type: UserType.DELEGUE,
+            },
+          },
+
+          {
+            $unwind: {
+              path: "$relations",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                  { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                  { $eq: ["$relations.active", true] },
+                ],
+              },
+            },
+          },
+          {
+            $group: {
+              _id: "$_id",
+              root: {
+                $first: "$$ROOT",
+              },
+            },
+          },
+          {
+            $replaceRoot: {
+              newRoot: "$root",
+            },
+          },
+          {
+            $project: { password: 0 },
+          },
+        ],
+        as: "delegue",
+      },
+    },
+
+    {
+      $unwind: {
+        path: "$responsable",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$formateur",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $unwind: {
+        path: "$delegue",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+  ],
+  as: "relations",
+};
+
+const addCountFields = {
+  nombre_voeux: { $sum: "$relations.nombre_voeux" },
+  nombre_voeux_restant: { $sum: "$relations.nombre_voeux_restant" },
+};
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router();
@@ -38,6 +175,9 @@ module.exports = ({ sendEmail, resendEmail }) => {
     return res;
   }
 
+  // const responsableFilter = { type: UserType.ETABLISSEMENT, "etablissements_formateur.0": { $exists: true } };
+  // const formateurFilter = { type: UserType.ETABLISSEMENT, "etablissements_responsable.0": { $exists: true } };
+
   /**
    * USER (ADMIN & ACADEMIE)
    */
@@ -49,19 +189,19 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const { username } = req.user;
       const user = await User.findOne({ username }).lean();
 
-      res.json(user);
+      return res.json(user);
     })
   );
 
   /**
-   * USERS (GESTIONNAIRES & FORMATEURS)
+   * Établissements (RESPONSABLES & FORMATEURS)
    */
 
   /**
-   * Permet de récupérer la liste des utilisateurs
+   * Permet de récupérer la liste des établissements
    */
   router.get(
-    "/api/admin/users",
+    "/api/admin/etablissements",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -78,156 +218,125 @@ module.exports = ({ sendEmail, resendEmail }) => {
         sort: Joi.string().default(JSON.stringify({ type: -1 })),
       }).validateAsync(req.query, { abortEarly: false });
 
-      const regex = ".*" + text + ".*";
+      const regex = "(.*" + text?.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*)+";
       const regexQuery = { $regex: regex, $options: "i" };
 
-      const { find, pagination } = await paginate(
-        User,
+      const pipeline = [
         {
-          $and: [
-            ...(type ? [{ type }] : []),
+          $match: {
+            $and: [
+              {
+                type: type ? type : { $in: [UserType.FORMATEUR, UserType.RESPONSABLE] },
+              },
 
-            {
-              $or: [
-                {
-                  type: "Formateur",
-                  $and: [
-                    {},
-                    ...(text
-                      ? [
-                          {
-                            $or: [
-                              { siret: regexQuery },
-                              { uai: regexQuery },
-                              { raison_sociale: regexQuery },
-                              { email: regexQuery },
-                              {
-                                etablissements: {
-                                  $elemMatch: { siret: regexQuery },
-                                },
-                              },
-                            ],
-                          },
-                        ]
-                      : []),
-
-                    ...(academie || !!defaultAcademies?.length
-                      ? [
-                          {
-                            $or: [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }],
-                          },
-                        ]
-                      : []),
-                  ],
-                },
-                {
-                  type: "Gestionnaire",
-                  $and: [
-                    {},
-                    ...(text
-                      ? [
-                          {
-                            $or: [
-                              { siret: regexQuery },
-                              { uai: regexQuery },
-                              { raison_sociale: regexQuery },
-                              { email: regexQuery },
-                              {
-                                etablissements: {
-                                  $elemMatch: { uai: regexQuery },
-                                },
-                              },
-                              {
-                                etablissements: {
-                                  $elemMatch: { email: regexQuery },
-                                },
-                              },
-                            ],
-                          },
-                        ]
-                      : []),
-
-                    ...(academie || !!defaultAcademies?.length
-                      ? [
-                          {
-                            $or: [
-                              { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
-                              {
-                                etablissements: {
-                                  $elemMatch: { "academie.code": { $in: academie ? [academie] : defaultAcademies } },
-                                },
-                              },
-                            ],
-                          },
-                        ]
-                      : []),
-                  ],
-                },
-              ],
-            },
-          ],
+              // ...(type
+              //   ? // [
+              //     //     {
+              //     //       type: UserType.ETABLISSEMENT,
+              //     //       ...(type === UserType.FORMATEUR ? formateurFilter : {}),
+              //     //       ...(type === UserType.RESPONSABLE ? responsableFilter : {}),
+              //     //     },
+              //     //   ]
+              //     [{ type }]
+              //   : []),
+            ],
+          },
         },
         {
-          page,
-          items_par_page,
-          select: { _id: 0, password: 0 },
-          sort: JSON.parse(sort ?? JSON.stringify({ type: -1 })),
-        }
-      );
+          $lookup: lookupRelations,
+        },
 
-      const stream = oleoduc(
-        find.cursor(),
-        transformData(async (user) => {
-          return {
-            ...(user.type === UserType.GESTIONNAIRE
-              ? {
-                  ...(await fillGestionnaire(user, admin)),
-
-                  formateurs: await Promise.all(
-                    (
-                      await Formateur.find({
-                        uai: {
-                          $in:
-                            user?.etablissements
-                              .filter((etablissement) => filterForAcademie(etablissement, admin))
-                              .map((etablissement) => etablissement.uai) ?? [],
-                        },
-                      }).lean()
-                    ).map((etablissement) => fillFormateur(etablissement, admin))
-                  ),
-                }
-              : {
-                  ...(await fillFormateur(user, admin)),
-
-                  gestionnaires: await Promise.all(
-                    (
-                      await Gestionnaire.find({
-                        siret: {
-                          $in:
-                            user?.etablissements
-                              // .filter((etablissement) => filterForAcademie(etablissement, admin))
-                              .map((etablissement) => etablissement.siret) ?? [],
-                        },
-                      }).lean()
-                    ).map((gestionnaire) => fillGestionnaire(gestionnaire, admin))
-                  ),
-                }),
-          };
-        }),
-        transformIntoJSON({
-          arrayWrapper: {
-            pagination,
+        {
+          $match: {
+            $and: [
+              ...(academie || !!defaultAcademies?.length
+                ? [{ "academie.code": { $in: academie ? [academie] : defaultAcademies } }]
+                : []),
+              {
+                $or: [
+                  {
+                    // Formateur
+                    $and: [
+                      { type: UserType.FORMATEUR },
+                      ...(text
+                        ? [
+                            {
+                              $or: [
+                                { siret: regexQuery },
+                                { uai: regexQuery },
+                                { raison_sociale: regexQuery },
+                                { "relations.delegue.email": regexQuery },
+                                { "relations.etablissement_responsable.siret": regexQuery },
+                                { "relations.etablissement_responsable.uai": regexQuery },
+                              ],
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                  {
+                    // Responsables
+                    $and: [
+                      { type: UserType.RESPONSABLE },
+                      ...(text
+                        ? [
+                            {
+                              $or: [
+                                { siret: regexQuery },
+                                { uai: regexQuery },
+                                { raison_sociale: regexQuery },
+                                { email: regexQuery },
+                                { "relations.delegue.email": regexQuery },
+                                { "relations.etablissement_formateur.siret": regexQuery },
+                                { "relations.etablissement_formateur.uai": regexQuery },
+                              ],
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ],
+              },
+            ],
           },
-          arrayPropertyName: "users",
-        })
-      );
+        },
+        {
+          $addFields: addCountFields,
+        },
+      ];
 
-      return sendJsonStream(stream, res);
+      const { results, pagination } = await aggregate(User, pipeline, {
+        page,
+        items_par_page,
+        select: { _id: 0, password: 0 },
+        sort: JSON.parse(sort ?? JSON.stringify({ type: -1 })),
+        cache: true,
+      });
+
+      res.json({
+        etablissements: results,
+        pagination,
+      });
+
+      // const stream = oleoduc(
+      //   find.cursor(),
+      //   transformIntoJSON({
+      //     arrayWrapper: {
+      //       pagination,
+      //     },
+      //     arrayPropertyName: "etablissements",
+      //   })
+      // );
+
+      // return sendJsonStream(stream, res);
     })
   );
 
+  /**
+   * Permet de récupérer la liste des établissements sous forme de CSV
+   */
   router.get(
-    "/api/admin/users/export.csv",
+    "/api/admin/etablissements/export.csv",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -250,150 +359,264 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   /**
-   * GESTIONNAIRES
+   * RESPONSABLES
    * =============
    */
 
+  /**
+   * Permet de récupérer un responsable
+   */
   router.get(
-    "/api/admin/gestionnaires/:siret",
+    "/api/admin/responsables/:siret",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { username } = req.user;
-      const admin = await User.findOne({ username }).lean();
+      // const { username } = req.user;
+      // const admin = await User.findOne({ username }).lean();
 
       const { siret } = await Joi.object({
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+      const responsable = (
+        await Responsable.aggregate([
+          { $match: { siret } },
+          {
+            $lookup: lookupRelations,
+          },
+          { $addFields: addCountFields },
+        ])
+      )?.[0];
 
-      res.json(await fillGestionnaire(gestionnaire, admin));
+      if (!responsable) {
+        throw Error("Responsable introuvable");
+      }
+
+      // Responsable.populate(responsable, { path: "relations.voeux_telechargements.user", select: "-password" });
+
+      return res.json(responsable);
     })
   );
 
-  router.get(
-    "/api/admin/gestionnaires/:siret/formateurs",
+  // router.get(
+  //   "/api/admin/responsables/:siret/formateurs",
+  //   checkApiToken(),
+  //   checkIsAdmin(),
+  //   tryCatch(async (req, res) => {
+  //     const { username } = req.user;
+  //     const admin = await User.findOne({ username }).lean();
+
+  //     const { siret } = await Joi.object({
+  //       siret: Joi.string().pattern(siretFormat).required(),
+  //     }).validateAsync(req.params, { abortEarly: false });
+
+  //     const responsable = (
+  //       await Responsable.aggregate([
+  //         { $match: { siret } },
+  //         {
+  //           $lookup: lookupRelations,
+  //         },
+  //       ])
+  //     )?.[0];
+
+  //     return res.json(
+  //       await Promise.all(
+  //         responsable?.relations?.map(async (relation) => {
+  //           return await Formateur.aggregate([
+  //             { $match: { uai: relation.etablissement_formateur.uai } },
+  //             { $lookup: lookupRelations },
+  //           ])?.[0];
+  //         }) ?? []
+  //       )
+  //     );
+  //   })
+  // );
+
+  /**
+   * Permet à un administrateur de modifier les paramètres de diffusion d'un responsable à un de ses formateurs associés (ajout / modification)
+   */
+  router.post(
+    "/api/admin/responsables/:siret/delegation",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { username } = req.user;
-      const admin = await User.findOne({ username }).lean();
-
       const { siret } = await Joi.object({
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
+      const { email, uai } = await Joi.object({
+        email: Joi.string().email({ tlds: { allow: false } }),
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.body, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret });
+      const responsable = await Responsable.findOne({ siret }).lean();
+      const formateur = await Formateur.findOne({ uai }).lean();
 
-      if (
-        !gestionnaire?.etablissements
-          .filter((etablissement) => filterForAcademie(etablissement, admin))
-          .filter((e) => e.voeux_date).length === 0
-      ) {
-        return res.json([]);
+      const previousDelegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: {
+            "etablissement_responsable.siret": siret,
+            "etablissement_formateur.uai": uai,
+            active: true,
+          },
+        },
+      });
+
+      // Suppression de la délégation existante si elle existe déjà entre le responsable et le formateur
+
+      if (previousDelegue) {
+        await Delegue.updateOne(
+          {
+            _id: previousDelegue._id,
+          },
+          {
+            $set: {
+              "relations.$[element].active": false,
+            },
+          },
+          {
+            arrayFilters: [
+              { "element.etablissement_responsable.siret": siret, "element.etablissement_formateur.uai": uai },
+            ],
+          }
+        );
       }
 
-      res.json(
-        await Promise.all(
-          gestionnaire?.etablissements
-            .filter((etablissement) => filterForAcademie(etablissement, admin))
-            .map(async (etablissement) => {
-              const formateur = await Formateur.findOne({ uai: etablissement.uai }).lean();
+      const delegue = await Delegue.findOne({ email });
 
-              return {
-                ...formateur,
+      if (
+        !delegue?.relations?.filter(
+          (relation) =>
+            relation.etablissement_responsable.siret === siret && relation.etablissement_formateur.uai === uai
+        ).length
+      ) {
+        await Delegue.updateOne(
+          { email },
+          {
+            $setOnInsert: {
+              username: email,
+              email,
+            },
+            $addToSet: {
+              relations: {
+                etablissement_responsable: {
+                  siret: responsable.siret,
+                  uai: responsable.uai,
+                },
+                etablissement_formateur: {
+                  siret: formateur?.siret,
+                  uai: formateur?.uai,
+                },
+                active: true,
+              },
+            },
+          },
+          {
+            upsert: true,
+            setDefaultsOnInsert: true,
+            runValidators: true,
+            new: true,
+          }
+        );
+      } else {
+        await Delegue.updateOne(
+          { email },
+          {
+            $setOnInsert: {
+              username: email,
+              email,
+            },
+            $set: {
+              "relations.$[element].active": true,
+            },
+          },
+          {
+            upsert: true,
+            setDefaultsOnInsert: true,
+            runValidators: true,
+            new: true,
+            arrayFilters: [
+              { "element.etablissement_responsable.siret": siret, "element.etablissement_formateur.uai": uai },
+            ],
+          }
+        );
+      }
 
-                etablissements: await Promise.all(
-                  formateur?.etablissements
-                    .filter((etablissement) => filterForAcademie(etablissement, admin))
-                    .map(async (etablissement) => {
-                      const voeuxFilter = {
-                        "etablissement_formateur.uai": formateur.uai,
-                        "etablissement_gestionnaire.siret": etablissement.siret,
-                      };
+      if (previousDelegue) {
+        saveDelegationUpdatedByAdmin({ uai, siret, email }, req.user);
+      } else {
+        saveDelegationCreatedByAdmin({ uai, siret, email }, req.user);
+      }
 
-                      const voeux = await Voeu.find(voeuxFilter);
+      const updatedDelegue = await Delegue.findOne({ email });
 
-                      return {
-                        ...etablissement,
+      if (updatedDelegue.statut === UserStatut.EN_ATTENTE) {
+        await Delegue.updateOne({ email }, { $set: { statut: UserStatut.CONFIRME } });
+      }
 
-                        nombre_voeux: etablissement.siret ? await Voeu.countDocuments(voeuxFilter).lean() : 0,
+      const previousActivationEmail = updatedDelegue.emails.find((e) => e.templateName.startsWith("activation_"));
+      previousActivationEmail
+        ? await resendActivationEmails(resendEmail, { username: email, force: true, sender: req.user })
+        : await sendActivationEmails(sendEmail, { username: email, force: true, sender: req.user });
 
-                        first_date_voeux: etablissement.siret
-                          ? voeux
-                              .flatMap((voeu) => voeu._meta.import_dates)
-                              .sort((a, b) => new Date(a) - new Date(b))[0]
-                          : null,
+      logger.info(`Délégation activée (${updatedDelegue.email}) pour le formateur ${uai} et le responsable ${siret}`);
 
-                        last_date_voeux: etablissement.voeux_date /*etablissement.siret
-                        ? voeux.flatMap((voeu) => voeu._meta.import_dates).sort((a, b) => new Date(b) - new Date(a))[0]
-                        : null*/,
-                      };
-                    }) ?? []
-                ),
-              };
-            })
-        )
-      );
+      return res.json(updatedDelegue);
     })
   );
 
   /**
-   * Permet au gestionnaire de modifier les paramètres de diffusion à un de ses formateurs associés
+   * Permet à un administrateur de modifier les paramètres de diffusion d'un responsable à un de ses formateurs associés (suppression)
    */
-  router.put(
-    "/api/admin/gestionnaires/:siret/formateurs/:uai",
+  router.delete(
+    "/api/admin/responsables/:siret/delegation",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { siret, uai } = await Joi.object({
+      const { siret } = await Joi.object({
         siret: Joi.string().pattern(siretFormat).required(),
-        uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.body, { abortEarly: false });
 
-      if (!gestionnaire?.etablissements.filter((etablissements) => etablissements.uai === uai).length === 0) {
-        throw Error("L'UAI n'est pas dans la liste des établissements formateurs liés à votre gestionnaire.");
-      }
-
-      const etablissement = gestionnaire?.etablissements.find((e) => e.uai === uai);
-
-      const etablissements = gestionnaire?.etablissements.map((etablissement) => {
-        if (etablissement.uai === uai) {
-          typeof req.body.email !== "undefined" && (etablissement.email = req.body.email);
-          typeof req.body.diffusionAutorisee !== "undefined" &&
-            (etablissement.diffusionAutorisee = req.body.diffusionAutorisee);
-        }
-        return etablissement;
+      const delegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: {
+            "etablissement_responsable.siret": siret,
+            "etablissement_formateur.uai": uai,
+            active: true,
+          },
+        },
       });
 
-      await Gestionnaire.updateOne({ siret: gestionnaire.siret }, { etablissements });
+      const updateDelegue = await Delegue.updateOne(
+        {
+          relations: {
+            $elemMatch: {
+              "etablissement_responsable.siret": siret,
+              "etablissement_formateur.uai": uai,
+              active: true,
+            },
+          },
+        },
+        {
+          $set: {
+            "relations.$[element].active": false,
+          },
+        },
+        {
+          arrayFilters: [
+            { "element.etablissement_responsable.siret": siret, "element.etablissement_formateur.uai": uai },
+          ],
+        }
+      );
 
-      const formateur = await Formateur.findOne({ uai }).lean();
+      await saveDelegationCancelledByAdmin({ uai, siret, email: delegue?.email }, req.user);
 
-      if (typeof req.body.email !== "undefined" && req.body.diffusionAutorisee === true) {
-        etablissement?.diffusionAutorisee
-          ? await saveDelegationUpdatedByAdmin({ ...formateur, email: req.body.email }, req.user)
-          : await saveDelegationCreatedByAdmin({ ...formateur, email: req.body.email }, req.user);
+      logger.info(`Délégation désactivée (${delegue.email}) pour le formateur ${uai} et le responsable ${siret}`);
 
-        await Formateur.updateOne(
-          { uai },
-          { $set: { statut: UserStatut.CONFIRME, email: req.body.email, password: null } }
-        );
-        const previousActivationEmail = formateur.emails.find((e) => e.templateName.startsWith("activation_"));
-
-        previousActivationEmail
-          ? await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user })
-          : await sendActivationEmails(sendEmail, { username: uai, force: true, sender: req.user });
-      } else if (req.body.diffusionAutorisee === false) {
-        await saveDelegationCancelledByAdmin({ ...formateur, email: formateur.email ?? etablissement.email }, req.user);
-      }
-
-      const updatedGestionnaire = await Gestionnaire.findOne({ siret: gestionnaire.siret });
-
-      res.json(updatedGestionnaire);
+      return res.json(updateDelegue);
     })
   );
 
@@ -401,7 +624,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * Retourne la liste des voeux pour un formateur donné sous forme d'un CSV.
    */
   router.get(
-    "/api/admin/gestionnaires/:siret/formateurs/:uai/voeux",
+    "/api/admin/responsables/:siret/formateurs/:uai/voeux",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -418,8 +641,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
+  /**
+   * Permet de modifier l'adresse courriel d'un responsable (et envoie un courriel pour confirmation de l'adresse courriel)
+   *
+   */
   router.put(
-    "/api/admin/gestionnaires/:siret/setEmail",
+    "/api/admin/responsables/:siret/setEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -428,14 +655,23 @@ module.exports = ({ sendEmail, resendEmail }) => {
         email: Joi.string().email().required(),
       }).validateAsync({ ...req.body, ...req.params }, { abortEarly: false });
 
-      const gestionnaire = await Gestionnaire.findOne({ siret });
+      const responsable = await Responsable.findOne({
+        siret,
+      });
+
+      // const responsable = await Etablissement.findOne({
+      //   ...responsableFilter,
+      //   siret,
+      // });
 
       await changeEmail(siret, email, { auteur: req.user.username });
 
-      await saveAccountEmailUpdatedByAdmin({ siret, email }, gestionnaire.email, req.user);
+      await saveAccountEmailUpdatedByAdmin({ siret, email }, responsable.email, req.user);
 
-      await Gestionnaire.updateOne({ siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
-      const previousConfirmationEmail = gestionnaire.emails.find((e) => e.templateName.startsWith("confirmation_"));
+      await Responsable.updateOne({ siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
+      // await Etablissement.updateOne({ ...responsableFilter, siret }, { $set: { statut: UserStatut.EN_ATTENTE } });
+
+      const previousConfirmationEmail = responsable.emails.find((e) => e.templateName.startsWith("confirmation_"));
 
       previousConfirmationEmail
         ? await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user })
@@ -445,8 +681,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
+  /**
+   * Permet de renvoyer un mail de confirmation à un responsable
+   */
   router.put(
-    "/api/admin/gestionnaires/:siret/resendConfirmationEmail",
+    "/api/admin/responsables/:siret/resendConfirmationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -461,8 +700,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
+  /**
+   * Permet de renvoyer un mail d'activation à un responsable
+   */
   router.put(
-    "/api/admin/gestionnaires/:siret/resendActivationEmail",
+    "/api/admin/responsables/:siret/resendActivationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -477,8 +719,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
+  /**
+   * Permet de renvoyer un mail de notification à un responsable
+   */
   router.put(
-    "/api/admin/gestionnaires/:siret/resendNotificationEmail",
+    "/api/admin/responsables/:siret/resendNotificationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -493,8 +738,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
+  /**
+   * DEPRECATED :
+   * Marque un responsable comme non concerné (permet de ne plus envoyer de courriels à ce responsable)
+   */
   router.put(
-    "/api/admin/gestionnaires/:siret/markAsNonConcerne",
+    "/api/admin/responsables/:siret/markAsNonConcerne",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
@@ -513,76 +762,108 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * =============
    */
 
+  /**
+   * Permet de récupérer un formateur
+   */
   router.get(
     "/api/admin/formateurs/:uai",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { username } = req.user;
-      const admin = await User.findOne({ username }).lean();
+      // const { username } = req.user;
+      // const admin = await User.findOne({ username }).lean();
 
       const { uai } = await Joi.object({
         uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      const formateur = await Formateur.findOne({ uai }).lean();
+      const formateur = (
+        await Formateur.aggregate([
+          { $match: { uai } },
+          {
+            $lookup: lookupRelations,
+          },
+          { $addFields: addCountFields },
+        ])
+      )?.[0];
 
-      res.json(await fillFormateur(formateur, admin));
+      logger.info(formateur);
+
+      if (!formateur) {
+        throw Error("Formateur introuvable");
+      }
+
+      return res.json(formateur);
+
+      // const formateur = await Formateur.findOne({ uai }).lean();
+      // // const formateur = await Etablissement.findOne({ ...formateurFilter, uai }).lean();
+
+      // res.json(await fillFormateur(formateur, admin));
     })
   );
 
-  router.get(
-    "/api/admin/formateurs/:uai/gestionnaires",
-    checkApiToken(),
-    checkIsAdmin(),
-    tryCatch(async (req, res) => {
-      const { username } = req.user;
-      const admin = await User.findOne({ username }).lean();
-
-      const { uai } = await Joi.object({
-        uai: Joi.string().pattern(uaiFormat).required(),
-      }).validateAsync(req.params, { abortEarly: false });
-
-      const formateur = await Formateur.findOne({ uai });
-
-      res.json(
-        await Promise.all(
-          formateur?.etablissements.map(async (etablissement) => {
-            const gestionnaire = await Gestionnaire.findOne({ siret: etablissement.siret }).lean();
-
-            return await fillGestionnaire(gestionnaire, admin);
-          })
-        )
-      );
-    })
-  );
-
+  /**
+   * DELEGUES
+   * =============
+   */
+  /**
+   * Permet de renvoyer un mail d'activation à un délégué
+   */
   router.put(
-    "/api/admin/formateurs/:uai/resendActivationEmail",
+    "/api/admin/delegues/:siret/:uai/resendActivationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { uai } = await Joi.object({
+      const { siret, uai } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
         uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cancelUnsubscription(uai);
-      const stats = await resendActivationEmails(resendEmail, { username: uai, force: true, sender: req.user });
+      const delegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: { "etablissement_responsable.siret": siret, "etablissement_formateur.uai": uai, active: true },
+        },
+      });
+
+      if (!delegue) {
+        throw Boom.notFound();
+      }
+
+      await cancelUnsubscription(delegue.email);
+      const stats = await resendActivationEmails(resendEmail, {
+        username: delegue.username,
+        force: true,
+        sender: req.user,
+      });
 
       return res.json(stats);
     })
   );
 
+  /**
+   * Permet de renvoyer un mail de notification à un délégué
+   */
   router.put(
-    "/api/admin/formateurs/:uai/resendNotificationEmail",
+    "/api/admin/delegues/:siret/:uai/resendNotificationEmail",
     checkApiToken(),
     checkIsAdmin(),
     tryCatch(async (req, res) => {
-      const { uai } = await Joi.object({
+      const { siret, uai } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
         uai: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
-      await cancelUnsubscription(uai);
+      const delegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: { "etablissement_responsable.siret": siret, "etablissement_formateur.uai": uai, active: true },
+        },
+      });
+
+      if (!delegue) {
+        throw Boom.notFound();
+      }
+
+      await cancelUnsubscription(delegue.email);
       const stats = await resendNotificationEmails(resendEmail, { username: uai, force: true, sender: req.user });
 
       return res.json(stats);

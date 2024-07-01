@@ -6,6 +6,7 @@ const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const validators = require("../../common/validators.js");
 const { activateUser } = require("../../common/actions/activateUser");
+const { UserStatut } = require("../../common/constants/UserStatut.js");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -16,7 +17,7 @@ module.exports = () => {
     checkActionToken(),
     tryCatch(async (req, res) => {
       const user = req.user;
-      if (user.statut !== "confirmé") {
+      if (user.statut !== UserStatut.CONFIRME) {
         throw Boom.badRequest(`L'utilisateur ${user.username} est déjà activé`);
       }
 

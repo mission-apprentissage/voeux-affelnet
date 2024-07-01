@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { insertGestionnaire } = require("../utils/fakeData");
+const { insertResponsable } = require("../utils/fakeData");
 const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");
 const { createTestContext } = require("../utils/testUtils");
 const createEmailActions = require("../../src/common/actions/createEmailActions");
@@ -9,8 +9,8 @@ const { User } = require("../../src/common/model");
 describe("sendConfirmationEmails", () => {
   xit("Vérifie qu'on peut envoyer des emails de confirmation", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
-    await insertGestionnaire({
+    await insertResponsable({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
+    await insertResponsable({
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -26,7 +26,7 @@ describe("sendConfirmationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 2);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].replyTo, "candidats-apprentissage@education.gouv.fr");
+    assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[1].to, "test1@apprentissage.beta.gouv.fr");
     assert.ok(sent[1].html.indexOf("Madame, Monsieur,") !== -1);
     assert.strictEqual(
@@ -42,7 +42,7 @@ describe("sendConfirmationEmails", () => {
 
   xit("Vérifie qu'on n'envoie pas d'emails aux utilisateurs déjà contactés pour ce template", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       email: "test@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -66,7 +66,7 @@ describe("sendConfirmationEmails", () => {
 
   xit("Vérifie qu'on n'envoie pas d'emails aux utilisateurs qui se sont désinscrits", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({
+    await insertResponsable({
       email: "test@apprentissage.beta.gouv.fr",
       unsubscribe: true,
     });
@@ -84,8 +84,8 @@ describe("sendConfirmationEmails", () => {
 
   xit("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     const { sendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
-    await insertGestionnaire({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
-    await insertGestionnaire({
+    await insertResponsable({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
+    await insertResponsable({
       email: "test1@apprentissage.beta.gouv.fr",
       emails: [
         {
@@ -112,8 +112,8 @@ describe("sendConfirmationEmails", () => {
 
   xit("Vérifie qu'on peut envoyer un email à un CFA", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
-    await insertGestionnaire({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
-    await insertGestionnaire({
+    await insertResponsable({ username: "11111111100006", email: "test@apprentissage.beta.gouv.fr" });
+    await insertResponsable({
       email: "test1@apprentissage.beta.gouv.fr",
     });
 

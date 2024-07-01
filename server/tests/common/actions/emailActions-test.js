@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { insertUser, insertGestionnaire } = require("../../utils/fakeData");
+const { insertUser, insertResponsable } = require("../../utils/fakeData");
 const { createFakeMailer } = require("../../utils/fakeMailer");
 const { User } = require("../../../src/common/model");
 const createEmailActions = require("../../../src/common/actions/createEmailActions");
@@ -15,7 +15,7 @@ describe("emails", () => {
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].from, "candidats-apprentissage@education.gouv.fr");
+    assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.strictEqual(
       emailsSent[0].subject,
       "Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
@@ -50,11 +50,11 @@ describe("emails", () => {
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].from, "candidats-apprentissage@education.gouv.fr");
+    assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.strictEqual(
       emailsSent[0].subject,
-      // "[Rappel] Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
-      "Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
+      "[Rappel] Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
+      // "Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
     );
     const found = await User.findOne().lean();
     assert.strictEqual(found.emails.length, 1);
@@ -63,8 +63,8 @@ describe("emails", () => {
 
   it("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
     const { sendEmail } = createTestContext();
-    const user1 = await insertGestionnaire({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
-    const user2 = await insertGestionnaire({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
+    const user1 = await insertResponsable({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
+    const user2 = await insertResponsable({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
 
     await sendEmail(user1, "activation_user");
     await sendEmail(user2, "activation_user");

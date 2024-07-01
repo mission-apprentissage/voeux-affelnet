@@ -1,6 +1,6 @@
 const logger = require("../common/logger");
 const { oleoduc, writeData, compose } = require("oleoduc");
-const { Dossier } = require("../common/model/index.js");
+const { Dossier } = require("../common/model");
 const { pick, sortBy } = require("lodash");
 const { omitEmpty, removeDiacritics } = require("../common/utils/objectUtils.js");
 const { findAcademieByDepartement, findAcademieByCodeInsee } = require("../common/academies.js");

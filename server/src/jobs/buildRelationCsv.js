@@ -1,5 +1,5 @@
 const {
-  compose,
+  // compose,
   transformIntoCSV,
   oleoduc,
   accumulateData,
@@ -9,12 +9,13 @@ const {
   transformData,
 } = require("oleoduc");
 const { Readable } = require("stream");
-const { getRelationsFromOffreDeFormation } = require("./utils/getRelationsFromOffreDeFormation.js");
-const { parseCsv } = require("../common/utils/csvUtils.js");
+const { streamOffreDeFormation } = require("./utils/offreDeFormation.js");
+// const { parseCsv } = require("../common/utils/csvUtils.js");
+const { getCsvContent } = require("./utils/csv.js");
 
-function parseAdditionalRelationsCsv(csv) {
-  return compose(csv, parseCsv());
-}
+// function parseAdditionalRelationsCsv(csv) {
+//   return compose(csv, parseCsv());
+// }
 
 async function buildRelationCsv({ outputRelations, outputInvalids }, options = {}) {
   const stats = {
@@ -27,7 +28,7 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
   const invalids = [];
 
   const streams = [
-    await getRelationsFromOffreDeFormation({
+    await streamOffreDeFormation({
       ...options,
       onConflict: (c) => {
         stats.conflicts++;
@@ -36,16 +37,34 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
     }),
   ];
 
+  let overwriteEmails = new Map();
+
   if (options.additionalRelations) {
-    streams.push(parseAdditionalRelationsCsv(options.additionalRelations));
+    // Format : siret_responsable, email_responsable, uai_formateurs
+    // streams.push(parseAdditionalRelationsCsv(options.additionalRelations));
+
+    overwriteEmails = new Map(
+      (await getCsvContent(options.additionalRelations)).map(({ siret_responsable, email_responsable }) => [
+        siret_responsable,
+        email_responsable,
+      ])
+    );
   }
 
   await oleoduc(
     mergeStreams(...streams),
-    transformData(({ siret_gestionnaire, email_gestionnaire, uai_etablissement }) => {
-      const sanitized_siret_gestionnaire = siret_gestionnaire?.replace(/\s+/g, "")?.toLowerCase();
-      const sanitized_email_gestionnaire = email_gestionnaire?.replace(/\s+/g, "");
-      const sanitized_uai_etablissement = uai_etablissement
+
+    transformData(({ siret_responsable, email_responsable, uai_formateurs }) => {
+      return {
+        siret_responsable,
+        email_responsable: email_responsable ?? overwriteEmails.get(siret_responsable),
+        uai_formateurs,
+      };
+    }),
+    transformData(({ siret_responsable, email_responsable, uai_formateurs }) => {
+      const sanitized_siret_responsable = siret_responsable?.replace(/\s+/g, "")?.toLowerCase();
+      const sanitized_email_responsable = email_responsable?.replace(/\s+/g, "");
+      const sanitized_uai_formateurs = uai_formateurs
         ?.replace(/\s+/g, "")
         ?.toUpperCase()
         .split(",")
@@ -53,25 +72,25 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
         .map((uai) => uai.toUpperCase());
 
       return {
-        siret_gestionnaire: sanitized_siret_gestionnaire?.length ? sanitized_siret_gestionnaire : undefined,
-        email_gestionnaire: sanitized_email_gestionnaire?.length ? sanitized_email_gestionnaire : undefined,
-        uai_etablissement: sanitized_uai_etablissement?.length ? sanitized_uai_etablissement : [],
+        siret_responsable: sanitized_siret_responsable?.length ? sanitized_siret_responsable : undefined,
+        email_responsable: sanitized_email_responsable?.length ? sanitized_email_responsable : undefined,
+        uai_formateurs: sanitized_uai_formateurs?.length ? sanitized_uai_formateurs : [],
       };
     }),
     accumulateData(
       async (accumulator, relation) => {
-        const index = accumulator.findIndex((item) => item.siret === relation.siret_gestionnaire);
+        const index = accumulator.findIndex((item) => item.siret_responsable === relation.siret_responsable);
 
         if (index === -1) {
           stats.valid++;
           accumulator.push({
-            siret: relation.siret_gestionnaire,
-            email: relation.email_gestionnaire,
-            etablissements: [...new Set(relation.uai_etablissement)],
+            siret_responsable: relation.siret_responsable,
+            email_responsable: relation.email_responsable,
+            uai_formateurs: [...new Set(relation.uai_formateurs)],
           });
         } else {
-          accumulator[index].etablissements = [
-            ...new Set([...accumulator[index].etablissements, ...relation.uai_etablissement]),
+          accumulator[index].uai_formateurs = [
+            ...new Set([...accumulator[index].uai_formateurs, ...relation.uai_formateurs]),
           ];
         }
         return accumulator;
@@ -80,7 +99,11 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
     ),
     flattenArray(),
     filterData((relation) => {
-      if (!relation.siret?.length || !relation.email?.length || !relation.etablissements?.length) {
+      if (
+        !relation.siret_responsable?.length ||
+        !relation.email_responsable?.length ||
+        !relation.uai_formateurs?.length
+      ) {
         stats.invalid++;
         invalids.push(relation);
         return false;

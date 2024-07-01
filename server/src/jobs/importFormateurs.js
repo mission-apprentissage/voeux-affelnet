@@ -1,59 +1,28 @@
-// TODO :
-// - Appeler referentiel pour récupérer raison_sociale / adresse / cp, etc...
-// - Récupérer UAI formateur à la place du lieu de formation
-
 const { oleoduc, filterData, writeData, accumulateData, flattenArray } = require("oleoduc");
 const Joi = require("@hapi/joi");
-
-const { omitEmpty } = require("../common/utils/objectUtils");
-const logger = require("../common/logger");
-const { Formateur, Gestionnaire } = require("../common/model");
-const { parseCsv } = require("../common/utils/csvUtils");
 const { pick } = require("lodash");
-const { arrayOf } = require("../common/validators");
-const { siretFormat, uaiFormat } = require("../common/utils/format");
+const { diff } = require("deep-object-diff");
+const CatalogueApi = require("../common/api/CatalogueApi");
 const { findAcademieByUai } = require("../common/academies");
-const ReferentielApi = require("../common/api/ReferentielApi");
-const { getNombreVoeux, getVoeuxDate } = require("./countVoeux");
+const { Formateur } = require("../common/model");
+const logger = require("../common/logger");
+const { arrayOf } = require("../common/validators");
+const { parseCsv } = require("../common/utils/csvUtils");
+const { siretFormat, uaiFormat } = require("../common/utils/format");
+const { omitEmpty } = require("../common/utils/objectUtils");
+const { getCsvContent } = require("./utils/csv");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
 const schema = Joi.object({
-  siret: Joi.string().pattern(siretFormat).required(),
-  etablissements: arrayOf(Joi.string().pattern(uaiFormat)).required(),
+  siret_responsable: Joi.string().pattern(siretFormat).required(),
+  uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
-async function buildEtablissements(sirets, formateur) {
-  return Promise.all(
-    [...new Set(sirets)].map(async (siret) => {
-      // const voeu = await Voeu.findOne({ "etablissement_formateur.uai": uai });
+async function importFormateurs(relationsCsv, formateursOverwriteCsv, options = {}) {
+  const catalogueApi = options.catalogueApi || (await new CatalogueApi());
 
-      const gestionnaire = await Gestionnaire.findOne({ siret }).lean();
-
-      if (!gestionnaire) {
-        console.warn(`Gestionnaire ${siret} non trouvé`);
-      }
-      // eslint-disable-next-line
-      const existingEtablissement = formateur?.etablissements?.find((etablissement) => etablissement.siret === siret);
-
-      const voeux_date = await getVoeuxDate({ uai: formateur.uai, siret });
-
-      const nombre_voeux = await getNombreVoeux({ uai: formateur.uai, siret });
-
-      return {
-        siret,
-        uai: gestionnaire?.uai,
-        // ...(voeu ? { voeux_date: voeu._meta.import_dates[voeu._meta.import_dates.length - 1] } : {}),
-        nombre_voeux,
-        voeux_date,
-        academie: gestionnaire?.academie,
-      };
-    })
-  );
-}
-
-async function importFormateurs(formateursCsv, options = {}) {
-  const referentielApi = options.referentielApi || new ReferentielApi();
+  const overwriteArray = await getCsvContent(formateursOverwriteCsv);
 
   const stats = {
     total: 0,
@@ -64,7 +33,7 @@ async function importFormateurs(formateursCsv, options = {}) {
   };
 
   await oleoduc(
-    formateursCsv,
+    relationsCsv,
     parseCsv({
       on_record: (record) => omitEmpty(record),
     }),
@@ -80,18 +49,18 @@ async function importFormateurs(formateursCsv, options = {}) {
       return false;
     }),
     accumulateData(
-      async (accumulator, { siret, etablissements }) => {
-        if (siret === SIRET_RECENSEMENT) {
+      async (accumulator, { siret_responsable, uai_formateurs }) => {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return accumulator;
         }
 
-        etablissements.split(",").forEach((uai) => {
-          if (!accumulator.filter((acc) => acc.uai === uai).length) {
-            accumulator.push({ uai, etablissements: [siret] });
+        uai_formateurs.split(",").forEach((uai_formateur) => {
+          if (!accumulator.filter((acc) => acc.uai_formateur === uai_formateur).length) {
+            accumulator.push({ uai_formateur, siret_responsables: [siret_responsable] });
           } else {
             accumulator = accumulator.map((acc) => {
-              if (acc.uai === uai) {
-                return { ...acc, etablissements: [...new Set([...acc.etablissements, siret])] };
+              if (acc.uai_formateur === uai_formateur) {
+                return { ...acc, siret_responsables: [...new Set([...acc.siret_responsables, siret_responsable])] };
               } else {
                 return acc;
               }
@@ -105,73 +74,152 @@ async function importFormateurs(formateursCsv, options = {}) {
     ),
     flattenArray(),
     writeData(
-      async ({ uai, etablissements }) => {
+      async ({ uai_formateur /*, siret_responsables*/ }) => {
         try {
-          const found = await Formateur.findOne({ uai }).lean();
-          const gestionnaires = await buildEtablissements(etablissements, found ?? { uai });
-          const organismes = (
-            await referentielApi.searchOrganismes({ uais: uai }).catch((error) => {
-              logger.warn(error, `Le formateur ${uai} n'est pas dans le référentiel`);
-              return null;
-            })
-          )?.organismes;
+          const found = await Formateur.findOne({ uai: uai_formateur }).lean();
 
-          if (organismes?.length > 1) {
-            logger.warn(`Multiples organismes trouvés dans le référentiel pour l'UAI ${uai}`);
+          const foundOverwrite = overwriteArray.find((record) => record["UAI"] === uai_formateur);
+
+          if (foundOverwrite) {
+            logger.info(`Formateur ${uai_formateur} trouvé dans le fichier de surcharge`);
           }
 
-          const organisme = organismes[0];
+          let organisme;
+
+          if (!found) {
+            let organismes = (
+              await catalogueApi
+                .getEtablissements({
+                  uai: uai_formateur,
+                  ...(foundOverwrite ? { siret: foundOverwrite.Siret } : {}),
+                  published: true,
+                })
+                .catch(() => {
+                  // logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le catalogue`);
+                  return null;
+                })
+            )?.etablissements;
+
+            if (!organismes?.length) {
+              organismes = (
+                await catalogueApi
+                  .getEtablissements({
+                    uai: uai_formateur,
+                    ...(foundOverwrite ? { siret: foundOverwrite.Siret } : {}),
+                  })
+                  .catch(() => {
+                    // logger.warn(error, `Le formateur ${uai_formateur} n'est pas dans le catalogue`);
+                    return null;
+                  })
+              )?.etablissements;
+            }
+
+            if (!foundOverwrite && organismes?.length > 1) {
+              const formations = (
+                await catalogueApi.getFormations({
+                  published: true,
+                  catalogue_published: true,
+                  etablissement_formateur_uai: uai_formateur,
+                  affelnet_perimetre: true,
+                })
+              ).formations;
+
+              const sirets = formations.reduce((acc, formation) => {
+                acc.add(formation.etablissement_formateur_siret);
+                return acc;
+              }, new Set());
+
+              if (sirets.size === 1) {
+                organismes = (await catalogueApi.getEtablissements({ siret: [...sirets][0], published: true }))
+                  ?.etablissements;
+              }
+
+              if (organismes?.length !== 1) {
+                logger.error(
+                  `Multiples organismes trouvés dans le catalogue pour l'UAI ${uai_formateur} et pas de siret unique trouvé dans les formations (${[
+                    ...sirets,
+                  ].join(", ")}})`
+                );
+
+                stats.failed++;
+                return;
+              }
+            }
+
+            if (!foundOverwrite && !organismes?.length) {
+              logger.error(`Le formateur ${uai_formateur} n'est pas dans le catalogue`);
+              stats.failed++;
+              return;
+            }
+
+            organisme = organismes[0];
+          }
+
+          if (!foundOverwrite?.Siret && !found?.siret && !organisme?.siret) {
+            stats.failed++;
+            logger.error(`Impossible de trouver le siret du formateur ${uai_formateur}`);
+            return;
+          }
+
+          const siret = foundOverwrite?.Siret ?? organisme?.siret ?? found?.siret;
 
           const updates = omitEmpty({
-            etablissements: gestionnaires,
-            siret: organisme?.siret,
-            raison_sociale: organisme?.raison_sociale,
-            adresse: organisme?.adresse?.label,
-            libelle_ville: organisme?.adresse?.localite,
-            academie: pick(findAcademieByUai(uai), ["code", "nom"]),
+            siret,
+            raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
+            adresse: organisme
+              ? [
+                  organisme?.numero_voie,
+                  organisme?.type_voie,
+                  organisme?.nom_voie,
+                  organisme?.code_postal,
+                  organisme?.localite,
+                ]
+                  .filter((value) => !!value)
+                  .join(" ")
+              : found?.adresse,
+            libelle_ville: organisme?.localite ?? found?.libelle_ville,
+            academie: pick(findAcademieByUai(uai_formateur), ["code", "nom"]),
           });
 
+          // console.log({ uai_formateur, updates });
+
           const res = await Formateur.updateOne(
-            { uai },
+            { uai: uai_formateur },
             {
               $setOnInsert: {
-                uai,
-                username: uai,
+                uai: uai_formateur,
+                username: uai_formateur,
               },
               $set: updates,
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
 
+          // if (foundOverwrite?.Siret) {
+          //   console.log({ uai_formateur, updates });
+          // }
+
           if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Formateur ${uai} ajouté`);
+            logger.info(`Formateur ${uai_formateur} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
 
+            const previous = pick(found, ["siret", "raison_sociale", "libelle_ville", "adresse"]);
+
             logger.info(
-              `Formateur ${uai} mis à jour \n${JSON.stringify(
-                {
-                  previous: pick(found, [
-                    "etablissements",
-                    "raison_sociale",
-                    "libelle_ville",
-                    "adresse",
-                    "cp",
-                    "commune" /*, "academie"*/,
-                  ]),
-                  updates,
-                },
+              `Formateur ${uai_formateur} / ${updates?.siret} mis à jour \n${JSON.stringify(
+                diff(previous, updates),
                 null,
                 2
               )}`
             );
           } else {
-            logger.trace(`Formateur ${uai} déjà à jour`);
+            logger.trace(`Formateur ${uai_formateur} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter le formateur ${uai}`, error);
+          logger.error(`Impossible de traiter le formateur ${uai_formateur}`, error);
         }
       },
       { parallel: 10 }

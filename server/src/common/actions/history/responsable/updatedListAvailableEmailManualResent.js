@@ -1,8 +1,8 @@
 const { ResponsableActions } = require("../../../constants/History");
-const { Gestionnaire } = require("../../../model");
+const { Responsable } = require("../../../model");
 
 const saveUpdatedListAvailableEmailManualResent = async ({ siret, email }, admin) => {
-  await Gestionnaire.updateOne(
+  await Responsable.updateOne(
     { siret },
     {
       $push: {

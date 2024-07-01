@@ -1,21 +1,22 @@
 const { oleoduc, transformData, writeData } = require("oleoduc");
 const Joi = require("@hapi/joi");
-const { pickBy, isEmpty, uniqBy, pick } = require("lodash");
+const { isEmpty, uniqBy, pick } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
-const { Voeu, Mef } = require("../common/model");
+const { Voeu, Mef, Formateur, Responsable } = require("../common/model");
 const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
-const { deepOmitEmpty, trimValues, flattenObject } = require("../common/utils/objectUtils");
-const { parseCsv } = require("../common/utils/csvUtils");
+const { deepOmitEmpty, flattenObject } = require("../common/utils/objectUtils");
 // const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
 const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
-const { getSiretGestionnaireFromCleMinistereEducatif } = require("../common/utils/cleMinistereEducatifUtils");
+const {
+  getSiretResponsableFromCleMinistereEducatif,
+  getSiretFormateurFromCleMinistereEducatif,
+} = require("../common/utils/cleMinistereEducatifUtils");
 const { catalogue } = require("./utils/catalogue");
-const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/formateur");
-const { referentiel } = require("./utils/referentiel");
-const { countVoeux } = require("./countVoeux");
+const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/relation");
+const { fixExtractionVoeux } = require("./utils/extractionVoeux.js");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -75,10 +76,12 @@ const schema = Joi.object({
     academie: academieValidationSchema,
   }).required(),
   etablissement_formateur: Joi.object({
+    siret: Joi.string().pattern(siretFormat),
     uai: Joi.string().pattern(uaiFormat),
   }).required(),
-  etablissement_gestionnaire: Joi.object({
+  etablissement_responsable: Joi.object({
     siret: Joi.string().pattern(siretFormat),
+    uai: Joi.string().pattern(siretFormat),
   }).required(),
 });
 
@@ -116,50 +119,90 @@ const pickAcademie = (academie) => {
   return isEmpty(res) ? null : res;
 };
 
-const parseVoeuxCsv = async (source) => {
-  const { findFormateurUai, findGestionnaireSiretAndEmail } = await catalogue();
-  const { findSiretResponsableReferentiel } = await referentiel();
+const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
+  const { findFormation } = await catalogue();
 
   return oleoduc(
-    source,
-    parseCsv({
-      quote: '"',
-      on_record: (record) => {
-        const filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
-        return trimValues(filtered);
-      },
-    }),
+    // sourceCsv,
+    // parseCsv({
+    //   quote: '"',
+    //   on_record: (record) => {
+    //     const filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
+    //     return trimValues(filtered);
+    //   },
+    // }),
+    await fixExtractionVoeux(sourceCsv, overwriteCsv),
     transformData(async (line) => {
       // logger.info({ line });
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
       const uaiEtablissementOrigine = line["Code UAI étab. origine"]?.toUpperCase();
       const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase();
+      const cle_ministere_educatif = line["clé ministère éducatif"]?.toUpperCase();
+
+      const uaiEtablissementFormateur = line["UAI Établissement formateur"]?.toUpperCase();
+      const uaiEtablissementResponsable = line["UAI Établissement responsable"]?.toUpperCase();
+
       const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase();
-      const academieDuVoeu = pickAcademie(findAcademieByName(line["Académie possédant le dossier élève"]));
+      const academieDuVoeu = pickAcademie(
+        findAcademieByName(line["Académie possédant le dossier élève et l'offre de formation"])
+      );
       const academieOrigine = pickAcademie(findAcademieByUai(uaiCIO || uaiEtablissementOrigine));
       const academieAccueil = pickAcademie(findAcademieByUai(uaiEtablissementAccueil));
 
-      const siretGestionnaireFromLine = getSiretGestionnaireFromCleMinistereEducatif(
-        line["clé ministère éducatif"],
+      const siretResponsableFromLine = getSiretResponsableFromCleMinistereEducatif(
+        cle_ministere_educatif,
         line["SIRET UAI gestionnaire"]
       );
 
-      const siretGestionnaire = siretGestionnaireFromLine?.length
-        ? siretGestionnaireFromLine
-        : await findGestionnaireSiretAndEmail({
-            uai: uaiEtablissementAccueil,
-            siretGestionnaire: siretGestionnaireFromLine,
-            cleMinistereEducatif: line["clé ministère éducatif"],
-          })?.formations?.[0]?.etablissement_gestionnaire_siret;
+      const siretFormateurFromLine = getSiretFormateurFromCleMinistereEducatif(
+        cle_ministere_educatif,
+        line["SIRET UAI formateur"]
+      );
 
-      const uaiFormateur =
-        (
-          await findFormateurUai({
-            uai: uaiEtablissementAccueil,
-            cleMinistereEducatif: line["clé ministère éducatif"],
-            siretGestionnaire: siretGestionnaire,
-          })
-        )?.formations?.[0]?.etablissement_formateur_uai ?? uaiEtablissementAccueil;
+      let siretResponsable = siretResponsableFromLine;
+      let siretFormateur = siretFormateurFromLine;
+      let uaiResponsable = uaiEtablissementResponsable;
+      let uaiFormateur = uaiEtablissementFormateur;
+
+      const academie = academieDuVoeu?.nom.toUpperCase();
+      const code_offre = line["Code offre de formation (vœu)"];
+      const affelnet_id = `${academie}/${code_offre}`;
+
+      if (
+        (!siretResponsable || !uaiResponsable || !siretFormateur || !uaiFormateur) &&
+        (affelnet_id || cle_ministere_educatif)
+      ) {
+        let formation;
+
+        if (cle_ministere_educatif?.length) {
+          formation = await findFormation({ published: true, cle_ministere_educatif });
+        }
+
+        if (!formation) {
+          formation = await findFormation({ published: true, affelnet_id });
+        }
+
+        if (!formation) {
+          formation = await findFormation({ affelnet_id });
+        }
+
+        if (formation) {
+          siretResponsable ??= formation.etablissement_gestionnaire_siret;
+          uaiResponsable ??= formation.etablissement_gestionnaire_uai;
+          siretFormateur ??= formation.etablissement_formateur_siret;
+          uaiFormateur ??= formation.etablissement_formateur_uai;
+        }
+      }
+
+      if (!uaiResponsable || !siretFormateur) {
+        const responsable = await Responsable.findOne({ siret: siretResponsable }).lean();
+        const formateur = await Formateur.findOne({ uai: uaiFormateur }).lean();
+
+        siretResponsable ??= responsable?.siret;
+        uaiResponsable ??= responsable?.uai;
+        siretFormateur ??= formateur?.siret;
+        uaiFormateur ??= formateur?.uai;
+      }
 
       return deepOmitEmpty({
         academie: academieDuVoeu,
@@ -187,11 +230,11 @@ const parseVoeuxCsv = async (source) => {
           email_2: line["Mail responsable 2"],
         },
         formation: {
-          code_affelnet: line["Code offre de formation (vœu)"],
+          code_affelnet: code_offre,
           mef,
           code_formation_diplome,
           libelle: line["Libellé formation"],
-          cle_ministere_educatif: line["clé ministère éducatif"],
+          cle_ministere_educatif,
         },
         etablissement_origine: {
           uai: uaiEtablissementOrigine,
@@ -208,10 +251,12 @@ const parseVoeuxCsv = async (source) => {
           academie: academieAccueil || academieDuVoeu,
         },
         etablissement_formateur: {
+          siret: siretFormateur,
           uai: uaiFormateur,
         },
-        etablissement_gestionnaire: {
-          siret: siretGestionnaire ?? (await findSiretResponsableReferentiel(uaiFormateur)),
+        etablissement_responsable: {
+          siret: siretResponsable,
+          uai: uaiResponsable,
         },
       });
     }),
@@ -243,13 +288,13 @@ const hasAnomaliesOnMandatoryFields = (anomalies) => {
         "formation.code_formation_diplome",
         "etablissement_accueil.uai",
         "etablissement_formateur.uai",
-        "etablissement_gestionnaire.siret",
+        "etablissement_responsable.siret",
       ]
     ).length > 0
   );
 };
 
-const importVoeux = async (voeuxCsvStream, options = {}) => {
+const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
   const stats = {
     total: 0,
     created: 0,
@@ -268,12 +313,11 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
   const ids = new Set();
 
   await oleoduc(
-    await (async () => await parseVoeuxCsv(voeuxCsvStream))(),
+    await (async () => await parseVoeuxCsv(voeuxCsvStream, overwriteFile))(),
     writeData(
       async (data) => {
-        // logger.info({ data });
         const key = JSON.stringify({
-          siret: data.etablissement_gestionnaire.siret,
+          siret: data.etablissement_responsable.siret,
           uai: data.etablissement_formateur.uai,
         });
 
@@ -338,7 +382,7 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
             }
 
             // await markVoeuxAsAvailable(
-            //   { siret: data.etablissement_gestionnaire.siret, uai: data.etablissement_formateur.uai },
+            //   { siret: data.etablissement_responsable.siret, uai: data.etablissement_formateur.uai },
             //   importDate
             // );
           }
@@ -371,28 +415,26 @@ const importVoeux = async (voeuxCsvStream, options = {}) => {
     );
   }
 
-  await countVoeux();
-
   await Promise.all(
     [...relations].map(async (relation) => {
       const { siret, uai } = JSON.parse(relation);
 
       const nombre_voeux = await Voeu.countDocuments({
         "etablissement_formateur.uai": uai,
-        "etablissement_gestionnaire.siret": siret,
+        "etablissement_responsable.siret": siret,
       });
 
       if (
         await Voeu.countDocuments({
+          "etablissement_responsable.siret": siret,
           "etablissement_formateur.uai": uai,
-          "etablissement_gestionnaire.siret": siret,
           "_meta.import_dates": { $in: [importDate] },
         })
       ) {
         if (
           await Voeu.countDocuments({
+            "etablissement_responsable.siret": siret,
             "etablissement_formateur.uai": uai,
-            "etablissement_gestionnaire.siret": siret,
             "_meta.import_dates": { $nin: [importDate] },
           })
         ) {

@@ -1,15 +1,15 @@
 const { ResponsableActions } = require("../../../constants/History");
-const { Gestionnaire } = require("../../../model");
+const { Responsable } = require("../../../model");
 
-const saveAccountEmailUpdatedByAccount = async ({ siret, email }, old_email) => {
-  await Gestionnaire.updateOne(
-    { siret },
+const saveAccountEmailUpdatedByAccount = async ({ _id }, new_email, old_email) => {
+  await Responsable.updateOne(
+    { _id },
     {
       $push: {
         histories: {
           action: ResponsableActions.ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT,
           variables: {
-            new_email: email,
+            new_email,
             old_email,
           },
         },

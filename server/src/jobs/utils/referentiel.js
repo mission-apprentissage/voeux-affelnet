@@ -4,18 +4,18 @@ const logger = require("../../common/logger.js");
 const referentiel = async () => {
   const referentielApi = new ReferentielApi();
 
-  const findEmailReferentielCache = new Map();
-  const findSiretResponsableReferentielCache = new Map();
+  const findEmailCache = new Map();
+  const findSiretResponsableCache = new Map();
 
   return {
-    findEmailReferentiel: async (siret) => {
-      logger.debug(`findEmailReferentiel ${siret}`);
+    findEmail: async (siret) => {
+      logger.debug(`referentiel > findEmail ${siret}`);
 
       if (!siret || !siret?.length) {
         return null;
       }
-      if (findEmailReferentielCache.has(siret)) {
-        return findEmailReferentielCache.get(siret);
+      if (findEmailCache.has(siret)) {
+        return findEmailCache.get(siret);
       }
 
       try {
@@ -25,23 +25,23 @@ const referentiel = async () => {
           return organisme?.contacts.find((c) => c.confirmé === true)?.email || organisme?.contacts[0]?.email;
         })();
 
-        findEmailReferentielCache.set(siret, result);
+        findEmailCache.set(siret, result);
         return result;
       } catch (e) {
-        logger.error(e, `Une erreur est survenue lors de l'appel au référentiel pour le siret ${siret}`);
+        logger.error(e, `referentiel > findEmail / Une erreur est survenue lors de l'appel pour le siret ${siret}`);
         return null;
       }
     },
 
-    findSiretResponsableReferentiel: async (uai) => {
-      logger.debug(`findSiretResponsableReferentiel ${uai}`);
+    findSiretResponsable: async (uai) => {
+      logger.debug(`referentiel > findSiretResponsable ${uai}`);
 
       if (!uai || !uai?.length) {
         return null;
       }
 
-      if (findSiretResponsableReferentielCache.has(uai)) {
-        return findSiretResponsableReferentielCache.get(uai);
+      if (findSiretResponsableCache.has(uai)) {
+        return findSiretResponsableCache.get(uai);
       }
 
       try {
@@ -49,7 +49,7 @@ const referentiel = async () => {
           let { organismes } = await referentielApi.searchOrganismes({ uais: uai });
 
           if (organismes.length === 0) {
-            logger.warn(`Impossible de trouver l'organisme ${uai} dans le référentiel`);
+            logger.warn(`referentiel > findSiretResponsable : Impossible de trouver l'organisme ${uai}`);
             return null;
           }
 
@@ -64,11 +64,14 @@ const referentiel = async () => {
           return responsable.siret;
         })();
 
-        findSiretResponsableReferentielCache.set(uai, result);
+        findSiretResponsableCache.set(uai, result);
 
         return result;
       } catch (e) {
-        logger.error(e, `Une erreur est survenue lors de l'appel au référentiel pour l'UAI ${uai}`);
+        logger.error(
+          e,
+          `referentiel > findSiretResponsable : Une erreur est survenue lors de l'appel au référentiel pour l'UAI ${uai}`
+        );
         return null;
       }
     },

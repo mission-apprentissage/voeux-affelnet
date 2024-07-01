@@ -1,7 +1,7 @@
 const { omit } = require("lodash");
 const assert = require("assert");
 const { createAdmin } = require("../../src/jobs/createAdmin.js");
-const { User } = require("../../src/common/model/index.js");
+const { User } = require("../../src/common/model");
 
 describe("createAdmin", () => {
   it("Vérifie qu'on peut créer un admin", async () => {

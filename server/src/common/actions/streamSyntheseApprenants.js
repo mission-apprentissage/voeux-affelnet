@@ -1,12 +1,11 @@
-const { Voeu } = require("../model/index.js");
+const { Voeu } = require("../model");
 const { compose, transformData } = require("oleoduc");
 const { findDossiers } = require("./findDossiers.js");
 const { capitalizeFirstLetter } = require("../utils/stringUtils.js");
-const { uniq } = require("lodash");
 const { ouiNon } = require("../utils/csvUtils.js");
 
 function getJeuneStatut(statuts) {
-  const array = uniq(statuts);
+  const array = [...new Set(statuts)];
   return ouiNon(array.includes(true));
 }
 

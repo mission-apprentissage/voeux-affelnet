@@ -1,10 +1,10 @@
-const _ = require("lodash");
+const { isEmpty } = require("lodash");
 const logger = require("../../common/logger");
 const config = require("../../config");
 const { init, captureException, configureScope } = require("@sentry/node");
 
 module.exports = () => {
-  const isEnabled = !_.isEmpty(config.sentry.dsn);
+  const isEnabled = !isEmpty(config.sentry.dsn);
 
   if (isEnabled) {
     init({ dsn: config.sentry.dsn, environment: config.env, tracesSampleRate: 1.0 });

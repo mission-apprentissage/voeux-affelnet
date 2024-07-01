@@ -1,9 +1,12 @@
 module.exports = {
   User: require("./User"),
   Alert: require("./Alert"),
-  Gestionnaire: require("./Gestionnaire"),
+  // Etablissement: require("./Etablissement"),
+  Responsable: require("./Responsable"),
   Csaio: require("./Csaio"),
+  Relation: require("./Relation"),
   Formateur: require("./Formateur"),
+  Delegue: require("./Delegue"),
   Academie: require("./Academie"),
   Formation: require("./Formation"),
   Voeu: require("./Voeu"),

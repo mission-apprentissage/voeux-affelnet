@@ -1,6 +1,6 @@
 const assert = require("assert");
 const config = require("../../src/config");
-const { Gestionnaire } = require("../../src/common/model");
+const { Responsable } = require("../../src/common/model");
 const { createResetPasswordToken } = require("../../src/common/utils/jwtUtils");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
@@ -24,13 +24,13 @@ describe("passwordRoutes", () => {
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "user1@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].from, "candidats-apprentissage@education.gouv.fr");
-    assert.strictEqual(emailsSent[0].subject, "Réinitialisation du mot de passe (lien valable 1 heure)");
+    assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
+    assert.strictEqual(emailsSent[0].subject, "Réinitialisation du mot de passe (lien valable 2 heures)");
   });
 
   it("Vérifie qu'un cfa peut faire une demande de réinitialisation de mot de passe en lower case", async () => {
     const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
-    await createAndLogUser("0751234J", "password", { model: Gestionnaire });
+    await createAndLogUser("0751234J", "password", { model: Responsable });
 
     const response = await httpClient.post("/api/password/forgotten-password", {
       username: "0751234J",

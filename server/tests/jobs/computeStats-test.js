@@ -1,6 +1,6 @@
 const assert = require("assert");
 const { DateTime } = require("luxon");
-const { insertGestionnaire, insertVoeu } = require("../utils/fakeData");
+const { insertResponsable, insertVoeu } = require("../utils/fakeData");
 const computeStats = require("../../src/jobs/computeStats");
 
 describe("computeStats", () => {
@@ -8,7 +8,7 @@ describe("computeStats", () => {
     const firstImport = DateTime.fromISO("2021-06-02T14:00:00.000Z");
     const secondImport = DateTime.fromISO("2021-06-15T14:00:00.000Z");
     await Promise.all([
-      insertGestionnaire({
+      insertResponsable({
         siret: "11111111100006",
         statut: "activé",
         email: "activé_avec_voeux@apprentissage.beta.gouv.fr",
@@ -18,7 +18,7 @@ describe("computeStats", () => {
           { uai: "0751234J", date: secondImport.plus({ days: 1 }) },
         ],
       }),
-      insertGestionnaire({
+      insertResponsable({
         statut: "confirmé",
         email: "confirmé_avec_voeux@apprentissage.beta.gouv.fr",
         etablissements: [{ uai: "0757890U", voeux_date: new Date() }],
@@ -32,7 +32,7 @@ describe("computeStats", () => {
           },
         ],
       }),
-      insertGestionnaire({
+      insertResponsable({
         statut: "en attente",
         email: "en_attente_avec_voeux@apprentissage.beta.gouv.fr",
         etablissements: [{ uai: "0754560Z", voeux_date: new Date() }],
@@ -47,7 +47,7 @@ describe("computeStats", () => {
           },
         ],
       }),
-      insertGestionnaire({
+      insertResponsable({
         statut: "en attente",
         email: "en_erreur@apprentissage.beta.gouv.fr",
         emails: [
@@ -290,7 +290,7 @@ describe("computeVoeuxStats", () => {
     const thirdImport = DateTime.fromISO("2021-06-29T14:00:00.000Z");
 
     await Promise.all([
-      insertGestionnaire({
+      insertResponsable({
         statut: "activé",
         email: "activéNonTelechargé@apprentissage.beta.gouv.fr",
         etablissements: [{ uai: "0754560Z", voeux_date: new Date() }],

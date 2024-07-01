@@ -10,7 +10,7 @@ const Boom = require("boom");
 const { dateAsString } = require("../../common/utils/stringUtils.js");
 const { encodeStream } = require("iconv-lite");
 const { getLatestImportDate } = require("../../common/actions/getLatestImportDate.js");
-const { Dossier } = require("../../common/model/index.js");
+const { Dossier } = require("../../common/model");
 
 const fichiers = [
   {

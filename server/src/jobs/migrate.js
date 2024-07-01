@@ -1,6 +1,6 @@
 const { JobEvent } = require("../common/model");
 const logger = require("../common/logger");
-const { Voeu, Csaio } = require("../common/model/index.js");
+const { Voeu, Csaio } = require("../common/model");
 const { raw } = require("../common/utils/mongooseUtils.js");
 const { findRegionByCode } = require("../common/regions.js");
 

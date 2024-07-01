@@ -1,6 +1,6 @@
 const assert = require("assert");
 const { DateTime } = require("luxon");
-const { insertGestionnaire } = require("../utils/fakeData");
+const { insertResponsable } = require("../utils/fakeData");
 const sendNotificationEmails = require("../../src/jobs/sendNotificationEmails");
 const { createTestContext } = require("../utils/testUtils");
 const createEmailActions = require("../../src/common/actions/createEmailActions");
@@ -12,7 +12,7 @@ describe("sendNotificationEmails", () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -30,7 +30,7 @@ describe("sendNotificationEmails", () => {
     const sent = getEmailsSent();
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.deepStrictEqual(sent[0].replyTo, "candidats-apprentissage@education.gouv.fr");
+    assert.deepStrictEqual(sent[0].replyTo, "voeux-affelnet@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(sent[0].subject, "De nouveaux vœux Affelnet sont téléchargeables");
     assert.deepStrictEqual(stats, {
       total: 1,
@@ -43,7 +43,7 @@ describe("sendNotificationEmails", () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: today }],
@@ -77,7 +77,7 @@ describe("sendNotificationEmails", () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [
@@ -87,7 +87,7 @@ describe("sendNotificationEmails", () => {
         },
       ],
     });
-    await insertGestionnaire({
+    await insertResponsable({
       statut: "activé",
       etablissements: [{ uai: "0757890U", voeux_date: today }],
       voeux_telechargements: [
@@ -113,7 +113,7 @@ describe("sendNotificationEmails", () => {
     const { sendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
     const today = new Date();
     const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -144,7 +144,7 @@ describe("sendNotificationEmails", () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const today = new Date();
     const lastWeek = DateTime.fromJSDate(today).minus({ days: 7 }).toJSDate();
-    await insertGestionnaire({
+    await insertResponsable({
       username: "11111111100006",
       email: "test@apprentissage.beta.gouv.fr",
       statut: "activé",
@@ -156,7 +156,7 @@ describe("sendNotificationEmails", () => {
         },
       ],
     });
-    await insertGestionnaire({
+    await insertResponsable({
       statut: "activé",
       etablissements: [{ uai: "0751234J", voeux_date: today }],
       voeux_telechargements: [

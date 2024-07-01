@@ -1,6 +1,6 @@
 const logger = require("../common/logger");
 const { DateTime } = require("luxon");
-const { User, Gestionnaire } = require("../common/model");
+const { User, Responsable, Relation, Delegue } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
 const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
 const { UserType } = require("../common/constants/UserType");
@@ -10,13 +10,67 @@ const {
   saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsResponsable,
 } = require("../common/actions/history/responsable");
 const {
-  saveUpdatedListAvailableEmailManualResent: saveUpdatedListAvailableEmailManualResentAsFormateur,
-  saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsFormateur,
-} = require("../common/actions/history/formateur");
+  saveUpdatedListAvailableEmailManualResent: saveUpdatedListAvailableEmailManualResentAsDelegue,
+  saveUpdatedListAvailableEmailAutomaticResent: saveUpdatedListAvailableEmailAutomaticResentAsDelegue,
+} = require("../common/actions/history/delegue");
 
 async function resendUpdateEmails(resendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+
+  const relations = await Relation.find({
+    // $and: [
+    //   // { $expr: { $gt: ["$nombre_voeux", 0] } },
+    //   // { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
+    //   // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+    //   // { $expr: { $ne: ["$first_date_voeux", "$last_date_voeux"] } },
+    // ],
+  });
+  // console.log(relations);
+
+  const delegues = (
+    (await Promise.all(
+      relations.map(
+        async (relation) =>
+          await Delegue.findOne({
+            type: UserType.DELEGUE,
+            relations: {
+              $elemMatch: {
+                "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+                active: true,
+              },
+            },
+          })
+      )
+    )) ?? []
+  )
+    .filter((delegue) => !!delegue)
+    .reduce((acc, delegue) => {
+      if (!acc.find((d) => d.email === delegue.email)) {
+        acc.push(delegue);
+      }
+
+      return acc;
+    }, []);
+
+  const relationsDeleguees = delegues.flatMap((delegue) => delegue.relations.filter((relation) => relation.active));
+
+  const relationsNonDeleguees = relations.filter(
+    (relation) =>
+      !relationsDeleguees.find(
+        (relationDeleguee) =>
+          relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+          relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
+      )
+  );
+
+  const responsables = await Responsable.find({
+    siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
+  });
+
+  logger.info(`Sending update emails to ${responsables.length} responsables and ${delegues.length} delegues...`);
+
   const query = {
     ...(options.username ? { username: options.username } : {}),
     ...(options.force
@@ -25,7 +79,13 @@ async function resendUpdateEmails(resendEmail, options = {}) {
           unsubscribe: false,
           statut: { $nin: [UserStatut.NON_CONCERNE] },
 
-          "etablissements.voeux_date": { $exists: true },
+          $or: [
+            {
+              type: UserType.RESPONSABLE,
+              _id: { $in: responsables.map((responsable) => responsable._id) },
+            },
+            { type: UserType.DELEGUE, _id: { $in: delegues.map((delegue) => delegue._id) } },
+          ],
 
           ...(options.retry
             ? {
@@ -42,7 +102,7 @@ async function resendUpdateEmails(resendEmail, options = {}) {
                     templateName: /^update_.*/,
                     error: { $exists: false },
                     $and: [
-                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 3 }).toJSDate() } } },
+                      { sendDates: { $not: { $gt: DateTime.now().minus({ days: 7 }).toJSDate() } } },
                       { "sendDates.2": { $exists: false } },
                     ],
                   },
@@ -51,53 +111,71 @@ async function resendUpdateEmails(resendEmail, options = {}) {
         }),
   };
 
+  // const query = {
+  //   ...(options.username ? { username: options.username } : {}),
+  //   ...(options.force
+  //     ? {}
+  //     : {
+  //         unsubscribe: false,
+  //         statut: { $nin: [UserStatut.NON_CONCERNE] },
+
+  //         "etablissements.voeux_date": { $exists: true },
+
+  //         ...(options.retry
+  //           ? {
+  //               emails: {
+  //                 $elemMatch: {
+  //                   templateName: /^update_.*/,
+  //                   "error.type": { $in: ["fatal", "soft_bounce"] },
+  //                 },
+  //               },
+  //             }
+  //           : {
+  //               emails: {
+  //                 $elemMatch: {
+  //                   templateName: /^update_.*/,
+  //                   error: { $exists: false },
+  //                   $and: [
+  //                     { sendDates: { $not: { $gt: DateTime.now().minus({ days: 3 }).toJSDate() } } },
+  //                     { "sendDates.2": { $exists: false } },
+  //                   ],
+  //                 },
+  //               },
+  //             }),
+  //       }),
+  // };
+
   await User.find(query)
     .lean()
+    // .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      if (user.type === UserType.FORMATEUR) {
-        const gestionnaire = await Gestionnaire.findOne({
-          "etablissements.uai": user.username,
-          "etablissements.diffusionAutorisee": true,
-        });
-
-        if (!gestionnaire) {
-          return;
-        }
-
-        const etablissement = gestionnaire.etablissements?.find(
-          (etablissement) => etablissement.diffusionAutorisee && etablissement.uai === user.username
-        );
-
-        user.email = user.email || etablissement?.email;
-      }
-
-      if (await allFilesAsAlreadyBeenDownloaded(user)) {
+      if (!options.force && (await allFilesAsAlreadyBeenDownloaded(user))) {
         return;
       }
 
-      if (await !filesHaveUpdate(user)) {
+      if (!options.force && (await !filesHaveUpdate(user))) {
         return;
       }
 
       const previous = user.emails.find((e) => e.templateName.startsWith("update_"));
+      stats.total++;
 
       try {
-        stats.total++;
         if (limit > stats.sent) {
           logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);
           await resendEmail(previous.token);
 
           switch (user.type) {
-            case UserType.GESTIONNAIRE:
+            case UserType.RESPONSABLE:
               options.sender
                 ? await saveUpdatedListAvailableEmailManualResentAsResponsable(user, options.sender)
                 : await saveUpdatedListAvailableEmailAutomaticResentAsResponsable(user);
               break;
-            case UserType.FORMATEUR:
+            case UserType.DELEGUE:
               options.sender
-                ? await saveUpdatedListAvailableEmailManualResentAsFormateur(user, options.sender)
-                : await saveUpdatedListAvailableEmailAutomaticResentAsFormateur(user);
+                ? await saveUpdatedListAvailableEmailManualResentAsDelegue(user, options.sender)
+                : await saveUpdatedListAvailableEmailAutomaticResentAsDelegue(user);
               break;
             default:
               break;

@@ -16,22 +16,24 @@ const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const resendNotificationEmails = require("./jobs/resendNotificationEmails");
 const sendUpdateEmails = require("./jobs/sendUpdateEmails");
 const resendUpdateEmails = require("./jobs/resendUpdateEmails");
-const importGestionnaires = require("./jobs/importGestionnaires");
-const { cleanGestionnaires } = require("./jobs/cleanGestionnaires");
+const importEtablissementsResponsables = require("./jobs/importEtablissementsResponsables");
+const importResponsables = require("./jobs/importResponsables");
+const { cleanResponsables } = require("./jobs/cleanResponsables");
+const importEtablissementsFormateurs = require("./jobs/importEtablissementsFormateurs");
 const importFormateurs = require("./jobs/importFormateurs");
 const { cleanFormateurs } = require("./jobs/cleanFormateurs");
+const importRelations = require("./jobs/importRelations");
 const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
-const exportGestionnaires = require("./jobs/exportGestionnaires");
+const exportResponsables = require("./jobs/exportResponsables");
 const buildRelationCsv = require("./jobs/buildRelationCsv");
 const { createAdmin } = require("./jobs/createAdmin.js");
 const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
-const { Gestionnaire } = require("./common/model");
+const { Responsable } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
 const { importDossiers } = require("./jobs/importDossiers.js");
 const { createCsaio } = require("./jobs/createCsaio.js");
-const { countVoeux } = require("./jobs/countVoeux.js");
 const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js");
 const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUniquementEnApprentissage.js");
 const { asArray } = require("./common/utils/stringUtils.js");
@@ -62,6 +64,11 @@ cli
   .description("Permet de créer le fichier des CFA")
   .option("--affelnet <affelnet>", "Le fichier CSV contentant l'offre de formation Affelnet", createReadStream)
   .option(
+    "--overwrite <affelnetOverwrite>",
+    "Le fichier CSV contentant l'offre de formation corrigée Affelnet",
+    createReadStream
+  )
+  .option(
     "--additionalRelations <additionalRelations>",
     "Le fichier CSV contenant les relations complémentaires",
     createReadStream
@@ -86,32 +93,66 @@ cli
   });
 
 cli
-  .command("importGestionnaires <gestionnaireCsv>")
+  .command("importResponsables <relationsCsv> <responsableOverwriteCsv>")
+  .description(
+    "Créé les comptes des responsables à partir du fichier des relations, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
+  )
+  .action((relationsCsv, responsableOverwriteCsv) => {
+    runScript(() => {
+      const responsableInput = relationsCsv ? createReadStream(relationsCsv) : null;
+      const responsableOverwriteInput = responsableOverwriteCsv ? createReadStream(responsableOverwriteCsv) : null;
+
+      // console.log("responsableInput", responsableInput);
+      // console.log("responsableOverwriteInput", responsableOverwriteInput);
+
+      return importResponsables(responsableInput, responsableOverwriteInput);
+    });
+  });
+
+cli
+  .command("importEtablissementsResponsables <responsableCsv>")
   .description(
     "Créé les comptes des responsables à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
   )
-  .action((gestionnaireCsv) => {
+  .action((responsableCsv) => {
     runScript(() => {
-      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
 
-      return importGestionnaires(input);
+      return importEtablissementsResponsables(input);
     });
   });
 
 cli
-  .command("cleanGestionnaires <gestionnaireCsv>")
-  .description("Supprime les gestionnaires n'apparaissant pas dans le fichier des relations")
+  .command("cleanResponsables <responsableCsv>")
+  .description("Supprime les responsables n'apparaissant pas dans le fichier des relations")
   .option("--proceed", "Permet d'applique la suppression", false)
-  .action((gestionnaireCsv, options) => {
+  .action((responsableCsv, options) => {
     runScript(() => {
-      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
 
-      return cleanGestionnaires(input, options);
+      return cleanResponsables(input, options);
     });
   });
 
 cli
-  .command("importFormateurs <formateurCsv>")
+  .command("importFormateurs <relationsCsv> <formateurOverwriteCsv>")
+  .description(
+    "Créé les comptes des formateurs à partir du fichier des relations <relationsCsv>, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
+  )
+  .action((relationsCsv, formateurOverwriteCsv) => {
+    runScript(() => {
+      const formateurInput = relationsCsv ? createReadStream(relationsCsv) : null;
+      const formateurOverwriteInput = formateurOverwriteCsv ? createReadStream(formateurOverwriteCsv) : null;
+
+      // console.log("formateurInput", formateurInput);
+      // console.log("formateurOverwriteInput", formateurOverwriteInput);
+
+      return importFormateurs(formateurInput, formateurOverwriteInput);
+    });
+  });
+
+cli
+  .command("importEtablissementsFormateurs <formateurCsv>")
   .description(
     "Créé les comptes des formateurs à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
   )
@@ -119,19 +160,31 @@ cli
     runScript(() => {
       const input = formateurCsv ? createReadStream(formateurCsv) : process.stdin;
 
-      return importFormateurs(input);
+      return importEtablissementsFormateurs(input);
     });
   });
-
 cli
   .command("cleanFormateurs <formateurCsv>")
   .description("Supprime les formateurs n'apparaissant pas dans le fichier des relations")
   .option("--proceed", "Permet d'applique la suppression", false)
-  .action((gestionnaireCsv, options) => {
+  .action((responsableCsv, options) => {
     runScript(() => {
-      const input = gestionnaireCsv ? createReadStream(gestionnaireCsv) : process.stdin;
+      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
 
       return cleanFormateurs(input, options);
+    });
+  });
+
+cli
+  .command("importRelations <relationsCsv> <responsablesOverwriteCsv> <formateursOverwriteCsv>")
+  .description("Importe les formations depuis le fichier transmis par Affelnet")
+  .action((relationsCsv, responsablesOverwriteCsv, formateursOverwriteCsv) => {
+    runScript(() => {
+      const relationsInput = relationsCsv ? createReadStream(relationsCsv) : null;
+      const responsablesOverwriteInput = responsablesOverwriteCsv ? createReadStream(responsablesOverwriteCsv) : null;
+      const formateursOverwriteInput = formateursOverwriteCsv ? createReadStream(formateursOverwriteCsv) : null;
+
+      return importRelations(relationsInput, responsablesOverwriteInput, formateursOverwriteInput);
     });
   });
 
@@ -171,27 +224,20 @@ cli
 cli
   .command("importVoeux")
   .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
-  .argument("<file>", "Le fichier CSV contentant les voeux  (default: stdin)")
+  .argument("<file>", "Le fichier CSV contentant les voeux ")
+  .argument("<overwriteFile", "Le fichier CSV écransant les offres de formation")
   .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
-  .action((file, options) => {
+  .action((file, overwriteFile, options) => {
     runScript(async () => {
-      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+      const inputFile = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
+      const inputOverwriteFile = overwriteFile ? createReadStream(overwriteFile, { encoding: "UTF-8" }) : null;
 
       let importDate = new Date();
       if (options.refresh) {
         importDate = await getLatestImportDate();
       }
 
-      return importVoeux(input, { importDate });
-    });
-  });
-
-cli
-  .command("countVoeux")
-  .description("Compte les voeux et ajoute l'information sur les relations")
-  .action(() => {
-    runScript(async () => {
-      return countVoeux();
+      return importVoeux(inputFile, inputOverwriteFile, { importDate });
     });
   });
 
@@ -221,6 +267,7 @@ cli
   .command("sendNotificationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--force", "Ignore les règles d'envoi habituelles")
   .action((options) => {
     runScript(({ sendEmail }) => {
       return sendNotificationEmails(sendEmail, options);
@@ -231,6 +278,7 @@ cli
   .command("resendNotificationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--force", "Ignore les règles d'envoi habituelles")
   .option("--retry", "Renvoie les emails en erreur", false)
   .option("--max <max>", "Nombre de relances maximum", parseInt)
   .action((options) => {
@@ -243,6 +291,7 @@ cli
   .command("sendUpdateEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--force", "Ignore les règles d'envoi habituelles")
   .action((options) => {
     runScript(({ sendEmail }) => {
       return sendUpdateEmails(sendEmail, options);
@@ -253,6 +302,7 @@ cli
   .command("resendUpdateEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--force", "Ignore les règles d'envoi habituelles")
   .option("--retry", "Renvoie les emails en erreur", false)
   .option("--max <max>", "Nombre de relances maximum", parseInt)
   .action((options) => {
@@ -283,7 +333,7 @@ cli
     });
   });
 cli
-  .command("confirmGestionnaire")
+  .command("confirmResponsable")
   .description("Permet de confirmer manuellement un CFA")
   .arguments("<siret> <email>")
   .option("--force", "Ecrase les données déjà confirmées")
@@ -304,14 +354,14 @@ cli
   });
 
 cli
-  .command("exportGestionnaires")
+  .command("exportResponsables")
   .option("--filter <filter>", "Filtre au format json", JSON.parse)
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out, filter }) => {
     runScript(() => {
       const output = out || writeToStdout();
 
-      return exportGestionnaires(output, { filter });
+      return exportResponsables(output, { filter });
     });
   });
 
@@ -342,7 +392,7 @@ cli.command("migrate").action(() => {
 cli
   .command("injectDataset")
   .option("--mef", "Importe les mefs")
-  .option("--gestionnaire", "Ajoute un gestionnaire")
+  .option("--responsable", "Ajoute un responsable")
   .option("--admin", "Ajoute un administrateur")
   .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
   .action((options) => {
@@ -381,7 +431,10 @@ cli
       };
 
       return await oleoduc(
-        Gestionnaire.aggregate([{ $unwind: "$etablissements" }, { $project: { uai: "$etablissements.uai" } }]).cursor(),
+        Responsable.aggregate([
+          { $unwind: "$etablissements_formateur" },
+          { $project: { uai: "$etablissements_formateur.uai" } },
+        ]).cursor(),
         transformData((etablissement) => etablissement.uai),
         transformData(async (uai) => await getEmailsFormateurFromUai(uai)),
         flattenArray(),
@@ -401,16 +454,16 @@ cli
   });
 
 cli
-  .command("getGestionnaireEmails")
+  .command("getResponsableEmails")
   .option("--out <out>", "Fichier cible dans lequel sera stocké l'export (défaut: stdout)", createWriteStream)
   .action(({ out }) => {
     runScript(async () => {
       const output = out || writeToStdout();
 
-      // Récupération des adresses emails des CFAs gestionnaires
-      const etablissement_gestionnaire_emails = await Gestionnaire.distinct("email");
+      // Récupération des adresses emails des CFAs responsables
+      const etablissement_responsable_emails = await Responsable.distinct("email");
 
-      const source = Readable.from(etablissement_gestionnaire_emails);
+      const source = Readable.from(etablissement_responsable_emails);
 
       return oleoduc(
         source,

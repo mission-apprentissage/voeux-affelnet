@@ -1,5 +1,5 @@
 const logger = require("../common/logger");
-const { Csaio } = require("../common/model/index.js");
+const { Csaio } = require("../common/model");
 const { some } = require("lodash");
 const { findAcademieByCode } = require("../common/academies.js");
 

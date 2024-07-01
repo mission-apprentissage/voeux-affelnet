@@ -1,5 +1,5 @@
-const getSiretGestionnaireFromCleMinistereEducatif = (cle_ministere_educatif, siret_gestionnaire) => {
-  return cle_ministere_educatif ? cle_ministere_educatif.slice(11, -24) : siret_gestionnaire;
+const getSiretResponsableFromCleMinistereEducatif = (cle_ministere_educatif, siret_responsable) => {
+  return cle_ministere_educatif ? cle_ministere_educatif.slice(11, -24) : siret_responsable;
 };
 
 const getSiretFormateurFromCleMinistereEducatif = (cle_ministere_educatif, siret_formateur) => {
@@ -7,6 +7,6 @@ const getSiretFormateurFromCleMinistereEducatif = (cle_ministere_educatif, siret
 };
 
 module.exports = {
-  getSiretGestionnaireFromCleMinistereEducatif,
+  getSiretResponsableFromCleMinistereEducatif,
   getSiretFormateurFromCleMinistereEducatif,
 };

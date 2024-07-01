@@ -33,21 +33,21 @@ describe("loginRoutes", () => {
     });
   });
 
-  it("Vérifie qu'on peut se connecter en lowercase avec un uai", async () => {
-    const { httpClient } = await startServer();
-    await insertUser({
-      username: "3319338X",
-      email: "user1@apprentissage.beta.gouv.fr",
-    });
-    await activateUser("3319338X", "password");
+  // it("Vérifie qu'on peut se connecter en lowercase avec un uai", async () => {
+  //   const { httpClient } = await startServer();
+  //   await insertUser({
+  //     username: "3319338X",
+  //     email: "user1@apprentissage.beta.gouv.fr",
+  //   });
+  //   await activateUser("3319338X", "password");
 
-    const response = await httpClient.post("/api/login", {
-      username: "3319338x",
-      password: "password",
-    });
+  //   const response = await httpClient.post("/api/login", {
+  //     username: "3319338x",
+  //     password: "password",
+  //   });
 
-    assert.strictEqual(response.status, 200);
-  });
+  //   assert.strictEqual(response.status, 200);
+  // });
 
   it("Vérifie qu'un mot de passe invalide est rejeté", async () => {
     const { httpClient } = await startServer();

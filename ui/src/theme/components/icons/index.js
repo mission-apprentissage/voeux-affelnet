@@ -21,6 +21,8 @@ export * from "./EmojiFlat";
 export * from "./EmojiSmile";
 export * from "./Error";
 export * from "./ErrorFill";
+export * from "./EyeFill";
+export * from "./EyeOffFill";
 export * from "./ErrorLine";
 export * from "./ExclamationCircle";
 export * from "./ExternalLinkLine";

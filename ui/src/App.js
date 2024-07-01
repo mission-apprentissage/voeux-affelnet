@@ -2,7 +2,8 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
-import { getUserType } from "./common/utils/getUserType.js";
+import { getUserType } from "./common/utils/getUserType";
+import { UserType } from "./common/constants/UserType";
 
 const ForgottenPasswordPage = lazy(() => import("./pages/password/ForgottenPasswordPage"));
 const ActivationPage = lazy(() => import("./pages/ActivationPage"));
@@ -10,10 +11,11 @@ const PreviewEmail = lazy(() => import("./pages/PreviewEmail"));
 const StatsPage = lazy(() => import("./pages/StatsPage"));
 const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
 
-const GestionnaireRoutes = lazy(() => import("./pages/gestionnaire/Routes"));
+const ResponsableRoutes = lazy(() => import("./pages/responsable/Routes"));
 const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
+const DelegueRoutes = lazy(() => import("./pages/delegue/Routes"));
 const AdminRoutes = lazy(() => import("./pages/admin/Routes"));
-const CsaioPage = lazy(() => import("./pages/CsaioPage.js"));
+const CsaioPage = lazy(() => import("./pages/CsaioPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
 const ConfirmationPage = lazy(() => import("./pages/ConfirmationPage"));
@@ -29,7 +31,7 @@ const Accessibilite = lazy(() => import("./pages/legal/Accessibilite"));
 const RequireAuth = ({ children, allowed }) => {
   const [auth] = useAuth();
   const type = getUserType(auth);
-  const isNotAllowed = allowed && !allowed.includes(type);
+  const isNotAllowed = allowed && !allowed.map((v) => v.toLowerCase()).includes(type);
 
   if (!auth || auth.sub === "anonymous" || isNotAllowed) {
     return <Navigate to="/login" />;
@@ -42,7 +44,14 @@ const App = () => {
   const [auth] = useAuth();
 
   const getDefaultRedirection = () => {
-    return auth.type === "Gestionnaire" ? "gestionnaire/formateurs" : getUserType(auth);
+    switch (auth.type) {
+      case UserType.RESPONSABLE:
+        return "responsable/formateurs";
+      case UserType.DELEGUE:
+        return "delegue/relations";
+      default:
+        return getUserType(auth);
+    }
   };
 
   return (
@@ -72,11 +81,11 @@ const App = () => {
             }
           />
           <Route
-            path="/gestionnaire/*"
+            path="/responsable/*"
             element={
               <Suspense>
-                <RequireAuth allowed={["gestionnaire"]}>
-                  <GestionnaireRoutes />
+                <RequireAuth allowed={[UserType.RESPONSABLE]}>
+                  <ResponsableRoutes />
                 </RequireAuth>
               </Suspense>
             }
@@ -86,8 +95,19 @@ const App = () => {
             path="/formateur/*"
             element={
               <Suspense>
-                <RequireAuth allowed={["formateur"]}>
+                <RequireAuth allowed={[UserType.FORMATEUR]}>
                   <FormateurRoutes />
+                </RequireAuth>
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="/delegue/*"
+            element={
+              <Suspense>
+                <RequireAuth allowed={[UserType.DELEGUE]}>
+                  <DelegueRoutes />
                 </RequireAuth>
               </Suspense>
             }
@@ -97,7 +117,7 @@ const App = () => {
             path="/csaio"
             element={
               <Suspense>
-                <RequireAuth allowed={["csaio"]}>
+                <RequireAuth allowed={[UserType.CSAIO]}>
                   <CsaioPage />
                 </RequireAuth>
               </Suspense>
@@ -109,7 +129,7 @@ const App = () => {
             path="/profil"
             element={
               <Suspense>
-                <RequireAuth allowed={["gestionnaire", "formateur"]}>
+                <RequireAuth allowed={[UserType.RESPONSABLE, UserType.FORMATEUR, UserType.DELEGUE]}>
                   <Navigate to={`/${getUserType(auth)}`} />;
                 </RequireAuth>
               </Suspense>

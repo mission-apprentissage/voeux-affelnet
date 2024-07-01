@@ -1,7 +1,7 @@
 const assert = require("assert");
 const { Readable } = require("stream");
 const { importDossiers } = require("../../src/jobs/importDossiers.js");
-const { Dossier } = require("../../src/common/model/index.js");
+const { Dossier } = require("../../src/common/model");
 const { omit } = require("lodash");
 const { mockTableauDeBordApi } = require("../utils/apiMocks.js");
 
