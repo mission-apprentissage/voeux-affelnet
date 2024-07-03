@@ -91,29 +91,53 @@ export const Responsable = () => {
     }
   }, [siret, responsable, toast, reload]);
 
-  // const resendNotificationEmail = useCallback(async () => {
-  //   try {
-  //     await _put(`/api/admin/responsables/${siret}/resendNotificationEmail`);
+  const resendNotificationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/admin/responsables/${siret}/resendNotificationEmail`);
 
-  //     toast({
-  //       title: "Courriel envoyé",
-  //       description: `Le courriel de notification de listes téléchargeables a été renvoyé à l'adresse ${responsable?.email}`,
-  //       status: "success",
-  //       duration: 9000,
-  //       isClosable: true,
-  //     });
-  //     await reload();
-  //   } catch (error) {
-  //     toast({
-  //       title: "Impossible d'envoyer le courriel",
-  //       description:
-  //         "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de listes téléchargeables . Veuillez contacter le support.",
-  //       status: "error",
-  //       duration: 9000,
-  //       isClosable: true,
-  //     });
-  //   }
-  // }, [siret, responsable, toast, reload]);
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de listes téléchargeables a été renvoyé à l'adresse ${responsable?.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await reload();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de listes téléchargeables . Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [siret, responsable, toast, reload]);
+
+  const resendUpdateEmail = useCallback(async () => {
+    try {
+      await _put(`/api/admin/responsables/${siret}/resendUpdateEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de mise à jour des listes téléchargeables a été renvoyé à l'adresse ${responsable?.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await reload();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de mise à jour de listes téléchargeables . Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [siret, responsable, toast, reload]);
 
   useEffect(() => {
     const run = async () => {
@@ -136,6 +160,11 @@ export const Responsable = () => {
   if (!responsable) {
     return;
   }
+
+  const hasVoeux = !!responsable.relations.find((relation) => relation?.nombre_voeux > 0);
+  const hasUpdate = !!responsable.relations.find(
+    (relation) => new Date(relation?.first_date_voeux).getTime() !== new Date(relation?.last_date_voeux).getTime()
+  );
 
   // const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.relations?.find(
   //   (relation) =>
@@ -204,26 +233,35 @@ export const Responsable = () => {
               {UserType.RESPONSABLE === responsable?.type &&
                 (() => {
                   switch (true) {
-                    case UserStatut.EN_ATTENTE === responsable?.statut &&
-                      !!responsable?.emails.filter((email) => email.templateName === "confirmation_responsable").length:
+                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && hasUpdate:
+                      /* !!responsable?.emails.filter((email) => email.templateName === "update_responsable").length */
                       return (
-                        <Link variant="action" onClick={resendConfirmationEmail}>
+                        <Link variant="action" onClick={resendUpdateEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    case UserStatut.CONFIRME === responsable?.statut &&
-                      !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length:
+                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && !hasUpdate:
+                      /* !!responsable?.emails.filter((email) => email.templateName === "notification_responsable").length */
+                      return (
+                        <Link variant="action" onClick={resendNotificationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+                    case UserStatut.CONFIRME === responsable?.statut:
+                      /* !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length */
                       return (
                         <Link variant="action" onClick={resendActivationEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    // case UserStatut.ACTIVE === responsable?.statut:
-                    //   return (
-                    //     <Link variant="action" onClick={resendNotificationEmail}>
-                    //       Générer un nouvel envoi de notification
-                    //     </Link>
-                    //   );
+                    case UserStatut.EN_ATTENTE === responsable?.statut /*&&
+                    !!responsable?.emails.filter((email) => email.templateName === "confirmation_responsable").length*/:
+                      return (
+                        <Link variant="action" onClick={resendConfirmationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+
                     default:
                       return <></>;
                   }

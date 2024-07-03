@@ -98,6 +98,30 @@ export const Formateur = ({ responsable, callback }) => {
     }
   }, [formateur, toast, callback]);
 
+  const resendUpdateEmail = useCallback(async () => {
+    try {
+      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendUpdateEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de misa à jour des listes de candidats disponible a été renvoyé à l'adresse ${formateur?.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await callback();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de mise à jour. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [formateur, toast, callback]);
+
   const cancelDelegationAndDownloadVoeux = useCallback(async () => {
     await cancelDelegation();
     await downloadVoeux();
@@ -294,18 +318,30 @@ export const Formateur = ({ responsable, callback }) => {
                 {UserType.DELEGUE === delegue.type &&
                   (() => {
                     switch (true) {
-                      case UserStatut.CONFIRME === delegue.statut:
+                      case hasVoeux &&
+                        !!delegue.emails.filter((email) => email.templateName === "update_delegue").length:
+                        return (
+                          <Link variant="action" onClick={resendUpdateEmail}>
+                            Générer un nouvel envoi de notification
+                          </Link>
+                        );
+
+                      case hasVoeux &&
+                        !!delegue.emails.filter((email) => email.templateName === "notification_delegue").length:
+                        return (
+                          <Link variant="action" onClick={resendNotificationEmail}>
+                            Générer un nouvel envoi de notification
+                          </Link>
+                        );
+
+                      case UserStatut.CONFIRME === delegue.statut &&
+                        !!delegue.emails.filter((email) => email.templateName === "notification_delegue").length:
                         return (
                           <Link variant="action" onClick={resendActivationEmail}>
                             Générer un nouvel envoi de notification
                           </Link>
                         );
-                      // case UserStatut.ACTIVE === delegue.statut:
-                      //   return (
-                      //     <Link variant="action" onClick={resendNotificationEmail}>
-                      //       Générer un nouvel envoi de notification
-                      //     </Link>
-                      //   );
+
                       default:
                         return <></>;
                     }

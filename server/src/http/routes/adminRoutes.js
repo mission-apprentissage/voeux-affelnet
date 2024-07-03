@@ -17,8 +17,11 @@ const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const resendConfirmationEmails = require("../../jobs/resendConfirmationEmails");
 const resendActivationEmails = require("../../jobs/resendActivationEmails");
 const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
+const resendUpdateEmails = require("../../jobs/resendUpdateEmails");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 const sendActivationEmails = require("../../jobs/sendActivationEmails");
+const sendNotificationEmails = require("../../jobs/sendNotificationEmails");
+const sendUpdateEmails = require("../../jobs/sendUpdateEmails");
 const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history/responsable");
 const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/relation");
 const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/relation");
@@ -675,7 +678,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       previousConfirmationEmail
         ? await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user })
-        : await sendConfirmationEmails(sendEmail, { username: siret, sender: req.user });
+        : await sendConfirmationEmails(sendEmail, { username: siret, force: true, sender: req.user });
 
       return res.json({});
     })
@@ -694,7 +697,17 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      const stats = await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user });
+      // const stats = await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user });
+
+      const responsable = await Responsable.findOne({
+        siret,
+      });
+
+      const previousConfirmationEmail = responsable.emails.find((e) => e.templateName.startsWith("confirmation_"));
+
+      const stats = previousConfirmationEmail
+        ? await resendConfirmationEmails(resendEmail, { username: siret, force: true, sender: req.user })
+        : await sendConfirmationEmails(sendEmail, { username: siret, force: true, sender: req.user });
 
       return res.json(stats);
     })
@@ -713,7 +726,17 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      const stats = await resendActivationEmails(resendEmail, { username: siret, force: true, sender: req.user });
+      // const stats = await resendActivationEmails(resendEmail, { username: siret, force: true, sender: req.user });
+
+      const responsable = await Responsable.findOne({
+        siret,
+      });
+
+      const previousActivationEmail = responsable.emails.find((e) => e.templateName.startsWith("activation_"));
+
+      const stats = previousActivationEmail
+        ? await resendActivationEmails(resendEmail, { username: siret, force: true, sender: req.user })
+        : await sendActivationEmails(sendEmail, { username: siret, force: true, sender: req.user });
 
       return res.json(stats);
     })
@@ -732,7 +755,46 @@ module.exports = ({ sendEmail, resendEmail }) => {
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret);
-      const stats = await resendNotificationEmails(resendEmail, { username: siret, force: true, sender: req.user });
+      // const stats = await resendNotificationEmails(resendEmail, { username: siret, force: true, sender: req.user });
+
+      const responsable = await Responsable.findOne({
+        siret,
+      });
+
+      const previousNotificationEmail = responsable.emails.find((e) => e.templateName.startsWith("notification_"));
+
+      const stats = previousNotificationEmail
+        ? await resendNotificationEmails(resendEmail, { username: siret, force: true, sender: req.user })
+        : await sendNotificationEmails(sendEmail, { username: siret, force: true, sender: req.user });
+
+      return res.json(stats);
+    })
+  );
+
+  /**
+   * Permet de renvoyer un mail de mise à jour à un responsable
+   */
+  router.put(
+    "/api/admin/responsables/:siret/resendUpdateEmail",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { siret } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      await cancelUnsubscription(siret);
+      // const stats = await resendUpdateEmails(resendEmail, { username: siret, force: true, sender: req.user });
+
+      const responsable = await Responsable.findOne({
+        siret,
+      });
+
+      const previousUpdateEmail = responsable.emails.find((e) => e.templateName.startsWith("update_"));
+
+      const stats = previousUpdateEmail
+        ? await resendUpdateEmails(resendEmail, { username: siret, force: true, sender: req.user })
+        : await sendUpdateEmails(sendEmail, { username: siret, force: true, sender: req.user });
 
       return res.json(stats);
     })
@@ -829,12 +891,13 @@ module.exports = ({ sendEmail, resendEmail }) => {
         throw Boom.notFound();
       }
 
-      await cancelUnsubscription(delegue.email);
-      const stats = await resendActivationEmails(resendEmail, {
-        username: delegue.username,
-        force: true,
-        sender: req.user,
-      });
+      await cancelUnsubscription(delegue.username);
+
+      const previousActivationEmail = delegue.emails.find((e) => e.templateName.startsWith("activation_"));
+
+      const stats = previousActivationEmail
+        ? await resendActivationEmails(resendEmail, { username: delegue.username, force: true, sender: req.user })
+        : await sendActivationEmails(sendEmail, { username: delegue.username, force: true, sender: req.user });
 
       return res.json(stats);
     })
@@ -863,8 +926,48 @@ module.exports = ({ sendEmail, resendEmail }) => {
         throw Boom.notFound();
       }
 
-      await cancelUnsubscription(delegue.email);
-      const stats = await resendNotificationEmails(resendEmail, { username: uai, force: true, sender: req.user });
+      await cancelUnsubscription(delegue.username);
+
+      const previousNotificationEmail = delegue.emails.find((e) => e.templateName.startsWith("notification_"));
+
+      const stats = previousNotificationEmail
+        ? await resendNotificationEmails(resendEmail, { username: delegue.username, force: true, sender: req.user })
+        : await sendNotificationEmails(sendEmail, { username: delegue.username, force: true, sender: req.user });
+
+      return res.json(stats);
+    })
+  );
+
+  /**
+   * Permet de renvoyer un mail de mise à jour à un délégué
+   */
+  router.put(
+    "/api/admin/delegues/:siret/:uai/resendUpdateEmail",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { siret, uai } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const delegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: { "etablissement_responsable.siret": siret, "etablissement_formateur.uai": uai, active: true },
+        },
+      });
+
+      if (!delegue) {
+        throw Boom.notFound();
+      }
+
+      await cancelUnsubscription(delegue.username);
+
+      const previousUpdateEmail = delegue.emails.find((e) => e.templateName.startsWith("update_"));
+
+      const stats = previousUpdateEmail
+        ? await resendUpdateEmails(resendEmail, { username: delegue.username, force: true, sender: req.user })
+        : await sendUpdateEmails(sendEmail, { username: delegue.username, force: true, sender: req.user });
 
       return res.json(stats);
     })

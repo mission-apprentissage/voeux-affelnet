@@ -6,9 +6,11 @@ const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/
 
 const {
   saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForResponsable,
+  saveUpdatedListAvailableEmailManualSent: saveUpdatedListAvailableEmailManualSentForResponsable,
 } = require("../common/actions/history/responsable");
 const {
   saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForDelegue,
+  saveUpdatedListAvailableEmailManualSent: saveUpdatedListAvailableEmailManualSentForDelegue,
 } = require("../common/actions/history/delegue");
 
 async function sendUpdateEmails(sendEmail, options = {}) {
@@ -114,10 +116,14 @@ async function sendUpdateEmails(sendEmail, options = {}) {
 
           switch (user.type) {
             case UserType.RESPONSABLE:
-              await saveUpdatedListAvailableEmailAutomaticSentForResponsable(user);
+              options.sender
+                ? await saveUpdatedListAvailableEmailManualSentForResponsable(user, options.sender)
+                : await saveUpdatedListAvailableEmailAutomaticSentForResponsable(user);
               break;
             case UserType.DELEGUE:
-              await saveUpdatedListAvailableEmailAutomaticSentForDelegue(user);
+              options.sender
+                ? await saveUpdatedListAvailableEmailManualSentForDelegue(user, options.sender)
+                : await saveUpdatedListAvailableEmailAutomaticSentForDelegue(user);
               break;
             default:
               break;
