@@ -80,7 +80,7 @@ export const Formateur = ({ responsable, callback }) => {
 
       toast({
         title: "Courriel envoyé",
-        description: `Le courriel de notification de liste de candidats disponible a été renvoyé à l'adresse ${formateur?.email}`,
+        description: `Le courriel de notification de liste de candidats disponible a été renvoyé à l'adresse ${delegue?.email}`,
         status: "success",
         duration: 9000,
         isClosable: true,
@@ -96,7 +96,7 @@ export const Formateur = ({ responsable, callback }) => {
         isClosable: true,
       });
     }
-  }, [formateur, toast, callback]);
+  }, [formateur, delegue, toast, callback]);
 
   const resendUpdateEmail = useCallback(async () => {
     try {
@@ -104,7 +104,7 @@ export const Formateur = ({ responsable, callback }) => {
 
       toast({
         title: "Courriel envoyé",
-        description: `Le courriel de notification de misa à jour des listes de candidats disponible a été renvoyé à l'adresse ${formateur?.email}`,
+        description: `Le courriel de notification de misa à jour des listes de candidats disponible a été renvoyé à l'adresse ${delegue?.email}`,
         status: "success",
         duration: 9000,
         isClosable: true,
@@ -120,7 +120,7 @@ export const Formateur = ({ responsable, callback }) => {
         isClosable: true,
       });
     }
-  }, [formateur, toast, callback]);
+  }, [formateur, delegue, toast, callback]);
 
   const cancelDelegationAndDownloadVoeux = useCallback(async () => {
     await cancelDelegation();
@@ -165,6 +165,7 @@ export const Formateur = ({ responsable, callback }) => {
   const isDiffusionAutorisee = !!delegue;
 
   const hasVoeux = relation.nombre_voeux > 0;
+  const hasUpdate = new Date(relation?.first_date_voeux).getTime() !== new Date(relation?.last_date_voeux).getTime();
 
   const voeuxTelechargementsDelegue =
     relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
@@ -318,24 +319,21 @@ export const Formateur = ({ responsable, callback }) => {
                 {UserType.DELEGUE === delegue.type &&
                   (() => {
                     switch (true) {
-                      case hasVoeux &&
-                        !!delegue.emails.filter((email) => email.templateName === "update_delegue").length:
+                      case UserStatut.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
                         return (
                           <Link variant="action" onClick={resendUpdateEmail}>
                             Générer un nouvel envoi de notification
                           </Link>
                         );
 
-                      case hasVoeux &&
-                        !!delegue.emails.filter((email) => email.templateName === "notification_delegue").length:
+                      case UserStatut.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
                         return (
                           <Link variant="action" onClick={resendNotificationEmail}>
                             Générer un nouvel envoi de notification
                           </Link>
                         );
 
-                      case UserStatut.CONFIRME === delegue.statut &&
-                        !!delegue.emails.filter((email) => email.templateName === "notification_delegue").length:
+                      case UserStatut.CONFIRME === delegue.statut:
                         return (
                           <Link variant="action" onClick={resendActivationEmail}>
                             Générer un nouvel envoi de notification

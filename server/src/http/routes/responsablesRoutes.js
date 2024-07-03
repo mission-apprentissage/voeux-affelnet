@@ -7,10 +7,14 @@ const authMiddleware = require("../middlewares/authMiddleware.js");
 const { markVoeuxAsDownloadedByResponsable } = require("../../common/actions/markVoeuxAsDownloaded.js");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Responsable, Formateur, Delegue, Relation } = require("../../common/model");
-const resendNotificationEmails = require("../../jobs/resendNotificationEmails.js");
 const { uaiFormat } = require("../../common/utils/format.js");
 const sendActivationEmails = require("../../jobs/sendActivationEmails.js");
 const resendActivationEmails = require("../../jobs/resendActivationEmails.js");
+const sendNotificationEmails = require("../../jobs/sendNotificationEmails.js");
+const resendNotificationEmails = require("../../jobs/resendNotificationEmails.js");
+const sendUpdateEmails = require("../../jobs/sendUpdateEmails.js");
+const resendUpdateEmails = require("../../jobs/resendUpdateEmails.js");
+
 const { UserStatut } = require("../../common/constants/UserStatut.js");
 const { changeEmail } = require("../../common/actions/changeEmail.js");
 const { saveAccountEmailUpdatedByAccount } = require("../../common/actions/history/responsable");
@@ -456,11 +460,11 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         throw Boom.notFound();
       }
 
-      const stats = await resendActivationEmails(resendEmail, {
-        username: delegue.email,
-        force: true,
-        sender: req.user,
-      });
+      const previousActivationEmail = delegue.emails.find((e) => e.templateName.startsWith("activation_"));
+
+      const stats = previousActivationEmail
+        ? await resendActivationEmails(resendEmail, { username: delegue.username, force: true, sender: req.user })
+        : await sendActivationEmails(sendEmail, { username: delegue.username, force: true, sender: req.user });
 
       return res.json(stats);
     })
@@ -486,11 +490,41 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         throw Boom.notFound();
       }
 
-      const stats = await resendNotificationEmails(resendEmail, {
-        username: delegue.email,
-        force: true,
-        sender: req.user,
+      const previousNotificationEmail = delegue.emails.find((e) => e.templateName.startsWith("notification_"));
+
+      const stats = previousNotificationEmail
+        ? await resendNotificationEmails(resendEmail, { username: delegue.username, force: true, sender: req.user })
+        : await sendNotificationEmails(sendEmail, { username: delegue.username, force: true, sender: req.user });
+
+      return res.json(stats);
+    })
+  );
+
+  router.put(
+    "/api/responsable/formateurs/:uai/resendUpdateEmail",
+    checkApiToken(),
+    ensureIs(UserType.RESPONSABLE),
+    tryCatch(async (req, res) => {
+      const { siret } = req.user;
+      const { uai } = await Joi.object({
+        uai: Joi.string().pattern(uaiFormat).required(),
+      }).validateAsync(req.params, { abortEarly: false });
+
+      const delegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: { "etablissement_responsable.siret": siret, "etablissement_formateur.uai": uai, active: true },
+        },
       });
+
+      if (!delegue) {
+        throw Boom.notFound();
+      }
+
+      const previousUpdateEmail = delegue.emails.find((e) => e.templateName.startsWith("update_"));
+
+      const stats = previousUpdateEmail
+        ? await resendUpdateEmails(resendEmail, { username: delegue.username, force: true, sender: req.user })
+        : await sendUpdateEmails(sendEmail, { username: delegue.username, force: true, sender: req.user });
 
       return res.json(stats);
     })
