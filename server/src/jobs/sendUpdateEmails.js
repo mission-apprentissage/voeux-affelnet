@@ -16,82 +16,87 @@ const {
 async function sendUpdateEmails(sendEmail, options = {}) {
   const stats = { total: 0, sent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+  let query;
 
-  const relations = await Relation.find({
-    // $and: [
-    //   // { $expr: { $gt: ["$nombre_voeux", 0] } },
-    //   // { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
-    //   // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
-    //   // { $expr: { $ne: ["$first_date_voeux", "$last_date_voeux"] } },
-    // ],
-  });
-  // console.log(relations);
+  if (options.username && options.force) {
+    query = { username: options.username };
+  } else {
+    const relations = await Relation.find({
+      // $and: [
+      //   // { $expr: { $gt: ["$nombre_voeux", 0] } },
+      //   // { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
+      //   // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+      //   // { $expr: { $ne: ["$first_date_voeux", "$last_date_voeux"] } },
+      // ],
+    });
+    // console.log(relations);
 
-  const delegues = (
-    (await Promise.all(
-      relations.map(
-        async (relation) =>
-          await Delegue.findOne({
-            type: UserType.DELEGUE,
-            relations: {
-              $elemMatch: {
-                "etablissement_responsable.siret": relation.etablissement_responsable.siret,
-                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
-                active: true,
+    const delegues = (
+      (await Promise.all(
+        relations.map(
+          async (relation) =>
+            await Delegue.findOne({
+              type: UserType.DELEGUE,
+              relations: {
+                $elemMatch: {
+                  "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                  "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+                  active: true,
+                },
               },
-            },
-          })
-      )
-    )) ?? []
-  )
-    .filter((delegue) => !!delegue)
-    .reduce((acc, delegue) => {
-      if (!acc.find((d) => d.email === delegue.email)) {
-        acc.push(delegue);
-      }
+            })
+        )
+      )) ?? []
+    )
+      .filter((delegue) => !!delegue)
+      .reduce((acc, delegue) => {
+        if (!acc.find((d) => d.email === delegue.email)) {
+          acc.push(delegue);
+        }
 
-      return acc;
-    }, []);
+        return acc;
+      }, []);
 
-  const relationsDeleguees = delegues.flatMap((delegue) => delegue.relations.filter((relation) => relation.active));
+    const relationsDeleguees = delegues.flatMap((delegue) => delegue.relations.filter((relation) => relation.active));
 
-  const relationsNonDeleguees = relations.filter(
-    (relation) =>
-      !relationsDeleguees.find(
-        (relationDeleguee) =>
-          relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
-          relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
-      )
-  );
+    const relationsNonDeleguees = relations.filter(
+      (relation) =>
+        !relationsDeleguees.find(
+          (relationDeleguee) =>
+            relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+            relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
+        )
+    );
 
-  const responsables = await Responsable.find({
-    siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
-  });
+    const responsables = await Responsable.find({
+      siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
+    });
 
-  logger.info(`Sending update emails to ${responsables.length} responsables and ${delegues.length} delegues...`);
+    logger.info(`Sending update emails to ${responsables.length} responsables and ${delegues.length} delegues...`);
 
-  const query = {
-    ...(options.username ? { username: options.username } : {}),
-    ...(options.force
-      ? {}
-      : {
-          unsubscribe: false,
-          statut: { $nin: [UserStatut.NON_CONCERNE] },
+    query = {
+      ...(options.username ? { username: options.username } : {}),
+      ...(options.force
+        ? {}
+        : {
+            unsubscribe: false,
+            statut: { $nin: [UserStatut.NON_CONCERNE] },
 
-          $and: [
-            { "emails.templateName": { $regex: "^notification_.*$" } },
-            { "emails.templateName": { $not: { $regex: "^update_.*$" } } },
-          ],
+            $and: [
+              { "emails.templateName": { $regex: "^notification_.*$" } },
+              { "emails.templateName": { $not: { $regex: "^update_.*$" } } },
+            ],
 
-          $or: [
-            {
-              type: UserType.RESPONSABLE,
-              _id: { $in: responsables.map((responsable) => responsable._id) },
-            },
-            { type: UserType.DELEGUE, _id: { $in: delegues.map((delegue) => delegue._id) } },
-          ],
-        }),
-  };
+            $or: [
+              {
+                type: UserType.RESPONSABLE,
+                _id: { $in: responsables.map((responsable) => responsable._id) },
+              },
+              { type: UserType.DELEGUE, _id: { $in: delegues.map((delegue) => delegue._id) } },
+            ],
+          }),
+    };
+  }
 
   await User.find(query)
     .lean()
