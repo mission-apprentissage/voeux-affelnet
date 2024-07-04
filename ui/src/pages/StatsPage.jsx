@@ -250,15 +250,13 @@ function StatsPage() {
             </Heading>
             <StatGroup mb={4}>
               <Stat mr={2}>
-                <StatLabel>Nombre de candidatures</StatLabel>
-                <StatNumber>{voeux?.total?.toLocaleString()}</StatNumber>
-                <StatHelpText>dont {voeux?.totalRecensement?.toLocaleString()} voeux de recensement</StatHelpText>
+                <StatLabel>Nombre de candidatures (hors voeux générique)</StatLabel>
+                <StatNumber>{(voeux?.totalDiffusable + voeux?.totalNonDiffusable)?.toLocaleString()}</StatNumber>
               </Stat>
 
               <Stat mr={2}>
-                <StatLabel>Nombre de candidatures diffusables</StatLabel>
-                <StatNumber>{voeux?.totalDiffusable?.toLocaleString()}</StatNumber>
-                <StatHelpText>et {voeux?.totalNonDiffusable?.toLocaleString()} non diffusables</StatHelpText>
+                <StatLabel>Candidatures non diffusables</StatLabel>
+                <StatNumber>{voeux?.totalNonDiffusable?.toLocaleString()}</StatNumber>
               </Stat>
 
               <Stat mr={2}>
