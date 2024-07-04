@@ -82,7 +82,7 @@ function LoginPage() {
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   const location = useLocation();
-  const { actionToken } = queryString.parse(location.search);
+  const { actionToken, redirect } = queryString.parse(location.search);
   const username = decodeJWT(actionToken)?.sub || query.get("username");
   const [data, loading, error] = useFetch(`/api/login/status?username=${username}&token=${actionToken}`);
 
@@ -105,7 +105,7 @@ function LoginPage() {
     try {
       const { token } = await _post("/api/login", values);
       setAuth(token);
-      navigate("/");
+      navigate(redirect ?? "/");
     } catch (e) {
       console.error(e);
       setStatus({ error: e.prettyMessage });
