@@ -14,6 +14,8 @@ import { DelegationModal } from "../../../common/components/admin/modals/Delegat
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { UserStatut } from "../../../common/constants/UserStatut";
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
+import { Breadcrumb } from "../../../common/components/Breadcrumb";
+import { ResponsableLibelle } from "../../../common/components/responsable/fields/ResponsableLibelle";
 
 export const Formateur = () => {
   const mounted = useRef(false);
@@ -194,21 +196,46 @@ export const Formateur = () => {
   const hasVoeux = relation?.nombre_voeux > 0;
   const hasUpdate = new Date(relation?.first_date_voeux).getTime() !== new Date(relation?.last_date_voeux).getTime();
 
+  const title = (
+    <>
+      Organisme {isResponsableFormateurCheck ? <>responsable-formateur</> : <>formateur</>} :&nbsp;
+      <FormateurLibelle formateur={formateur} />
+    </>
+  );
+
   return (
-    <Page
-      title={
-        <>
-          Organisme {isResponsableFormateurCheck ? <>responsable-formateur</> : <>formateur</>} :&nbsp;
-          <FormateurLibelle formateur={formateur} />
-        </>
-      }
-    >
-      <Box my={6}>
-        <Text mb={4}>
-          Adresse : {formateur?.adresse} – Siret : {formateur?.siret ?? "Inconnu"} – UAI : {formateur?.uai ?? "Inconnu"}
-        </Text>
-      </Box>
-      {/*
+    <>
+      <Breadcrumb
+        items={[
+          {
+            label: (
+              <>
+                Organisme responsable :&nbsp;
+                <ResponsableLibelle responsable={responsable} />
+              </>
+            ),
+            url: `/admin/responsable/${siret}`,
+          },
+          {
+            label: (
+              <>
+                Organisme {isResponsableFormateurCheck ? <>responsable-formateur</> : <>formateur</>} :&nbsp;
+                <FormateurLibelle formateur={formateur} />
+              </>
+            ),
+            url: `/admin/responsable/${siret}/formateur/${uai}`,
+          },
+        ]}
+      />
+
+      <Page title={title}>
+        <Box my={6}>
+          <Text mb={4}>
+            Adresse : {formateur?.adresse} – Siret : {formateur?.siret ?? "Inconnu"} – UAI :{" "}
+            {formateur?.uai ?? "Inconnu"}
+          </Text>
+        </Box>
+        {/*
       {isResponsableFormateurCheck ? (
         <Box mb={12}>
           <Text mb={4}>
@@ -230,150 +257,152 @@ export const Formateur = () => {
           />
         </Box>
       ) : ( */}
-      <Box mb={12}>
-        <Alert status="info" variant="left-accent" my={6}>
-          <Box>
-            <Text mb={2}>
-              <Text as="b" style={{ textDecoration: "underline" }}>
-                Organisme responsable
-              </Text>{" "}
-              : {responsable?.raison_sociale}
-            </Text>
-            <Text mb={2}>
-              Adresse : {responsable?.adresse ?? "Inconnue"} – Siret : {responsable?.siret ?? "Inconnu"} – UAI :{" "}
-              {responsable?.uai ?? "Inconnu"}
-            </Text>
-            <Text mb={2}>
-              Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
-              {responsable?.email}
-            </Text>
-            <Text mb={2}>
-              <Link variant="action" href={`/admin/responsable/${responsable?.siret}  `}>
-                Accéder à la page de l'organisme responsable
-              </Link>
-            </Text>
-            <Text mb={2}>
-              <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
-                Accéder à la liste des formateurs dépendants de cet organisme responsable
-              </Link>
+        <Box mb={12}>
+          <Alert status="info" variant="left-accent" my={6}>
+            <Box>
+              <Text mb={2}>
+                <Text as="b" style={{ textDecoration: "underline" }}>
+                  Organisme responsable
+                </Text>{" "}
+                : {responsable?.raison_sociale}
+              </Text>
+              <Text mb={2}>
+                Adresse : {responsable?.adresse ?? "Inconnue"} – Siret : {responsable?.siret ?? "Inconnu"} – UAI :{" "}
+                {responsable?.uai ?? "Inconnu"}
+              </Text>
+              <Text mb={2}>
+                Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
+                {responsable?.email}
+              </Text>
+              <Text mb={2}>
+                <Link variant="action" href={`/admin/responsable/${responsable?.siret}  `}>
+                  Accéder à la page de l'organisme responsable
+                </Link>
+              </Text>
+              <Text mb={2}>
+                <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
+                  Accéder à la liste des formateurs dépendants de cet organisme responsable
+                </Link>
+              </Text>
+            </Box>
+          </Alert>
+
+          {isDiffusionAutorisee ? (
+            <>
+              <Text mb={4}>
+                La délégation des droits de réception des listes de candidats a été activée pour cet organisme
+                formateur.{" "}
+              </Text>
+              <Text mb={4}>
+                Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
+                <FormateurEmail responsable={responsable} formateur={formateur} delegue={delegue} />{" "}
+                <Link variant="action" onClick={onOpenUpdateDelegationModal}>
+                  (modifier)
+                </Link>
+              </Text>
+
+              <UpdateDelegationModal
+                relation={relation}
+                callback={callback}
+                isOpen={isOpenUpdateDelegationModal}
+                onClose={onCloseUpdateDelegationModal}
+              />
+            </>
+          ) : (
+            <>
+              <Text mb={4}>
+                La délégation des droits de réception des listes de candidats n'a pas été activée pour cet organisme
+                formateur. Seul le responsable peut les réceptionner.
+              </Text>
+
+              <Button variant="primary" mb={4} onClick={onOpenDelegationModal}>
+                Définir une délégation de droits pour cet organisme
+              </Button>
+
+              <DelegationModal
+                relation={relation}
+                callback={callback}
+                isOpen={isOpenDelegationModal}
+                onClose={onCloseDelegationModal}
+              />
+            </>
+          )}
+        </Box>
+        {/* )} */}
+
+        <Box mb={12} id="statut">
+          <Heading as="h3" size="md" mb={4}>
+            Statut
+          </Heading>
+
+          <Box mb={4}>
+            <Text display={"inline-flex"}>
+              <Box mr={2} display="inline-flex">
+                <FormateurStatut relation={relation} />.
+              </Box>
+              {isDiffusionAutorisee /*|| isResponsableFormateurCheck*/ &&
+                (() => {
+                  switch (true) {
+                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
+                      //!!delegue.emails.filter((email) => email.templateName === "update_delegue").length:
+                      return (
+                        <Link variant="action" onClick={resendUpdateEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
+                      //!!delegue.emails.filter((email) => email.templateName === "notification_delegue").length:
+                      return (
+                        <Link variant="action" onClick={resendNotificationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+                    case UserStatut.CONFIRME === delegue.statut:
+                      // !!delegue.emails.filter((email) => email.templateName === "activation_delegue").length:
+                      return (
+                        <Link variant="action" onClick={resendActivationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+
+                    default:
+                      return <></>;
+                  }
+                })()}
             </Text>
           </Box>
-        </Alert>
 
-        {isDiffusionAutorisee ? (
-          <>
-            <Text mb={4}>
-              La délégation des droits de réception des listes de candidats a été activée pour cet organisme formateur.{" "}
-            </Text>
-            <Text mb={4}>
-              Personne habilitée à réceptionner les listes au sein de l'organisme formateur :{" "}
-              <FormateurEmail responsable={responsable} formateur={formateur} delegue={delegue} />{" "}
-              <Link variant="action" onClick={onOpenUpdateDelegationModal}>
-                (modifier)
-              </Link>
-            </Text>
+          <Heading as="h4" size="sm" mb={4}>
+            Nombre de candidats: {relation.nombre_voeux.toLocaleString()}
+          </Heading>
 
-            <UpdateDelegationModal
-              relation={relation}
-              callback={callback}
-              isOpen={isOpenUpdateDelegationModal}
-              onClose={onCloseUpdateDelegationModal}
-            />
-          </>
-        ) : (
-          <>
-            <Text mb={4}>
-              La délégation des droits de réception des listes de candidats n'a pas été activée pour cet organisme
-              formateur. Seul le responsable peut les réceptionner.
-            </Text>
-
-            <Button variant="primary" mb={4} onClick={onOpenDelegationModal}>
-              Définir une délégation de droits pour cet organisme
-            </Button>
-
-            <DelegationModal
-              relation={relation}
-              callback={callback}
-              isOpen={isOpenDelegationModal}
-              onClose={onCloseDelegationModal}
-            />
-          </>
-        )}
-      </Box>
-      {/* )} */}
-
-      <Box mb={12} id="statut">
-        <Heading as="h3" size="md" mb={4}>
-          Statut
-        </Heading>
-
-        <Box mb={4}>
-          <Text display={"inline-flex"}>
-            <Box mr={2} display="inline-flex">
-              <FormateurStatut relation={relation} />.
-            </Box>
-            {isDiffusionAutorisee /*|| isResponsableFormateurCheck*/ &&
-              (() => {
-                switch (true) {
-                  case UserStatut.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
-                    //!!delegue.emails.filter((email) => email.templateName === "update_delegue").length:
-                    return (
-                      <Link variant="action" onClick={resendUpdateEmail}>
-                        Générer un nouvel envoi de notification
-                      </Link>
-                    );
-                  case UserStatut.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
-                    //!!delegue.emails.filter((email) => email.templateName === "notification_delegue").length:
-                    return (
-                      <Link variant="action" onClick={resendNotificationEmail}>
-                        Générer un nouvel envoi de notification
-                      </Link>
-                    );
-                  case UserStatut.CONFIRME === delegue.statut:
-                    // !!delegue.emails.filter((email) => email.templateName === "activation_delegue").length:
-                    return (
-                      <Link variant="action" onClick={resendActivationEmail}>
-                        Générer un nouvel envoi de notification
-                      </Link>
-                    );
-
-                  default:
-                    return <></>;
-                }
-              })()}
-          </Text>
+          {hasVoeux && (
+            <Link variant="action" onClick={() => downloadVoeux({ responsable, formateur })}>
+              Télécharger la liste
+            </Link>
+          )}
         </Box>
 
-        <Heading as="h4" size="sm" mb={4}>
-          Nombre de candidats: {relation.nombre_voeux.toLocaleString()}
-        </Heading>
+        <Box mb={12}>
+          <Heading as="h3" size="md" mb={4}>
+            Historique des actions
+          </Heading>
 
-        {hasVoeux && (
-          <Link variant="action" onClick={() => downloadVoeux({ responsable, formateur })}>
-            Télécharger la liste
+          <History
+            formateur={formateur}
+            responsable={isResponsableFormateurCheck ? responsable : undefined}
+            delegue={delegue}
+            relation={relation}
+          />
+        </Box>
+
+        <Box mb={12}>
+          <Link href="/support" variant="action">
+            Signaler une anomalie
           </Link>
-        )}
-      </Box>
-
-      <Box mb={12}>
-        <Heading as="h3" size="md" mb={4}>
-          Historique des actions
-        </Heading>
-
-        <History
-          formateur={formateur}
-          responsable={isResponsableFormateurCheck ? responsable : undefined}
-          delegue={delegue}
-          relation={relation}
-        />
-      </Box>
-
-      <Box mb={12}>
-        <Link href="/support" variant="action">
-          Signaler une anomalie
-        </Link>
-      </Box>
-    </Page>
+        </Box>
+      </Page>
+    </>
   );
 };
 

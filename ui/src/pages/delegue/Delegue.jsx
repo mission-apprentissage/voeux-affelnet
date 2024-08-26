@@ -3,6 +3,7 @@ import { Box, Text, Heading, Link, useDisclosure } from "@chakra-ui/react";
 import { Page } from "../../common/components/layout/Page";
 import { UpdateDelegueEmailModal } from "../../common/components/delegue/modals/UpdateDelegueEmailModal";
 import { History } from "../responsable/History";
+import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Delegue = ({ delegue, callback }) => {
   const { onOpen, isOpen, onClose } = useDisclosure();
@@ -13,15 +14,24 @@ export const Delegue = ({ delegue, callback }) => {
 
   const relations = delegue?.relations?.filter((relation) => relation.active) ?? [];
 
+  const title = (
+    <>
+      Compte délégué :&nbsp;<strong>{delegue.email}</strong>
+    </>
+  );
+
   return (
     <>
-      <Page
-        title={
-          <>
-            Compte délégué :&nbsp;<strong>{delegue.email}</strong>
-          </>
-        }
-      >
+      <Breadcrumb
+        items={[
+          {
+            label: "Profil",
+            url: "/profil",
+          },
+        ]}
+      />
+
+      <Page title={title}>
         <Box mb={12}>
           <Text mb={4}>
             Votre adresse courriel : {delegue.email}.{" "}

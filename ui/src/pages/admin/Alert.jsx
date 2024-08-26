@@ -1,26 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Center,
-  Heading,
-  Button,
-  FormControl,
-  FormLabel,
-  Container,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  Textarea,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, Center, Heading, Button, FormControl, FormLabel, Container, Textarea, VStack } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 import { useFormik } from "formik";
 import { _post, _get, _delete } from "../../common/httpClient";
 import { ArrowDropRightLine } from "../../theme/components/icons";
 import useAuth from "../../common/hooks/useAuth";
+import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Alert = () => {
-  const [messagesManuels, setMessagesManuels] = useState([]);
+  const [messages, setMessages] = useState([]);
 
   const [user] = useAuth();
   const mountedRef = useRef(true);
@@ -31,7 +19,7 @@ export const Alert = () => {
         try {
           const data = await _get("/api/alert");
 
-          setMessagesManuels(data);
+          setMessages(data);
         } catch (e) {
           console.error(e);
         }
@@ -99,56 +87,62 @@ export const Alert = () => {
   };
 
   return (
-    <Box w="100%" pt={[4, 8]} px={[1, 1, 12, 24]}>
-      <Container maxW="xl">
-        <Center verticalAlign="center">
-          <Box mt={10} width={["auto", "50rem"]}>
-            <Heading textStyle="h2" marginBottom="2w">
-              Message de maintenance
-            </Heading>
-            <Box>
-              <FormControl as="fieldset">
-                <FormLabel as="legend">Liste des messages manuels: </FormLabel>
-                <Box>
-                  <VStack wrap="none">
-                    {messagesManuels.map((message, index) => {
-                      return (
-                        <Box w="100%" display={"inline-flex"} key={index}>
-                          <Box w="80%">
-                            <Textarea disabled>{message.msg}</Textarea>
-                          </Box>
-                          <Box w="20%" alignSelf="right" alignItems="right">
-                            <Button textStyle="sm" variant="danger" onClick={() => deleteMessage(message)}>
-                              Supprimer
-                            </Button>
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                  </VStack>
-                </Box>
-              </FormControl>
+    <>
+      <Breadcrumb items={[{ label: "Gestion des messages de maintenance", url: "/admin/alert" }]} />
 
-              <FormControl as="fieldset" mt={5}>
-                <FormLabel as="legend">Ajouter un message manuel: </FormLabel>
-                <Textarea
-                  name="msg"
-                  value={valuesM.msg}
-                  onChange={handleChangeM}
-                  placeholder="Saisissez un message manuel"
-                  rows={3}
-                  required
-                />
-                <Box mt="1rem" textAlign="right">
-                  <Button textStyle="sm" variant="primary" disabled={!valuesM.msg?.length} onClick={handleSubmitM}>
-                    Enregistrer et activer
-                  </Button>
-                </Box>
-              </FormControl>
+      <Box w="100%" pt={[4, 8]} px={[1, 1, 12, 24]}>
+        <Container maxW="xl">
+          <Center verticalAlign="center">
+            <Box mt={10} width={["auto", "50rem"]}>
+              <Heading textStyle="h2" marginBottom="2w">
+                Message de maintenance
+              </Heading>
+              <Box>
+                {!!messages.length && (
+                  <FormControl as="fieldset">
+                    <FormLabel as="legend">Liste des messages : </FormLabel>
+                    <Box>
+                      <VStack wrap="none">
+                        {messages.map((message, index) => {
+                          return (
+                            <Box w="100%" display={"inline-flex"} key={index}>
+                              <Box w="80%">
+                                <Textarea disabled>{message.msg}</Textarea>
+                              </Box>
+                              <Box w="20%" alignSelf="right" alignItems="right">
+                                <Button textStyle="sm" variant="danger" onClick={() => deleteMessage(message)}>
+                                  Supprimer
+                                </Button>
+                              </Box>
+                            </Box>
+                          );
+                        })}
+                      </VStack>
+                    </Box>
+                  </FormControl>
+                )}
+
+                <FormControl as="fieldset" mt={5}>
+                  <FormLabel as="legend">Ajouter un message : </FormLabel>
+                  <Textarea
+                    name="msg"
+                    value={valuesM.msg}
+                    onChange={handleChangeM}
+                    placeholder="Saisissez un message"
+                    rows={3}
+                    required
+                  />
+                  <Box mt="1rem" textAlign="right">
+                    <Button textStyle="sm" variant="primary" disabled={!valuesM.msg?.length} onClick={handleSubmitM}>
+                      Enregistrer et activer
+                    </Button>
+                  </Box>
+                </FormControl>
+              </Box>
             </Box>
-          </Box>
-        </Center>
-      </Container>
-    </Box>
+          </Center>
+        </Container>
+      </Box>
+    </>
   );
 };

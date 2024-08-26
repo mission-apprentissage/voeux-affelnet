@@ -19,6 +19,8 @@ import { FileDownloadLine } from "../../../theme/components/icons/FileDownloadLi
 import { useDownloadStatut } from "../../../common/hooks/adminHooks";
 import { ResponsableEmail } from "../../../common/components/admin/fields/ResponsableEmail";
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
+import { Breadcrumb } from "../../../common/components/Breadcrumb";
+import { Page } from "../../../common/components/layout/Page";
 
 export const Etablissements = () => {
   const mounted = useRef(true);
@@ -128,285 +130,292 @@ export const Etablissements = () => {
 
   return (
     <>
-      <Formik
-        enableReinitialize
-        initialValues={{
-          text: "",
-          ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
-        }}
-        validationSchema={Yup.object().shape({
-          text: Yup.string(),
-        })}
-        onSubmit={callback}
-        onChange={callback}
-      >
-        {({ handleSubmit, handleChange, values, submitForm }) => {
-          return (
-            <Form id="search">
-              <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
-                <Box w="50%" pr={4}>
-                  <Field name="academie">
-                    {({ field, setFieldValue, meta }) => {
+      <Breadcrumb items={[]} />
+      <Page title="Listes de candidats Affelnet : console de pilotage">
+        <Formik
+          enableReinitialize
+          initialValues={{
+            text: "",
+            ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
+          }}
+          validationSchema={Yup.object().shape({
+            text: Yup.string(),
+          })}
+          onSubmit={callback}
+          onChange={callback}
+        >
+          {({ handleSubmit, handleChange, values, submitForm }) => {
+            return (
+              <Form id="search">
+                <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
+                  <Box w="50%" pr={4}>
+                    <Field name="academie">
+                      {({ field, setFieldValue, meta }) => {
+                        return (
+                          <Select
+                            placeholder={"Académie (toutes)"}
+                            disabled={self.academies?.length === 1}
+                            {...field}
+                            onChange={(value) => {
+                              handleChange(value);
+                              handleSubmit();
+                            }}
+                          >
+                            {academies.map((academie) => (
+                              <option
+                                key={academie.code}
+                                value={academie.code}
+                                disabled={
+                                  self.academies?.length &&
+                                  !self.academies.map((academie) => academie.code).includes(academie.code)
+                                }
+                              >
+                                {academie.nom}
+                              </option>
+                            ))}
+                          </Select>
+                        );
+                      }}
+                    </Field>
+                  </Box>
+
+                  <Box w="50%" pl={4}>
+                    <Field name="type">
+                      {({ field }) => {
+                        return (
+                          <Select
+                            placeholder={"Type d'organisme (tous)"}
+                            {...field}
+                            onChange={(value) => {
+                              handleChange(value);
+                              handleSubmit();
+                            }}
+                          >
+                            <option value="Responsable">Organisme responsable</option>
+                            <option value="Formateur">Organisme formateur</option>
+                          </Select>
+                        );
+                      }}
+                    </Field>
+                  </Box>
+                </Box>
+
+                <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
+                  <Field name="text">
+                    {({ field, meta }) => {
                       return (
-                        <Select
-                          placeholder={"Académie (toutes)"}
-                          disabled={self.academies?.length === 1}
+                        <Input
+                          placeholder={"Chercher un Siret, un UAI, une raison sociale, un email"}
+                          style={{ margin: 0 }}
+                          onChange={handleSubmit}
+                          onInput={handleSubmit}
                           {...field}
-                          onChange={(value) => {
-                            handleChange(value);
-                            handleSubmit();
-                          }}
-                        >
-                          {academies.map((academie) => (
-                            <option
-                              key={academie.code}
-                              value={academie.code}
-                              disabled={
-                                self.academies?.length &&
-                                !self.academies.map((academie) => academie.code).includes(academie.code)
-                              }
-                            >
-                              {academie.nom}
-                            </option>
-                          ))}
-                        </Select>
+                        />
                       );
                     }}
                   </Field>
-                </Box>
-
-                <Box w="50%" pl={4}>
-                  <Field name="type">
-                    {({ field }) => {
-                      return (
-                        <Select
-                          placeholder={"Type d'organisme (tous)"}
-                          {...field}
-                          onChange={(value) => {
-                            handleChange(value);
-                            handleSubmit();
-                          }}
-                        >
-                          <option value="Responsable">Organisme responsable</option>
-                          <option value="Formateur">Organisme formateur</option>
-                        </Select>
-                      );
-                    }}
-                  </Field>
-                </Box>
-              </Box>
-
-              <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
-                <Field name="text">
-                  {({ field, meta }) => {
-                    return (
-                      <Input
-                        placeholder={"Chercher un Siret, un UAI, une raison sociale, un email"}
-                        style={{ margin: 0 }}
-                        onChange={handleSubmit}
-                        onInput={handleSubmit}
-                        {...field}
-                      />
-                    );
-                  }}
-                </Field>
-                {/*
+                  {/*
                 <Button variant="primary" type="submit" form="search">
                   Rechercher
                 </Button> */}
-              </Box>
+                </Box>
 
-              {error && <ErrorMessage>Une erreur est survenue</ErrorMessage>}
-            </Form>
-          );
-        }}
-      </Formik>
+                {error && <ErrorMessage>Une erreur est survenue</ErrorMessage>}
+              </Form>
+            );
+          }}
+        </Formik>
 
-      <Box display="flex" justifyContent={"right"}>
-        <Link onClick={downloadStatutToCSV}>
-          {downloading ? <Spinner size="sm" verticalAlign={"middle"} /> : <FileDownloadLine verticalAlign={"middle"} />}{" "}
-          Exporter (csv)
-        </Link>
-      </Box>
+        <Box display="flex" justifyContent={"right"}>
+          <Link onClick={downloadStatutToCSV}>
+            {downloading ? (
+              <Spinner size="sm" verticalAlign={"middle"} />
+            ) : (
+              <FileDownloadLine verticalAlign={"middle"} />
+            )}{" "}
+            Exporter (csv)
+          </Link>
+        </Box>
 
-      <Table style={{ marginTop: "15px" }}>
-        <Thead>
-          <Tr>
-            <Th width="80px"></Th>
-
-            <Th width="450px">Raison sociale / Ville</Th>
-            <Th width="350px">Courriel habilité</Th>
-
-            <Th width={"70px"}>Candidats</Th>
-            <Th width={"70px"}>Restant à télécharger</Th>
-            <Th>Statut</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {loading || data.length === 0 ? (
+        <Table style={{ marginTop: "15px" }}>
+          <Thead>
             <Tr>
-              <Td colSpan={6}>{loading ? <Progress size="xs" isIndeterminate /> : "Pas de résultats"}</Td>
-            </Tr>
-          ) : (
-            data.map((user, index) => {
-              return (
-                <Tr key={index}>
-                  {
-                    {
-                      Responsable: (
-                        <>
-                          <Td>
-                            <Link variant="primary" href={`/admin/responsable/${user.siret}`}>
-                              Détail
-                            </Link>
-                          </Td>
-                          <Td>
-                            <Box lineHeight={6}>
-                              <ResponsableLibelle responsable={user} />{" "}
-                              <OrganismeResponsableTag verticalAlign="baseline" />
-                            </Box>
-                          </Td>
-                          <Td>
-                            <Box lineHeight={6}>
-                              <ResponsableEmail responsable={user} />
-                            </Box>
-                          </Td>
-                          <Td>{user.nombre_voeux.toLocaleString()}</Td>
-                          <Td>{user.nombre_voeux_restant.toLocaleString()}</Td>
-                          <Td>
-                            <Box lineHeight={6}>
-                              <ResponsableStatut responsable={user} />{" "}
-                            </Box>
-                          </Td>
-                        </>
-                      ),
-                      Formateur: (
-                        <>
-                          <Td>
-                            <Link variant="primary" href={`/admin/formateur/${user.uai}`}>
-                              Détail
-                            </Link>
-                          </Td>
-                          <Td>
-                            <Box lineHeight={6}>
-                              <FormateurLibelle formateur={user} /> <OrganismeFormateurTag verticalAlign="baseline" />
-                            </Box>
-                          </Td>
-                          <Td>
-                            <Box lineHeight={6}>
-                              {user.relations?.map((relation, index) => {
-                                const delegue = relation.delegue;
-                                const responsable = relation.responsable ?? relation.etablissements_responsable;
+              <Th width="80px"></Th>
 
-                                return (
-                                  <Box key={index}>
-                                    <FormateurEmail responsable={responsable} formateur={user} delegue={delegue} />
-                                  </Box>
-                                );
-                              })}
-                            </Box>
-                          </Td>
-                          <Td>
-                            <Text>{user.nombre_voeux.toLocaleString()}</Text>
-                          </Td>
-                          <Td>
-                            <Text>{user.nombre_voeux_restant.toLocaleString()}</Text>
-                          </Td>
-                          <Td>
-                            <Box lineHeight={6}>
-                              {user.relations?.map((relation, index) => {
-                                return <FormateurStatut key={index} relation={relation} />;
-                              })}
-                            </Box>
-                          </Td>
-                        </>
-                      ),
-                      // Etablissement: (
-                      //   <>
-                      //     <Td>
-                      //       <Link variant="primary" href={`/admin/etablissement/${user.siret}`}>
-                      //         Détail
-                      //       </Link>
-                      //     </Td>
-                      //     <Td>
-                      //       <Text lineHeight={6}>
-                      //         <EtablissementLibelle etablissement={user} />{" "}
-                      //         {!!user.etablissements_formateur?.length && (
-                      //           <OrganismeResponsableTag verticalAlign="baseline" />
-                      //         )}
-                      //         {!!user.etablissements_responsable?.length && (
-                      //           <OrganismeFormateurTag verticalAlign="baseline" />
-                      //         )}
-                      //       </Text>
-                      //     </Td>
-                      //     <Td>
-                      //       <Text lineHeight={6}>
-                      //         {!!user.formateurs?.length && (
-                      //           <>
-                      //             {user.email} <ContactResponsableTag />
-                      //           </>
-                      //         )}
-                      //         {!!user.responsables?.length &&
-                      //           user.responsables
-                      //             ?.filter((responsable) => responsable?.siret !== user.siret)
-                      //             ?.map((responsable) => {
-                      //               const etablissement = responsable?.etablissements_formateur.find(
-                      //                 (etablissement) => etablissement.uai === user.uai
-                      //               );
-                      //               return etablissement?.diffusion_autorisee ? (
-                      //                 <Box>
-                      //                   {user.email ?? etablissement.email} <ContactDelegueTag />
-                      //                 </Box>
-                      //               ) : (
-                      //                 <Box>
-                      //                   {responsable?.email} <ContactResponsableTag />
-                      //                 </Box>
-                      //               );
-                      //             })}
-                      //       </Text>
-                      //     </Td>
-                      //     <Td>
-                      //       {/* {user.nombre_voeux.toLocaleString()} */}
-                      //       {user.etablissements_responsable.reduce(
-                      //         (acc, etablissement) => acc + etablissement.nombre_voeux,
-                      //         0
-                      //       ) +
-                      //         user.etablissements_formateur.reduce(
-                      //           (acc, etablissement) => acc + etablissement.nombre_voeux,
-                      //           0
-                      //         )}
-                      //     </Td>
-                      //     <Td>
-                      //       {user.etablissements_responsable.reduce(
-                      //         (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
-                      //         0
-                      //       ) +
-                      //         user.etablissements_formateur.reduce(
-                      //           (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
-                      //           0
-                      //         )}
-                      //     </Td>
-                      //     <Td>
-                      //       <Text lineHeight={6}>
-                      //         <ResponsableStatut responsable={user} />{" "}
-                      //         {user.responsables?.map((responsable) => {
-                      //           return <FormateurStatut responsable={responsable} formateur={user} />;
-                      //         })}
-                      //       </Text>
-                      //     </Td>
-                      //   </>
-                      // ),
-                    }[user.type]
-                  }
-                </Tr>
-              );
-            })
-          )}
-        </Tbody>
-      </Table>
-      <Box mt={4} mb={4} ml="auto" mr="auto">
-        <Pagination pagination={pagination} onClick={(page) => search({ ...query, page })} />
-      </Box>
+              <Th width="450px">Raison sociale / Ville</Th>
+              <Th width="350px">Courriel habilité</Th>
+
+              <Th width={"70px"}>Candidats</Th>
+              <Th width={"70px"}>Restant à télécharger</Th>
+              <Th>Statut</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {loading || data.length === 0 ? (
+              <Tr>
+                <Td colSpan={6}>{loading ? <Progress size="xs" isIndeterminate /> : "Pas de résultats"}</Td>
+              </Tr>
+            ) : (
+              data.map((user, index) => {
+                return (
+                  <Tr key={index}>
+                    {
+                      {
+                        Responsable: (
+                          <>
+                            <Td>
+                              <Link variant="primary" href={`/admin/responsable/${user.siret}`}>
+                                Détail
+                              </Link>
+                            </Td>
+                            <Td>
+                              <Box lineHeight={6}>
+                                <ResponsableLibelle responsable={user} />{" "}
+                                <OrganismeResponsableTag verticalAlign="baseline" />
+                              </Box>
+                            </Td>
+                            <Td>
+                              <Box lineHeight={6}>
+                                <ResponsableEmail responsable={user} />
+                              </Box>
+                            </Td>
+                            <Td>{user.nombre_voeux.toLocaleString()}</Td>
+                            <Td>{user.nombre_voeux_restant.toLocaleString()}</Td>
+                            <Td>
+                              <Box lineHeight={6}>
+                                <ResponsableStatut responsable={user} />{" "}
+                              </Box>
+                            </Td>
+                          </>
+                        ),
+                        Formateur: (
+                          <>
+                            <Td>
+                              <Link variant="primary" href={`/admin/formateur/${user.uai}`}>
+                                Détail
+                              </Link>
+                            </Td>
+                            <Td>
+                              <Box lineHeight={6}>
+                                <FormateurLibelle formateur={user} /> <OrganismeFormateurTag verticalAlign="baseline" />
+                              </Box>
+                            </Td>
+                            <Td>
+                              <Box lineHeight={6}>
+                                {user.relations?.map((relation, index) => {
+                                  const delegue = relation.delegue;
+                                  const responsable = relation.responsable ?? relation.etablissements_responsable;
+
+                                  return (
+                                    <Box key={index}>
+                                      <FormateurEmail responsable={responsable} formateur={user} delegue={delegue} />
+                                    </Box>
+                                  );
+                                })}
+                              </Box>
+                            </Td>
+                            <Td>
+                              <Text>{user.nombre_voeux.toLocaleString()}</Text>
+                            </Td>
+                            <Td>
+                              <Text>{user.nombre_voeux_restant.toLocaleString()}</Text>
+                            </Td>
+                            <Td>
+                              <Box lineHeight={6}>
+                                {user.relations?.map((relation, index) => {
+                                  return <FormateurStatut key={index} relation={relation} />;
+                                })}
+                              </Box>
+                            </Td>
+                          </>
+                        ),
+                        // Etablissement: (
+                        //   <>
+                        //     <Td>
+                        //       <Link variant="primary" href={`/admin/etablissement/${user.siret}`}>
+                        //         Détail
+                        //       </Link>
+                        //     </Td>
+                        //     <Td>
+                        //       <Text lineHeight={6}>
+                        //         <EtablissementLibelle etablissement={user} />{" "}
+                        //         {!!user.etablissements_formateur?.length && (
+                        //           <OrganismeResponsableTag verticalAlign="baseline" />
+                        //         )}
+                        //         {!!user.etablissements_responsable?.length && (
+                        //           <OrganismeFormateurTag verticalAlign="baseline" />
+                        //         )}
+                        //       </Text>
+                        //     </Td>
+                        //     <Td>
+                        //       <Text lineHeight={6}>
+                        //         {!!user.formateurs?.length && (
+                        //           <>
+                        //             {user.email} <ContactResponsableTag />
+                        //           </>
+                        //         )}
+                        //         {!!user.responsables?.length &&
+                        //           user.responsables
+                        //             ?.filter((responsable) => responsable?.siret !== user.siret)
+                        //             ?.map((responsable) => {
+                        //               const etablissement = responsable?.etablissements_formateur.find(
+                        //                 (etablissement) => etablissement.uai === user.uai
+                        //               );
+                        //               return etablissement?.diffusion_autorisee ? (
+                        //                 <Box>
+                        //                   {user.email ?? etablissement.email} <ContactDelegueTag />
+                        //                 </Box>
+                        //               ) : (
+                        //                 <Box>
+                        //                   {responsable?.email} <ContactResponsableTag />
+                        //                 </Box>
+                        //               );
+                        //             })}
+                        //       </Text>
+                        //     </Td>
+                        //     <Td>
+                        //       {/* {user.nombre_voeux.toLocaleString()} */}
+                        //       {user.etablissements_responsable.reduce(
+                        //         (acc, etablissement) => acc + etablissement.nombre_voeux,
+                        //         0
+                        //       ) +
+                        //         user.etablissements_formateur.reduce(
+                        //           (acc, etablissement) => acc + etablissement.nombre_voeux,
+                        //           0
+                        //         )}
+                        //     </Td>
+                        //     <Td>
+                        //       {user.etablissements_responsable.reduce(
+                        //         (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
+                        //         0
+                        //       ) +
+                        //         user.etablissements_formateur.reduce(
+                        //           (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
+                        //           0
+                        //         )}
+                        //     </Td>
+                        //     <Td>
+                        //       <Text lineHeight={6}>
+                        //         <ResponsableStatut responsable={user} />{" "}
+                        //         {user.responsables?.map((responsable) => {
+                        //           return <FormateurStatut responsable={responsable} formateur={user} />;
+                        //         })}
+                        //       </Text>
+                        //     </Td>
+                        //   </>
+                        // ),
+                      }[user.type]
+                    }
+                  </Tr>
+                );
+              })
+            )}
+          </Tbody>
+        </Table>
+        <Box mt={4} mb={4} ml="auto" mr="auto">
+          <Pagination pagination={pagination} onClick={(page) => search({ ...query, page })} />
+        </Box>
+      </Page>
     </>
   );
 };

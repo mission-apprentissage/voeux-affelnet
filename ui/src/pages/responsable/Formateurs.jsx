@@ -6,6 +6,7 @@ import { Page } from "../../common/components/layout/Page";
 
 import { FormateursAvecVoeux } from "./FormateursAvecVoeux";
 import { FormateursSansVoeux } from "./FormateursSansVoeux";
+import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Formateurs = ({ responsable, callback }) => {
   const navigate = useNavigate();
@@ -25,9 +26,20 @@ export const Formateurs = ({ responsable, callback }) => {
 
   const avecVoeux = !!responsable?.nombre_voeux;
 
+  const title = "Listes de candidats aux formations : console d'administration et de téléchargement";
+
   return (
     <>
-      <Page title={"Listes de candidats aux formations : console d'administration et de téléchargement"}>
+      <Breadcrumb
+        items={[
+          {
+            label: title,
+            url: `/responsable/formateurs`,
+          },
+        ]}
+      />
+
+      <Page title={title}>
         <Box mb={12}>
           {!avecVoeux && (
             <Text mb={4}>

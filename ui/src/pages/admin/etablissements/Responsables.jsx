@@ -10,6 +10,7 @@ import { OrganismeResponsableTag } from "../../../common/components/tags/Organis
 // import { ResponsableEmail } from "../../../common/components/admin/fields/ResponsableEmail";
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
+import { Breadcrumb } from "../../../common/components/Breadcrumb";
 
 export const Responsables = () => {
   const navigate = useNavigate();
@@ -81,16 +82,35 @@ export const Responsables = () => {
     return;
   }
 
+  const title = (
+    <>
+      Organisme formateur :&nbsp;
+      <FormateurLibelle formateur={formateur} /> / liste des organismes responsables associés
+    </>
+  );
+
   return (
     <>
-      <Page
-        title={
-          <>
-            Organisme formateur :&nbsp;
-            <FormateurLibelle formateur={formateur} /> / liste des organismes responsables associés
-          </>
-        }
-      >
+      <Breadcrumb
+        items={[
+          {
+            label: (
+              <>
+                Organisme formateur :&nbsp;
+                <FormateurLibelle formateur={formateur} />
+              </>
+            ),
+            url: `/admin/formateur/${uai}`,
+          },
+
+          {
+            label: <>Liste des organismes responsables associés</>,
+            url: `/admin/formateur/${uai}/responsables`,
+          },
+        ]}
+      />
+
+      <Page title={title}>
         <Box mb={12}>
           {formateur?.relations && (
             <Table mt={12}>

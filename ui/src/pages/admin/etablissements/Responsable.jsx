@@ -10,6 +10,7 @@ import { History } from "../../responsable/History";
 import { UserType } from "../../../common/constants/UserType";
 import { UserStatut } from "../../../common/constants/UserStatut";
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
+import { Breadcrumb } from "../../../common/components/Breadcrumb";
 
 export const Responsable = () => {
   const mounted = useRef(false);
@@ -172,40 +173,42 @@ export const Responsable = () => {
   //     relation?.etablissement_responsable.siret === responsable?.siret
   // );
 
+  const title = (
+    <>
+      Organisme responsable :&nbsp;
+      <ResponsableLibelle responsable={responsable} />
+    </>
+  );
   return (
-    <Page
-      title={
-        <>
-          Organisme responsable :&nbsp;
-          <ResponsableLibelle responsable={responsable} />
-        </>
-      }
-    >
-      <Box my={12}>
-        <Box mb={12}>
-          <Text mb={4}>
-            Adresse : {responsable?.adresse} - Siret : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
-            {responsable?.uai ?? "Inconnu"}
-          </Text>
+    <>
+      <Breadcrumb items={[{ label: title, url: `/admin/responsable/${siret}` }]} />
 
-          <Text mb={4}>
-            Email de direction enregistré : <strong>{responsable?.email}</strong>.{" "}
-          </Text>
+      <Page title={title}>
+        <Box my={12}>
+          <Box mb={12}>
+            <Text mb={4}>
+              Adresse : {responsable?.adresse} - Siret : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
+              {responsable?.uai ?? "Inconnu"}
+            </Text>
 
-          {(responsable?.relations?.length === 1 &&
-            responsable?.relations[0]?.etablissement_formateur.uai !== responsable?.uai) ||
-            (responsable?.relations?.length > 1 && (
-              <Text mb={4}>
-                L'organisme est responsable de l'offre de {responsable?.relations?.length} organisme
-                {responsable?.relations?.length > 1 && "s"} formateur
-                {responsable?.relations?.length > 1 && "s"}.{" "}
-                <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
-                  Accéder à la liste
-                </Link>
-              </Text>
-            ))}
+            <Text mb={4}>
+              Email de direction enregistré : <strong>{responsable?.email}</strong>.{" "}
+            </Text>
 
-          {/* {isResponsableFormateurForAtLeastOneEtablissement && (
+            {(responsable?.relations?.length === 1 &&
+              responsable?.relations[0]?.etablissement_formateur.uai !== responsable?.uai) ||
+              (responsable?.relations?.length > 1 && (
+                <Text mb={4}>
+                  L'organisme est responsable de l'offre de {responsable?.relations?.length} organisme
+                  {responsable?.relations?.length > 1 && "s"} formateur
+                  {responsable?.relations?.length > 1 && "s"}.{" "}
+                  <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
+                    Accéder à la liste
+                  </Link>
+                </Text>
+              ))}
+
+            {/* {isResponsableFormateurForAtLeastOneEtablissement && (
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
               <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}>
@@ -214,95 +217,96 @@ export const Responsable = () => {
             </Text>
           )} */}
 
-          <Button variant="primary" onClick={onOpenUpdateResponsableEmailModal}>
-            Modifier l'adresse courriel
-          </Button>
-        </Box>
-
-        <Box mb={12} id="statut">
-          <Heading as="h3" size="md" mb={4}>
-            Statut
-          </Heading>
-
-          <Box mb={4}>
-            <Box display={"inline-flex"}>
-              <Box mr={2} display="inline-flex">
-                <ResponsableStatut responsable={responsable} />.
-              </Box>
-
-              {UserType.RESPONSABLE === responsable?.type &&
-                (() => {
-                  switch (true) {
-                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && hasUpdate:
-                      /* !!responsable?.emails.filter((email) => email.templateName === "update_responsable").length */
-                      return (
-                        <Link variant="action" onClick={resendUpdateEmail}>
-                          Générer un nouvel envoi de notification
-                        </Link>
-                      );
-                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && !hasUpdate:
-                      /* !!responsable?.emails.filter((email) => email.templateName === "notification_responsable").length */
-                      return (
-                        <Link variant="action" onClick={resendNotificationEmail}>
-                          Générer un nouvel envoi de notification
-                        </Link>
-                      );
-                    case UserStatut.CONFIRME === responsable?.statut:
-                      /* !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length */
-                      return (
-                        <Link variant="action" onClick={resendActivationEmail}>
-                          Générer un nouvel envoi de notification
-                        </Link>
-                      );
-                    case UserStatut.EN_ATTENTE === responsable?.statut /*&&
-                    !!responsable?.emails.filter((email) => email.templateName === "confirmation_responsable").length*/:
-                      return (
-                        <Link variant="action" onClick={resendConfirmationEmail}>
-                          Générer un nouvel envoi de notification
-                        </Link>
-                      );
-
-                    default:
-                      return <></>;
-                  }
-                })()}
-            </Box>
+            <Button variant="primary" onClick={onOpenUpdateResponsableEmailModal}>
+              Modifier l'adresse courriel
+            </Button>
           </Box>
 
-          <Heading as="h4" size="sm" mb={4}>
-            Nombre de candidats: {responsable?.nombre_voeux.toLocaleString()}
-          </Heading>
+          <Box mb={12} id="statut">
+            <Heading as="h3" size="md" mb={4}>
+              Statut
+            </Heading>
 
-          <Text mb={4}>
-            <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
-              Voir la liste des organismes formateurs
-            </Link>{" "}
-            pour accéder aux listes de candidats disponibles et à leurs statuts de téléchargement.
-          </Text>
+            <Box mb={4}>
+              <Box display={"inline-flex"}>
+                <Box mr={2} display="inline-flex">
+                  <ResponsableStatut responsable={responsable} />.
+                </Box>
+
+                {UserType.RESPONSABLE === responsable?.type &&
+                  (() => {
+                    switch (true) {
+                      case UserStatut.ACTIVE === responsable?.statut && hasVoeux && hasUpdate:
+                        /* !!responsable?.emails.filter((email) => email.templateName === "update_responsable").length */
+                        return (
+                          <Link variant="action" onClick={resendUpdateEmail}>
+                            Générer un nouvel envoi de notification
+                          </Link>
+                        );
+                      case UserStatut.ACTIVE === responsable?.statut && hasVoeux && !hasUpdate:
+                        /* !!responsable?.emails.filter((email) => email.templateName === "notification_responsable").length */
+                        return (
+                          <Link variant="action" onClick={resendNotificationEmail}>
+                            Générer un nouvel envoi de notification
+                          </Link>
+                        );
+                      case UserStatut.CONFIRME === responsable?.statut:
+                        /* !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length */
+                        return (
+                          <Link variant="action" onClick={resendActivationEmail}>
+                            Générer un nouvel envoi de notification
+                          </Link>
+                        );
+                      case UserStatut.EN_ATTENTE === responsable?.statut /*&&
+                    !!responsable?.emails.filter((email) => email.templateName === "confirmation_responsable").length*/:
+                        return (
+                          <Link variant="action" onClick={resendConfirmationEmail}>
+                            Générer un nouvel envoi de notification
+                          </Link>
+                        );
+
+                      default:
+                        return <></>;
+                    }
+                  })()}
+              </Box>
+            </Box>
+
+            <Heading as="h4" size="sm" mb={4}>
+              Nombre de candidats: {responsable?.nombre_voeux.toLocaleString()}
+            </Heading>
+
+            <Text mb={4}>
+              <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
+                Voir la liste des organismes formateurs
+              </Link>{" "}
+              pour accéder aux listes de candidats disponibles et à leurs statuts de téléchargement.
+            </Text>
+          </Box>
+
+          <Box mb={12}>
+            <Heading as="h3" size="md" mb={4}>
+              Historique des actions
+            </Heading>
+
+            <History responsable={responsable} />
+          </Box>
+
+          <Box mb={12}>
+            <Link href="/support" variant="action">
+              Signaler une anomalie
+            </Link>
+          </Box>
+
+          <UpdateResponsableEmailModal
+            isOpen={isOpenUpdateResponsableEmailModal}
+            onClose={onCloseUpdateResponsableEmailModal}
+            callback={reload}
+            responsable={responsable}
+          />
         </Box>
-
-        <Box mb={12}>
-          <Heading as="h3" size="md" mb={4}>
-            Historique des actions
-          </Heading>
-
-          <History responsable={responsable} />
-        </Box>
-
-        <Box mb={12}>
-          <Link href="/support" variant="action">
-            Signaler une anomalie
-          </Link>
-        </Box>
-
-        <UpdateResponsableEmailModal
-          isOpen={isOpenUpdateResponsableEmailModal}
-          onClose={onCloseUpdateResponsableEmailModal}
-          callback={reload}
-          responsable={responsable}
-        />
-      </Box>
-    </Page>
+      </Page>
+    </>
   );
 };
 

@@ -32,6 +32,7 @@ import { FormateurStatut } from "../../common/components/responsable/fields/Form
 import { UserType } from "../../common/constants/UserType";
 import { UserStatut } from "../../common/constants/UserStatut";
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
+import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Formateur = ({ responsable, callback }) => {
   const { uai } = useParams();
@@ -197,9 +198,25 @@ export const Formateur = ({ responsable, callback }) => {
       ? new Date(delegue.emails?.findLast(() => true)?.sendDates?.findLast(() => true))
       : null;
 
+  const title = "Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation";
+
   return (
     <>
-      <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
+      <Breadcrumb
+        items={[
+          {
+            label: "Listes de candidats aux formations : console d'administration et de téléchargement",
+            url: `/responsable/formateurs`,
+          },
+
+          {
+            label: `${title} (UAI : ${formateur?.uai})`,
+            url: `/responsable/formateurs/${formateur?.uai}`,
+          },
+        ]}
+      />
+
+      <Page title={title}>
         <Box mb={4}>
           <Heading as="h3" size="md" mb={4}>
             Organisme {isResponsableFormateurCheck ? <>responsable-formateur</> : <>formateur</>} :&nbsp;

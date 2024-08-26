@@ -9,6 +9,7 @@ import { FormateurEmail } from "../../../common/components/admin/fields/Formateu
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { _get } from "../../../common/httpClient";
 import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
+import { Breadcrumb } from "../../../common/components/Breadcrumb";
 
 export const Formateurs = () => {
   const mounted = useRef(false);
@@ -72,16 +73,35 @@ export const Formateurs = () => {
     return;
   }
 
+  const title = (
+    <>
+      Organisme responsable :&nbsp;
+      <ResponsableLibelle responsable={responsable} /> / liste des organismes formateurs associés
+    </>
+  );
+
   return (
     <>
-      <Page
-        title={
-          <>
-            Organisme responsable :&nbsp;
-            <ResponsableLibelle responsable={responsable} /> / liste des organismes formateurs associés
-          </>
-        }
-      >
+      <Breadcrumb
+        items={[
+          {
+            label: (
+              <>
+                Organisme responsable :&nbsp;
+                <ResponsableLibelle responsable={responsable} />
+              </>
+            ),
+            url: `/admin/responsable/${siret}`,
+          },
+
+          {
+            label: <>Liste des organismes formateurs associés</>,
+            url: `/admin/responsable/${siret}/formateurs`,
+          },
+        ]}
+      />
+
+      <Page title={title}>
         <Box mb={12}>
           <Text mb={4}>
             <strong>

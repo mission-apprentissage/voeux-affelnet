@@ -5,6 +5,7 @@ import { Page } from "../../common/components/layout/Page";
 import { ResponsableLibelle } from "../../common/components/responsable/fields/ResponsableLibelle";
 import { ResponsableEmail } from "../../common/components/responsable/fields/ResponsableEmail";
 import { History } from "./History";
+import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Responsable = ({ responsable, callback }) => {
   const { onOpen, isOpen, onClose } = useDisclosure();
@@ -21,6 +22,15 @@ export const Responsable = ({ responsable, callback }) => {
 
   return (
     <>
+      <Breadcrumb
+        items={[
+          {
+            label: "Profil",
+            url: "/profil",
+          },
+        ]}
+      />
+
       <Page
         title={
           <>

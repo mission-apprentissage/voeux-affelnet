@@ -12,6 +12,7 @@ import { FormateurEmail } from "../../common/components/formateur/fields/Formate
 import { _get } from "../../common/httpClient";
 import { UserType } from "../../common/constants/UserType";
 import { History } from "../responsable/History";
+import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Relation = ({ delegue, callback }) => {
   const { siret, uai } = useParams();
@@ -82,9 +83,24 @@ export const Relation = ({ delegue, callback }) => {
 
   const hasUpdatedVoeux = voeuxTelechargesAtLeastOnce && !voeuxTelecharges;
 
+  const title = "Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation";
+
   return (
     <>
-      <Page title={"Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation"}>
+      <Breadcrumb
+        items={[
+          {
+            label: "Liste des délégations de droits accordées",
+            url: "/delegue/relations",
+          },
+          {
+            label: title,
+            url: `/delegue/relations/${siret}/${uai}`,
+          },
+        ]}
+      />
+
+      <Page title={title}>
         <Box mb={4}>
           <Heading as="h3" size="md" mb={4}>
             Organisme formateur :&nbsp;

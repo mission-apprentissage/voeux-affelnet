@@ -7,6 +7,7 @@ import { Page } from "../../common/components/layout/Page";
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { ResponsableLibelle } from "../../common/components/responsable/fields/ResponsableLibelle";
 import { FormateurStatut } from "../../common/components/delegue/fields/FormateurStatut";
+import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Relations = ({ delegue, callback }) => {
   const navigate = useNavigate();
@@ -37,13 +38,21 @@ export const Relations = ({ delegue, callback }) => {
     return;
   }
 
+  const title =
+    "Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation / Liste des délégations de droits accordées";
+
   return (
     <>
-      <Page
-        title={
-          "Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation / Liste des délégations de droits accordées"
-        }
-      >
+      <Breadcrumb
+        items={[
+          {
+            label: title,
+            url: "/delegue/relations",
+          },
+        ]}
+      />
+
+      <Page title={title}>
         <Box mb={12}>
           <Text mb={4}>
             <strong>
