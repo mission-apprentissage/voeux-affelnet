@@ -466,7 +466,7 @@ function StatsPage() {
                         <Td>{organismes?.totalResponsable?.toLocaleString()}</Td>
                         <Td>
                           {organismes?.totalResponsableActivated?.toLocaleString()}{" "}
-                          {organismes?.totalResponsableActivated > 0 && (
+                          {organismes?.totalResponsable > 0 && (
                             <>
                               (
                               <b>
