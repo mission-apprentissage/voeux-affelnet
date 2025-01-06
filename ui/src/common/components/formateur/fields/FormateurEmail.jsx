@@ -13,10 +13,10 @@ export const FormateurEmail = ({ responsable, formateur, delegue }) => {
       <Text as="span">
         {isDiffusionAutorisee ? (
           <>
-            <strong>Vous</strong> ({delegue.email})
+            <strong>Vous</strong> ({delegue.email ?? "Information manquante"})
           </>
         ) : (
-          <>{responsable?.email}</>
+          <>{responsable?.email ?? "Information manquante"}</>
         )}
       </Text>
     </>

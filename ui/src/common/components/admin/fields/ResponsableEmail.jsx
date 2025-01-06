@@ -13,11 +13,11 @@ export const ResponsableEmail = ({ responsable, formateur, delegue }) => {
     <>
       {isDiffusionAutorisee ? (
         <Text display={"inline"}>
-          {delegue.email} <ContactDelegueTag />
+          {delegue?.email ?? "Information manquante"} <ContactDelegueTag />
         </Text>
       ) : (
         <Text display={"inline"}>
-          {responsable?.email} <ContactResponsableTag />
+          {responsable?.email ?? "Information manquante"} <ContactResponsableTag />
         </Text>
       )}
     </>
