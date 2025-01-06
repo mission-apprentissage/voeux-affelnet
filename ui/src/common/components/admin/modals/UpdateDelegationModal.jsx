@@ -39,7 +39,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
   const updateDelegationEmail = useCallback(
     async ({ form }) => {
       try {
-        await _post(`/api/admin/responsables/${responsable?.siret}/delegation`, {
+        await _post(`/api/admin/responsables/${responsable?.uai}/delegation`, {
           email: form.email,
           uai: formateur?.uai,
         });
@@ -63,13 +63,13 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         });
       }
     },
-    [callback, onClose, responsable?.siret, formateur?.uai, toast]
+    [callback, onClose, responsable?.uai, formateur?.uai, toast]
   );
 
   const cancelDelegation = useCallback(
     async ({ form }) => {
       try {
-        await _delete(`/api/admin/responsables/${responsable?.siret}/delegation`, {
+        await _delete(`/api/admin/responsables/${responsable?.uai}/delegation`, {
           uai: formateur?.uai,
         });
 
@@ -79,7 +79,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         console.error(error);
       }
     },
-    [callback, onClose, responsable?.siret, formateur?.uai]
+    [callback, onClose, responsable?.uai, formateur?.uai]
   );
 
   return (

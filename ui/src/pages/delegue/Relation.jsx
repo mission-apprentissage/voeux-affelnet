@@ -10,12 +10,12 @@ import { ResponsableLibelle } from "../../common/components/responsable/fields/R
 import { ResponsableEmail } from "../../common/components/formateur/fields/ResponsableEmail";
 import { FormateurEmail } from "../../common/components/formateur/fields/FormateurEmail";
 import { _get } from "../../common/httpClient";
-import { UserType } from "../../common/constants/UserType";
+import { DownloadType } from "../../common/constants/DownloadType";
 import { History } from "../responsable/History";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Relation = ({ delegue, callback }) => {
-  const { siret, uai } = useParams();
+  const { uai_responsable, uai_formateur } = useParams();
 
   const downloadVoeux = useDownloadVoeux();
 
@@ -31,8 +31,8 @@ export const Relation = ({ delegue, callback }) => {
 
   const relation = delegue?.relations?.find(
     (relation) =>
-      relation.etablissement_responsable.siret === siret &&
-      relation.etablissement_formateur.uai === uai &&
+      relation.etablissement_responsable.uai === uai_responsable &&
+      relation.etablissement_formateur.uai === uai_formateur &&
       relation.active
   );
 
@@ -52,15 +52,15 @@ export const Relation = ({ delegue, callback }) => {
   const isDiffusionAutorisee = relation?.active;
 
   // const voeuxTelechargementsResponsable = responsable?.voeux_telechargements_formateur.filter(
-  //   (telechargement) => telechargement.uai === formateur?.uai
+  //   (telechargement) => telechargement.uai_formateur === formateur?.uai
   // );
 
   const voeuxTelechargementsResponsable = relation.voeux_telechargements.filter(
-    (telechargement) => telechargement.userType === UserType.RESPONSABLE
+    (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
   );
 
   const voeuxTelechargementsDelegue = relation.voeux_telechargements.filter(
-    (telechargement) => telechargement.userType === UserType.DELEGUE
+    (telechargement) => telechargement.downloadType === DownloadType.DELEGUE
   );
 
   const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
@@ -95,7 +95,7 @@ export const Relation = ({ delegue, callback }) => {
           },
           {
             label: title,
-            url: `/delegue/relations/${siret}/${uai}`,
+            url: `/delegue/relations/${uai_responsable}/${uai_formateur}`,
           },
         ]}
       />
@@ -108,8 +108,7 @@ export const Relation = ({ delegue, callback }) => {
           </Heading>
 
           <Text mb={4}>
-            Adresse : {formateur?.adresse} - Siret : {formateur?.siret ?? "Inconnu"} - UAI :{" "}
-            {formateur?.uai ?? "Inconnu"}
+            Adresse : {formateur?.adresse} - UAI : {formateur?.uai ?? "Inconnu"}
           </Text>
         </Box>
 
@@ -123,8 +122,7 @@ export const Relation = ({ delegue, callback }) => {
                 : <ResponsableLibelle responsable={responsable} />
               </Text>
               <Text mb={2}>
-                Adresse : {responsable?.adresse ?? "Inconnue"} – Siret : {responsable?.siret ?? "Inconnu"} – UAI :{" "}
-                {responsable?.uai ?? "Inconnu"}
+                Adresse : {responsable?.adresse ?? "Inconnue"} – UAI : {responsable?.uai ?? "Inconnu"}
               </Text>
               <Text mb={2}>
                 Contact au sein de l’organisme responsable : <ResponsableEmail responsable={responsable} />

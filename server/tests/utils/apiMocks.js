@@ -1,11 +1,11 @@
-const uuid = require("uuid");
+// const uuid = require("uuid");
 const nock = require("nock"); // eslint-disable-line node/no-unpublished-require
 const { merge } = require("lodash");
-const faker = require("@faker-js/faker/locale/fr").faker;
+const { fakerFR: faker } = require("@faker-js/faker");
 const CatalogueApi = require("../../src/common/api/CatalogueApi.js");
-const ReferentielApi = require("../../src/common/api/ReferentielApi.js");
+// const ReferentielApi = require("../../src/common/api/ReferentielApi.js");
 const { createUAI } = require("../../src/common/utils/validationUtils.js");
-const TableauDeBordApi = require("../../src/common/api/TableauDeBordApi.js");
+// const TableauDeBordApi = require("../../src/common/api/TableauDeBordApi.js");
 
 function createNock(baseUrl) {
   const client = nock(baseUrl);
@@ -13,156 +13,156 @@ function createNock(baseUrl) {
 }
 
 module.exports = {
-  mockReferentielApi(callback) {
-    const client = createNock(ReferentielApi.baseApiUrl);
+  // mockReferentielApi(callback) {
+  //   const client = createNock(ReferentielApi.baseApiUrl);
 
-    function createOrganisme(custom = {}) {
-      const uai = createUAI(faker.helpers.replaceSymbols("075####"));
+  //   function createOrganisme(custom = {}) {
+  //     const uai = createUAI(faker.helpers.replaceSymbols("075####"));
 
-      return merge(
-        {},
-        {
-          siret: faker.helpers.replaceSymbols("#########00015"),
-          _meta: {
-            anomalies: [],
-            date_import: "2021-12-17T18:17:44.880Z",
-            uai_probable: uai,
-            nouveau: false,
-          },
-          certifications: [
-            {
-              type: "rncp",
-              code: "RNCP1120",
-              label: "Logistique",
-              sources: ["catalogue"],
-            },
-          ],
-          contacts: [
-            {
-              email: faker.internet.email(),
-              confirmé: false,
-              sources: ["catalogue"],
-            },
-          ],
-          diplomes: [
-            {
-              type: "cfd",
-              code: "01022105",
-              niveau: "010",
-              label: "MC5",
-              sources: ["catalogue"],
-            },
-          ],
-          lieux_de_formation: [
-            {
-              code: "5.692799_48.351221",
-              adresse: {
-                label: "Paris",
-                code_postal: "75001",
-                code_insee: "75101",
-                localite: "Paris",
-                geojson: {
-                  type: "Feature",
-                  geometry: {
-                    type: "Point",
-                    coordinates: [5.692799, 48.351221],
-                  },
-                  properties: {
-                    score: 1,
-                    source: "geo-adresse-api",
-                  },
-                },
-                departement: {
-                  code: "75",
-                  nom: "Paris",
-                },
-                region: {
-                  code: "01",
-                  nom: "Paris",
-                },
-                academie: {
-                  code: "01",
-                  nom: "Paris",
-                },
-              },
-              sources: ["catalogue"],
-              uai: createUAI(faker.helpers.replaceSymbols("075####")),
-            },
-          ],
-          referentiels: ["catalogue-etablissements", "sifa-ramsese", "datagouv"],
-          relations: [],
-          reseaux: [],
-          uai,
-          uai_potentiels: [
-            {
-              uai: createUAI(faker.helpers.replaceSymbols("075####")),
-              sources: ["catalogue-etablissements", "opcoep", "sifa-ramsese", "deca"],
-            },
-          ],
-          etat_administratif: "actif",
-          forme_juridique: {
-            code: "7331",
-            label: "Établissement public local d'enseignement",
-          },
-          raison_sociale: "LYCEE POLYVALENT",
-          siege_social: false,
-          enseigne: "GRETA LORRAINE SUD",
-          adresse: {
-            academie: {
-              code: "01",
-              nom: "Paris",
-            },
-            code_insee: "75101",
-            code_postal: "75001",
-            departement: {
-              code: "01",
-              nom: "Paris",
-            },
-            geojson: {
-              geometry: {
-                coordinates: [6.583151, 48.022475],
-                type: "Point",
-              },
-              properties: {
-                score: 0.9586099999999999,
-                source: "geo-adresse-api",
-              },
-              type: "Feature",
-            },
-            label: "36 rue des lilas",
-            localite: "Paris",
-            region: {
-              code: "01",
-              nom: "Paris",
-            },
-          },
-          nature: "responsable_formateur",
-          numero_declaration_activite: faker.helpers.replaceSymbols("###########"),
-          qualiopi: true,
-        },
-        custom
-      );
-    }
+  //     return merge(
+  //       {},
+  //       {
+  //         siret: faker.helpers.replaceSymbols("#########00015"),
+  //         _meta: {
+  //           anomalies: [],
+  //           date_import: "2021-12-17T18:17:44.880Z",
+  //           uai_probable: uai,
+  //           nouveau: false,
+  //         },
+  //         certifications: [
+  //           {
+  //             type: "rncp",
+  //             code: "RNCP1120",
+  //             label: "Logistique",
+  //             sources: ["catalogue"],
+  //           },
+  //         ],
+  //         contacts: [
+  //           {
+  //             email: faker.internet.email(),
+  //             confirmé: false,
+  //             sources: ["catalogue"],
+  //           },
+  //         ],
+  //         diplomes: [
+  //           {
+  //             type: "cfd",
+  //             code: "01022105",
+  //             niveau: "010",
+  //             label: "MC5",
+  //             sources: ["catalogue"],
+  //           },
+  //         ],
+  //         lieux_de_formation: [
+  //           {
+  //             code: "5.692799_48.351221",
+  //             adresse: {
+  //               label: "Paris",
+  //               code_postal: "75001",
+  //               code_insee: "75101",
+  //               localite: "Paris",
+  //               geojson: {
+  //                 type: "Feature",
+  //                 geometry: {
+  //                   type: "Point",
+  //                   coordinates: [5.692799, 48.351221],
+  //                 },
+  //                 properties: {
+  //                   score: 1,
+  //                   source: "geo-adresse-api",
+  //                 },
+  //               },
+  //               departement: {
+  //                 code: "75",
+  //                 nom: "Paris",
+  //               },
+  //               region: {
+  //                 code: "01",
+  //                 nom: "Paris",
+  //               },
+  //               academie: {
+  //                 code: "01",
+  //                 nom: "Paris",
+  //               },
+  //             },
+  //             sources: ["catalogue"],
+  //             uai: createUAI(faker.helpers.replaceSymbols("075####")),
+  //           },
+  //         ],
+  //         referentiels: ["catalogue-etablissements", "sifa-ramsese", "datagouv"],
+  //         relations: [],
+  //         reseaux: [],
+  //         uai,
+  //         uai_potentiels: [
+  //           {
+  //             uai: createUAI(faker.helpers.replaceSymbols("075####")),
+  //             sources: ["catalogue-etablissements", "opcoep", "sifa-ramsese", "deca"],
+  //           },
+  //         ],
+  //         etat_administratif: "actif",
+  //         forme_juridique: {
+  //           code: "7331",
+  //           label: "Établissement public local d'enseignement",
+  //         },
+  //         raison_sociale: "LYCEE POLYVALENT",
+  //         siege_social: false,
+  //         enseigne: "GRETA LORRAINE SUD",
+  //         adresse: {
+  //           academie: {
+  //             code: "01",
+  //             nom: "Paris",
+  //           },
+  //           code_insee: "75101",
+  //           code_postal: "75001",
+  //           departement: {
+  //             code: "01",
+  //             nom: "Paris",
+  //           },
+  //           geojson: {
+  //             geometry: {
+  //               coordinates: [6.583151, 48.022475],
+  //               type: "Point",
+  //             },
+  //             properties: {
+  //               score: 0.9586099999999999,
+  //               source: "geo-adresse-api",
+  //             },
+  //             type: "Feature",
+  //           },
+  //           label: "36 rue des lilas",
+  //           localite: "Paris",
+  //           region: {
+  //             code: "01",
+  //             nom: "Paris",
+  //           },
+  //         },
+  //         nature: "responsable_formateur",
+  //         numero_declaration_activite: faker.helpers.replaceSymbols("###########"),
+  //         qualiopi: true,
+  //       },
+  //       custom
+  //     );
+  //   }
 
-    callback(client, {
-      organismes(array = [{}]) {
-        return {
-          organismes: array.map((custom) => {
-            return createOrganisme(custom);
-          }),
-          pagination: {
-            page: 1,
-            resultats_par_page: 1,
-            nombre_de_page: 1,
-            total: 1,
-          },
-        };
-      },
-      organisme(custom = {}) {
-        return createOrganisme(custom);
-      },
-    });
-  },
+  //   callback(client, {
+  //     organismes(array = [{}]) {
+  //       return {
+  //         organismes: array.map((custom) => {
+  //           return createOrganisme(custom);
+  //         }),
+  //         pagination: {
+  //           page: 1,
+  //           resultats_par_page: 1,
+  //           nombre_de_page: 1,
+  //           total: 1,
+  //         },
+  //       };
+  //     },
+  //     organisme(custom = {}) {
+  //       return createOrganisme(custom);
+  //     },
+  //   });
+  // },
   mockCatalogueApi(callback) {
     const client = createNock(CatalogueApi.baseApiUrl);
     callback(client, {
@@ -344,82 +344,82 @@ module.exports = {
       },
     });
   },
-  mockTableauDeBordApi(callback) {
-    const client = createNock(TableauDeBordApi.baseApiUrl);
-    callback(client, {
-      login(custom = {}) {
-        return merge(
-          {},
-          {
-            id: "12345",
-          },
-          custom
-        );
-      },
-      dossiers(array = [{}]) {
-        return array.map((custom) => {
-          return merge(
-            {},
-            {
-              etablissement_nom_academie: null,
-              ine_apprenant: "",
-              etablissement_reseaux: null,
-              etablissement_formateur_code_commune_insee: null,
-              code_commune_insee_apprenant: null,
-              niveau_formation_libelle: "3 (CAP...)",
-              annee_formation: 1,
-              contrat_date_fin: "2022-12-31T00:00:00Z",
-              tel_apprenant: faker.phone.phoneNumber("06########"),
-              prenom_apprenant: faker.name.firstName(),
-              etablissement_num_academie: null,
-              email_contact: faker.internet.email(),
-              contrat_date_rupture: null,
-              etablissement_localite: null,
-              id_erp_apprenant: "123",
-              etablissement_geo_coordonnees: null,
-              siret_etablissement_valid: true,
-              etablissement_num_departement: "77",
-              periode_formation: [2022, 2022],
-              etablissement_formateur_geo_coordonnees: null,
-              nom_etablissement: faker.company.companyName(),
-              etablissement_formateur_siret: null,
-              libelle_court_formation: null,
-              erps: null,
-              date_de_naissance_apprenant: "2000-04-14T00:00:00Z",
-              history_cleaned_date: null,
-              niveau_formation: "3",
-              siret_etablissement: faker.helpers.replaceSymbols("#########00015"),
-              updated_at: "2022-09-01T18:09:43.023Z",
-              etablissement_num_region: "11",
-              formation_rncp: "RNCP8812",
-              match_formation_mnaCatalog_cfd_siret: null,
-              etablissement_adresse: null,
-              historique_statut_apprenant: [
-                {
-                  valeur_statut: 3,
-                  date_statut: "2022-03-14T00:00:00Z",
-                  date_reception: "2022-08-01T20:33:23.15Z",
-                },
-              ],
-              forced_annee_scolaire: null,
-              source: "scform",
-              etablissement_nom_departement: "Seine-et-Marne",
-              etablissement_gestionnaire_siret: null,
-              _id: uuid.v4(),
-              formation_cfd: faker.helpers.replaceSymbols("4#######"),
-              etablissement_code_postal: null,
-              created_at: "2022-07-15T18:20:54.977Z",
-              uai_etablissement: faker.helpers.replaceSymbols("075####"),
-              nom_apprenant: faker.name.lastName(),
-              annee_scolaire: "2022-2022",
-              etablissement_nom_region: "Île-de-France",
-              contrat_date_debut: "2022-03-18T00:00:00Z",
-              libelle_long_formation: "EMPLOYE(E) COMMERCIAL(E) EN MAGASIN (TP)",
-            },
-            custom
-          );
-        });
-      },
-    });
-  },
+  // mockTableauDeBordApi(callback) {
+  //   const client = createNock(TableauDeBordApi.baseApiUrl);
+  //   callback(client, {
+  //     login(custom = {}) {
+  //       return merge(
+  //         {},
+  //         {
+  //           id: "12345",
+  //         },
+  //         custom
+  //       );
+  //     },
+  //     dossiers(array = [{}]) {
+  //       return array.map((custom) => {
+  //         return merge(
+  //           {},
+  //           {
+  //             etablissement_nom_academie: null,
+  //             ine_apprenant: "",
+  //             etablissement_reseaux: null,
+  //             etablissement_formateur_code_commune_insee: null,
+  //             code_commune_insee_apprenant: null,
+  //             niveau_formation_libelle: "3 (CAP...)",
+  //             annee_formation: 1,
+  //             contrat_date_fin: "2022-12-31T00:00:00Z",
+  //             tel_apprenant: faker.phone.phoneNumber("06########"),
+  //             prenom_apprenant: faker.name.firstName(),
+  //             etablissement_num_academie: null,
+  //             email_contact: faker.internet.email(),
+  //             contrat_date_rupture: null,
+  //             etablissement_localite: null,
+  //             id_erp_apprenant: "123",
+  //             etablissement_geo_coordonnees: null,
+  //             siret_etablissement_valid: true,
+  //             etablissement_num_departement: "77",
+  //             periode_formation: [2022, 2022],
+  //             etablissement_formateur_geo_coordonnees: null,
+  //             nom_etablissement: faker.company.companyName(),
+  //             etablissement_formateur_siret: null,
+  //             libelle_court_formation: null,
+  //             erps: null,
+  //             date_de_naissance_apprenant: "2000-04-14T00:00:00Z",
+  //             history_cleaned_date: null,
+  //             niveau_formation: "3",
+  //             siret_etablissement: faker.helpers.replaceSymbols("#########00015"),
+  //             updated_at: "2022-09-01T18:09:43.023Z",
+  //             etablissement_num_region: "11",
+  //             formation_rncp: "RNCP8812",
+  //             match_formation_mnaCatalog_cfd_siret: null,
+  //             etablissement_adresse: null,
+  //             historique_statut_apprenant: [
+  //               {
+  //                 valeur_statut: 3,
+  //                 date_statut: "2022-03-14T00:00:00Z",
+  //                 date_reception: "2022-08-01T20:33:23.15Z",
+  //               },
+  //             ],
+  //             forced_annee_scolaire: null,
+  //             source: "scform",
+  //             etablissement_nom_departement: "Seine-et-Marne",
+  //             etablissement_gestionnaire_siret: null,
+  //             _id: uuid.v4(),
+  //             formation_cfd: faker.helpers.replaceSymbols("4#######"),
+  //             etablissement_code_postal: null,
+  //             created_at: "2022-07-15T18:20:54.977Z",
+  //             uai_etablissement: faker.helpers.replaceSymbols("075####"),
+  //             nom_apprenant: faker.name.lastName(),
+  //             annee_scolaire: "2022-2022",
+  //             etablissement_nom_region: "Île-de-France",
+  //             contrat_date_debut: "2022-03-18T00:00:00Z",
+  //             libelle_long_formation: "EMPLOYE(E) COMMERCIAL(E) EN MAGASIN (TP)",
+  //           },
+  //           custom
+  //         );
+  //       });
+  //     },
+  //   });
+  // },
 };

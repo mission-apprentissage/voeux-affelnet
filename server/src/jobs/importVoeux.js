@@ -3,17 +3,13 @@ const Joi = require("@hapi/joi");
 const { isEmpty, uniqBy, pick } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
-const { Voeu, Mef, Formateur, Responsable } = require("../common/model");
+const { Voeu, Mef, Etablissement } = require("../common/model");
 const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, flattenObject } = require("../common/utils/objectUtils");
 // const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
-const { uaiFormat, siretFormat, mef10Format, cfdFormat } = require("../common/utils/format");
-const {
-  getSiretResponsableFromCleMinistereEducatif,
-  getSiretFormateurFromCleMinistereEducatif,
-} = require("../common/utils/cleMinistereEducatifUtils");
+const { uaiFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 const { catalogue } = require("./utils/catalogue");
 const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/relation");
 const { fixExtractionVoeux } = require("./utils/extractionVoeux.js");
@@ -76,12 +72,10 @@ const schema = Joi.object({
     academie: academieValidationSchema,
   }).required(),
   etablissement_formateur: Joi.object({
-    siret: Joi.string().pattern(siretFormat),
     uai: Joi.string().pattern(uaiFormat),
   }).required(),
   etablissement_responsable: Joi.object({
-    siret: Joi.string().pattern(siretFormat),
-    uai: Joi.string().pattern(siretFormat),
+    uai: Joi.string().pattern(uaiFormat),
   }).required(),
 });
 
@@ -149,18 +143,18 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const academieOrigine = pickAcademie(findAcademieByUai(uaiCIO || uaiEtablissementOrigine));
       const academieAccueil = pickAcademie(findAcademieByUai(uaiEtablissementAccueil));
 
-      const siretResponsableFromLine = getSiretResponsableFromCleMinistereEducatif(
-        cle_ministere_educatif,
-        line["SIRET UAI gestionnaire"]
-      );
+      // const siretResponsableFromLine = getSiretResponsableFromCleMinistereEducatif(
+      //   cle_ministere_educatif,
+      //   line["SIRET UAI gestionnaire"]
+      // );
 
-      const siretFormateurFromLine = getSiretFormateurFromCleMinistereEducatif(
-        cle_ministere_educatif,
-        line["SIRET UAI formateur"]
-      );
+      // const siretFormateurFromLine = getSiretFormateurFromCleMinistereEducatif(
+      //   cle_ministere_educatif,
+      //   line["SIRET UAI formateur"]
+      // );
 
-      let siretResponsable = siretResponsableFromLine;
-      let siretFormateur = siretFormateurFromLine;
+      // let siretResponsable = siretResponsableFromLine;
+      // let siretFormateur = siretFormateurFromLine;
       let uaiResponsable = uaiEtablissementResponsable;
       let uaiFormateur = uaiEtablissementFormateur;
 
@@ -169,7 +163,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const affelnet_id = `${academie}/${code_offre}`;
 
       if (
-        (!siretResponsable || !uaiResponsable || !siretFormateur || !uaiFormateur) &&
+        /* !siretResponsable ||!siretFormateur  ||*/ (!uaiResponsable || !uaiFormateur) &&
         (affelnet_id || cle_ministere_educatif)
       ) {
         let formation;
@@ -187,20 +181,20 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
         }
 
         if (formation) {
-          siretResponsable ??= formation.etablissement_gestionnaire_siret;
+          // siretResponsable ??= formation.etablissement_gestionnaire_siret;
           uaiResponsable ??= formation.etablissement_gestionnaire_uai;
-          siretFormateur ??= formation.etablissement_formateur_siret;
+          // siretFormateur ??= formation.etablissement_formateur_siret;
           uaiFormateur ??= formation.etablissement_formateur_uai;
         }
       }
 
-      if (!uaiResponsable || !siretFormateur) {
-        const responsable = await Responsable.findOne({ siret: siretResponsable }).lean();
-        const formateur = await Formateur.findOne({ uai: uaiFormateur }).lean();
+      if (!uaiResponsable || !uaiFormateur) {
+        const responsable = await Etablissement.findOne({ uai: uaiResponsable }).lean();
+        const formateur = await Etablissement.findOne({ uai: uaiFormateur }).lean();
 
-        siretResponsable ??= responsable?.siret;
+        // siretResponsable ??= responsable?.siret;
         uaiResponsable ??= responsable?.uai;
-        siretFormateur ??= formateur?.siret;
+        // siretFormateur ??= formateur?.siret;
         uaiFormateur ??= formateur?.uai;
       }
 
@@ -251,11 +245,11 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
           academie: academieAccueil || academieDuVoeu,
         },
         etablissement_formateur: {
-          siret: siretFormateur,
+          // siret: siretFormateur,
           uai: uaiFormateur,
         },
         etablissement_responsable: {
-          siret: siretResponsable,
+          // siret: siretResponsable,
           uai: uaiResponsable,
         },
       });
@@ -288,7 +282,7 @@ const hasAnomaliesOnMandatoryFields = (anomalies) => {
         "formation.code_formation_diplome",
         "etablissement_accueil.uai",
         "etablissement_formateur.uai",
-        "etablissement_responsable.siret",
+        "etablissement_responsable.uai",
       ]
     ).length > 0
   );
@@ -382,7 +376,7 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
             }
 
             // await markVoeuxAsAvailable(
-            //   { siret: data.etablissement_responsable.siret, uai: data.etablissement_formateur.uai },
+            //   { uai_responsable: data.etablissement_responsable.uai, uai_formateur: data.etablissement_formateur.uai },
             //   importDate
             // );
           }
@@ -417,30 +411,30 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
 
   await Promise.all(
     [...relations].map(async (relation) => {
-      const { siret, uai } = JSON.parse(relation);
+      const { uai_responsable, uai_formateur } = JSON.parse(relation);
 
       const nombre_voeux = await Voeu.countDocuments({
-        "etablissement_formateur.uai": uai,
-        "etablissement_responsable.siret": siret,
+        "etablissement_responsable.uai": uai_responsable,
+        "etablissement_formateur.uai": uai_formateur,
       });
 
       if (
         await Voeu.countDocuments({
-          "etablissement_responsable.siret": siret,
-          "etablissement_formateur.uai": uai,
+          "etablissement_responsable.uai": uai_responsable,
+          "etablissement_formateur.uai": uai_formateur,
           "_meta.import_dates": { $in: [importDate] },
         })
       ) {
         if (
           await Voeu.countDocuments({
-            "etablissement_responsable.siret": siret,
-            "etablissement_formateur.uai": uai,
+            "etablissement_responsable.uai": uai_responsable,
+            "etablissement_formateur.uai": uai_formateur,
             "_meta.import_dates": { $nin: [importDate] },
           })
         ) {
-          return await saveUpdatedListAvailable({ uai, siret, nombre_voeux });
+          return await saveUpdatedListAvailable({ uai_responsable, uai_formateur, nombre_voeux });
         } else {
-          return await saveListAvailable({ uai, siret, nombre_voeux });
+          return await saveListAvailable({ uai_responsable, uai_formateur, nombre_voeux });
         }
       }
     })

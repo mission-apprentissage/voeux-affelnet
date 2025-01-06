@@ -1,0 +1,23 @@
+const { RelationActions } = require("../../../constants/History");
+const { Relation } = require("../../../model");
+
+const saveListAvailableEmailAutomaticSentToResponsable = async ({ relation, responsable }) => {
+  await Relation.updateOne(
+    { _id: relation._id },
+    {
+      $push: {
+        histories: {
+          action: RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
+          variables: {
+            nombre_voeux: relation.nombre_voeux,
+            email: responsable.email,
+          },
+        },
+      },
+    }
+  );
+};
+
+module.exports = {
+  saveListAvailableEmailAutomaticSentToResponsable,
+};

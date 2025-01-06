@@ -8,7 +8,7 @@ import { DelegationModal } from "../modals/DelegationModal";
 import { StatutBadge, statuses } from "../../StatutBadge";
 import { SuccessFill } from "../../../../theme/components/icons/SuccessFill";
 import { WarningFill } from "../../../../theme/components/icons/WarningFill";
-import { UserType } from "../../../constants/UserType";
+import { DownloadType } from "../../../constants/DownloadType";
 
 export const FormateurStatut = ({ relation, callback, showDownloadButton }) => {
   const responsable = relation.responsable ?? relation.etablissements_responsable;
@@ -33,10 +33,13 @@ export const FormateurStatut = ({ relation, callback, showDownloadButton }) => {
   const voeuxDisponible = relation?.nombre_voeux > 0;
 
   const voeuxTelechargementsDelegue =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.downloadType === DownloadType.DELEGUE) ??
+    [];
 
   const voeuxTelechargementsResponsable =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
+    relation.voeux_telechargements?.filter(
+      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+    ) ?? [];
 
   switch (isDiffusionAutorisee) {
     case true: {

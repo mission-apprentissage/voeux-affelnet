@@ -23,7 +23,7 @@ import { Formik, Form, Field } from "formik";
 import { _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
-import { UserType } from "../../../constants/UserType";
+import { DownloadType } from "../../../constants/DownloadType";
 
 export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -34,7 +34,7 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const activateDelegation = useCallback(
     async ({ form }) => {
       try {
-        await _post(`/api/admin/responsables/${responsable?.siret}/delegation`, {
+        await _post(`/api/admin/responsables/${responsable?.uai}/delegation`, {
           email: form.email,
           uai: formateur?.uai,
         });
@@ -58,13 +58,15 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
         });
       }
     },
-    [onClose, callback, responsable?.siret, formateur?.uai, toast]
+    [onClose, callback, responsable?.uai, formateur?.uai, toast]
   );
 
   const hasVoeux = relation.nombre_voeux > 0;
 
   const voeuxTelechargementsResponsable =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
+    relation.voeux_telechargements?.filter(
+      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+    ) ?? [];
 
   const voeuxTelecharges = !!voeuxTelechargementsResponsable.find(
     (telechargement) => new Date(telechargement.date).getTime() >= new Date(relation.last_date_voeux).getTime()

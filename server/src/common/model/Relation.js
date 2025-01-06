@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 const { historySchema } = require("./schemas/relationHistorySchema");
-const { UserType } = require("../constants/UserType");
+const { DownloadType } = require("../constants/DownloadType");
 const { academieSchema } = require("./schemas/academieSchema");
 
 const schema = new Schema({
@@ -9,13 +9,9 @@ const schema = new Schema({
     required: true,
     default: null,
     type: nested({
-      siret: {
-        type: String,
-        required: true,
-        index: true,
-      },
       uai: {
         type: String,
+        required: true,
         index: true,
       },
     }),
@@ -25,10 +21,6 @@ const schema = new Schema({
     required: true,
     default: null,
     type: nested({
-      siret: {
-        type: String,
-        index: true,
-      },
       uai: {
         type: String,
         required: true,
@@ -56,10 +48,10 @@ const schema = new Schema({
           required: true,
           refPath: "userType",
         },
-        userType: {
+        downloadType: {
           type: String,
           required: true,
-          enum: Object.values(UserType),
+          enum: Object.values(DownloadType),
         },
       }),
     ],
@@ -93,7 +85,7 @@ const schema = new Schema({
 
 schema.index(
   {
-    "etablissement_responsable.siret": "text",
+    "etablissement_responsable.uai": "text",
     "etablissement_formateur.uai": "text",
     "academie.code": "text",
   },

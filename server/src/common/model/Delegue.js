@@ -1,7 +1,7 @@
 const { Schema } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 const User = require("./User");
-const { historySchema } = require("./schemas/formateurHistorySchema");
+const { historySchema } = require("./schemas/delegueHistorySchema");
 const { UserType } = require("../constants/UserType");
 
 const schema = new Schema({
@@ -14,13 +14,9 @@ const schema = new Schema({
           required: true,
           default: null,
           type: nested({
-            siret: {
-              type: String,
-              required: true,
-              index: true,
-            },
             uai: {
               type: String,
+              required: true,
               index: true,
             },
           }),
@@ -30,10 +26,6 @@ const schema = new Schema({
           required: true,
           default: null,
           type: nested({
-            siret: {
-              type: String,
-              index: true,
-            },
             uai: {
               type: String,
               required: true,
@@ -46,19 +38,6 @@ const schema = new Schema({
           type: Boolean,
           default: false,
         },
-
-        // voeux_telechargements: {
-        //   default: [],
-        //   type: [
-        //     nested({
-        //       date: {
-        //         type: Date,
-        //         required: true,
-        //         default: () => new Date(),
-        //       },
-        //     }),
-        //   ],
-        // },
       }),
     ],
   },

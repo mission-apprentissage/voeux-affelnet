@@ -51,12 +51,6 @@ async function resendActivationEmails(resendEmail, options = {}) {
               }),
 
           type: { $in: [UserType.DELEGUE, UserType.RESPONSABLE] },
-
-          // $or: [
-          //   { type: UserType.RESPONSABLE },
-          //   { type: UserType.FORMATEUR },
-          //   // { type: { $nin: [UserType.FORMATEUR, UserType.RESPONSABLE] } },
-          // ],
         }),
   };
 
@@ -68,23 +62,6 @@ async function resendActivationEmails(resendEmail, options = {}) {
     .cursor()
     .eachAsync(async (user) => {
       const previous = user.emails.find((e) => e.templateName.startsWith("activation_"));
-
-      // if (user.type === UserType.FORMATEUR) {
-      //   const responsable = await Responsable.findOne({
-      //     "etablissements.uai": user.username,
-      //     "etablissements.diffusion_autorisee": true,
-      //   });
-
-      //   if (!responsable) {
-      //     return;
-      //   }
-
-      //   const etablissement = responsable.etablissements_formateur?.find(
-      //     (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
-      //   );
-
-      //   user.email = etablissement?.email;
-      // }
 
       try {
         logger.info(`Resending ${previous.templateName} email to ${user.type} ${user.username}...`);

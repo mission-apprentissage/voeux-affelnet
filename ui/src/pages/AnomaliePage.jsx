@@ -97,8 +97,8 @@ export const AnomaliePage = () => {
                     Faites un signalement à l’équipe en charge de la diffusion des listes de candidats , en indiquant :
                     <UnorderedList>
                       <ListItem>
-                        Le numéro Siret figurant dans nos correspondances (numéro Siret qui vous sert d’identifiant de
-                        connexion au service),
+                        Le code UAI figurant dans nos correspondances (code UAI qui vous sert d’identifiant de connexion
+                        au service),
                       </ListItem>
                       <ListItem>
                         Le ou les code(s) UAI des organismes formateurs manquants ou auxquels vous ne devriez pas être
@@ -150,13 +150,11 @@ export const AnomaliePage = () => {
                 listes de candidats en 2024.
               </Text>
               <Text mb={4}>
-                Si vous pensez que les erreurs de Siret ou d'UAI impactent la diffusion des listes de candidats,
-                veuillez en{" "}
+                Si vous pensez que les erreurs d'UAI impactent la diffusion des listes de candidats, veuillez en{" "}
                 <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
                   faire le signalement à l'équipe en charge de la diffusion des listes
                 </Link>
-                , en précisant toutes les informations utiles (Siret et UAI actuellement enregistrés, corrections
-                attendues).
+                , en précisant toutes les informations utiles (UAI actuellement enregistrés, corrections attendues).
               </Text>
             </AccordionPanel>
           </AccordionItem>
@@ -241,8 +239,8 @@ export const AnomaliePage = () => {
                 en indiquant :
                 <UnorderedList>
                   <ListItem>
-                    Le numéro Siret et/ou code UAI figurant dans nos correspondances (code qui vous sert d’identifiant
-                    de connexion au service),
+                    Le code UAI figurant dans nos correspondances (code qui vous sert d’identifiant de connexion au
+                    service),
                   </ListItem>
                   <ListItem>La navigateur internet que vous utilisez et son numéro de version</ListItem>
                   <ListItem>

@@ -136,7 +136,7 @@ function ReceptionVoeuxPage() {
                           {({ field, meta }) => {
                             return (
                               <Input
-                                placeholder="Rechercher un Siret, un UAI, une raison sociale..."
+                                placeholder="Rechercher un UAI, une raison sociale..."
                                 style={{ margin: 0 }}
                                 {...field}
                               />
@@ -169,7 +169,6 @@ function ReceptionVoeuxPage() {
                 <Table>
                   <Thead>
                     <Tr>
-                      <Td>SIRET</Td>
                       <Td>UAI</Td>
                       <Td>RAISON_SOCIALE</Td>
                       <Td>ADRESSE</Td>
@@ -178,7 +177,6 @@ function ReceptionVoeuxPage() {
                   <Tbody>
                     {responsableData.formateurs?.map((formateur, index) => (
                       <Tr key={index}>
-                        <Td>{formateur?.siret}</Td>
                         <Td>{formateur?.uai}</Td>
                         <Td>{formateur?.raison_sociale}</Td>
                         <Td>{formateur?.adresse}</Td>
@@ -220,7 +218,7 @@ function ReceptionVoeuxPage() {
                           {({ field, meta }) => {
                             return (
                               <Input
-                                placeholder="Rechercher un Siret, un UAI, une raison sociale..."
+                                placeholder="Rechercher un UAI, une raison sociale..."
                                 style={{ margin: 0 }}
                                 {...field}
                               />
@@ -253,7 +251,6 @@ function ReceptionVoeuxPage() {
                 <Table>
                   <Thead>
                     <Tr>
-                      <Td>SIRET</Td>
                       <Td>UAI</Td>
                       <Td>RAISON_SOCIALE</Td>
                       <Td>ADRESSE</Td>
@@ -262,7 +259,6 @@ function ReceptionVoeuxPage() {
                   <Tbody>
                     {formateurData.responsables?.map((responsable, index) => (
                       <Tr key={index}>
-                        <Td>{responsable.siret}</Td>
                         <Td>{responsable.uai}</Td>
                         <Td>{responsable.raison_sociale}</Td>
                         <Td>{responsable.adresse}</Td>

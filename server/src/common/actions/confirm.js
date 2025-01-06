@@ -28,7 +28,7 @@ async function confirm(username, email, options = {}) {
     await changeEmail(username, email, { auteur: username });
 
     switch (user.type) {
-      case UserType.RESPONSABLE:
+      case UserType.ETABLISSEMENT:
         await saveAccountEmailUpdatedByAccountAsResponsable(user, email, oldEmail);
         break;
       case UserType.DELEGUE:
@@ -42,7 +42,7 @@ async function confirm(username, email, options = {}) {
   }
 
   switch (user.type) {
-    case UserType.RESPONSABLE:
+    case UserType.ETABLISSEMENT:
       await saveAccountConfirmedAsResponsable(user, email);
       break;
     case UserType.DELEGUE:

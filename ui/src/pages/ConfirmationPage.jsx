@@ -150,7 +150,7 @@ const ConfirmationPage = () => {
                   <Text mb={4}>
                     Afin d’accéder au téléchargement des listes de candidats en apprentissage, veuillez confirmer{" "}
                     {data.type === "Responsable" ? (
-                      <>l’adresse courriel du directeur de votre établissement (Siret: {username})</>
+                      <>l’adresse courriel du directeur de votre établissement (UAI: {username})</>
                     ) : (
                       <>
                         l'adresse courriel renseignée par le directeur de l'établissement responsable pour délégation

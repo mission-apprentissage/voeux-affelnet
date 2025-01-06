@@ -3,7 +3,7 @@ import { Text, Button } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../../hooks/delegueHooks";
 import { StatutBadge, statuses } from "../../StatutBadge";
-import { UserType } from "../../../constants/UserType";
+import { DownloadType } from "../../../constants/DownloadType";
 
 export const FormateurStatut = ({ relation, callback, showDownloadButton }) => {
   const responsable = relation.responsable ?? relation.etablissements_responsable;
@@ -23,7 +23,8 @@ export const FormateurStatut = ({ relation, callback, showDownloadButton }) => {
   const voeuxDisponible = relation?.nombre_voeux > 0;
 
   const voeuxTelechargementsDelegue =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.downloadType === DownloadType.DELEGUE) ??
+    [];
 
   switch (true) {
     case voeuxDisponible &&

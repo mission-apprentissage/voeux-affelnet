@@ -30,7 +30,7 @@ export const Relations = ({ delegue, callback }) => {
       const responsable =
         relation.responsable ?? relation.etablissements_responsable ?? relation.etablissement_responsable;
       const formateur = relation.formateur ?? relation.etablissements_formateur ?? relation.etablissement_formateur;
-      navigate(`/delegue/relations/${responsable?.siret}/${formateur?.uai}`, { replace: true });
+      navigate(`/delegue/relations/${responsable?.uai}/${formateur?.uai}`, { replace: true });
     }
   }, [relations, navigate]);
 
@@ -91,12 +91,12 @@ export const Relations = ({ delegue, callback }) => {
 
                   const voeuxTelechargementsFormateur =
                     formateur?.voeux_telechargements_responsable?.filter(
-                      (telechargement) => telechargement.siret === responsable?.siret
+                      (telechargement) => telechargement.uai_responsable === responsable?.uai
                     ) ?? [];
 
                   const voeuxTelechargementsResponsable =
                     responsable?.voeux_telechargements_formateur?.filter(
-                      (telechargement) => telechargement.uai === formateur?.uai
+                      (telechargement) => telechargement.uai_formateur === formateur?.uai
                     ) ?? [];
 
                   const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
@@ -123,7 +123,7 @@ export const Relations = ({ delegue, callback }) => {
                   return (
                     <Tr key={index}>
                       <Td>
-                        <Link variant="primary" href={`/delegue/relations/${responsable?.siret}/${formateur?.uai}`}>
+                        <Link variant="primary" href={`/delegue/relations/${responsable?.uai}/${formateur?.uai}`}>
                           Détail
                         </Link>
                       </Td>

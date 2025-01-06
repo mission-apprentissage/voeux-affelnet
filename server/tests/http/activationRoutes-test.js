@@ -2,7 +2,7 @@ const assert = require("assert");
 const config = require("../../src/config");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
-const { insertResponsable, insertUser } = require("../utils/fakeData");
+const { insertUser, insertEtablissement } = require("../utils/fakeData");
 const { createActionToken } = require("../../src/common/utils/jwtUtils");
 const { startServer } = require("../utils/testUtils");
 
@@ -67,10 +67,10 @@ describe("activationRoutes", () => {
 
   it("Vérifie qu'un responsable peut activer un compte", async () => {
     const { httpClient } = await startServer();
-    await insertResponsable({ siret: "84776162400026" });
+    const etablissement = await insertEtablissement();
 
     const response = await httpClient.post("/api/activation", {
-      actionToken: createActionToken("84776162400026"),
+      actionToken: createActionToken(etablissement.username),
       password: "Password!123456",
     });
 
@@ -79,9 +79,9 @@ describe("activationRoutes", () => {
     assert.ok(decoded.iat);
     assert.ok(decoded.exp);
     assert.deepStrictEqual(_.omit(decoded, ["iat", "exp"]), {
-      sub: "84776162400026",
+      sub: etablissement.username,
       iss: "voeux-affelnet",
-      type: "Responsable",
+      type: "Etablissement",
       permissions: {
         isAdmin: false,
       },
@@ -90,10 +90,10 @@ describe("activationRoutes", () => {
 
   it("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
     const { httpClient } = await startServer();
-    await insertResponsable({ siret: "84776162400026" });
+    const etablissement = await insertEtablissement();
 
     const response = await httpClient.post("/api/activation", {
-      actionToken: createActionToken("84776162400026"),
+      actionToken: createActionToken(etablissement.username),
       password: "too weak",
     });
 
@@ -113,7 +113,7 @@ describe("activationRoutes", () => {
 
   // it("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
   //   const { httpClient } = await startServer();
-  //   await insertResponsable({ siret: "84776162400026" });
+  //   const etablissement = await insertEtablissement();
 
   //   const response = await httpClient.post("/api/activation", {
   //     actionToken: createActionToken("84776162400026", { expiresIn: "1ms" }),
@@ -125,16 +125,16 @@ describe("activationRoutes", () => {
 
   it("Vérifie qu'on ne peut pas utiliser plusieurs fois un token", async () => {
     const { httpClient } = await startServer();
-    await insertResponsable({ siret: "84776162400026" });
+    const etablissement = await insertEtablissement();
 
     let response = await httpClient.post("/api/activation", {
-      actionToken: createActionToken("84776162400026"),
+      actionToken: createActionToken(etablissement.username),
       password: "Password!123456",
     });
     assert.strictEqual(response.status, 200);
 
     response = await httpClient.post("/api/activation", {
-      actionToken: createActionToken("84776162400026"),
+      actionToken: createActionToken(etablissement.username),
       password: "Password!123456",
     });
 
@@ -143,10 +143,10 @@ describe("activationRoutes", () => {
 
   it("Vérifie qu'on ne peut pas créer de compte avec un token forgé", async () => {
     const { httpClient } = await startServer();
-    await insertResponsable({ siret: "84776162400026" });
+    const etablissement = await insertEtablissement();
 
     const response = await httpClient.post("/api/activation", {
-      actionToken: createActionToken("84776162400026", { secret: "fake-secret" }),
+      actionToken: createActionToken(etablissement.username, { secret: "fake-secret" }),
       password: "Password!123456",
     });
 

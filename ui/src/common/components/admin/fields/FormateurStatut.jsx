@@ -1,5 +1,5 @@
 import { UserStatut } from "../../../constants/UserStatut";
-import { UserType } from "../../../constants/UserType";
+import { DownloadType } from "../../../constants/DownloadType";
 import { StatutBadge, statuses } from "../../StatutBadge";
 
 export const FormateurStatut = ({ relation }) => {
@@ -16,10 +16,13 @@ export const FormateurStatut = ({ relation }) => {
   const voeuxDisponible = relation?.nombre_voeux > 0;
 
   const voeuxTelechargementsDelegue =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.downloadType === DownloadType.DELEGUE) ??
+    [];
 
   const voeuxTelechargementsResponsable =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
+    relation.voeux_telechargements?.filter(
+      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+    ) ?? [];
 
   switch (isDiffusionAutorisee) {
     case true: {

@@ -71,7 +71,7 @@ const Header = () => {
                   </Flex>
                 </MenuButton>
                 <MenuList>
-                  {[UserType.RESPONSABLE, UserType.FORMATEUR, UserType.DELEGUE].includes(auth.type) && (
+                  {[UserType.ETABLISSEMENT, UserType.DELEGUE].includes(auth.type) && (
                     <>
                       <MenuItem as="a" href="/profil">
                         Profil

@@ -5,6 +5,7 @@ const { confirm } = require("../../common/actions/confirm");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { User } = require("../../common/model");
+const { UserType } = require("../../common/constants/UserType");
 
 module.exports = ({ sendEmail }) => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -13,7 +14,7 @@ module.exports = ({ sendEmail }) => {
   router.get(
     "/api/confirmation/status",
     checkActionToken(),
-    ensureIsOneOf(["Responsable"]),
+    ensureIsOneOf([UserType.ETABLISSEMENT]),
     tryCatch(async (req, res) => {
       const user = req.user;
 
@@ -35,7 +36,7 @@ module.exports = ({ sendEmail }) => {
   router.post(
     "/api/confirmation/accept",
     checkActionToken(),
-    ensureIsOneOf(["Responsable"]),
+    ensureIsOneOf([UserType.ETABLISSEMENT]),
     tryCatch(async (req, res) => {
       const user = req.user;
       const { email } = await Joi.object({

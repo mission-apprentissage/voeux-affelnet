@@ -3,14 +3,15 @@ const Joi = require("@hapi/joi");
 const { compose, transformIntoCSV } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { validate } = require("../../common/validators.js");
-const { streamCroisementVoeux } = require("../../common/actions/streamCroisementVoeux.js");
-const { streamSyntheseApprenants } = require("../../common/actions/streamSyntheseApprenants.js");
+const { validate } = require("../../common/validators");
+const { streamCroisementVoeux } = require("../../common/actions/streamCroisementVoeux");
+const { streamSyntheseApprenants } = require("../../common/actions/streamSyntheseApprenants");
 const Boom = require("boom");
-const { dateAsString } = require("../../common/utils/stringUtils.js");
+const { dateAsString } = require("../../common/utils/stringUtils");
 const { encodeStream } = require("iconv-lite");
-const { getLatestImportDate } = require("../../common/actions/getLatestImportDate.js");
+const { getLatestImportDate } = require("../../common/actions/getLatestImportDate");
 const { Dossier } = require("../../common/model");
+const { UserType } = require("../../common/constants/UserType");
 
 const fichiers = [
   {
@@ -47,7 +48,7 @@ module.exports = ({ users }) => {
   router.get(
     "/api/csaio/fichiers",
     checkApiToken(),
-    ensureIs("Csaio"),
+    ensureIs(UserType.CSAIO),
     tryCatch(async (req, res) => {
       const { academies } = req.user;
       const latestImportDate = await getLatestImportDate(Dossier, {
@@ -55,10 +56,10 @@ module.exports = ({ users }) => {
       });
 
       if (!latestImportDate) {
-        return res.json([]);
+        return reson([]);
       }
 
-      res.json(
+      reson(
         fichiers.flatMap((f) => {
           return [
             { name: `${f.name}.csv`, date: latestImportDate, academies },
@@ -72,7 +73,7 @@ module.exports = ({ users }) => {
   router.get(
     "/api/csaio/fichiers/:filename.:ext",
     checkApiToken(),
-    ensureIs("Csaio"),
+    ensureIs(UserType.CSAIO),
     tryCatch(async (req, res) => {
       const { academies } = req.user;
       const { filename, ext } = await validate(req.params, {

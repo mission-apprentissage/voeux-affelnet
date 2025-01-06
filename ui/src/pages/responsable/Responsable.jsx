@@ -15,9 +15,7 @@ export const Responsable = ({ responsable, callback }) => {
   }
 
   const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.relations?.find(
-    (relation) =>
-      relation.etablissement_formateur.uai === responsable?.uai ||
-      relation.etablissement_formateur.siret === responsable?.siret
+    (relation) => relation.etablissement_formateur.uai === responsable?.uai
   );
 
   return (
@@ -41,8 +39,7 @@ export const Responsable = ({ responsable, callback }) => {
       >
         <Box mb={12}>
           <Text mb={4}>
-            Adresse : {responsable?.adresse} - Siret : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
-            {responsable?.uai ?? "Inconnu"}
+            Adresse : {responsable?.adresse} - UAI : {responsable?.uai ?? "Inconnu"}
           </Text>
 
           <Text mb={4}>

@@ -5,8 +5,8 @@ const tryCatch = require("../middlewares/tryCatchMiddleware.js");
 const authMiddleware = require("../middlewares/authMiddleware.js");
 const { markVoeuxAsDownloadedByDelegue } = require("../../common/actions/markVoeuxAsDownloaded.js");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
-const { Delegue, Responsable, Formateur, Relation } = require("../../common/model");
-const { siretFormat, uaiFormat } = require("../../common/utils/format.js");
+const { Etablissement, Delegue, Relation } = require("../../common/model");
+const { uaiFormat } = require("../../common/utils/format.js");
 const { changeEmail } = require("../../common/actions/changeEmail.js");
 const { UserType } = require("../../common/constants/UserType.js");
 
@@ -27,6 +27,7 @@ module.exports = ({ users }) => {
     ensureIs(UserType.DELEGUE),
     tryCatch(async (req, res) => {
       const { email } = req.user;
+
       const delegue = (
         await Delegue.aggregate([
           { $match: { email } },
@@ -35,7 +36,7 @@ module.exports = ({ users }) => {
             $lookup: {
               from: Relation.collection.name,
               let: {
-                siret_responsable: "$relations.etablissement_responsable.siret",
+                uai_responsable: "$relations.etablissement_responsable.uai",
                 uai_formateur: "$relations.etablissement_formateur.uai",
               },
               pipeline: [
@@ -43,7 +44,7 @@ module.exports = ({ users }) => {
                   $match: {
                     $expr: {
                       $and: [
-                        { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
+                        { $eq: ["$etablissement_responsable.uai", "$$uai_responsable"] },
                         { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
                       ],
                     },
@@ -51,27 +52,17 @@ module.exports = ({ users }) => {
                 },
                 {
                   $lookup: {
-                    from: Responsable.collection.name,
-                    localField: "etablissement_responsable.siret",
-                    foreignField: "siret",
-                    pipeline: [
-                      {
-                        $match: { type: UserType.RESPONSABLE },
-                      },
-                    ],
+                    from: Etablissement.collection.name,
+                    localField: "etablissement_responsable.uai",
+                    foreignField: "uai",
                     as: "responsable",
                   },
                 },
                 {
                   $lookup: {
-                    from: Formateur.collection.name,
+                    from: Etablissement.collection.name,
                     localField: "etablissement_formateur.uai",
                     foreignField: "uai",
-                    pipeline: [
-                      {
-                        $match: { type: UserType.FORMATEUR },
-                      },
-                    ],
                     as: "formateur",
                   },
                 },
@@ -128,15 +119,15 @@ module.exports = ({ users }) => {
    * Retourne la liste des voeux pour la relation responsable-formateur sous forme d'un CSV.
    */
   router.get(
-    "/api/delegue/:siret/:uai/voeux",
+    "/api/delegue/:uai_responsable/:uai_formateur/voeux",
     checkApiToken(),
     ensureIs(UserType.DELEGUE),
     tryCatch(async (req, res) => {
       const { email } = req.user;
 
-      const { siret, uai } = await Joi.object({
-        siret: Joi.string().pattern(siretFormat).required(),
-        uai: Joi.string().pattern(uaiFormat).required(),
+      const { uai_responsable, uai_formateur } = await Joi.object({
+        uai_responsable: Joi.string().pattern(uaiFormat).required(),
+        uai_formateur: Joi.string().pattern(uaiFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const delegue = await Delegue.findOne({ email });
@@ -145,20 +136,24 @@ module.exports = ({ users }) => {
         !delegue.relations.find(
           (relation) =>
             relation.active &&
-            relation.etablissement_responsable.siret === siret &&
-            relation.etablissement_formateur.uai === uai
+            relation.etablissement_responsable.uai === uai_responsable &&
+            relation.etablissement_formateur.uai === uai_formateur
         )
       ) {
         throw Error("La ressource n'est pas accessible.");
       }
 
-      const filename = `${siret}-${uai}.csv`;
+      const filename = `${uai_responsable}-${uai_formateur}.csv`;
 
-      await markVoeuxAsDownloadedByDelegue(siret, uai);
+      await markVoeuxAsDownloadedByDelegue(uai_responsable, uai_formateur);
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-      return compose(getVoeuxStream({ siret, uai }), transformIntoCSV({ mapper: (v) => `"${v || ""}"` }), res);
+      return compose(
+        getVoeuxStream({ uai_responsable, uai_formateur }),
+        transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
+        res
+      );
     })
   );
 

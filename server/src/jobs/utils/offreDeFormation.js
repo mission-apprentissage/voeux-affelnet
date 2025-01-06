@@ -1,12 +1,13 @@
 const logger = require("../../common/logger.js");
 const { compose, transformData, filterData, accumulateData, flattenArray } = require("oleoduc");
-const { Responsable /*Etablissement*/ } = require("../../common/model/index.js");
+const { Etablissement } = require("../../common/model/index.js");
 const { catalogue } = require("./catalogue.js");
 const { getSiretResponsableFromCleMinistereEducatif } = require("../../common/utils/cleMinistereEducatifUtils.js");
 const { getCsvContent } = require("./csv.js");
 const { parseCsv } = require("../../common/utils/csvUtils.js");
 
 const SIRET_RECENSEMENT = "99999999999999";
+const UAI_RECENSEMENT = "0000000A";
 
 const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
   // console.log("originalCsv", originalCsv);
@@ -27,29 +28,32 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
       },
     }),
     transformData(async (data) => {
+      let overwriteItem;
+
       if (overwriteArray) {
         const academie = data["ACADEMIE"];
         const code_offre = data["CODE_OFFRE"];
         const affelnet_id = `${academie}/${code_offre}`;
 
-        const overwriteItem = overwriteArray.find((item) => item["Affelnet_id"] === affelnet_id);
+        overwriteItem = overwriteArray.find((item) => item["Affelnet_id"] === affelnet_id);
+
         if (overwriteItem) {
           logger.warn(`Données écrasées pour la formation ${affelnet_id}`, {
-            SIRET_UAI_GESTIONNAIRE: overwriteItem["Siret responsable"],
-            UAI_FORMATEUR: overwriteItem["UAI formateur"],
+            // SIRET_UAI_GESTIONNAIRE: overwriteItem?.["Siret responsable"] ?? data["SIRET_UAI_GESTIONNAIRE"],
+            // SIRET_UAI_FORMATEUR: overwriteItem?.["Siret formateur"] ?? data["SIRET_UAI_FORMATEUR"],
+            UAI_RESPONSABLE: overwriteItem["UAI responsable"]?.toUpperCase(),
+            UAI_FORMATEUR: overwriteItem["UAI formateur"]?.toUpperCase(),
           });
-
-          return {
-            ...data,
-            SIRET_UAI_GESTIONNAIRE: overwriteItem["Siret responsable"],
-            UAI_RESPONSABLE: overwriteItem["UAI responsable"],
-            SIRET_UAI_FORMATEUR: overwriteItem["Siret formateur"],
-            UAI_FORMATEUR: overwriteItem["UAI formateur"],
-          };
         }
       }
 
-      return data;
+      return {
+        ...data,
+        // SIRET_UAI_GESTIONNAIRE: overwriteItem?.["Siret responsable"] ?? data["SIRET_UAI_GESTIONNAIRE"],
+        // SIRET_UAI_FORMATEUR: overwriteItem?.["Siret formateur"] ?? data["SIRET_UAI_FORMATEUR"],
+        UAI_RESPONSABLE: (overwriteItem?.["UAI responsable"] ?? data["UAI_RESPONSABLE"])?.toUpperCase(),
+        UAI_FORMATEUR: (overwriteItem?.["UAI formateur"] ?? data["UAI_FORMATEUR"])?.toUpperCase(),
+      };
     })
   );
 };
@@ -102,22 +106,19 @@ async function streamOffreDeFormation(options = {}) {
           : getSiretResponsableFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_GESTIONNAIRE"]);
         const uai_accueil = data["UAI"]?.toUpperCase();
         let uai_formateur = data["UAI_FORMATEUR"]?.toUpperCase();
-        // let uai_responsable = data["UAI_RESPONSABLE"]?.toUpperCase();
+        let uai_responsable = data["UAI_RESPONSABLE"]?.toUpperCase();
 
         const academie = data["ACADEMIE"];
         const code_offre = data["CODE_OFFRE"];
         const affelnet_id = `${academie}/${code_offre}`;
 
-        if (siret_responsable === SIRET_RECENSEMENT) {
-          logger.debug(`${affelnet_id} / Siret recensement détecté pour l'uai_accueil d'accueil ${uai_accueil}`);
+        if (siret_responsable === SIRET_RECENSEMENT || uai_responsable === UAI_RECENSEMENT) {
+          logger.debug(`${affelnet_id} / Siret ou UAI recensement détecté pour l'uai_accueil d'accueil ${uai_accueil}`);
           return accumulator;
         }
 
         try {
           if (!uai_formateur?.length) {
-            // logger.debug(
-            //   `${affelnet_id} / Recherche de l'UAI formateur pour ${uai_accueil} (${cle_ministere_educatif}, ${siret_responsable})`
-            // );
             logger.debug(`${affelnet_id} / Recherche de l'UAI formateur`);
 
             let formation;
@@ -130,35 +131,28 @@ async function streamOffreDeFormation(options = {}) {
               formation = await findFormation({ affelnet_id });
             }
 
-            uai_formateur = formation?.etablissement_formateur_uai;
-            // uai_formateur = (
-            //   await searchFormateurUai({ cle_ministere_educatif, siret_responsable, uai_accueil })
-            // )?.uai_formateur?.toUpperCase();
+            uai_formateur = formation?.etablissement_formateur_uai?.toUpperCase();
 
             if (!uai_formateur?.length) {
               logger.error(`${affelnet_id} / UAI formateur introuvable`);
-              // logger.error(
-              //   `${affelnet_id} / UAI formateur introuvable pour l'UAI d'accueil ${uai_accueil} (${cle_ministere_educatif}, ${siret_responsable})`
-              // );
               return accumulator;
             } else {
               logger.info(`${affelnet_id} / UAI formateur trouvé pour ${uai_accueil} : ${uai_formateur}`);
             }
           }
 
-          if (!siret_responsable?.length) {
-            logger.debug(`${affelnet_id} / Recherche du siret responsable`);
+          if (!uai_responsable?.length) {
+            logger.debug(`${affelnet_id} / Recherche de l'UAI responsable`);
 
             const formation = await findFormation({ affelnet_id });
 
-            siret_responsable = formation?.etablissement_gestionnaire_siret;
+            uai_responsable = formation?.etablissement_gestionnaire_uai?.toUpperCase();
 
-            if (!siret_responsable?.length) {
-              logger.error(`${affelnet_id} / siret responsable introuvable`);
-
+            if (!uai_responsable?.length) {
+              logger.error(`${affelnet_id} / uai responsable introuvable`);
               return accumulator;
             } else {
-              logger.info(`${affelnet_id} / siret responsable trouvé : ${siret_responsable}`);
+              logger.info(`${affelnet_id} / uai responsable trouvé : ${uai_responsable}`);
             }
           }
 
@@ -167,16 +161,18 @@ async function streamOffreDeFormation(options = {}) {
           }
 
           const existingRelations = accumulator.filter(
-            (acc) => acc.uai_formateur === uai_formateur && acc.siret_responsable !== siret_responsable
+            (acc) => acc.uai_formateur === uai_formateur && acc.uai_responsable !== uai_responsable
           );
 
-          const uniqueSirets = [
-            ...new Set([siret_responsable, ...existingRelations.map((item) => item.siret_responsable)]),
+          const uniqueResponsables = [
+            ...new Set([uai_responsable, ...existingRelations.map((item) => item.uai_responsable)]),
           ];
 
-          if (uniqueSirets.length > 1) {
+          if (uniqueResponsables.length > 1) {
             logger.debug(
-              `${affelnet_id} / UAI formateur ${uai_formateur} on multiple SIRET : ${uniqueSirets.join(" / ")}`
+              `${affelnet_id} / UAI formateur ${uai_formateur} on multiple UAI responsable : ${uniqueResponsables.join(
+                " / "
+              )}`
             );
             // return accumulator;
           }
@@ -186,10 +182,10 @@ async function streamOffreDeFormation(options = {}) {
               (acc) =>
                 acc.affelnet_id === affelnet_id &&
                 acc.uai_formateur === uai_formateur &&
-                acc.siret_responsable === siret_responsable
+                acc.uai_responsable === uai_responsable
             )
           ) {
-            accumulator.push({ uai_formateur, affelnet_id, siret_responsable });
+            accumulator.push({ affelnet_id, uai_responsable, uai_formateur });
           }
 
           return accumulator;
@@ -276,32 +272,31 @@ async function streamOffreDeFormation(options = {}) {
     // ),
 
     transformData(
-      async ({ uai_formateur, affelnet_id, siret_responsable }) => {
-        if (!uai_formateur?.length || !affelnet_id?.length || !siret_responsable?.length) {
+      async ({ affelnet_id, uai_responsable, uai_formateur }) => {
+        if (!affelnet_id?.length || !uai_responsable?.length || !uai_formateur?.length) {
           logger.warn("Informations manquantes : ", {
-            uai_formateur,
             affelnet_id,
-            siret_responsable,
+            uai_responsable,
+            uai_formateur,
           });
         }
 
         try {
-          if (siret_responsable === SIRET_RECENSEMENT) {
+          if (uai_responsable === UAI_RECENSEMENT) {
             return {
+              uai_responsable: UAI_RECENSEMENT,
               uai_formateurs: uai_formateur?.toUpperCase(),
-              siret_responsable: SIRET_RECENSEMENT,
               email_responsable: process.env.VOEUX_AFFELNET_EMAIL,
             };
           }
 
-          if (siret_responsable) {
-            const responsable = await Responsable.findOne({ siret: siret_responsable });
-            // const responsable = await Etablissement.findOne({ siret: siret_responsable });
+          if (uai_responsable) {
+            const responsable = await Etablissement.findOne({ uai: uai_responsable });
 
             if (responsable) {
               return {
+                uai_responsable: responsable.uai,
                 uai_formateurs: uai_formateur?.toUpperCase(),
-                siret_responsable: responsable.siret,
                 email_responsable: responsable.email?.toLowerCase(),
               };
             }
@@ -319,21 +314,21 @@ async function streamOffreDeFormation(options = {}) {
             // });
 
             return {
+              uai_responsable: uai_responsable ?? formation?.etablissement_gestionnaire_uai,
               uai_formateurs: uai_formateur?.toUpperCase(),
-              siret_responsable: siret_responsable ?? formation?.etablissement_gestionnaire_siret,
               email_responsable: formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
             };
           } catch (e) {
             return {
+              uai_responsable: null,
               uai_formateurs: uai_formateur?.toUpperCase(),
-              siret_responsable: null,
               email_responsable: null,
             };
           }
         } catch (e) {
           logger.error(
             { err: e },
-            `Une erreur est survenue lors du traitement de la ligne { uai_formateur: ${uai_formateur}, affelnet_id: ${affelnet_id}, siret_responsable: ${siret_responsable} }`
+            `Une erreur est survenue lors du traitement de la ligne { affelnet_id: ${affelnet_id}, uai_responsable: ${uai_responsable}, uai_formateur: ${uai_formateur} }`
           );
         }
       },

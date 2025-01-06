@@ -1,21 +1,29 @@
 const { UserStatut } = require("../common/constants/UserStatut");
 const { UserType } = require("../common/constants/UserType");
+const { DownloadType } = require("../common/constants/DownloadType");
 const logger = require("../common/logger");
-const { User /*, Responsable*/ } = require("../common/model");
+const { User, Relation } = require("../common/model");
 
 const {
-  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentForResponsable,
+  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentToResponsable,
 } = require("../common/actions/history/responsable");
-// const {
-//   saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentForFormateur,
-// } = require("../common/actions/history/formateur");
 const {
-  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentForDelegue,
+  saveAccountActivationEmailAutomaticSent: saveAccountActivationEmailAutomaticSentToDelegue,
 } = require("../common/actions/history/delegue");
 
-async function sendActivationEmails(sendEmail, options = {}) {
-  const stats = { total: 0, sent: 0, failed: 0 };
+const {
+  saveAccountActivationEmailManualResent: saveAccountActivationEmailManualResentToResponsable,
+  saveAccountActivationEmailAutomaticResent: saveAccountActivationEmailAutomaticResentToResponsable,
+} = require("../common/actions/history/responsable");
+const {
+  saveAccountActivationEmailManualResent: saveAccountActivationEmailManualResentToDelegue,
+  saveAccountActivationEmailAutomaticResent: saveAccountActivationEmailAutomaticResentToDelegue,
+} = require("../common/actions/history/delegue");
+
+async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
+  const stats = { total: 0, sent: 0, resent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+  const skip = options.skip || 0;
 
   const query = {
     ...(options.username ? { username: options.username } : {}),
@@ -26,66 +34,71 @@ async function sendActivationEmails(sendEmail, options = {}) {
           $or: [{ password: { $exists: false } }, { password: null }],
           statut: UserStatut.CONFIRME,
           "emails.templateName": { $not: { $regex: "^activation_.*$" } },
-          // $or: [
-          //   { type: UserType.RESPONSABLE },
-          //   { type: UserType.FORMATEUR },
-          //   { type: { $nin: [UserType.FORMATEUR, UserType.RESPONSABLE] } },
-          // ],
         }),
   };
 
   await User.find(query)
     .lean()
+    .skip(skip)
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      console.log({ user });
+      // console.log({ user });
+
+      const type = user.type === UserType.ETABLISSEMENT ? DownloadType.RESPONSABLE : user.type;
+
+      if (
+        type === DownloadType.RESPONSABLE &&
+        (await Relation.countDocuments({ "etablissement_responsable.uai": user.uai })) === 0
+      ) {
+        return;
+      }
 
       const templateName =
         user.isAdmin && user.academie?.code
           ? `activation_academie`
-          : `activation_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
+          : `activation_${(type?.toLowerCase() || "user").toLowerCase()}`;
+      const previous = user.emails.find((email) => email.templateName === templateName);
       stats.total++;
 
-      // if (user.type === UserType.FORMATEUR) {
-      //   const responsable = await Responsable.findOne({
-      //     "etablissements.uai": user.username,
-      //     "etablissements.diffusion_autorisee": true,
-      //   });
-
-      //   if (!responsable) {
-      //     return;
-      //   }
-
-      //   const etablissement = responsable.etablissements_formateur?.find(
-      //     (etablissement) => etablissement.diffusion_autorisee && etablissement.uai === user.username
-      //   );
-
-      //   user.email = etablissement?.email;
-      // }
-
       try {
-        logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
-        await sendEmail(user, templateName);
+        logger.info(
+          `${previous ? "Res" : "S"}ending ${templateName} email to ${type} ${user.username} (${user.email})...`
+        );
+        previous ? await resendEmail(previous.token) : await sendEmail(user, templateName);
 
-        switch (user.type) {
-          case UserType.RESPONSABLE:
-            await saveAccountActivationEmailAutomaticSentForResponsable(user);
+        switch (type) {
+          case DownloadType.RESPONSABLE:
+            switch (!!previous) {
+              case false:
+                await saveAccountActivationEmailAutomaticSentToResponsable(user);
+                break;
+              case true:
+                options.sender
+                  ? await saveAccountActivationEmailManualResentToResponsable(user, options.sender)
+                  : await saveAccountActivationEmailAutomaticResentToResponsable(user);
+                break;
+            }
             break;
-          // case UserType.FORMATEUR:
-          //   await saveAccountActivationEmailAutomaticSentForFormateur(user);
-          //   break;
-
-          case UserType.DELEGUE:
-            await saveAccountActivationEmailAutomaticSentForDelegue(user);
+          case DownloadType.DELEGUE:
+            switch (!!previous) {
+              case false:
+                await saveAccountActivationEmailAutomaticSentToDelegue(user);
+                break;
+              case true:
+                options.sender
+                  ? await saveAccountActivationEmailManualResentToDelegue(user, options.sender)
+                  : await saveAccountActivationEmailAutomaticResentToDelegue(user);
+                break;
+            }
             break;
           default:
             break;
         }
 
-        stats.sent++;
+        previous ? stats.resent++ : stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);
+        logger.error(`Unable to ${previous ? "re" : ""}sent ${templateName} email to ${user.type} ${user.username}`, e);
         stats.failed++;
       }
     });

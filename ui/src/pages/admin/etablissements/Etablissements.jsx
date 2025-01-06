@@ -1,5 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Text, Input, Table, Tbody, Td, Thead, Th, Tr, Link, Select, Spinner, Progress } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Input,
+  Table,
+  Tbody,
+  Td,
+  Thead,
+  Th,
+  Tr,
+  Link,
+  Select,
+  Spinner,
+  Progress,
+  Checkbox,
+} from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import queryString from "query-string";
 
@@ -7,20 +22,20 @@ import { Pagination } from "../../../common/components/Pagination";
 import ErrorMessage from "../../../common/components/ErrorMessage";
 import { Yup } from "../../../common/Yup";
 import { _get } from "../../../common/httpClient";
-// import { EtablissementLibelle } from "../../../common/components/etablissement/fields/EtablissementLibelle";
-import { ResponsableLibelle } from "../../../common/components/responsable/fields/ResponsableLibelle";
-import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
+import { EtablissementLibelle } from "../../../common/components/etablissement/fields/EtablissementLibelle";
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
 import { useGet } from "../../../common/hooks/httpHooks";
-import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
 import { OrganismeResponsableTag } from "../../../common/components/tags/OrganismeResponsable";
+import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
+import { OrganismeResponsableFormateurTag } from "../../../common/components/tags/OrganismeResponsableFormateur";
 import { FileDownloadLine } from "../../../theme/components/icons/FileDownloadLine";
 import { useDownloadStatut } from "../../../common/hooks/adminHooks";
-import { ResponsableEmail } from "../../../common/components/admin/fields/ResponsableEmail";
-import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
 import { Breadcrumb } from "../../../common/components/Breadcrumb";
 import { Page } from "../../../common/components/layout/Page";
+import { RelationType } from "../../../common/constants/RelationType";
+import { ContactResponsableTag } from "../../../common/components/tags/ContactResponsable";
+import { ContactDelegueTag } from "../../../common/components/tags/ContactDelegue";
 
 export const Etablissements = () => {
   const mounted = useRef(true);
@@ -191,8 +206,9 @@ export const Etablissements = () => {
                               handleSubmit();
                             }}
                           >
-                            <option value="Responsable">Organisme responsable</option>
-                            <option value="Formateur">Organisme formateur</option>
+                            <option value={RelationType.RESPONSABLE}>Organisme responsable</option>
+                            <option value={RelationType.FORMATEUR}>Organisme formateur</option>
+                            <option value={RelationType.RESPONSABLE_FORMATEUR}>Organisme responsable-formateur</option>
                           </Select>
                         );
                       }}
@@ -205,7 +221,7 @@ export const Etablissements = () => {
                     {({ field, meta }) => {
                       return (
                         <Input
-                          placeholder={"Chercher un Siret, un UAI, une raison sociale, un email"}
+                          placeholder={"Chercher un UAI, une raison sociale, un email"}
                           style={{ margin: 0 }}
                           onChange={handleSubmit}
                           onInput={handleSubmit}
@@ -214,10 +230,18 @@ export const Etablissements = () => {
                       );
                     }}
                   </Field>
-                  {/*
-                <Button variant="primary" type="submit" form="search">
-                  Rechercher
-                </Button> */}
+                </Box>
+
+                <Box style={{ display: "inline-flex", width: "100%" }} m={4}>
+                  <Field name="missing_email">
+                    {({ field, meta }) => {
+                      return (
+                        <Checkbox onChange={handleSubmit} onInput={handleSubmit} {...field}>
+                          Limiter aux établissements sans adresse courriel
+                        </Checkbox>
+                      );
+                    }}
+                  </Field>
                 </Box>
 
                 {error && <ErrorMessage>Une erreur est survenue</ErrorMessage>}
@@ -256,156 +280,108 @@ export const Etablissements = () => {
                 <Td colSpan={6}>{loading ? <Progress size="xs" isIndeterminate /> : "Pas de résultats"}</Td>
               </Tr>
             ) : (
-              data.map((user, index) => {
+              data.map((etablissement, index) => {
+                const isOnlyResponsableFormateur =
+                  etablissement.is_responsable_formateur && etablissement.relations.length === 1;
+
+                const relationsResponsable = etablissement.relations.filter(
+                  (relation) => relation.responsable?.uai === etablissement.uai
+                );
+
+                const relationsFormateur = etablissement.relations.filter(
+                  (relation) => relation.formateur?.uai === etablissement.uai
+                );
+
+                const relationsOnlyResponsable = relationsResponsable.filter(
+                  (relation) => relation.formateur?.uai !== etablissement.uai
+                );
+
+                const relationsOnlyFormateur = relationsFormateur.filter(
+                  (relation) => relation.responsable?.uai !== etablissement.uai
+                );
+
+                // const relationResponsableFormateur = etablissement.relations.find(
+                //   (relation) =>
+                //     relation.formateur?.uai === etablissement.uai && relation.responsable?.uai === etablissement.uai
+                // );
+
                 return (
                   <Tr key={index}>
-                    {
-                      {
-                        Responsable: (
-                          <>
-                            <Td>
-                              <Link variant="primary" href={`/admin/responsable/${user.siret}`}>
-                                Détail
-                              </Link>
-                            </Td>
-                            <Td>
-                              <Box lineHeight={6}>
-                                <ResponsableLibelle responsable={user} />{" "}
-                                <OrganismeResponsableTag verticalAlign="baseline" />
-                              </Box>
-                            </Td>
-                            <Td>
-                              <Box lineHeight={6}>
-                                <ResponsableEmail responsable={user} />
-                              </Box>
-                            </Td>
-                            <Td>{user.nombre_voeux.toLocaleString()}</Td>
-                            <Td>{user.nombre_voeux_restant.toLocaleString()}</Td>
-                            <Td>
-                              <Box lineHeight={6}>
-                                <ResponsableStatut responsable={user} />{" "}
-                              </Box>
-                            </Td>
-                          </>
-                        ),
-                        Formateur: (
-                          <>
-                            <Td>
-                              <Link variant="primary" href={`/admin/formateur/${user.uai}`}>
-                                Détail
-                              </Link>
-                            </Td>
-                            <Td>
-                              <Box lineHeight={6}>
-                                <FormateurLibelle formateur={user} /> <OrganismeFormateurTag verticalAlign="baseline" />
-                              </Box>
-                            </Td>
-                            <Td>
-                              <Box lineHeight={6}>
-                                {user.relations?.map((relation, index) => {
-                                  const delegue = relation.delegue;
-                                  const responsable = relation.responsable ?? relation.etablissements_responsable;
+                    <Td>
+                      <Link variant="primary" href={`/admin/etablissement/${etablissement.uai}`}>
+                        Détail
+                      </Link>
+                    </Td>
+                    <Td>
+                      <Text lineHeight={6}>
+                        <EtablissementLibelle etablissement={etablissement} />{" "}
+                        {!isOnlyResponsableFormateur && !!relationsOnlyResponsable?.length && (
+                          <OrganismeResponsableTag verticalAlign="baseline" ml={2} />
+                        )}
+                        {etablissement.is_responsable_formateur && (
+                          <OrganismeResponsableFormateurTag verticalAlign="baseline" ml={2} />
+                        )}
+                        {!isOnlyResponsableFormateur && !!relationsOnlyFormateur?.length && (
+                          <OrganismeFormateurTag verticalAlign="baseline" ml={2} />
+                        )}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <Text lineHeight={6}>
+                        {(() => {
+                          const responsables = [
+                            ...new Set(
+                              etablissement.relations
+                                ?.filter((relation) => !relation.delegue)
+                                .map((relation) => relation.responsable?.email ?? "Information manquante")
+                            ),
+                          ];
 
-                                  return (
-                                    <Box key={index}>
-                                      <FormateurEmail responsable={responsable} formateur={user} delegue={delegue} />
-                                    </Box>
-                                  );
-                                })}
-                              </Box>
-                            </Td>
-                            <Td>
-                              <Text>{user.nombre_voeux.toLocaleString()}</Text>
-                            </Td>
-                            <Td>
-                              <Text>{user.nombre_voeux_restant.toLocaleString()}</Text>
-                            </Td>
-                            <Td>
-                              <Box lineHeight={6}>
-                                {user.relations?.map((relation, index) => {
-                                  return <FormateurStatut key={index} relation={relation} />;
-                                })}
-                              </Box>
-                            </Td>
-                          </>
-                        ),
-                        // Etablissement: (
-                        //   <>
-                        //     <Td>
-                        //       <Link variant="primary" href={`/admin/etablissement/${user.siret}`}>
-                        //         Détail
-                        //       </Link>
-                        //     </Td>
-                        //     <Td>
-                        //       <Text lineHeight={6}>
-                        //         <EtablissementLibelle etablissement={user} />{" "}
-                        //         {!!user.etablissements_formateur?.length && (
-                        //           <OrganismeResponsableTag verticalAlign="baseline" />
-                        //         )}
-                        //         {!!user.etablissements_responsable?.length && (
-                        //           <OrganismeFormateurTag verticalAlign="baseline" />
-                        //         )}
-                        //       </Text>
-                        //     </Td>
-                        //     <Td>
-                        //       <Text lineHeight={6}>
-                        //         {!!user.formateurs?.length && (
-                        //           <>
-                        //             {user.email} <ContactResponsableTag />
-                        //           </>
-                        //         )}
-                        //         {!!user.responsables?.length &&
-                        //           user.responsables
-                        //             ?.filter((responsable) => responsable?.siret !== user.siret)
-                        //             ?.map((responsable) => {
-                        //               const etablissement = responsable?.etablissements_formateur.find(
-                        //                 (etablissement) => etablissement.uai === user.uai
-                        //               );
-                        //               return etablissement?.diffusion_autorisee ? (
-                        //                 <Box>
-                        //                   {user.email ?? etablissement.email} <ContactDelegueTag />
-                        //                 </Box>
-                        //               ) : (
-                        //                 <Box>
-                        //                   {responsable?.email} <ContactResponsableTag />
-                        //                 </Box>
-                        //               );
-                        //             })}
-                        //       </Text>
-                        //     </Td>
-                        //     <Td>
-                        //       {/* {user.nombre_voeux.toLocaleString()} */}
-                        //       {user.etablissements_responsable.reduce(
-                        //         (acc, etablissement) => acc + etablissement.nombre_voeux,
-                        //         0
-                        //       ) +
-                        //         user.etablissements_formateur.reduce(
-                        //           (acc, etablissement) => acc + etablissement.nombre_voeux,
-                        //           0
-                        //         )}
-                        //     </Td>
-                        //     <Td>
-                        //       {user.etablissements_responsable.reduce(
-                        //         (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
-                        //         0
-                        //       ) +
-                        //         user.etablissements_formateur.reduce(
-                        //           (acc, etablissement) => acc + etablissement.nombre_voeux_restant,
-                        //           0
-                        //         )}
-                        //     </Td>
-                        //     <Td>
-                        //       <Text lineHeight={6}>
-                        //         <ResponsableStatut responsable={user} />{" "}
-                        //         {user.responsables?.map((responsable) => {
-                        //           return <FormateurStatut responsable={responsable} formateur={user} />;
-                        //         })}
-                        //       </Text>
-                        //     </Td>
-                        //   </>
-                        // ),
-                      }[user.type]
-                    }
+                          const delegues = [
+                            ...new Set(
+                              etablissement.relations
+                                ?.filter((relation) => !!relation.delegue)
+                                .map((relation) => relation.delegue?.email ?? "Information manquante")
+                            ),
+                          ];
+
+                          return (
+                            <>
+                              {responsables?.map((responsable) => (
+                                <>
+                                  {responsable} <ContactResponsableTag />
+                                  <br />
+                                </>
+                              ))}
+                              {delegues?.map((delegue) => (
+                                <>
+                                  {delegue} <ContactDelegueTag />
+                                  <br />
+                                </>
+                              ))}
+                            </>
+                          );
+                        })()}
+                      </Text>
+                    </Td>
+                    <Td>
+                      {etablissement.relations
+                        ?.reduce((acc, etablissement) => acc + +etablissement.nombre_voeux, 0)
+                        .toLocaleString()}
+                    </Td>
+                    <Td>
+                      {etablissement.relations
+                        ?.reduce((acc, etablissement) => acc + +etablissement.nombre_voeux_restant, 0)
+                        .toLocaleString()}
+                    </Td>
+                    <Td>
+                      <Text lineHeight={6}>
+                        <ResponsableStatut responsable={etablissement} />{" "}
+                        {etablissement.responsables?.map((responsable) => {
+                          return <FormateurStatut responsable={responsable} formateur={etablissement} />;
+                        })}
+                      </Text>
+                    </Td>
                   </Tr>
                 );
               })

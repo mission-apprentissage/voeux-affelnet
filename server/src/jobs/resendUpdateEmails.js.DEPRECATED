@@ -2,7 +2,7 @@ const logger = require("../common/logger");
 const { DateTime } = require("luxon");
 const { User, Responsable, Relation, Delegue } = require("../common/model");
 const { UserStatut } = require("../common/constants/UserStatut");
-const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
+// const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
 const { UserType } = require("../common/constants/UserType");
 
 const {
@@ -40,7 +40,7 @@ async function resendUpdateEmails(resendEmail, options = {}) {
               type: UserType.DELEGUE,
               relations: {
                 $elemMatch: {
-                  "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                  "etablissement_responsable.uai": relation.etablissement_responsable.uai,
                   "etablissement_formateur.uai": relation.etablissement_formateur.uai,
                   active: true,
                 },
@@ -64,13 +64,13 @@ async function resendUpdateEmails(resendEmail, options = {}) {
       (relation) =>
         !relationsDeleguees.find(
           (relationDeleguee) =>
-            relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+            relationDeleguee.etablissement_responsable.uai === relation.etablissement_responsable.uai &&
             relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
         )
     );
 
     const responsables = await Responsable.find({
-      siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
+      uai: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.uai) },
     });
 
     logger.info(`Sending update emails to ${responsables.length} responsables and ${delegues.length} delegues...`);

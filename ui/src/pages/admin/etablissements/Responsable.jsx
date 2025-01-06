@@ -22,7 +22,7 @@ export const Responsable = () => {
     onClose: onCloseUpdateResponsableEmailModal,
   } = useDisclosure();
 
-  const { siret } = useParams();
+  const { uai_responsable } = useParams();
 
   const [responsable, setResponsable] = useState(undefined);
   const [loadingResponsable, setLoadingResponsable] = useState(false);
@@ -30,7 +30,7 @@ export const Responsable = () => {
   const getResponsable = useCallback(async () => {
     try {
       setLoadingResponsable(true);
-      const response = await _get(`/api/admin/responsables/${siret}`);
+      const response = await _get(`/api/admin/responsables/${uai_responsable}`);
       setResponsable(response);
       setLoadingResponsable(false);
     } catch (error) {
@@ -38,7 +38,7 @@ export const Responsable = () => {
       setLoadingResponsable(false);
       throw Error;
     }
-  }, [siret]);
+  }, [uai_responsable]);
 
   const reload = useCallback(async () => {
     await getResponsable();
@@ -46,7 +46,7 @@ export const Responsable = () => {
 
   const resendActivationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${siret}/resendActivationEmail`);
+      await _put(`/api/admin/responsables/${uai_responsable}/resendActivationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -66,11 +66,11 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [siret, responsable, toast, reload]);
+  }, [uai_responsable, responsable, toast, reload]);
 
   const resendConfirmationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${siret}/resendConfirmationEmail`);
+      await _put(`/api/admin/responsables/${uai_responsable}/resendConfirmationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -90,11 +90,11 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [siret, responsable, toast, reload]);
+  }, [uai_responsable, responsable, toast, reload]);
 
   const resendNotificationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${siret}/resendNotificationEmail`);
+      await _put(`/api/admin/responsables/${uai_responsable}/resendNotificationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -114,11 +114,11 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [siret, responsable, toast, reload]);
+  }, [uai_responsable, responsable, toast, reload]);
 
   const resendUpdateEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${siret}/resendUpdateEmail`);
+      await _put(`/api/admin/responsables/${uai_responsable}/resendUpdateEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -138,7 +138,7 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [siret, responsable, toast, reload]);
+  }, [uai_responsable, responsable, toast, reload]);
 
   useEffect(() => {
     const run = async () => {
@@ -159,19 +159,20 @@ export const Responsable = () => {
   }
 
   if (!responsable) {
-    return;
+    return (
+      <>
+        Un problème est survenu lors de la récupération du responsable.{" "}
+        <Link variant="action" href="/support">
+          Signaler un problème
+        </Link>
+      </>
+    );
   }
 
   const hasVoeux = !!responsable.relations.find((relation) => relation?.nombre_voeux > 0);
   const hasUpdate = !!responsable.relations.find(
     (relation) => new Date(relation?.first_date_voeux).getTime() !== new Date(relation?.last_date_voeux).getTime()
   );
-
-  // const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.relations?.find(
-  //   (relation) =>
-  //     relation?.etablissement_formateur.uai === formateur?.uai ||
-  //     relation?.etablissement_responsable.siret === responsable?.siret
-  // );
 
   const title = (
     <>
@@ -181,14 +182,13 @@ export const Responsable = () => {
   );
   return (
     <>
-      <Breadcrumb items={[{ label: title, url: `/admin/responsable/${siret}` }]} />
+      <Breadcrumb items={[{ label: title, url: `/admin/responsable/${uai_responsable}` }]} />
 
       <Page title={title}>
         <Box my={12}>
           <Box mb={12}>
             <Text mb={4}>
-              Adresse : {responsable?.adresse} - Siret : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
-              {responsable?.uai ?? "Inconnu"}
+              Adresse : {responsable?.adresse} - UAI : {responsable?.uai ?? "Inconnu"}
             </Text>
 
             <Text mb={4}>
@@ -202,7 +202,7 @@ export const Responsable = () => {
                   L'organisme est responsable de l'offre de {responsable?.relations?.length} organisme
                   {responsable?.relations?.length > 1 && "s"} formateur
                   {responsable?.relations?.length > 1 && "s"}.{" "}
-                  <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
+                  <Link variant="action" href={`/admin/responsable/${responsable?.uai}/formateurs`}>
                     Accéder à la liste
                   </Link>
                 </Text>
@@ -211,7 +211,7 @@ export const Responsable = () => {
             {/* {isResponsableFormateurForAtLeastOneEtablissement && (
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
-              <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}>
+              <Link variant="action" href={`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`}>
                 Accéder à la page de téléchargement des listes de candidats
               </Link>
             </Text>
@@ -233,42 +233,41 @@ export const Responsable = () => {
                   <ResponsableStatut responsable={responsable} />.
                 </Box>
 
-                {UserType.RESPONSABLE === responsable?.type &&
-                  (() => {
-                    switch (true) {
-                      case UserStatut.ACTIVE === responsable?.statut && hasVoeux && hasUpdate:
-                        /* !!responsable?.emails.filter((email) => email.templateName === "update_responsable").length */
-                        return (
-                          <Link variant="action" onClick={resendUpdateEmail}>
-                            Générer un nouvel envoi de notification
-                          </Link>
-                        );
-                      case UserStatut.ACTIVE === responsable?.statut && hasVoeux && !hasUpdate:
-                        /* !!responsable?.emails.filter((email) => email.templateName === "notification_responsable").length */
-                        return (
-                          <Link variant="action" onClick={resendNotificationEmail}>
-                            Générer un nouvel envoi de notification
-                          </Link>
-                        );
-                      case UserStatut.CONFIRME === responsable?.statut:
-                        /* !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length */
-                        return (
-                          <Link variant="action" onClick={resendActivationEmail}>
-                            Générer un nouvel envoi de notification
-                          </Link>
-                        );
-                      case UserStatut.EN_ATTENTE === responsable?.statut /*&&
+                {(() => {
+                  switch (true) {
+                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && hasUpdate:
+                      /* !!responsable?.emails.filter((email) => email.templateName === "update_responsable").length */
+                      return (
+                        <Link variant="action" onClick={resendUpdateEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && !hasUpdate:
+                      /* !!responsable?.emails.filter((email) => email.templateName === "notification_responsable").length */
+                      return (
+                        <Link variant="action" onClick={resendNotificationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+                    case UserStatut.CONFIRME === responsable?.statut:
+                      /* !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length */
+                      return (
+                        <Link variant="action" onClick={resendActivationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
+                    case UserStatut.EN_ATTENTE === responsable?.statut /*&&
                     !!responsable?.emails.filter((email) => email.templateName === "confirmation_responsable").length*/:
-                        return (
-                          <Link variant="action" onClick={resendConfirmationEmail}>
-                            Générer un nouvel envoi de notification
-                          </Link>
-                        );
+                      return (
+                        <Link variant="action" onClick={resendConfirmationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
 
-                      default:
-                        return <></>;
-                    }
-                  })()}
+                    default:
+                      return <></>;
+                  }
+                })()}
               </Box>
             </Box>
 
@@ -277,7 +276,7 @@ export const Responsable = () => {
             </Heading>
 
             <Text mb={4}>
-              <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
+              <Link variant="action" href={`/admin/responsable/${responsable?.uai}/formateurs`}>
                 Voir la liste des organismes formateurs
               </Link>{" "}
               pour accéder aux listes de candidats disponibles et à leurs statuts de téléchargement.

@@ -6,7 +6,7 @@ const { Strategy: LocalStrategy } = require("passport-local");
 const sha512Utils = require("../../common/utils/passwordUtils");
 const { getUser } = require("../../common/actions/getUser");
 
-// const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
+const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 
 module.exports = () => {
   function checkUsernameAndPassword() {
@@ -18,11 +18,12 @@ module.exports = () => {
           passReqToCallback: true,
         },
         async (req, username, password, done) => {
-          // const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
-          return getUser(username?.replace(/\s/g, "")?.trim())
+          // return getUser(username?.replace(/\s/g, "")?.trim()).then((user) => done(null, user));
+          const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
+          return getUser(fixed?.trim())
             .then((user) => {
               if (!user || !user.password || !sha512Utils.compare(password, user.password)) {
-                req.errorMessage = `Echec de l'authentification pour l'utilisateur ${username}`;
+                req.errorMessage = `Echec de l'authentification pour l'utilisateur ${fixed}`;
                 done(null, false);
               } else {
                 done(null, user);
@@ -94,14 +95,6 @@ module.exports = () => {
     },
     ensureIs: (type) => {
       return (req, res, next) => {
-        // if (type === "Responsable" && req.user.type === "Etablissement" && !!req.user.etablissements_formateur.length) {
-        //   return next();
-        // }
-
-        // if (type === "Formateur" && req.user.type === "Etablissement" && !!req.user.etablissements_responsable.length) {
-        //   return next();
-        // }
-
         if (req.user.type !== type) {
           next(Boom.forbidden());
         } else {
@@ -111,22 +104,6 @@ module.exports = () => {
     },
     ensureIsOneOf: (types) => {
       return (req, res, next) => {
-        // if (
-        //   types.include("Responsable") &&
-        //   req.user.type === "Etablissement" &&
-        //   !!req.user.etablissements_formateur.length
-        // ) {
-        //   return next();
-        // }
-
-        // if (
-        //   types.include("Formateur") &&
-        //   req.user.type === "Etablissement" &&
-        //   !!req.user.etablissements_responsable.length
-        // ) {
-        //   return next();
-        // }
-
         if (!types.includes(req.user.type)) {
           next(Boom.forbidden());
         } else {

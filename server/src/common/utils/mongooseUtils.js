@@ -67,47 +67,18 @@ async function paginate(model, query, options = {}) {
  * @param {Number} options.page Numéro de la page
  * @param {Number} options.items_par_page Nombre d'éléments par page
  * @param {Object} options.sort Tri
+ * @param {Object} options.select Champs retournés
  *
- * @returns {Promise<{find: Promise<import("mongoose").Model[]>, pagination: {page: Number, items_par_page: Number, nombre_de_page: Number, total: Number}}>
+ * @returns {Promise<{results: Model[], pagination: {page: Number, items_par_page: Number, nombre_de_page: Number, total: Number}}>
  */
 async function aggregate(model, aggregation, options = {}) {
-  // const aggregationToken = JSON.stringify(aggregation);
-
-  // if (!(await CacheRegistry.exists({ value: aggregationToken }))) {
-  //   await CacheRegistry.create({
-  //     value: aggregationToken,
-  //     total: (await model.aggregate([...aggregation, { $count: "total" }]))?.[0]?.total || 0,
-  //   });
-  // }
-
-  // const cache = await CacheRegistry.findOne({ value: aggregationToken });
-  // const cacheKey = cache._id.toString();
-
-  // const CacheModel = mongoose.model(cacheKey, emptySchema, cacheKey);
-
-  // await CacheModel.createCollection({
-  //   viewOn: model.collection.name,
-  //   pipeline: aggregation,
-  // });
-
-  // const total = cache.total;
-
   const total = (await model.aggregate([...aggregation, { $count: "total" }]).cachePipeline())?.[0]?.total || 0;
   const page = options.page || 1;
   const limit = options.items_par_page || 10;
   const sort = options.sort || {};
   const skip = (page - 1) * limit;
 
-  // const query = CacheModel.find({}).sort(sort).cacheQuery();
   const query = model.aggregate([...aggregation, { $sort: sort }]).cachePipeline();
-
-  // let find = CacheModel.aggregate([{ $sort: sort }, { $skip: skip }, { $limit: limit }]);
-
-  // let find = await model
-  //   .aggregate([...aggregation, { $sort: sort }, { $skip: skip }, { $limit: limit }], {
-  //     allowDiskUse: true,
-  //   })
-  //   .cachePipeline();
 
   return {
     results: (await query).slice(skip, skip + limit),

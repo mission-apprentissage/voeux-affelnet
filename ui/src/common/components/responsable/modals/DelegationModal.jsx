@@ -24,7 +24,7 @@ import { Formik, Form, Field } from "formik";
 import { _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
-import { UserType } from "../../../constants/UserType";
+import { DownloadType } from "../../../constants/DownloadType";
 
 export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -65,7 +65,9 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const hasVoeux = relation.nombre_voeux > 0;
 
   const voeuxTelechargementsResponsable =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
+    relation.voeux_telechargements?.filter(
+      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+    ) ?? [];
 
   const voeuxTelecharges = !!voeuxTelechargementsResponsable.find(
     (telechargement) => new Date(telechargement.date).getTime() >= new Date(relation.last_date_voeux).getTime()

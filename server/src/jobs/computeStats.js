@@ -36,7 +36,7 @@ const computeOrganismesStats = async (filter = {}) => {
   };
 
   const relationEtablissementsFilter = {
-    "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
+    "etablissement_responsable.uai": { $nin: UAIS_RECENSEMENT },
     "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
   };
 

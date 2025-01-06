@@ -1,0 +1,142 @@
+const { UserType } = require("../constants/UserType.js");
+const logger = require("../logger.js");
+const { Relation, Delegue } = require("../model/index.js");
+
+const allFilesAsAlreadyBeenDownloaded = async (user) => {
+  logger.debug("allFilesAsAlreadyBeenDownloaded", user);
+
+  switch (user.type) {
+    case UserType.ETABLISSEMENT: {
+      const responsable = user;
+
+      const relations =
+        (await Relation.find({
+          "etablissement_responsable.uai": responsable.uai,
+        })) ?? [];
+
+      if (!relations.length || !relations.find((relation) => relation.nombre_voeux_restant > 0)) {
+        return true;
+      }
+
+      const delegues = await Delegue.find({ "relations.etablissement_responsable.uai": responsable.uai });
+
+      if (
+        relations
+          .filter((relation) => {
+            const delegue = delegues.find((delegue) =>
+              delegue.relations.find(
+                (rel) =>
+                  rel.etablissement_responsable.uai === relation.etablissement_responsable.uai &&
+                  rel.etablissement_formateur.uai === relation.etablissement_formateur.uai &&
+                  rel.active === true
+              )
+            );
+
+            return !delegue;
+          })
+          .find((relation) => relation.nombre_voeux_restant > 0)
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    case UserType.DELEGUE: {
+      const delegue = user;
+
+      const relations =
+        (await Promise.all(
+          delegue.relations.map(
+            async (relation) =>
+              await Relation.findOne({
+                "etablissement_responsable.uai": relation.etablissement_responsable.uai,
+                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+              })
+          )
+        )) ?? [];
+
+      if (relations.find((relation) => relation.nombre_voeux_restant > 0)) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    default: {
+      return true;
+    }
+  }
+};
+
+const filesHaveUpdate = async (user) => {
+  logger.debug("filesHaveUpdate", user);
+
+  switch (user.type) {
+    case UserType.ETABLISSEMENT: {
+      const responsable = user;
+
+      const relations =
+        (await Relation.find({
+          "etablissement_responsable.uai": responsable.uai,
+        })) ?? [];
+
+      if (!relations.length /* || !relations.find((relation) => relation.nombre_voeux_restant > 0)*/) {
+        return false;
+      }
+
+      const delegues = await Delegue.find({ "relations.etablissement_responsable.uai": responsable.uai });
+
+      if (
+        relations
+          .filter((relation) => {
+            const delegue = delegues.find((delegue) =>
+              delegue.relations.find(
+                (rel) =>
+                  rel.etablissement_responsable.uai === relation.etablissement_responsable.uai &&
+                  rel.etablissement_formateur.uai === relation.etablissement_formateur.uai &&
+                  rel.active === true
+              )
+            );
+
+            return !delegue;
+          })
+          .find((relation) => relation.first_voeux_date !== relation.last_voeux_date)
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    case UserType.DELEGUE: {
+      const delegue = user;
+
+      const relations =
+        (await Promise.all(
+          delegue.relations.map(
+            async (relation) =>
+              await Relation.findOne({
+                "etablissement_responsable.uai": relation.etablissement_responsable.uai,
+                "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+              })
+          )
+        )) ?? [];
+
+      if (relations.find((relation) => relation.last_voeux_date !== relation.first_voeux_date)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    default: {
+      return false;
+    }
+  }
+};
+
+module.exports = {
+  allFilesAsAlreadyBeenDownloaded,
+  filesHaveUpdate,
+};

@@ -8,160 +8,186 @@ function getTemplateFile(name) {
 const voeux_email = process.env.VOEUX_AFFELNET_EMAIL;
 
 module.exports = {
-  confirmation_responsable: (responsable, token, options = {}) => {
+  // eslint-disable-next-line no-unused-vars
+  confirmation_responsable: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `${prefix}Affelnet 2024  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (Siret : ${responsable.siret})`,
+      subject: `${prefix}Affelnet 2025 – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (UAI : ${user.uai})`,
       templateFile: getTemplateFile("confirmation_responsable"),
       data: {
-        responsable,
         token,
-        actionToken: createActionToken(responsable.username),
+        actionToken: createActionToken(user.username),
         voeux_email,
+        responsable: user,
       },
     };
   },
-  confirmation_delegue: (delegue, token, options = {}) => {
+  // eslint-disable-next-line no-unused-vars
+  confirmation_delegue: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `${prefix}Affelnet 2024  – Action requise pour la transmission des listes de candidats`,
+      subject: `${prefix}Affelnet 2025 – Action requise pour la transmission des listes de candidats`,
       templateFile: getTemplateFile("confirmation_delegue"),
       data: {
-        delegue,
         token,
-        actionToken: createActionToken(delegue.username),
+        actionToken: createActionToken(user.username),
         voeux_email,
+        delegue: user,
       },
     };
   },
-  confirmed: (user) => {
+  confirmed: (user, token) => {
     return {
-      subject: `Affelnet 2024  – Confirmation de votre adresse courriel`,
+      subject: `Affelnet 2025 – Confirmation de votre adresse courriel`,
       templateFile: getTemplateFile("confirmed"),
       data: {
-        user,
+        token,
+        actionToken: createActionToken(user.username),
         voeux_email,
+        user,
       },
     };
   },
-  activation_user: (user, token, options = {}) => {
+  // eslint-disable-next-line no-unused-vars
+  activation_user: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
+
     return {
       subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte administrateur`,
       templateFile: getTemplateFile("activation_user"),
       data: {
-        user,
         token,
         actionToken: createActionToken(user.username),
         voeux_email,
+        user,
       },
     };
   },
-  activation_academie: (user, token, options = {}) => {
+  // eslint-disable-next-line no-unused-vars
+  activation_academie: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
+
     return {
       subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte académique`,
       templateFile: getTemplateFile("activation_academie"),
       data: {
-        user,
         token,
         actionToken: createActionToken(user.username),
         voeux_email,
+        user,
       },
     };
   },
-  activation_responsable: (responsable, token, options = {}) => {
+  // eslint-disable-next-line no-unused-vars
+  activation_responsable: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `${prefix}Affelnet 2024  – Veuillez activer votre compte pour l'accès aux listes de candidats (Siret : ${responsable.siret})`,
+      subject: `${prefix}Affelnet 2025 – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${user.uai})`,
       templateFile: getTemplateFile("activation_responsable"),
       data: {
-        responsable,
         token,
-        actionToken: createActionToken(responsable.username),
+        actionToken: createActionToken(user.username),
         voeux_email,
+        responsable: user,
       },
     };
   },
-  activation_delegue: (delegue, token, options = {}) => {
+  // eslint-disable-next-line no-unused-vars
+  activation_delegue: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
+
     return {
-      subject: `${prefix}Affelnet 2024  – Veuillez activer votre compte pour l'accès aux listes de candidats aux offres de formation en apprentissage`,
+      subject: `${prefix}Affelnet 2025 – Veuillez activer votre compte pour l'accès aux listes de candidats aux offres de formation en apprentissage`,
       templateFile: getTemplateFile("activation_delegue"),
       data: {
-        delegue,
         token,
-        actionToken: createActionToken(delegue.username),
+        actionToken: createActionToken(user.username),
         voeux_email,
+        delegue: user,
       },
     };
   },
-  activation_csaio: (csaio, token, options = {}) => {
+  // eslint-disable-next-line no-unused-vars
+  activation_csaio: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
+
     return {
       subject: `${prefix}Activation de votre compte`,
       templateFile: getTemplateFile("activation_csaio"),
       data: {
-        csaio,
-        token,
-        actionToken: createActionToken(csaio.username),
+        actionToken: createActionToken(user.username),
         voeux_email,
+        csaio: user,
+        token,
       },
     };
   },
-  notification_responsable: (responsable, token, options = {}) => {
+  notification_responsable: (user, token, { relation, responsable, formateur }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
-      subject: `${prefix}Affelnet 2024  – Les listes de candidats à l’apprentissage sont téléchargeables (Siret : ${responsable.siret})`,
+      subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} sont téléchargeables`,
       templateFile: getTemplateFile("notification_responsable"),
       data: {
-        responsable,
-        token,
-        actionToken: createActionToken(responsable.username),
+        actionToken: createActionToken(user.username),
         voeux_email,
+        relation,
+        responsable,
+        formateur,
+        token,
       },
     };
   },
-  notification_delegue: (delegue, token, options = {}) => {
+  notification_delegue: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
-      subject: `${prefix}Affelnet 2024  – La liste de candidats à l’apprentissage est téléchargeable`,
+      subject: `${prefix}Affelnet 2025 – La liste de candidats à l’apprentissage pour l'établissement ${formateur.uai} est téléchargeable`,
       templateFile: getTemplateFile("notification_delegue"),
       data: {
+        actionToken: createActionToken(user.username),
+        voeux_email,
+        relation,
+        responsable,
+        formateur,
         delegue,
         token,
-        actionToken: createActionToken(delegue.username),
-        voeux_email,
       },
     };
   },
-  update_responsable: (responsable, token, options = {}) => {
+  update_responsable: (user, token, { relation, responsable, formateur }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
-      subject: `${prefix}Affelnet 2024  – Les listes de candidats à l’apprentissage ont été mises à jour (Siret : ${responsable.siret})`,
+      subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
       templateFile: getTemplateFile("update_responsable"),
       data: {
-        responsable,
-        token,
-        actionToken: createActionToken(responsable.username),
+        actionToken: createActionToken(user.username),
         voeux_email,
+        relation,
+        responsable,
+        formateur,
+        token,
       },
     };
   },
-  update_delegue: (delegue, token, options = {}) => {
+  update_delegue: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
-      subject: `${prefix}Affelnet 2024  – Les listes de candidats à l’apprentissage ont été mises à jour`,
+      subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
       templateFile: getTemplateFile("update_delegue"),
       data: {
+        actionToken: createActionToken(user.username),
+        voeux_email,
+        relation,
+        responsable,
+        formateur,
         delegue,
         token,
-        actionToken: createActionToken(delegue.username),
-        voeux_email,
       },
     };
   },
@@ -170,9 +196,9 @@ module.exports = {
       subject: "Réinitialisation du mot de passe (lien valable 2 heures)",
       templateFile: getTemplateFile("reset_password"),
       data: {
+        resetPasswordToken: createResetPasswordToken(user.username),
         user,
         token,
-        resetPasswordToken: createResetPasswordToken(user.username),
         voeux_email,
       },
     };

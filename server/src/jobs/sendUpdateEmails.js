@@ -1,143 +1,170 @@
-const { UserStatut } = require("../common/constants/UserStatut");
-const { UserType } = require("../common/constants/UserType");
+const { DownloadType } = require("../common/constants/DownloadType");
 const logger = require("../common/logger");
-const { User, Responsable, Relation, Delegue } = require("../common/model");
-const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
+const { Relation, Etablissement, Delegue } = require("../common/model");
+// const { RelationActions } = require("../common/constants/History");
 
 const {
-  saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForResponsable,
-  saveUpdatedListAvailableEmailManualSent: saveUpdatedListAvailableEmailManualSentForResponsable,
-} = require("../common/actions/history/responsable");
-const {
-  saveUpdatedListAvailableEmailAutomaticSent: saveUpdatedListAvailableEmailAutomaticSentForDelegue,
-  saveUpdatedListAvailableEmailManualSent: saveUpdatedListAvailableEmailManualSentForDelegue,
-} = require("../common/actions/history/delegue");
+  saveUpdatedListAvailableEmailAutomaticSentToResponsable,
+  saveUpdatedListAvailableEmailManualSentToResponsable,
+  saveUpdatedListAvailableEmailAutomaticSentToDelegue,
+  saveUpdatedListAvailableEmailManualSentToDelegue,
+  saveUpdatedListAvailableEmailAutomaticResentToResponsable,
+  saveUpdatedListAvailableEmailManualResentToResponsable,
+  saveUpdatedListAvailableEmailAutomaticResentToDelegue,
+  saveUpdatedListAvailableEmailManualResentToDelegue,
+} = require("../common/actions/history/relation");
 
-async function sendUpdateEmails(sendEmail, options = {}) {
-  const stats = { total: 0, sent: 0, failed: 0 };
+async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
+  const stats = { total: 0, sent: 0, resent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+  const skip = options.skip || 0;
   let query;
 
-  if (options.username && options.force) {
-    query = { username: options.username };
-  } else {
-    const relations = await Relation.find({
-      // $and: [
-      //   // { $expr: { $gt: ["$nombre_voeux", 0] } },
-      //   // { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
-      //   // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
-      //   // { $expr: { $ne: ["$first_date_voeux", "$last_date_voeux"] } },
-      // ],
-    });
-    // console.log(relations);
+  query = {
+    $and: [
+      { $expr: { $gt: ["$nombre_voeux", 0] } },
+      { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
+      { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+      { $expr: { $ne: ["$first_date_voeux", "$last_date_voeux"] } },
+    ],
+    // histories: {
+    //   $not: {
+    //     $elemMatch: {
+    //       action: {
+    //         $in: [
+    //           RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
+    //           RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
+    //           RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
+    //           RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
+    //         ],
+    //       },
+    //     },
+    //   },
+    // },
+  };
 
-    const delegues = (
-      (await Promise.all(
-        relations.map(
-          async (relation) =>
-            await Delegue.findOne({
-              type: UserType.DELEGUE,
-              relations: {
-                $elemMatch: {
-                  "etablissement_responsable.siret": relation.etablissement_responsable.siret,
-                  "etablissement_formateur.uai": relation.etablissement_formateur.uai,
-                  active: true,
-                },
-              },
-            })
-        )
-      )) ?? []
-    )
-      .filter((delegue) => !!delegue)
-      .reduce((acc, delegue) => {
-        if (!acc.find((d) => d.email === delegue.email)) {
-          acc.push(delegue);
-        }
-
-        return acc;
-      }, []);
-
-    const relationsDeleguees = delegues.flatMap((delegue) => delegue.relations.filter((relation) => relation.active));
-
-    const relationsNonDeleguees = relations.filter(
-      (relation) =>
-        !relationsDeleguees.find(
-          (relationDeleguee) =>
-            relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
-            relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
-        )
-    );
-
-    const responsables = await Responsable.find({
-      siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
-    });
-
-    logger.info(`Sending update emails to ${responsables.length} responsables and ${delegues.length} delegues...`);
-
-    query = {
-      ...(options.username ? { username: options.username } : {}),
-      ...(options.force
-        ? {}
-        : {
-            unsubscribe: false,
-            statut: { $nin: [UserStatut.NON_CONCERNE] },
-
-            $and: [
-              { "emails.templateName": { $regex: "^notification_.*$" } },
-              { "emails.templateName": { $not: { $regex: "^update_.*$" } } },
-            ],
-
-            $or: [
-              {
-                type: UserType.RESPONSABLE,
-                _id: { $in: responsables.map((responsable) => responsable._id) },
-              },
-              { type: UserType.DELEGUE, _id: { $in: delegues.map((delegue) => delegue._id) } },
-            ],
-          }),
-    };
-  }
-
-  await User.find(query)
+  await Relation.find(query)
     .lean()
-    // .limit(limit)
+    .skip(skip)
+    .limit(limit)
     .cursor()
-    .eachAsync(async (user) => {
-      if (!options.force && (await allFilesAsAlreadyBeenDownloaded(user))) {
-        return;
+    .eachAsync(async (relation) => {
+      const responsable = await Etablissement.findOne({ uai: relation.etablissement_responsable.uai });
+      const formateur = await Etablissement.findOne({ uai: relation.etablissement_formateur.uai });
+
+      const delegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: {
+            "etablissement_responsable.uai": relation.etablissement_responsable.uai,
+            "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+            active: true,
+          },
+        },
+      })
+        .select({ _id: 0, histories: 0 })
+        .lean();
+
+      const user = delegue ?? responsable;
+
+      if (!user) {
+        throw Error("Utilisateur introuvable pour la relation " + relation._id);
       }
 
-      if (!options.force && (await !filesHaveUpdate(user))) {
-        return;
+      if (!user.email) {
+        // return stats;
+        throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
       }
 
-      const templateName = `update_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
+      const type = (delegue ? DownloadType.DELEGUE : DownloadType.RESPONSABLE).toLowerCase();
+
+      const templateName = `notification_${type}`;
+      const previous = user.emails.find((e) => e.templateName === templateName && e.data.relation._id === relation._id);
       stats.total++;
 
       try {
-        if (limit > stats.sent) {
-          logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
-          await sendEmail(user, templateName);
+        logger.info(
+          `${previous ? "Res" : "S"}ending ${templateName} email to ${type} ${user.username} (${user.email})...`
+        );
 
-          switch (user.type) {
-            case UserType.RESPONSABLE:
-              options.sender
-                ? await saveUpdatedListAvailableEmailManualSentForResponsable(user, options.sender)
-                : await saveUpdatedListAvailableEmailAutomaticSentForResponsable(user);
-              break;
-            case UserType.DELEGUE:
-              options.sender
-                ? await saveUpdatedListAvailableEmailManualSentForDelegue(user, options.sender)
-                : await saveUpdatedListAvailableEmailAutomaticSentForDelegue(user);
-              break;
-            default:
-              break;
-          }
+        switch (type) {
+          case DownloadType.RESPONSABLE:
+            switch (!!previous) {
+              case false:
+                await sendEmail(user, templateName, {
+                  relation,
+                  responsable,
+                  formateur,
+                });
+                options.sender
+                  ? await saveUpdatedListAvailableEmailManualSentToResponsable(
+                      { relation, responsable, formateur },
+                      options.sender
+                    )
+                  : await saveUpdatedListAvailableEmailAutomaticSentToResponsable({
+                      relation,
+                      responsable,
+                      formateur,
+                    });
+                break;
+              case true:
+                await resendEmail(previous.token);
+                options.sender
+                  ? await saveUpdatedListAvailableEmailManualResentToResponsable(
+                      { relation, responsable, formateur },
+                      options.sender
+                    )
+                  : await saveUpdatedListAvailableEmailAutomaticResentToResponsable({
+                      relation,
+                      responsable,
+                      formateur,
+                    });
+                break;
+            }
+            break;
+          case DownloadType.DELEGUE:
+            switch (!!previous) {
+              case false:
+                await sendEmail(user, templateName, {
+                  relation,
+                  responsable,
+                  formateur,
+                  delegue,
+                });
+                options.sender
+                  ? await saveUpdatedListAvailableEmailManualSentToDelegue(
+                      { relation, responsable, formateur, delegue },
+                      options.sender
+                    )
+                  : await saveUpdatedListAvailableEmailAutomaticSentToDelegue({
+                      relation,
+                      responsable,
+                      formateur,
+                      delegue,
+                    });
+                break;
 
-          stats.sent++;
+              case true:
+                await resendEmail(previous.token);
+                options.sender
+                  ? await saveUpdatedListAvailableEmailManualResentToDelegue(
+                      { relation, responsable, formateur, delegue },
+                      options.sender
+                    )
+                  : await saveUpdatedListAvailableEmailAutomaticResentToDelegue({
+                      relation,
+                      responsable,
+                      formateur,
+                      delegue,
+                    });
+
+                break;
+            }
+            break;
         }
+
+        previous ? stats.resent++ : stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);
+        logger.error(`Unable to ${previous ? "re" : ""}sent ${templateName} email to ${type} ${user.username}`, e);
         stats.failed++;
       }
     });

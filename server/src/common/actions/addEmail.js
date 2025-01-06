@@ -1,6 +1,6 @@
 const { User } = require("../model");
 
-function addEmail(user, token, templateName) {
+function addEmail(user, token, templateName, variables = {}) {
   return User.updateOne(
     { username: user.username },
     {
@@ -9,6 +9,7 @@ function addEmail(user, token, templateName) {
           token,
           templateName,
           sendDates: [new Date()],
+          variables,
         },
       },
     },

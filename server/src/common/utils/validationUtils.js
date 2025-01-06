@@ -1,5 +1,3 @@
-const { isEmpty } = require("lodash");
-const luhn = require("fast-luhn");
 const ALPHABET_23_LETTERS = [
   "a",
   "b",
@@ -53,8 +51,5 @@ module.exports = {
     const checksum = code.substring(7, 8).toLowerCase();
 
     return checksum === computeChecksum(numbers);
-  },
-  isSiretValid(siret) {
-    return !isEmpty(siret) && siret.length === 14 && luhn(siret);
   },
 };

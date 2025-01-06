@@ -5,7 +5,7 @@ const { pick, sortBy } = require("lodash");
 const { omitEmpty, removeDiacritics } = require("../common/utils/objectUtils.js");
 const { findAcademieByDepartement, findAcademieByCodeInsee } = require("../common/academies.js");
 const { streamJsonArray } = require("../common/utils/streamUtils.js");
-const TableauDeBordApi = require("../common/api/TableauDeBordApi.js");
+const TableauDeBordApi = require("../common/api/TableauDeBordApi.js.DEPRECATED");
 
 const STATUT_MAPPER = {
   2: "inscrit",

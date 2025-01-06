@@ -21,7 +21,7 @@ async function activateUser(username, password, options = {}) {
   }
 
   switch (user.type) {
-    case UserType.RESPONSABLE:
+    case UserType.ETABLISSEMENT:
       await saveResponsableAccountActivated(user);
       break;
     case UserType.DELEGUE:

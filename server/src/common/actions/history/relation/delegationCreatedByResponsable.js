@@ -1,10 +1,10 @@
 const { RelationActions } = require("../../../constants/History");
 const { Relation } = require("../../../model");
 
-const saveDelegationCreatedByResponsable = async ({ uai, siret, email }, responsable) => {
+const saveDelegationCreatedByResponsable = async ({ uai_responsable, uai_formateur, email }, responsable) => {
   const relation = await Relation.findOne({
-    "etablissement_formateur.uai": uai,
-    "etablissement_responsable.siret": siret,
+    "etablissement_formateur.uai": uai_formateur,
+    "etablissement_responsable.uai": uai_responsable,
   }).lean();
 
   if (!relation) {
@@ -18,8 +18,8 @@ const saveDelegationCreatedByResponsable = async ({ uai, siret, email }, respons
         histories: {
           action: RelationActions.DELEGATION_CREATED_BY_RESPONSABLE,
           variables: {
-            uai,
-            siret,
+            uai_formateur,
+            uai_responsable,
             email,
             responsable: responsable.email,
           },

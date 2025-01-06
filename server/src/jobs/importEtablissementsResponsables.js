@@ -4,58 +4,23 @@ const { pick } = require("lodash");
 const { oleoduc, transformData, writeData } = require("oleoduc");
 
 const CatalogueApi = require("../common/api/CatalogueApi");
-// const ReferentielApi = require("../common/api/ReferentielApi");
 const { findAcademieByUai } = require("../common/academies");
 const { Etablissement } = require("../common/model");
 const logger = require("../common/logger");
 const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
-const { siretFormat, uaiFormat } = require("../common/utils/format");
+const { uaiFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
-const { getVoeuxDate, getNombreVoeux } = require("../common/utils/voeuxUtils");
 
-const SIRET_RECENSEMENT = "99999999999999";
+const UAI_RECENSEMENT = "0000000A";
 
 const schema = Joi.object({
-  siret_responsable: Joi.string().pattern(siretFormat).required(),
+  uai_responsable: Joi.string().pattern(uaiFormat).required(),
   email_responsable: Joi.string().email().required(),
   uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
-async function buildEtablissements(uais, responsable) {
-  return Promise.all(
-    [...new Set(uais)].map(async (uai) => {
-      const formateur = await Etablissement.findOne({ uai }).lean();
-
-      // if (!formateur) {
-      //   logger.warn(`Formateur ${uai} non trouvé`);
-      // }
-
-      const existingEtablissement = responsable?.etablissements_formateur?.find(
-        (etablissement) => etablissement.uai === uai
-      );
-
-      const voeux_date = await getVoeuxDate({ uai, siret: responsable.siret });
-
-      const nombre_voeux = await getNombreVoeux({ uai, siret: responsable.siret });
-
-      // console.log({ siret: responsable.siret, uai, nombre_voeux, voeux_date });
-
-      return {
-        uai,
-        siret: formateur?.siret,
-        nombre_voeux,
-        voeux_date,
-        email: existingEtablissement?.email || undefined,
-        diffusion_autorisee: existingEtablissement?.diffusion_autorisee || false,
-        academie: pick(findAcademieByUai(uai), ["code", "nom"]),
-      };
-    })
-  );
-}
-
 async function importEtablissementsResponsables(relationCsv, options = {}) {
-  // const referentielApi = options.referentielApi || new ReferentielApi();
   const catalogueApi = options.catalogueApi || (await new CatalogueApi());
   const stats = {
     total: 0,
@@ -82,56 +47,46 @@ async function importEtablissementsResponsables(relationCsv, options = {}) {
       return null;
     }),
     writeData(
-      async ({ siret_responsable, email_responsable, uai_formateurs }) => {
-        if (siret_responsable === SIRET_RECENSEMENT) {
+      async ({ uai_responsable, email_responsable }) => {
+        if (uai_responsable === UAI_RECENSEMENT) {
           return;
         }
 
         try {
-          const found = await Etablissement.findOne({ siret: siret_responsable }).lean();
-          const formateurs = await buildEtablissements(uai_formateurs, found ?? { siret: siret_responsable });
+          const found = await Etablissement.findOne({ uai: uai_responsable }).lean();
           let organisme;
 
           if (!found) {
-            organisme = await catalogueApi
-              .getEtablissement({ siret: siret_responsable, published: true })
-              .catch((error) => {
-                logger.warn(error, `Le responsable ${siret_responsable} n'est pas dans le catalogue`);
+            const organismes = (
+              await catalogueApi.getEtablissements({ uai: uai_responsable, published: true }).catch(() => {
+                return null;
+              })
+            )?.etablissements;
 
+            if (organismes?.length > 1) {
+              logger.error(`Multiples organismes trouvés dans le catalogue pour l'UAI ${uai_responsable}`);
+              stats.failed++;
+              return;
+            }
+
+            organisme = await catalogueApi.getEtablissement({ uai: uai_responsable, published: true }).catch(() => {
+              return null;
+            });
+
+            if (!organisme) {
+              organisme = await catalogueApi.getEtablissement({ uai: uai_responsable }).catch(() => {
                 return null;
               });
+            }
 
             if (!organisme) {
               stats.failed++;
-              logger.error(`Le responsable ${siret_responsable} n'est pas dans le catalogue`);
+              logger.error(`Le responsable ${uai_responsable} n'est pas dans le catalogue`);
               return;
             }
           }
 
-          if (!found?.uai && !organisme?.uai) {
-            stats.failed++;
-            logger.error(`Le responsable ${siret_responsable} n'a pas d'UAI dans le catalogue`);
-            return;
-          }
-
-          if (formateurs.length === 0) {
-            stats.failed++;
-            logger.error(`Le responsable ${siret_responsable} / ${organisme?.uai} n'a aucun établissement formateur`);
-            return;
-          }
-
-          // const updates = omitEmpty({
-          //   uai: organisme?.uai ?? found?.uai,
-          //   etablissements_formateur: formateurs,
-          //   raison_sociale: organisme?.raison_sociale ?? found?.raison_sociale,
-          //   academie: pick(findAcademieByUai(organisme?.uai ?? found?.uai), ["code", "nom"]),
-          //   adresse: organisme?.adresse?.label ?? found?.adresse,
-          //   libelle_ville: organisme?.adresse?.localite ?? found?.libelle_ville,
-          // });
-
           const updates = omitEmpty({
-            etablissements_formateur: formateurs,
-            uai: organisme?.uai ?? found?.uai,
             raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
             adresse: organisme
               ? [
@@ -145,15 +100,15 @@ async function importEtablissementsResponsables(relationCsv, options = {}) {
                   .join(" ")
               : found?.adresse,
             libelle_ville: organisme?.localite ?? found?.libelle_ville,
-            academie: pick(findAcademieByUai(organisme?.uai ?? found?.uai), ["code", "nom"]),
+            academie: pick(findAcademieByUai(uai_responsable), ["code", "nom"]),
           });
 
           const res = await Etablissement.updateOne(
-            { siret: siret_responsable },
+            { uai: uai_responsable },
             {
               $setOnInsert: {
-                siret: siret_responsable,
-                username: siret_responsable,
+                uai: uai_responsable,
+                username: uai_responsable,
                 email: email_responsable,
               },
               $set: updates,
@@ -163,32 +118,21 @@ async function importEtablissementsResponsables(relationCsv, options = {}) {
 
           if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Responsable ${siret_responsable} / ${organisme?.uai ?? found?.uai} ajouté`);
+            logger.info(`Responsable ${uai_responsable} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
 
-            const previous = pick(found, [
-              "uai",
-              "etablissements_formateur",
-              "raison_sociale",
-              "academie",
-              "adresse",
-              "libelle_ville",
-            ]);
+            const previous = pick(found, ["raison_sociale", "academie", "adresse", "libelle_ville"]);
 
             logger.info(
-              `Responsable ${siret_responsable} / ${organisme?.uai ?? found?.uai} mis à jour \n${JSON.stringify(
-                diff(previous, updates),
-                null,
-                2
-              )}`
+              `Responsable ${uai_responsable} mis à jour \n${JSON.stringify(diff(previous, updates), null, 2)}`
             );
           } else {
-            logger.trace(`Responsable ${siret_responsable} / ${organisme?.uai ?? found?.uai} déjà à jour`);
+            logger.trace(`Responsable ${uai_responsable} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter le responsable ${siret_responsable}`, error);
+          logger.error(`Impossible de traiter le responsable ${uai_responsable}`, error);
         }
       },
       { parallel: 10 }

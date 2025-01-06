@@ -1,13 +1,13 @@
 const { RelationActions } = require("../../../constants/History");
-const { Relation, Responsable } = require("../../../model");
+const { Relation, Etablissement } = require("../../../model");
 
-const saveUpdatedListDownloadedByResponsable = async ({ uai, siret }) => {
+const saveUpdatedListDownloadedByResponsable = async ({ uai_responsable, uai_formateur }) => {
   const relation = await Relation.findOne({
-    "etablissement_formateur.uai": uai,
-    "etablissement_responsable.siret": siret,
+    "etablissement_responsable.uai": uai_responsable,
+    "etablissement_formateur.uai": uai_formateur,
   }).lean();
 
-  const responsable = await Responsable.findOne({ siret }).select({ _id: 0, histories: 0 }).lean();
+  const responsable = await Etablissement.findOne({ uai: uai_responsable }).select({ _id: 0, histories: 0 }).lean();
 
   if (!relation) {
     return;

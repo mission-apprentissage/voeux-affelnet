@@ -7,45 +7,23 @@ import { Responsable } from "./Responsable";
 
 const ResponsableRoutes = () => {
   const [responsable, setResponsable] = useState(undefined);
-  const [formateurs, setFormateurs] = useState(undefined);
-  const [delegues, setDelegues] = useState(undefined);
   const mounted = useRef(false);
 
   const getResponsable = useCallback(async () => {
     try {
       const response = await _get("/api/responsable");
+      console.log(response);
       setResponsable(response);
     } catch (error) {
+      console.log(error);
       setResponsable(undefined);
       throw Error;
     }
   }, [setResponsable]);
 
-  // const getFormateurs = useCallback(async () => {
-  //   try {
-  //     const response = await _get("/api/responsable/formateurs");
-  //     setFormateurs(response);
-  //   } catch (error) {
-  //     setFormateurs(undefined);
-  //     throw Error;
-  //   }
-  // }, [setFormateurs]);
-
-  // const getDelegues = useCallback(async () => {
-  //   try {
-  //     const response = await _get("/api/responsable/delegues");
-  //     setDelegues(response);
-  //   } catch (error) {
-  //     setDelegues(undefined);
-  //     throw Error;
-  //   }
-  // }, [setDelegues]);
-
   const reload = useCallback(async () => {
     await getResponsable();
-    // await getFormateurs();
-    // await getDelegues();
-  }, [getResponsable /*, getFormateurs, getDelegues*/]);
+  }, [getResponsable]);
 
   useEffect(() => {
     const run = async () => {
@@ -73,6 +51,10 @@ const ResponsableRoutes = () => {
   //     navigate(`/responsable/formateurs/${responsable?.uai}`, { replace: true });
   //   }
   // }, [responsable, navigate]);
+
+  // if (!responsable.is_responsable) {
+  //   return "Vous n'êtes pas autorisé à accéder à cette page";
+  // }
 
   return (
     <>

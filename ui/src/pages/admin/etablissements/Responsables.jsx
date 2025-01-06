@@ -11,10 +11,11 @@ import { OrganismeResponsableTag } from "../../../common/components/tags/Organis
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
 import { Breadcrumb } from "../../../common/components/Breadcrumb";
+import { OrganismeResponsableFormateurTag } from "../../../common/components/tags/OrganismeResponsableFormateur";
 
 export const Responsables = () => {
   const navigate = useNavigate();
-  const { uai } = useParams();
+  const { uai_formateur } = useParams();
 
   const [formateur, setFormateur] = useState(undefined);
   // const [responsables, setResponsables] = useState(undefined);
@@ -23,35 +24,13 @@ export const Responsables = () => {
 
   const getFormateur = useCallback(async () => {
     try {
-      const response = await _get(`/api/admin/formateurs/${uai}`);
+      const response = await _get(`/api/admin/formateurs/${uai_formateur}`);
       setFormateur(response);
     } catch (error) {
       setFormateur(undefined);
       throw Error;
     }
-  }, [uai]);
-
-  // const getResponsables = useCallback(async () => {
-  //   try {
-  //     const response = await _get(`/api/admin/formateurs/${uai}/responsables`);
-
-  //     setResponsables(response);
-  //   } catch (error) {
-  //     setResponsables(undefined);
-  //     throw Error;
-  //   }
-  // }, [uai, setResponsables]);
-
-  // const getDelegues = useCallback(async () => {
-  //   try {
-  //     const response = await _get(`/api/admin/formateurs/${uai}/delegues`);
-
-  //     setDelegues(response);
-  //   } catch (error) {
-  //     setDelegues(undefined);
-  //     throw Error;
-  //   }
-  // }, [uai, setDelegues]);
+  }, [uai_formateur]);
 
   const reload = useCallback(async () => {
     await Promise.all([await getFormateur() /*, await getResponsables(), await getDelegues()*/]);
@@ -73,13 +52,20 @@ export const Responsables = () => {
 
   useEffect(() => {
     if (formateur?.relations?.length === 1) {
-      const responsable = formateur?.relations[0].responsable;
-      navigate(`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`, { replace: true });
+      const responsable = formateur?.relations[0].responsable ?? formateur?.relations[0].etablissement_responsable;
+      navigate(`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`, { replace: true });
     }
   }, [formateur, navigate]);
 
   if (!formateur) {
-    return;
+    return (
+      <>
+        Un problème est survenu lors de la récupération du formateur.{" "}
+        <Link variant="action" href="/support">
+          Signaler un problème
+        </Link>
+      </>
+    );
   }
 
   const title = (
@@ -88,6 +74,8 @@ export const Responsables = () => {
       <FormateurLibelle formateur={formateur} /> / liste des organismes responsables associés
     </>
   );
+
+  const relationsFormateur = formateur.relations.filter((relation) => relation.formateur?.uai === formateur?.uai);
 
   return (
     <>
@@ -100,19 +88,19 @@ export const Responsables = () => {
                 <FormateurLibelle formateur={formateur} />
               </>
             ),
-            url: `/admin/formateur/${uai}`,
+            url: `/admin/formateur/${uai_formateur}`,
           },
 
           {
             label: <>Liste des organismes responsables associés</>,
-            url: `/admin/formateur/${uai}/responsables`,
+            url: `/admin/formateur/${uai_formateur}/responsables`,
           },
         ]}
       />
 
       <Page title={title}>
         <Box mb={12}>
-          {formateur?.relations && (
+          {!!relationsFormateur?.length && (
             <Table mt={12}>
               <Thead>
                 <Tr>
@@ -127,7 +115,7 @@ export const Responsables = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {formateur?.relations.map((relation) => {
+                {relationsFormateur.map((relation) => {
                   const responsable = relation.responsable ?? relation.etablissements_responsable;
                   const delegue = relation.delegue;
 
@@ -136,14 +124,19 @@ export const Responsables = () => {
                       <Td>
                         <Link
                           variant="primary"
-                          href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}
+                          href={`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`}
                         >
                           Détail
                         </Link>
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <ResponsableLibelle responsable={responsable} /> <OrganismeResponsableTag />
+                          <ResponsableLibelle responsable={responsable} />
+                          {responsable?.uai === formateur?.uai ? (
+                            <OrganismeResponsableFormateurTag ml={2} verticalAlign="baseline" />
+                          ) : (
+                            <OrganismeResponsableTag ml={2} verticalAlign="baseline" />
+                          )}
                         </Text>
                       </Td>
                       <Td>

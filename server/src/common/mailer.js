@@ -13,7 +13,7 @@ function createTransporter(smtp) {
 
 function createMailer(transporter = createTransporter(config.smtp)) {
   async function sendEmailMessage(to, template) {
-    const { from, subject, /*data,*/ replyTo } = template;
+    const { from, subject, replyTo } = template;
     const address = from || "voeux-affelnet@apprentissage.beta.gouv.fr";
 
     const { messageId } = await transporter.sendMail({

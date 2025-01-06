@@ -5,9 +5,9 @@ import queryString from "query-string";
 
 export const useDownloadVoeux = () => {
   return useCallback(async ({ responsable, formateur }) => {
-    const filename = `${responsable?.siret}-${formateur?.uai}.csv`;
+    const filename = `${responsable?.uai}-${formateur?.uai}.csv`;
 
-    const content = await fetch(`/api/admin/responsables/${responsable?.siret}/formateurs/${formateur?.uai}/voeux`, {
+    const content = await fetch(`/api/admin/responsables/${responsable?.uai}/formateurs/${formateur?.uai}/voeux`, {
       method: "GET",
       headers: getHeaders(),
     });

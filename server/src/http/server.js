@@ -19,11 +19,11 @@ module.exports = async (actions) => {
   app.use(require("./routes/confirmationRoutes")(actions));
   app.use(require("./routes/responsablesRoutes.js")(actions));
   app.use(require("./routes/deleguesRoutes.js")(actions));
-  app.use(require("./routes/csaioRoutes.js")(actions));
+  // app.use(require("./routes/csaioRoutes.js")(actions));
   app.use(require("./routes/passwordRoutes")(actions));
   app.use(require("./routes/emailsRoutes")(actions));
   app.use(require("./routes/healthcheckRoutes")(actions));
-  app.use(require("./routes/relationRoutes")(actions));
+  // app.use(require("./routes/relationRoutes.js.DEPRECATED")(actions));
   app.use(require("./routes/statsRoutes")(actions));
   app.use(require("./routes/alertRoutes")(actions));
   app.use(require("./routes/adminRoutes")(actions));

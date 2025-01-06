@@ -27,9 +27,8 @@ import { SuccessLine } from "../../theme/components/icons";
 import { UpdateResponsableEmailModal } from "../../common/components/responsable/modals/UpdateResponsableEmailModal";
 import { ResponsableEmail } from "../../common/components/responsable/fields/ResponsableEmail";
 import { History } from "./History";
-import { isResponsableFormateur } from "../../common/utils/getUserType";
 import { FormateurStatut } from "../../common/components/responsable/fields/FormateurStatut";
-import { UserType } from "../../common/constants/UserType";
+import { DownloadType } from "../../common/constants/DownloadType";
 import { UserStatut } from "../../common/constants/UserStatut";
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
@@ -169,10 +168,13 @@ export const Formateur = ({ responsable, callback }) => {
   const hasUpdate = new Date(relation?.first_date_voeux).getTime() !== new Date(relation?.last_date_voeux).getTime();
 
   const voeuxTelechargementsDelegue =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.DELEGUE) ?? [];
+    relation.voeux_telechargements?.filter((telechargement) => telechargement.downloadType === DownloadType.DELEGUE) ??
+    [];
 
   const voeuxTelechargementsResponsable =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.userType === UserType.RESPONSABLE) ?? [];
+    relation.voeux_telechargements?.filter(
+      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+    ) ?? [];
 
   const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
     ? !!voeuxTelechargementsResponsable.find(
@@ -223,8 +225,7 @@ export const Formateur = ({ responsable, callback }) => {
             <FormateurLibelle formateur={formateur} />
           </Heading>
           <Text mb={4}>
-            Adresse : {formateur?.adresse} – Siret : {formateur?.siret ?? "Inconnu"} – UAI :{" "}
-            {formateur?.uai ?? "Inconnu"}
+            Adresse : {formateur?.adresse} – UAI : {formateur?.uai ?? "Inconnu"}
           </Text>
         </Box>
 
@@ -259,8 +260,7 @@ export const Formateur = ({ responsable, callback }) => {
                   : {responsable?.raison_sociale}
                 </Text>
                 <Text mb={2}>
-                  Adresse : {responsable?.adresse ?? "Inconnue"} – Siret : {responsable?.siret ?? "Inconnu"} – UAI :{" "}
-                  {responsable?.uai ?? "Inconnu"}
+                  Adresse : {responsable?.adresse ?? "Inconnue"} – UAI : {responsable?.uai ?? "Inconnu"}
                 </Text>
                 <Text mb={2}>
                   Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
@@ -333,34 +333,34 @@ export const Formateur = ({ responsable, callback }) => {
                   <FormateurStatut relation={relation} callback={callback} />.
                 </Box>
 
-                {UserType.DELEGUE === delegue.type &&
-                  (() => {
-                    switch (true) {
-                      case UserStatut.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
-                        return (
-                          <Link variant="action" onClick={resendUpdateEmail}>
-                            Générer un nouvel envoi de notification
-                          </Link>
-                        );
+                {/* {UserType.DELEGUE === delegue.type && */}
+                {(() => {
+                  switch (true) {
+                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
+                      return (
+                        <Link variant="action" onClick={resendUpdateEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
 
-                      case UserStatut.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
-                        return (
-                          <Link variant="action" onClick={resendNotificationEmail}>
-                            Générer un nouvel envoi de notification
-                          </Link>
-                        );
+                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
+                      return (
+                        <Link variant="action" onClick={resendNotificationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
 
-                      case UserStatut.CONFIRME === delegue.statut:
-                        return (
-                          <Link variant="action" onClick={resendActivationEmail}>
-                            Générer un nouvel envoi de notification
-                          </Link>
-                        );
+                    case UserStatut.CONFIRME === delegue.statut:
+                      return (
+                        <Link variant="action" onClick={resendActivationEmail}>
+                          Générer un nouvel envoi de notification
+                        </Link>
+                      );
 
-                      default:
-                        return <></>;
-                    }
-                  })()}
+                    default:
+                      return <></>;
+                  }
+                })()}
               </Text>
             </Box>
           )}

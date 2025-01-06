@@ -1,8 +1,8 @@
 const { ResponsableActions } = require("../../../constants/History");
-const { Responsable } = require("../../../model");
+const { Etablissement } = require("../../../model");
 
 const saveAccountEmailUpdatedByAccount = async ({ _id }, new_email, old_email) => {
-  await Responsable.updateOne(
+  await Etablissement.updateOne(
     { _id },
     {
       $push: {

@@ -49,7 +49,11 @@ const DelegueRoutes = () => {
 
         <Route exact path="relations" element={<Relations delegue={delegue} callback={reload} />} />
 
-        <Route exact path="relations/:siret/:uai" element={<Relation delegue={delegue} callback={reload} />} />
+        <Route
+          exact
+          path="relations/:uai_responsable/:uai_formateur"
+          element={<Relation delegue={delegue} callback={reload} />}
+        />
       </Routes>
     </>
   );

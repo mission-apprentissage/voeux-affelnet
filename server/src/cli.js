@@ -9,20 +9,23 @@ const { confirm } = require("./common/actions/confirm");
 const importMefs = require("./jobs/importMefs");
 const importVoeux = require("./jobs/importVoeux");
 const sendConfirmationEmails = require("./jobs/sendConfirmationEmails");
-const resendConfirmationEmails = require("./jobs/resendConfirmationEmails");
+// const resendConfirmationEmails = require("./jobs/resendConfirmationEmails.js.DEPRECATED");
 const sendActivationEmails = require("./jobs/sendActivationEmails");
-const resendActivationEmails = require("./jobs/resendActivationEmails");
+// const resendActivationEmails = require("./jobs/resendActivationEmails.DEPRECATED.js");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
-const resendNotificationEmails = require("./jobs/resendNotificationEmails");
+// const resendNotificationEmails = require("./jobs/resendNotificationEmails.js.DEPRECATED");
 const sendUpdateEmails = require("./jobs/sendUpdateEmails");
-const resendUpdateEmails = require("./jobs/resendUpdateEmails");
-const importEtablissementsResponsables = require("./jobs/importEtablissementsResponsables");
-const importResponsables = require("./jobs/importResponsables");
-const { cleanResponsables } = require("./jobs/cleanResponsables");
-const importEtablissementsFormateurs = require("./jobs/importEtablissementsFormateurs");
-const importFormateurs = require("./jobs/importFormateurs");
-const { cleanFormateurs } = require("./jobs/cleanFormateurs");
-const importRelations = require("./jobs/importRelations");
+// const resendUpdateEmails = require("./jobs/resendUpdateEmails.js.DEPRECATED");
+const { importEtablissements } = require("./jobs/importEtablissements");
+const { cleanEtablissements } = require("./jobs/cleanEtablissements.js");
+// const importEtablissementsResponsables = require("./jobs/importEtablissementsResponsables");
+// const importResponsables = require("./jobs/importResponsables");
+// const { cleanResponsables } = require("./jobs/cleanResponsables");
+// const importEtablissementsFormateurs = require("./jobs/importEtablissementsFormateurs");
+// const importFormateurs = require("./jobs/importFormateurs");
+// const { cleanFormateurs } = require("./jobs/cleanFormateurs.js.DEPRECATED");
+const { importEtablissementsRelations } = require("./jobs/importEtablissementsRelations");
+// const importRelations = require("./jobs/importRelations");
 const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
 const exportResponsables = require("./jobs/exportResponsables");
@@ -93,98 +96,134 @@ cli
   });
 
 cli
-  .command("importResponsables <relationsCsv> <responsableOverwriteCsv>")
+  .command("importEtablissements <relationCsv>")
   .description(
-    "Créé les comptes des responsables à partir du fichier des relations, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
+    "Créé les comptes des établissements à partir d'un fichier csv des relations avec les colonnes suivantes : 'uai_responsable,email,uai_formateurs'"
   )
-  .action((relationsCsv, responsableOverwriteCsv) => {
+  .action((relationCsv) => {
     runScript(() => {
-      const responsableInput = relationsCsv ? createReadStream(relationsCsv) : null;
-      const responsableOverwriteInput = responsableOverwriteCsv ? createReadStream(responsableOverwriteCsv) : null;
+      const input = relationCsv ? createReadStream(relationCsv) : process.stdin;
 
-      // console.log("responsableInput", responsableInput);
-      // console.log("responsableOverwriteInput", responsableOverwriteInput);
-
-      return importResponsables(responsableInput, responsableOverwriteInput);
+      return importEtablissements(input);
     });
   });
 
 cli
-  .command("importEtablissementsResponsables <responsableCsv>")
-  .description(
-    "Créé les comptes des responsables à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
-  )
-  .action((responsableCsv) => {
-    runScript(() => {
-      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
-
-      return importEtablissementsResponsables(input);
-    });
-  });
-
-cli
-  .command("cleanResponsables <responsableCsv>")
+  .command("cleanEtablissements <relationCsv>")
   .description("Supprime les responsables n'apparaissant pas dans le fichier des relations")
   .option("--proceed", "Permet d'applique la suppression", false)
-  .action((responsableCsv, options) => {
+  .action((relationCsv, options) => {
     runScript(() => {
-      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
+      const input = relationCsv ? createReadStream(relationCsv) : process.stdin;
 
-      return cleanResponsables(input, options);
+      return cleanEtablissements(input, options);
     });
   });
 
+// cli
+//   .command("importResponsables <relationsCsv> <responsableOverwriteCsv>")
+//   .description(
+//     "Créé les comptes des responsables à partir du fichier des relations, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
+//   )
+//   .action((relationsCsv, responsableOverwriteCsv) => {
+//     runScript(() => {
+//       const responsableInput = relationsCsv ? createReadStream(relationsCsv) : null;
+//       const responsableOverwriteInput = responsableOverwriteCsv ? createReadStream(responsableOverwriteCsv) : null;
+
+//       // console.log("responsableInput", responsableInput);
+//       // console.log("responsableOverwriteInput", responsableOverwriteInput);
+
+//       return importResponsables(responsableInput, responsableOverwriteInput);
+//     });
+//   });
+
+// cli
+//   .command("importEtablissementsResponsables <responsableCsv>")
+//   .description(
+//     "Créé les comptes des responsables à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+//   )
+//   .action((responsableCsv) => {
+//     runScript(() => {
+//       const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
+
+//       return importEtablissementsResponsables(input);
+//     });
+//   });
+
+// cli
+//   .command("cleanResponsables <responsableCsv>")
+//   .description("Supprime les responsables n'apparaissant pas dans le fichier des relations")
+//   .option("--proceed", "Permet d'applique la suppression", false)
+//   .action((responsableCsv, options) => {
+//     runScript(() => {
+//       const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
+
+//       return cleanResponsables(input, options);
+//     });
+//   });
+
+// cli
+//   .command("importFormateurs <relationsCsv> <formateurOverwriteCsv>")
+//   .description(
+//     "Créé les comptes des formateurs à partir du fichier des relations <relationsCsv>, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
+//   )
+//   .action((relationsCsv, formateurOverwriteCsv) => {
+//     runScript(() => {
+//       const formateurInput = relationsCsv ? createReadStream(relationsCsv) : null;
+//       const formateurOverwriteInput = formateurOverwriteCsv ? createReadStream(formateurOverwriteCsv) : null;
+
+//       // console.log("formateurInput", formateurInput);
+//       // console.log("formateurOverwriteInput", formateurOverwriteInput);
+
+//       return importFormateurs(formateurInput, formateurOverwriteInput);
+//     });
+//   });
+
+// cli
+//   .command("importEtablissementsFormateurs <formateurCsv>")
+//   .description(
+//     "Créé les comptes des formateurs à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
+//   )
+//   .action((formateurCsv) => {
+//     runScript(() => {
+//       const input = formateurCsv ? createReadStream(formateurCsv) : process.stdin;
+
+//       return importEtablissementsFormateurs(input);
+//     });
+//   });
+// cli
+//   .command("cleanFormateurs <formateurCsv>")
+//   .description("Supprime les formateurs n'apparaissant pas dans le fichier des relations")
+//   .option("--proceed", "Permet d'applique la suppression", false)
+//   .action((responsableCsv, options) => {
+//     runScript(() => {
+//       const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
+
+//       return cleanFormateurs(input, options);
+//     });
+//   });
+
+// cli
+//   .command("importRelations <relationsCsv> <responsablesOverwriteCsv> <formateursOverwriteCsv>")
+//   .description("Importe les relations")
+//   .action((relationsCsv, responsablesOverwriteCsv, formateursOverwriteCsv) => {
+//     runScript(() => {
+//       const relationsInput = relationsCsv ? createReadStream(relationsCsv) : null;
+//       const responsablesOverwriteInput = responsablesOverwriteCsv ? createReadStream(responsablesOverwriteCsv) : null;
+//       const formateursOverwriteInput = formateursOverwriteCsv ? createReadStream(formateursOverwriteCsv) : null;
+
+//       return importRelations(relationsInput, responsablesOverwriteInput, formateursOverwriteInput);
+//     });
+//   });
+
 cli
-  .command("importFormateurs <relationsCsv> <formateurOverwriteCsv>")
-  .description(
-    "Créé les comptes des formateurs à partir du fichier des relations <relationsCsv>, au format csv, avec les colonnes suivantes : 'siret,email,etablissements'"
-  )
-  .action((relationsCsv, formateurOverwriteCsv) => {
-    runScript(() => {
-      const formateurInput = relationsCsv ? createReadStream(relationsCsv) : null;
-      const formateurOverwriteInput = formateurOverwriteCsv ? createReadStream(formateurOverwriteCsv) : null;
-
-      // console.log("formateurInput", formateurInput);
-      // console.log("formateurOverwriteInput", formateurOverwriteInput);
-
-      return importFormateurs(formateurInput, formateurOverwriteInput);
-    });
-  });
-
-cli
-  .command("importEtablissementsFormateurs <formateurCsv>")
-  .description(
-    "Créé les comptes des formateurs à partir d'un fichier csv avec les colonnes suivantes : 'siret,email,etablissements'"
-  )
-  .action((formateurCsv) => {
-    runScript(() => {
-      const input = formateurCsv ? createReadStream(formateurCsv) : process.stdin;
-
-      return importEtablissementsFormateurs(input);
-    });
-  });
-cli
-  .command("cleanFormateurs <formateurCsv>")
-  .description("Supprime les formateurs n'apparaissant pas dans le fichier des relations")
-  .option("--proceed", "Permet d'applique la suppression", false)
-  .action((responsableCsv, options) => {
-    runScript(() => {
-      const input = responsableCsv ? createReadStream(responsableCsv) : process.stdin;
-
-      return cleanFormateurs(input, options);
-    });
-  });
-
-cli
-  .command("importRelations <relationsCsv> <responsablesOverwriteCsv> <formateursOverwriteCsv>")
-  .description("Importe les formations depuis le fichier transmis par Affelnet")
-  .action((relationsCsv, responsablesOverwriteCsv, formateursOverwriteCsv) => {
+  .command("importEtablissementsRelations <relationsCsv>")
+  .description("Importe les relations entre établissements")
+  .action((relationsCsv) => {
     runScript(() => {
       const relationsInput = relationsCsv ? createReadStream(relationsCsv) : null;
-      const responsablesOverwriteInput = responsablesOverwriteCsv ? createReadStream(responsablesOverwriteCsv) : null;
-      const formateursOverwriteInput = formateursOverwriteCsv ? createReadStream(formateursOverwriteCsv) : null;
 
-      return importRelations(relationsInput, responsablesOverwriteInput, formateursOverwriteInput);
+      return importEtablissementsRelations(relationsInput);
     });
   });
 
@@ -203,23 +242,24 @@ cli
   .command("sendConfirmationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul CFA")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ sendEmail }) => {
-      return sendConfirmationEmails(sendEmail, options);
+    runScript(({ sendEmail, resendEmail }) => {
+      return sendConfirmationEmails({ sendEmail, resendEmail }, options);
     });
   });
 
-cli
-  .command("resendConfirmationEmails")
-  .option("--username <username>", "Permet d'envoyer l'email à un seul CFA")
-  .option("--retry", "Renvoie les emails en erreur", false)
-  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
-  .option("--max <max>", "Nombre de relances maximum", parseInt)
-  .action((options) => {
-    runScript(({ resendEmail }) => {
-      return resendConfirmationEmails(resendEmail, options);
-    });
-  });
+// cli
+//   .command("resendConfirmationEmails")
+//   .option("--username <username>", "Permet d'envoyer l'email à un seul CFA")
+//   .option("--retry", "Renvoie les emails en erreur", false)
+//   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+//   .option("--max <max>", "Nombre de relances maximum", parseInt)
+//   .action((options) => {
+//     runScript(({ resendEmail }) => {
+//       return resendConfirmationEmails(resendEmail, options);
+//     });
+//   });
 
 cli
   .command("importVoeux")
@@ -245,71 +285,74 @@ cli
   .command("sendActivationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .action((options) => {
-    runScript(({ sendEmail }) => {
-      return sendActivationEmails(sendEmail, options);
+    runScript(({ sendEmail, resendEmail }) => {
+      return sendActivationEmails({ sendEmail, resendEmail }, options);
     });
   });
 
-cli
-  .command("resendActivationEmails")
-  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
-  .option("--retry", "Renvoie les emails en erreur", false)
-  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
-  .option("--max <max>", "Nombre de relances maximum", parseInt)
-  .action((options) => {
-    runScript(({ resendEmail }) => {
-      return resendActivationEmails(resendEmail, options);
-    });
-  });
+// cli
+//   .command("resendActivationEmails")
+//   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+//   .option("--retry", "Renvoie les emails en erreur", false)
+//   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+//   .option("--max <max>", "Nombre de relances maximum", parseInt)
+//   .action((options) => {
+//     runScript(({ resendEmail }) => {
+//       return resendActivationEmails(resendEmail, options);
+//     });
+//   });
 
 cli
   .command("sendNotificationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .option("--force", "Ignore les règles d'envoi habituelles")
   .action((options) => {
-    runScript(({ sendEmail }) => {
-      return sendNotificationEmails(sendEmail, options);
+    runScript(({ sendEmail, resendEmail }) => {
+      return sendNotificationEmails({ sendEmail, resendEmail }, options);
     });
   });
 
-cli
-  .command("resendNotificationEmails")
-  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
-  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
-  .option("--force", "Ignore les règles d'envoi habituelles")
-  .option("--retry", "Renvoie les emails en erreur", false)
-  .option("--max <max>", "Nombre de relances maximum", parseInt)
-  .action((options) => {
-    runScript(({ resendEmail }) => {
-      return resendNotificationEmails(resendEmail, options);
-    });
-  });
+// cli
+//   .command("resendNotificationEmails")
+//   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+//   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+//   .option("--force", "Ignore les règles d'envoi habituelles")
+//   .option("--retry", "Renvoie les emails en erreur", false)
+//   .option("--max <max>", "Nombre de relances maximum", parseInt)
+//   .action((options) => {
+//     runScript(({ resendEmail }) => {
+//       return resendNotificationEmails(resendEmail, options);
+//     });
+//   });
 
 cli
   .command("sendUpdateEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .option("--force", "Ignore les règles d'envoi habituelles")
   .action((options) => {
-    runScript(({ sendEmail }) => {
-      return sendUpdateEmails(sendEmail, options);
+    runScript(({ sendEmail, resendEmail }) => {
+      return sendUpdateEmails({ sendEmail, resendEmail }, options);
     });
   });
 
-cli
-  .command("resendUpdateEmails")
-  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
-  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
-  .option("--force", "Ignore les règles d'envoi habituelles")
-  .option("--retry", "Renvoie les emails en erreur", false)
-  .option("--max <max>", "Nombre de relances maximum", parseInt)
-  .action((options) => {
-    runScript(({ resendEmail }) => {
-      return resendUpdateEmails(resendEmail, options);
-    });
-  });
+// cli
+//   .command("resendUpdateEmails")
+//   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+//   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+//   .option("--force", "Ignore les règles d'envoi habituelles")
+//   .option("--retry", "Renvoie les emails en erreur", false)
+//   .option("--max <max>", "Nombre de relances maximum", parseInt)
+//   .action((options) => {
+//     runScript(({ resendEmail }) => {
+//       return resendUpdateEmails(resendEmail, options);
+//     });
+//   });
 
 cli
   .command("createAdmin")

@@ -11,7 +11,7 @@ async function createAdmin(username, email, codesAcademie) {
     ? codesAcademie.split(",").map((codeAcademie) => findAcademieByCode(codeAcademie))
     : undefined;
 
-  console.log({ codesAcademie, academies });
+  // console.log({ codesAcademie, academies });
 
   codesAcademie
     ? await Academie.create({

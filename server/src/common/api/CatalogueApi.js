@@ -20,10 +20,12 @@ function convertQueryIntoParams(query, options = {}) {
 }
 
 const getFormationsCache = new Map();
+const getEtablissementsCache = new Map();
+const getEtablissementCache = new Map();
 
 class CatalogueApi extends RateLimitedApi {
   constructor(options = {}) {
-    super("CatalogueApi", { nbRequests: 5, durationInSeconds: 1, ...options });
+    super("CatalogueApi", { nbRequests: 3, durationInSeconds: 1, ...options });
   }
 
   static get baseApiUrl() {
@@ -31,25 +33,44 @@ class CatalogueApi extends RateLimitedApi {
   }
 
   async execute(callback) {
-    if (!this.cookie) {
-      await this.connect();
-    }
+    const connect = this.disallowConcurrency(this.connect.bind(this));
 
-    return await super.execute(callback);
+    await connect();
+
+    try {
+      return await super.execute(callback);
+    } catch (e) {
+      console.log(e);
+      if (e.response?.status !== 404) {
+        throw e;
+      }
+    }
+  }
+
+  disallowConcurrency(fn) {
+    let inprogressPromise = Promise.resolve();
+
+    return (...args) => {
+      inprogressPromise = inprogressPromise.then(() => fn(...args));
+
+      return inprogressPromise;
+    };
   }
 
   async connect() {
-    if (!config.catalog.endpoint || !config.catalog.username || !config.catalog.password) {
-      throw Error("Missing env variables to connect to Catalogue API");
+    if (!this.cookie) {
+      if (!config.catalog.endpoint || !config.catalog.username || !config.catalog.password) {
+        throw Error("Missing env variables to connect to Catalogue API");
+      }
+
+      const response = await _fetch(`${CatalogueApi.baseApiUrl}/auth/login`, {
+        method: "POST",
+        data: { username: config.catalog.username, password: config.catalog.password },
+      });
+
+      logger.info(`Setting cookie : ${response.headers["set-cookie"]?.[0]}`);
+      this.cookie = response.headers["set-cookie"]?.[0];
     }
-
-    const response = await _fetch(`${CatalogueApi.baseApiUrl}/auth/login`, {
-      method: "POST",
-      data: { username: config.catalog.username, password: config.catalog.password },
-    });
-
-    logger.info(`Setting cookie : ${response.headers["set-cookie"]?.[0]}`);
-    this.cookie = response.headers["set-cookie"]?.[0];
   }
 
   async getFormations(query, options) {
@@ -61,13 +82,18 @@ class CatalogueApi extends RateLimitedApi {
 
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching formations...`, query);
-      const response = fetchJson(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`, {
-        headers: { Cookie: this.cookie },
-      });
+      try {
+        const response = await fetchJson(`${CatalogueApi.baseApiUrl}/entity/formations?${params}`, {
+          headers: { Cookie: this.cookie },
+        });
 
-      getFormationsCache.set(JSON.stringify(params), response);
+        getFormationsCache.set(JSON.stringify(params), response);
 
-      return response;
+        return response;
+      } catch (e) {
+        // console.error(e);
+        return [];
+      }
     });
   }
 
@@ -80,13 +106,18 @@ class CatalogueApi extends RateLimitedApi {
 
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching formation...`, query);
-      const response = fetchJson(`${CatalogueApi.baseApiUrl}/entity/formation?${params}`, {
-        headers: { Cookie: this.cookie },
-      });
+      try {
+        const response = await fetchJson(`${CatalogueApi.baseApiUrl}/entity/formation?${params}`, {
+          headers: { Cookie: this.cookie },
+        });
 
-      getFormationsCache.set(JSON.stringify(params), response);
+        getFormationsCache.set(JSON.stringify(params), response);
 
-      return response;
+        return response;
+      } catch (e) {
+        // console.error(e);
+        return null;
+      }
     });
   }
 
@@ -103,22 +134,50 @@ class CatalogueApi extends RateLimitedApi {
   }
 
   async getEtablissements(query, options) {
+    const params = convertQueryIntoParams(query, options);
+
+    if (getEtablissementsCache.has(JSON.stringify(params))) {
+      return getEtablissementsCache.get(JSON.stringify(params));
+    }
+
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching etablissements...`, query);
-      const params = convertQueryIntoParams(query, options);
-      return fetchJson(`${CatalogueApi.baseApiUrl}/entity/etablissements?${params}`, {
-        headers: { Cookie: this.cookie },
-      });
+
+      try {
+        const response = await fetchJson(`${CatalogueApi.baseApiUrl}/entity/etablissements?${params}`, {
+          headers: { Cookie: this.cookie },
+        });
+
+        getEtablissementsCache.set(JSON.stringify(params), response);
+
+        return response;
+      } catch (e) {
+        // console.log(params, e);
+      }
     });
   }
 
   async getEtablissement(query, options) {
+    const params = convertQueryIntoParams(query, options);
+
+    if (getEtablissementCache.has(JSON.stringify(params))) {
+      return getEtablissementCache.get(JSON.stringify(params));
+    }
+
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching etablissement...`, query);
       const params = convertQueryIntoParams(query, options);
-      return fetchJson(`${CatalogueApi.baseApiUrl}/entity/etablissement?${params}`, {
-        headers: { Cookie: this.cookie },
-      });
+      try {
+        const response = await fetchJson(`${CatalogueApi.baseApiUrl}/entity/etablissement?${params}`, {
+          headers: { Cookie: this.cookie },
+        });
+
+        getEtablissementCache.set(JSON.stringify(params), response);
+
+        return response;
+      } catch (e) {
+        // console.log(params, e);
+      }
     });
   }
 }

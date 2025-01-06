@@ -1,11 +1,11 @@
-const faker = require("@faker-js/faker/locale/fr").faker;
+const { fakerFR: faker } = require("@faker-js/faker");
 const { merge } = require("lodash");
-const { Responsable, Formateur, Voeu, User, Mef, Log } = require("../../src/common/model");
+const { Etablissement, Voeu, User, Delegue, Mef, Log, Relation } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
-const { Csaio, Dossier } = require("../../src/common/model");
+// const { Csaio, Dossier } = require("../../src/common/model");
 
 function createUsername() {
-  return faker.internet.userName().toLowerCase();
+  return faker.internet.username().toLowerCase();
 }
 
 function createEmail() {
@@ -28,58 +28,76 @@ module.exports = {
       )
     );
   },
-  insertResponsable: (custom = {}) => {
-    const siret = custom.siret || faker.helpers.replaceSymbols("#########00015");
+  insertEtablissement: (custom = {}) => {
+    const uai = custom.uai ?? createUAI(faker.helpers.replaceSymbols("#######"));
 
-    return Responsable.create(
+    return Etablissement.create(
       merge(
         {},
         {
-          username: siret,
-          siret,
+          username: uai,
+          uai: uai,
           email: createEmail(),
           emails: [],
-          raison_sociale: faker.company.companyName(),
+          raison_sociale: faker.company.name(),
           academie: { code: "01", nom: "Paris" },
+          adresse: faker.location.street(),
+          cp: faker.location.zipCode(),
+          commune: faker.location.city(),
         },
         custom
       )
     );
   },
-  insertCsaio: (custom = {}) => {
-    return Csaio.create(
+  insertRelation: ({ responsable, formateur, ...custom }) => {
+    const nombre_voeux = faker.number.int();
+    return Relation.create(
+      merge(
+        {},
+        {
+          etablissement_responsable: { uai: responsable.uai },
+          etablissement_formateur: { uai: formateur.uai },
+          academie: formateur.academie,
+          nombre_voeux,
+          nombre_voeux_restant: faker.number.int({ min: 0, max: nombre_voeux }),
+        },
+        custom
+      )
+    );
+  },
+
+  insertDelegue: ({ relations, ...custom }) => {
+    return Delegue.create(
       merge(
         {},
         {
           username: createUsername(),
           email: createEmail(),
-          emails: [],
-          academies: [{ code: "01", nom: "Paris" }],
+          relations,
         },
         custom
       )
     );
   },
-  insertFormateur: (custom = {}) => {
-    return Formateur.create(
-      merge(
-        {},
-        {
-          uai: custom.uai,
-          libelle_type_etablissement: faker.company.companySuffix(),
-          libelle_etablissement: faker.company.companyName(),
-          adresse: faker.address.street(),
-          cp: faker.address.zipCode(),
-          commune: faker.address.cityName(),
-        },
-        custom
-      )
-    );
-  },
+
+  // insertCsaio: (custom = {}) => {
+  //   return Csaio.create(
+  //     merge(
+  //       {},
+  //       {
+  //         username: createUsername(),
+  //         email: createEmail(),
+  //         emails: [],
+  //         academies: [{ code: "01", nom: "Paris" }],
+  //       },
+  //       custom
+  //     )
+  //   );
+  // },
   insertVoeu: (custom = {}) => {
-    const street = faker.address.streetAddress();
-    const codePostal = faker.address.zipCode();
-    const cityName = faker.address.cityName();
+    const street = faker.location.streetAddress();
+    const codePostal = faker.location.zipCode();
+    const cityName = faker.location.city();
 
     return Voeu.create(
       merge(
@@ -116,14 +134,14 @@ module.exports = {
           },
           etablissement_origine: {
             uai: createUAI(faker.helpers.replaceSymbols("075####")),
-            nom: faker.company.companyName(),
-            ville: faker.address.cityName(),
+            nom: faker.company.name(),
+            ville: faker.location.city(),
             academie: { code: "01", nom: "Paris" },
           },
           etablissement_accueil: {
             uai: createUAI(faker.helpers.replaceSymbols("075####")),
-            nom: faker.company.companyName(),
-            ville: faker.address.cityName(),
+            nom: faker.company.name(),
+            ville: faker.location.city(),
             cio: createUAI(faker.helpers.replaceSymbols("075####")),
             academie: { code: "01", nom: "Paris" },
           },
@@ -163,32 +181,32 @@ module.exports = {
       )
     );
   },
-  insertDossier: (custom = {}) => {
-    const firstName = faker.name.firstName().toUpperCase();
-    const lastName = faker.name.lastName().toUpperCase();
+  // insertDossier: (custom = {}) => {
+  //   const firstName = faker.name.firstName().toUpperCase();
+  //   const lastName = faker.name.lastName().toUpperCase();
 
-    return Dossier.create(
-      merge(
-        {},
-        {
-          dossier_id: "621d4f652b8e994d7a1794ec",
-          email_contact: createEmail(),
-          annee_formation: 1,
-          contrat_date_debut: new Date(),
-          contrat_date_fin: new Date(),
-          nom_apprenant: lastName,
-          prenom_apprenant: firstName,
-          statut: "apprenti",
-          formation_cfd: faker.helpers.replaceSymbols("##?####"),
-          uai_etablissement: faker.helpers.replaceSymbols("#######?"),
-          academie: { code: "01", nom: "Paris" },
-          _meta: {
-            nom_complet: `${firstName} ${lastName}`,
-            import_dates: [...(custom?._meta?.import_dates ?? [new Date()])],
-          },
-        },
-        custom
-      )
-    );
-  },
+  //   return Dossier.create(
+  //     merge(
+  //       {},
+  //       {
+  //         dossier_id: "621d4f652b8e994d7a1794ec",
+  //         email_contact: createEmail(),
+  //         annee_formation: 1,
+  //         contrat_date_debut: new Date(),
+  //         contrat_date_fin: new Date(),
+  //         nom_apprenant: lastName,
+  //         prenom_apprenant: firstName,
+  //         statut: "apprenti",
+  //         formation_cfd: faker.helpers.replaceSymbols("##?####"),
+  //         uai_etablissement: faker.helpers.replaceSymbols("#######?"),
+  //         academie: { code: "01", nom: "Paris" },
+  //         _meta: {
+  //           nom_complet: `${firstName} ${lastName}`,
+  //           import_dates: [...(custom?._meta?.import_dates ?? [new Date()])],
+  //         },
+  //       },
+  //       custom
+  //     )
+  //   );
+  // },
 };

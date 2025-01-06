@@ -4,7 +4,7 @@ export const FormateurEmail = ({ responsable, formateur, delegue }) => {
   const isDiffusionAutorisee = !!delegue?.relations.find(
     (relation) =>
       relation.active &&
-      relation.etablissement_responsable.siret === responsable?.siret &&
+      relation.etablissement_responsable.uai === responsable?.uai &&
       relation.etablissement_formateur.uai === formateur?.uai
   );
 

@@ -1,59 +1,36 @@
+import { Box, Link, Table, Tbody, Td, Text, Th, Thead, Tr } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Text, Box, Link, Table, Thead, Tr, Th, Tbody, Td } from "@chakra-ui/react";
 
-import { Page } from "../../../common/components/layout/Page";
-import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
-import { ResponsableLibelle } from "../../../common/components/responsable/fields/ResponsableLibelle";
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
 import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
-import { _get } from "../../../common/httpClient";
-import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
 import { Breadcrumb } from "../../../common/components/Breadcrumb";
+import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
+import { Page } from "../../../common/components/layout/Page";
+import { ResponsableLibelle } from "../../../common/components/responsable/fields/ResponsableLibelle";
+import { OrganismeFormateurTag } from "../../../common/components/tags/OrganismeFormateur";
+import { OrganismeResponsableFormateurTag } from "../../../common/components/tags/OrganismeResponsableFormateur";
+import { _get } from "../../../common/httpClient";
 
 export const Formateurs = () => {
   const mounted = useRef(false);
-  const { siret } = useParams();
+  const { uai_responsable } = useParams();
 
   const [responsable, setResponsable] = useState(undefined);
-  // const [formateurs, setFormateurs] = useState(undefined);
-  // const [delegues, setDelegues] = useState(undefined);
 
   const getResponsable = useCallback(async () => {
     try {
-      const response = await _get(`/api/admin/responsables/${siret}`);
+      const response = await _get(`/api/admin/responsables/${uai_responsable}`);
       setResponsable(response);
     } catch (error) {
       setResponsable(undefined);
       throw Error;
     }
-  }, [siret]);
-
-  // const getFormateurs = useCallback(async () => {
-  //   try {
-  //     const response = await _get(`/api/admin/responsables/${siret}/formateurs`);
-
-  //     setFormateurs(response);
-  //   } catch (error) {
-  //     setFormateurs(undefined);
-  //     throw Error;
-  //   }
-  // }, [siret, setFormateurs]);
-
-  // const getDelegues = useCallback(async () => {
-  //   try {
-  //     const response = await _get(`/api/admin/responsables/${siret}/delegues`);
-
-  //     setDelegues(response);
-  //   } catch (error) {
-  //     setDelegues(undefined);
-  //     throw Error;
-  //   }
-  // }, [siret, setDelegues]);
+  }, [uai_responsable]);
 
   const reload = useCallback(async () => {
-    await Promise.all([await getResponsable() /*, await getFormateurs(), await getDelegues()*/]);
-  }, [getResponsable /*, getFormateurs, getDelegues*/]);
+    await Promise.all([await getResponsable()]);
+  }, [getResponsable]);
 
   useEffect(() => {
     const run = async () => {
@@ -70,7 +47,14 @@ export const Formateurs = () => {
   }, [reload]);
 
   if (!responsable) {
-    return;
+    return (
+      <>
+        Un problème est survenu lors de la récupération du responsable.{" "}
+        <Link variant="action" href="/support">
+          Signaler un problème
+        </Link>
+      </>
+    );
   }
 
   const title = (
@@ -78,6 +62,10 @@ export const Formateurs = () => {
       Organisme responsable :&nbsp;
       <ResponsableLibelle responsable={responsable} /> / liste des organismes formateurs associés
     </>
+  );
+
+  const relationsResponsable = responsable.relations.filter(
+    (relation) => relation.responsable?.uai === responsable.uai
   );
 
   return (
@@ -91,12 +79,12 @@ export const Formateurs = () => {
                 <ResponsableLibelle responsable={responsable} />
               </>
             ),
-            url: `/admin/responsable/${siret}`,
+            url: `/admin/responsable/${uai_responsable}`,
           },
 
           {
             label: <>Liste des organismes formateurs associés</>,
-            url: `/admin/responsable/${siret}/formateurs`,
+            url: `/admin/responsable/${uai_responsable}/formateurs`,
           },
         ]}
       />
@@ -111,8 +99,7 @@ export const Formateurs = () => {
         </Box>
 
         <Box mb={12}>
-          {/* {formateurs && ( */}
-          {!!responsable?.relations?.length && (
+          {!!relationsResponsable.length && (
             <Table mt={12}>
               <Thead>
                 <Tr>
@@ -127,7 +114,7 @@ export const Formateurs = () => {
                 </Tr>
               </Thead>
               <Tbody>
-                {responsable?.relations.map((relation) => {
+                {relationsResponsable.map((relation) => {
                   const formateur = relation?.formateur ?? relation.etablissement_formateur;
                   const delegue = relation?.delegue;
 
@@ -137,7 +124,7 @@ export const Formateurs = () => {
                         {relation?.formateur && (
                           <Link
                             variant="primary"
-                            href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.uai}`}
+                            href={`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`}
                           >
                             Détail
                           </Link>
@@ -145,7 +132,12 @@ export const Formateurs = () => {
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <FormateurLibelle formateur={formateur} /> <OrganismeFormateurTag />
+                          <FormateurLibelle formateur={formateur} />
+                          {formateur.uai === responsable.uai ? (
+                            <OrganismeResponsableFormateurTag ml={2} verticalAlign="baseline" />
+                          ) : (
+                            <OrganismeFormateurTag ml={2} verticalAlign="baseline" />
+                          )}
                         </Text>
                       </Td>
                       <Td>

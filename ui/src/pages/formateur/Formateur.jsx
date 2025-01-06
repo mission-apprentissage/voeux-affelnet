@@ -35,13 +35,12 @@ export const Formateur = ({ formateur, responsables, callback }) => {
           </Heading>
 
           <Text mb={4}>
-            Adresse : {formateur?.adresse} - Siret : {formateur?.siret ?? "Inconnu"} - UAI :{" "}
-            {formateur?.uai ?? "Inconnu"}
+            Adresse : {formateur?.adresse} - UAI : {formateur?.uai ?? "Inconnu"}
           </Text>
         </Box>
 
         {formateur?.etablissements_responsable.map((etablissement, index) => {
-          const responsable = responsables?.find((responsable) => responsable.siret === etablissement.siret);
+          const responsable = responsables?.find((responsable) => responsable.uai === etablissement.uai);
 
           if (!responsable) {
             return <Fragment key={index}></Fragment>;
@@ -52,11 +51,11 @@ export const Formateur = ({ formateur, responsables, callback }) => {
           const isDiffusionAutorisee = etablissement?.diffusion_autorisee;
 
           const voeuxTelechargementsFormateur = formateur?.voeux_telechargements_responsable.filter(
-            (telechargement) => telechargement.siret === responsable.siret
+            (telechargement) => telechargement.uai_responsable === responsable.uai
           );
 
           const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur.filter(
-            (telechargement) => telechargement.uai === formateur?.uai
+            (telechargement) => telechargement.uai_formateur === formateur?.uai
           );
 
           const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
@@ -96,8 +95,7 @@ export const Formateur = ({ formateur, responsables, callback }) => {
                     : <ResponsableLibelle responsable={responsable} />
                   </Text>
                   <Text mb={2}>
-                    Adresse : {responsable.adresse ?? "Inconnue"} – Siret : {responsable.siret ?? "Inconnu"} – UAI :{" "}
-                    {responsable.uai ?? "Inconnu"}
+                    Adresse : {responsable.adresse ?? "Inconnue"} – UAI : {responsable.uai ?? "Inconnu"}
                   </Text>
                   <Text mb={2}>
                     Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}

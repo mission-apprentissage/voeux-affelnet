@@ -1,148 +1,135 @@
-const { UserStatut } = require("../common/constants/UserStatut");
-const { UserType } = require("../common/constants/UserType");
+const { DownloadType } = require("../common/constants/DownloadType");
 const logger = require("../common/logger");
-const { User, Responsable, Relation, Delegue } = require("../common/model");
-const { allFilesAsAlreadyBeenDownloaded, filesHaveUpdate } = require("../common/utils/dataUtils");
+const { Relation, Etablissement, Delegue } = require("../common/model");
+// const { RelationActions } = require("../common/constants/History");
 
 const {
-  saveListAvailableEmailAutomaticSent: saveListAvailableEmailAutomaticSentForResponsable,
-  saveListAvailableEmailManualSent: saveListAvailableEmailManualSentForResponsable,
-} = require("../common/actions/history/responsable");
-const {
-  saveListAvailableEmailAutomaticSent: saveListAvailableEmailAutomaticSentForDelegue,
-  saveListAvailableEmailManualSent: saveListAvailableEmailManualSentForDelegue,
-} = require("../common/actions/history/delegue");
+  saveListAvailableEmailAutomaticSentToResponsable,
+  saveListAvailableEmailManualSentToResponsable,
+  saveListAvailableEmailAutomaticSentToDelegue,
+  saveListAvailableEmailManualSentToDelegue,
+} = require("../common/actions/history/relation");
 
-async function sendNotificationEmails(sendEmail, options = {}) {
-  const stats = { total: 0, sent: 0, failed: 0 };
+async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) {
+  const stats = { total: 0, sent: 0, resent: 0, failed: 0, skiped: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
+  const skip = options.skip || 0;
   let query;
 
-  if (options.username && options.force) {
-    query = { username: options.username };
-  } else {
-    const relations = await Relation.find({
-      // $and: [
-      //   // { $expr: { $gt: ["$nombre_voeux", 0] } },
-      //   // { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
-      //   // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
-      //   // { $expr: { $eq: ["$first_date_voeux", "$last_date_voeux"] } },
-      // ],
-    });
-    // console.log(relations);
+  query = {
+    $and: [
+      { $expr: { $gt: ["$nombre_voeux", 0] } },
+      { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
+      { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+      { $expr: { $eq: ["$first_date_voeux", "$last_date_voeux"] } },
+    ],
+    // histories: {
+    //   $not: {
+    //     $elemMatch: {
+    //       action: {
+    //         $in: [
+    //           RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
+    //           RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
+    //           RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
+    //           RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
+    //         ],
+    //       },
+    //     },
+    //   },
+    // },
+  };
 
-    const delegues = (
-      (await Promise.all(
-        relations.map(
-          async (relation) =>
-            await Delegue.findOne({
-              type: UserType.DELEGUE,
-              relations: {
-                $elemMatch: {
-                  "etablissement_responsable.siret": relation.etablissement_responsable.siret,
-                  "etablissement_formateur.uai": relation.etablissement_formateur.uai,
-                  active: true,
-                },
-              },
-            })
-        )
-      )) ?? []
-    )
-      .filter((delegue) => !!delegue)
-      .reduce((acc, delegue) => {
-        if (!acc.find((d) => d.email === delegue.email)) {
-          acc.push(delegue);
-        }
-
-        return acc;
-      }, []);
-
-    const relationsDeleguees = delegues.flatMap((delegue) => delegue.relations.filter((relation) => relation.active));
-
-    const relationsNonDeleguees = relations.filter(
-      (relation) =>
-        !relationsDeleguees.find(
-          (relationDeleguee) =>
-            relationDeleguee.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
-            relationDeleguee.etablissement_formateur.uai === relation.etablissement_formateur.uai
-        )
-    );
-
-    const responsables = await Responsable.find({
-      siret: { $in: relationsNonDeleguees.map((relation) => relation.etablissement_responsable.siret) },
-    });
-
-    logger.info(
-      `Sending notification emails to ${responsables.length} responsables and ${delegues.length} delegues...`
-    );
-
-    query = {
-      ...(options.username ? { username: options.username } : {}),
-      ...(options.force
-        ? {}
-        : {
-            unsubscribe: false,
-            statut: { $nin: [UserStatut.NON_CONCERNE] },
-
-            $and: [
-              { "emails.templateName": { $not: { $regex: "^notification_.*$" } } },
-              { "emails.templateName": { $not: { $regex: "^update_.*$" } } },
-            ],
-
-            $or: [
-              {
-                type: UserType.RESPONSABLE,
-                _id: { $in: responsables.map((responsable) => responsable._id) },
-              },
-              { type: UserType.DELEGUE, _id: { $in: delegues.map((delegue) => delegue._id) } },
-            ],
-          }),
-    };
-  }
-
-  await User.find(query)
+  await Relation.find(query)
     .lean()
-    // .limit(limit)
+    .skip(skip)
+    .limit(limit)
     .cursor()
-    .eachAsync(async (user) => {
-      if (!options.force && (await allFilesAsAlreadyBeenDownloaded(user))) {
-        // console.log("allFilesAsAlreadyBeenDownloaded");
-        return;
+    .eachAsync(async (relation) => {
+      const responsable = await Etablissement.findOne({ uai: relation.etablissement_responsable.uai });
+      const formateur = await Etablissement.findOne({ uai: relation.etablissement_formateur.uai });
+
+      if (!responsable || !formateur) {
+        stats.skiped++;
+        logger.error("Responsable ou formateur manquant");
+        return stats;
       }
 
-      if (!options.force && (await filesHaveUpdate(user))) {
-        // console.log("filesHaveUpdate");
-        return;
+      const delegue = await Delegue.findOne({
+        relations: {
+          $elemMatch: {
+            "etablissement_responsable.uai": relation.etablissement_responsable.uai,
+            "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+            active: true,
+          },
+        },
+      })
+        .select({ _id: 0, histories: 0 })
+        .lean();
+
+      const user = delegue ?? responsable;
+
+      if (!user) {
+        stats.skiped++;
+        logger.error("Utilisateur introuvable pour la relation " + relation._id);
+        return stats;
+        // throw Error("Utilisateur introuvable pour la relation " + relation._id);
       }
 
-      const templateName = `notification_${(user.type?.toLowerCase() || "user").toLowerCase()}`;
+      if (!user.email) {
+        stats.skiped++;
+        logger.error("Absence d'adresse courriel pour l'utilisateur " + user._id);
+        return stats;
+        // throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
+      }
+
+      const type = (delegue ? DownloadType.DELEGUE : DownloadType.RESPONSABLE).toLowerCase();
+
+      const templateName = `notification_${type}`;
+      const previous = user.emails.find(
+        (e) => e.templateName === templateName && e.data?.relation?._id === relation._id
+      );
+
       stats.total++;
 
       try {
-        if (limit > stats.sent) {
-          logger.info(`Sending ${templateName} email to ${user.type} ${user.username}...`);
-          await sendEmail(user, templateName);
+        logger.info(
+          `${previous ? "Res" : "S"}ending ${templateName} email to ${type} ${user.username} (${user.email})...`
+        );
 
-          switch (user.type) {
-            case UserType.RESPONSABLE:
-              options.sender
-                ? await saveListAvailableEmailManualSentForResponsable(user, options.sender)
-                : await saveListAvailableEmailAutomaticSentForResponsable(user);
-              break;
+        switch (type) {
+          case DownloadType.RESPONSABLE:
+            previous
+              ? await resendEmail(previous.token)
+              : await sendEmail(user, templateName, {
+                  relation,
+                  responsable,
+                  formateur,
+                });
+            options.sender
+              ? await saveListAvailableEmailManualSentToResponsable({ relation, responsable }, options.sender)
+              : await saveListAvailableEmailAutomaticSentToResponsable({ relation, responsable });
+            break;
 
-            case UserType.DELEGUE:
-              options.sender
-                ? await saveListAvailableEmailManualSentForDelegue(user, options.sender)
-                : await saveListAvailableEmailAutomaticSentForDelegue(user);
-              break;
-            default:
-              break;
-          }
-
-          stats.sent++;
+          case DownloadType.DELEGUE:
+            previous
+              ? await resendEmail(previous.token)
+              : await sendEmail(user, templateName, {
+                  relation,
+                  responsable,
+                  formateur,
+                  delegue,
+                });
+            options.sender
+              ? await saveListAvailableEmailManualSentToDelegue({ relation, delegue }, options.sender)
+              : await saveListAvailableEmailAutomaticSentToDelegue({ relation, delegue });
+            break;
+          default:
+            break;
         }
+
+        previous ? stats.resent++ : stats.sent++;
       } catch (e) {
-        logger.error(`Unable to sent ${templateName} email to ${user.type} ${user.username}`, e);
+        logger.error(`Unable to ${previous ? "re" : ""}sent ${templateName} email to ${type} ${user.username}`, e);
         stats.failed++;
       }
     });

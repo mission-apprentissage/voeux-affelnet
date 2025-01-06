@@ -1,4 +1,4 @@
-const RateLimitedApi = require("./RateLimitedApi");
+const RateLimitedApi = require("./RateLimitedApi.js");
 const { fetchStream, fetchJson } = require("../utils/httpUtils.js");
 const { compose } = require("oleoduc");
 const { streamJsonArray } = require("../utils/streamUtils.js");

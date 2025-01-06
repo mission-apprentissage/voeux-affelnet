@@ -15,7 +15,6 @@ const ResponsableRoutes = lazy(() => import("./pages/responsable/Routes"));
 const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
 const DelegueRoutes = lazy(() => import("./pages/delegue/Routes"));
 const AdminRoutes = lazy(() => import("./pages/admin/Routes"));
-const CsaioPage = lazy(() => import("./pages/CsaioPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
 const ConfirmationPage = lazy(() => import("./pages/ConfirmationPage"));
@@ -47,7 +46,7 @@ const App = () => {
 
   const getDefaultRedirection = () => {
     switch (auth.type) {
-      case UserType.RESPONSABLE:
+      case UserType.ETABLISSEMENT:
         return "responsable/formateurs";
       case UserType.DELEGUE:
         return "delegue/relations";
@@ -86,19 +85,18 @@ const App = () => {
             path="/responsable/*"
             element={
               <Suspense>
-                <RequireAuth allowed={[UserType.RESPONSABLE]}>
+                <RequireAuth allowed={[UserType.ETABLISSEMENT]}>
                   <ResponsableRoutes />
                 </RequireAuth>
               </Suspense>
             }
           />
-
           <Route
-            path="/formateur/*"
+            path="/etablissement/*"
             element={
               <Suspense>
-                <RequireAuth allowed={[UserType.FORMATEUR]}>
-                  <FormateurRoutes />
+                <RequireAuth allowed={[UserType.ETABLISSEMENT]}>
+                  <ResponsableRoutes />
                 </RequireAuth>
               </Suspense>
             }
@@ -114,24 +112,13 @@ const App = () => {
               </Suspense>
             }
           />
-          <Route
-            exact
-            path="/csaio"
-            element={
-              <Suspense>
-                <RequireAuth allowed={[UserType.CSAIO]}>
-                  <CsaioPage />
-                </RequireAuth>
-              </Suspense>
-            }
-          />
 
           <Route
             exact
             path="/profil"
             element={
               <Suspense>
-                <RequireAuth allowed={[UserType.RESPONSABLE, UserType.FORMATEUR, UserType.DELEGUE]}>
+                <RequireAuth allowed={[UserType.ETABLISSEMENT, UserType.DELEGUE]}>
                   <Navigate to={`/${getUserType(auth)}`} />;
                 </RequireAuth>
               </Suspense>
