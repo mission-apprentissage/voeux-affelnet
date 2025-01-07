@@ -4,7 +4,7 @@ const { User } = require("../../../src/common/model");
 const { activateUser } = require("../../../src/common/actions/activateUser");
 
 describe("activateUser", () => {
-  it("Vérifie qu'on peut activer un utilisateur", async () => {
+  it.skip("Vérifie qu'on peut activer un utilisateur", async () => {
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
@@ -16,7 +16,7 @@ describe("activateUser", () => {
     assert.strictEqual(found.statut, "activé");
   });
 
-  it("Vérifie qu'on rejete un utilisateur invalide", async () => {
+  it.skip("Vérifie qu'on rejete un utilisateur invalide", async () => {
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",

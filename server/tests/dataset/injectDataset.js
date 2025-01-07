@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-missing-require
 const faker = require("@faker-js/faker/locale/fr").faker;
 const { Mef, JobEvent } = require("../../src/common/model");
 const sendConfirmationEmails = require("../../src/jobs/sendConfirmationEmails");

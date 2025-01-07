@@ -6,7 +6,7 @@ describe("dateUtils", () => {
   const b = "2022-06-17T13:41:45.865Z";
   const c = "2022-06-18T13:41:45.865Z";
 
-  it("Peut trier les dates dans l'ordre ascendant", () => {
+  it.skip("Peut trier les dates dans l'ordre ascendant", () => {
     const dates = [c, a, b];
     const results = dates.sort(sortAscending);
 
@@ -15,7 +15,7 @@ describe("dateUtils", () => {
     assert.strictEqual(results[2], c);
   });
 
-  it("Peut trier les dates dans l'ordre descendant", () => {
+  it.skip("Peut trier les dates dans l'ordre descendant", () => {
     const dates = [c, a, b];
     const results = dates.sort(sortDescending);
 

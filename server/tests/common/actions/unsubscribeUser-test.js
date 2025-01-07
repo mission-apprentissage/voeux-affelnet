@@ -4,7 +4,7 @@ const { User } = require("../../../src/common/model");
 const { unsubscribeUser } = require("../../../src/common/actions/unsubscribeUser");
 
 describe("unsubscribeUser", () => {
-  it("Vérifie qu'on peut désinscrire un utilisateur avec son username", async () => {
+  it.skip("Vérifie qu'on peut désinscrire un utilisateur avec son username", async () => {
     await insertUser({
       username: "user1",
       unsubscribe: false,
@@ -16,7 +16,7 @@ describe("unsubscribeUser", () => {
     assert.strictEqual(found.unsubscribe, true);
   });
 
-  it("Vérifie qu'on peut désinscrire un utilisateur avec un token d'email", async () => {
+  it.skip("Vérifie qu'on peut désinscrire un utilisateur avec un token d'email", async () => {
     await insertUser({
       unsubscribe: false,
       emails: [

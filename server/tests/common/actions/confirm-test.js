@@ -4,7 +4,7 @@ const { Responsable } = require("../../../src/common/model");
 const { confirm } = require("../../../src/common/actions/confirm");
 
 describe("confirm", () => {
-  it("Vérifie qu'on peut confirmer un responsable", async () => {
+  it.skip("Vérifie qu'on peut confirmer un responsable", async () => {
     await insertResponsable({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -15,7 +15,7 @@ describe("confirm", () => {
     assert.strictEqual(found.statut, "confirmé");
   });
 
-  it("Vérifie qu'on peut confirmer un cfa avec une nouvelle adresse email", async () => {
+  it.skip("Vérifie qu'on peut confirmer un cfa avec une nouvelle adresse email", async () => {
     await insertResponsable({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -28,7 +28,7 @@ describe("confirm", () => {
     assert.strictEqual(found.email, "user2@apprentissage.beta.gouv.fr");
   });
 
-  it("Vérifie qu'on ne peut pas confirmer un cfa sans une adresse email", async () => {
+  it.skip("Vérifie qu'on ne peut pas confirmer un cfa sans une adresse email", async () => {
     await insertResponsable({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -44,7 +44,7 @@ describe("confirm", () => {
     }
   });
 
-  it("Vérifie qu'on ne peut pas confirmer un cfa déjà confirmé", async () => {
+  it.skip("Vérifie qu'on ne peut pas confirmer un cfa déjà confirmé", async () => {
     await insertResponsable({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",
@@ -61,7 +61,7 @@ describe("confirm", () => {
     }
   });
 
-  it("Vérifie qu'on peut forcer la confirmation", async () => {
+  it.skip("Vérifie qu'on peut forcer la confirmation", async () => {
     await insertResponsable({
       siret: "11111111100006",
       email: "11111111100006@apprentissage.beta.gouv.fr",

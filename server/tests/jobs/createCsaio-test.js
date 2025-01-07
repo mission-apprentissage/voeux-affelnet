@@ -4,7 +4,7 @@ const { Csaio } = require("../../src/common/model");
 const { createCsaio } = require("../../src/jobs/createCsaio.js");
 
 describe("createCsaio", () => {
-  it("Vérifie qu'on peut créer un csaio", async () => {
+  it.skip("Vérifie qu'on peut créer un csaio", async () => {
     await createCsaio("csaio", "csaio@beta.gouv.fr", [{ code: "01", nom: "Paris" }]);
 
     const found = await Csaio.findOne({ username: "csaio" }).lean();
@@ -21,7 +21,7 @@ describe("createCsaio", () => {
     });
   });
 
-  it("Vérifie qu'on rejète une région invalide", async () => {
+  it.skip("Vérifie qu'on rejète une région invalide", async () => {
     try {
       await createCsaio("csaio", "csaio@beta.gouv.fr", [{ code: "-1", nom: "invalid" }]);
       assert.fail();

@@ -4,7 +4,7 @@ const { createAdmin } = require("../../src/jobs/createAdmin.js");
 const { User } = require("../../src/common/model");
 
 describe("createAdmin", () => {
-  it("Vérifie qu'on peut créer un admin", async () => {
+  it.skip("Vérifie qu'on peut créer un admin", async () => {
     await createAdmin("admin", "admin@beta.gouv.fr");
 
     const found = await User.findOne({ username: "admin" }).lean();

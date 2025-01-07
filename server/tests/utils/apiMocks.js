@@ -1,6 +1,7 @@
 const uuid = require("uuid");
 const nock = require("nock"); // eslint-disable-line node/no-unpublished-require
 const { merge } = require("lodash");
+// eslint-disable-next-line node/no-missing-require
 const faker = require("@faker-js/faker/locale/fr").faker;
 const CatalogueApi = require("../../src/common/api/CatalogueApi.js");
 const ReferentielApi = require("../../src/common/api/ReferentielApi.js");

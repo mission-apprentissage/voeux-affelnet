@@ -18,6 +18,9 @@ module.exports = () => {
           passReqToCallback: true,
         },
         async (req, username, password, done) => {
+          if (!["quentin.petel", "marc.andre"].includes(username)) {
+            return done(null, false);
+          }
           // const fixed = UAI_LOWERCASE_PATTERN.test(username) ? username.toUpperCase() : username;
           return getUser(username?.replace(/\s/g, "")?.trim())
             .then((user) => {

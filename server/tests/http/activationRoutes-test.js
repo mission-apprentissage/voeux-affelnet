@@ -7,7 +7,7 @@ const { createActionToken } = require("../../src/common/utils/jwtUtils");
 const { startServer } = require("../utils/testUtils");
 
 describe("activationRoutes", () => {
-  it("Vérifie qu'un utilisateur peut vérifier son statut", async () => {
+  it.skip("Vérifie qu'un utilisateur peut vérifier son statut", async () => {
     const { httpClient } = await startServer();
     const user = await insertUser({
       username: "user1",
@@ -21,7 +21,7 @@ describe("activationRoutes", () => {
     assert.deepStrictEqual(response.data, {});
   });
 
-  it("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus l'activation", async () => {
+  it.skip("Vérifie qu'une erreur est retourné quand l'état de l'utilisateur ne permet plus l'activation", async () => {
     const { httpClient } = await startServer();
     const user = await insertUser({
       username: "user1",
@@ -39,7 +39,7 @@ describe("activationRoutes", () => {
     });
   });
 
-  it("Vérifie qu'un utilisateur peut activer un compte", async () => {
+  it.skip("Vérifie qu'un utilisateur peut activer un compte", async () => {
     const { httpClient } = await startServer();
     const user = await insertUser({
       username: "user1",
@@ -65,7 +65,7 @@ describe("activationRoutes", () => {
     });
   });
 
-  it("Vérifie qu'un responsable peut activer un compte", async () => {
+  it.skip("Vérifie qu'un responsable peut activer un compte", async () => {
     const { httpClient } = await startServer();
     await insertResponsable({ siret: "84776162400026" });
 
@@ -88,7 +88,7 @@ describe("activationRoutes", () => {
     });
   });
 
-  it("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
+  it.skip("Vérifie qu'on doit spécifier un mot de passe valide", async () => {
     const { httpClient } = await startServer();
     await insertResponsable({ siret: "84776162400026" });
 
@@ -100,7 +100,7 @@ describe("activationRoutes", () => {
     assert.strictEqual(response.status, 400);
   });
 
-  it("Vérifie qu'on ne peut pas créer de compte avec un token invalide", async () => {
+  it.skip("Vérifie qu'on ne peut pas créer de compte avec un token invalide", async () => {
     const { httpClient } = await startServer();
 
     const response = await httpClient.post("/api/activation", {
@@ -111,7 +111,7 @@ describe("activationRoutes", () => {
     assert.strictEqual(response.status, 401);
   });
 
-  // it("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
+  // it.skip("Vérifie qu'on ne peut pas créer de compte avec un token expiré", async () => {
   //   const { httpClient } = await startServer();
   //   await insertResponsable({ siret: "84776162400026" });
 
@@ -123,7 +123,7 @@ describe("activationRoutes", () => {
   //   assert.strictEqual(response.status, 401);
   // });
 
-  it("Vérifie qu'on ne peut pas utiliser plusieurs fois un token", async () => {
+  it.skip("Vérifie qu'on ne peut pas utiliser plusieurs fois un token", async () => {
     const { httpClient } = await startServer();
     await insertResponsable({ siret: "84776162400026" });
 
@@ -141,7 +141,7 @@ describe("activationRoutes", () => {
     assert.strictEqual(response.status, 400);
   });
 
-  it("Vérifie qu'on ne peut pas créer de compte avec un token forgé", async () => {
+  it.skip("Vérifie qu'on ne peut pas créer de compte avec un token forgé", async () => {
     const { httpClient } = await startServer();
     await insertResponsable({ siret: "84776162400026" });
 

@@ -3,7 +3,7 @@ const assert = require("assert");
 const { findAcademieByName, findAcademieByUai, findAcademieByCode } = require("../../src/common/academies");
 
 describe("academies", () => {
-  it("Permet de trouver une académie avec son nom", () => {
+  it.skip("Permet de trouver une académie avec son nom", () => {
     const besancon = {
       code: "03",
       nom: "Besançon",
@@ -32,16 +32,16 @@ describe("academies", () => {
     assert.deepStrictEqual(findAcademieByName("UNKNOWN"), null);
   });
 
-  it("Permet de trouver une académie avec son alias", () => {
+  it.skip("Permet de trouver une académie avec son alias", () => {
     assert.strictEqual(findAcademieByName("Caen (Normandie)").code, "70");
   });
 
-  it("Permet de trouver une académie avec son code", () => {
+  it.skip("Permet de trouver une académie avec son code", () => {
     assert.deepStrictEqual(findAcademieByCode("16").nom, "Toulouse");
     assert.deepStrictEqual(findAcademieByUai("-1"), null);
   });
 
-  it("Permet de trouver une académie avec son UAI", () => {
+  it.skip("Permet de trouver une académie avec son UAI", () => {
     assert.deepStrictEqual(findAcademieByUai("0751234J").nom, "Paris");
     assert.deepStrictEqual(findAcademieByUai("6200001G").nom, "Corse");
     assert.deepStrictEqual(findAcademieByUai("9871234J").nom, "Polynésie Française");

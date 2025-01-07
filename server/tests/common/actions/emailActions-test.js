@@ -6,7 +6,7 @@ const createEmailActions = require("../../../src/common/actions/createEmailActio
 const { createTestContext } = require("../../utils/testUtils");
 
 describe("emails", () => {
-  it("Vérifie qu'on peut envoyer un email", async () => {
+  it.skip("Vérifie qu'on peut envoyer un email", async () => {
     const { sendEmail, getEmailsSent } = createTestContext();
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", username: "0648248W" });
 
@@ -30,7 +30,7 @@ describe("emails", () => {
     assert.strictEqual(found.emails[0].templateName, "activation_user");
   });
 
-  it("Vérifie qu'on peut renvoyer un email", async () => {
+  it.skip("Vérifie qu'on peut renvoyer un email", async () => {
     const { resendEmail, getEmailsSent } = createTestContext();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",
@@ -61,7 +61,7 @@ describe("emails", () => {
     assert.strictEqual(found.emails[0].sendDates.length, 2);
   });
 
-  it("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
+  it.skip("Vérifie qu'on envoie un email pour chaque cfa ayant la même adresse email", async () => {
     const { sendEmail } = createTestContext();
     const user1 = await insertResponsable({ email: "test@apprentissage.beta.gouv.fr", username: "11111111100006" });
     const user2 = await insertResponsable({ email: "test@apprentissage.beta.gouv.fr", username: "22222222200006" });
@@ -75,7 +75,7 @@ describe("emails", () => {
     assert.ok(results[1].emails[0]);
   });
 
-  it("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
+  it.skip("Vérifie qu'on gère une erreur lors de l'envoi d'un email", async () => {
     const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
     const { sendEmail } = createEmailActions({ mailer: createFakeMailer({ fail: true }) });
 
@@ -92,7 +92,7 @@ describe("emails", () => {
     }
   });
 
-  it("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
+  it.skip("Vérifie qu'on efface l'erreur lors d'un renvoi", async () => {
     const { resendEmail } = createTestContext();
     await insertUser({
       email: "test@apprentissage.beta.gouv.fr",

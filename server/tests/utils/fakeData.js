@@ -1,3 +1,4 @@
+// eslint-disable-next-line node/no-missing-require
 const faker = require("@faker-js/faker/locale/fr").faker;
 const { merge } = require("lodash");
 const { Responsable, Formateur, Voeu, User, Mef, Log } = require("../../src/common/model");
