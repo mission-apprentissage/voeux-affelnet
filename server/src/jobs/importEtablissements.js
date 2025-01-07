@@ -16,7 +16,7 @@ const UAI_RECENSEMENT = "0000000A";
 
 const schema = Joi.object({
   uai_responsable: Joi.string().pattern(uaiFormat).required(),
-  // email_responsable: Joi.string().email().required(),
+  email_responsable: Joi.string().email(),
   uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
 }).unknown();
 
@@ -47,28 +47,51 @@ async function importEtablissements(csv, options = {}) {
       logger.warn(`La ligne ${JSON.stringify(json)} est invalide`, error);
       return false;
     }),
-    // TODO : Modifier pour gérer email_responsable, conserver le type d'UAI (responsable / formateur) pour déterminer si on recherche le mail ensuite
+
     accumulateData(
-      async (accumulator, { uai_responsable, uai_formateurs }) => {
+      async (accumulator, { uai_responsable, email_responsable, uai_formateurs }) => {
         if (uai_responsable === UAI_RECENSEMENT) {
           return accumulator;
         }
 
-        accumulator = [...new Set([...accumulator, uai_responsable])];
+        if (!accumulator.has(uai_responsable)) {
+          accumulator.set(uai_responsable, { types: ["Responsable"], email: email_responsable });
+        } else {
+          accumulator.set(uai_responsable, {
+            types: [...new Set([...accumulator.get(uai_responsable).types, "Responsable"])],
+            email: email_responsable,
+          });
+        }
 
-        uai_formateurs.split(",").forEach((uai) => {
-          if (uai !== UAI_RECENSEMENT) {
-            accumulator = [...new Set([...accumulator, uai])];
+        uai_formateurs.split(",").forEach((uai_formateur) => {
+          if (!accumulator.has(uai_formateur)) {
+            accumulator.set(uai_formateur, { types: ["Formateur"], email: accumulator.get(uai_formateur)?.email });
+          } else {
+            accumulator.set(uai_formateur, {
+              types: [...new Set([...accumulator.get(uai_formateur).types, "Formateur"])],
+              email: accumulator.get(uai_formateur)?.email,
+            });
           }
         });
 
         return accumulator;
       },
+      { accumulator: new Map() }
+    ),
+
+    accumulateData(
+      async (accumulator, data) => {
+        return [...data.entries()];
+      },
       { accumulator: [] }
     ),
+
     flattenArray(),
+
     writeData(
-      async (uai) => {
+      async ([uai, { types, email }]) => {
+        // console.log({ uai, types, email });
+
         if (uai === UAI_RECENSEMENT) {
           return;
         }
@@ -107,9 +130,9 @@ async function importEtablissements(csv, options = {}) {
             }
           }
 
-          let email = found?.email;
+          let foundEmail = email ?? found?.email;
 
-          if (!email) {
+          if (!foundEmail && types.includes("Responsable")) {
             // logger.debug(`Email non trouvé pour l'établissement ${uai}, recherche dans les formations Catalogue`);
             const formations = (
               await catalogueApi.getFormations({
@@ -126,16 +149,16 @@ async function importEtablissements(csv, options = {}) {
               ...formations.map((etablissement) => etablissement.etablissement_gestionnaire_courriel),
             ]);
 
-            if (emails.size === 1) {
-              email = formations[0].etablissement_gestionnaire_courriel;
-              logger.info(`Email trouvé pour l'établissement ${uai} : "${email}"`);
+            if (emails.size === 1 && formations[0].etablissement_gestionnaire_courriel) {
+              foundEmail = formations[0].etablissement_gestionnaire_courriel;
+              logger.info(`Email trouvé pour l'établissement ${uai} : "${foundEmail}"`);
             } else {
               logger.warn(`Email non trouvé pour l'établissement ${uai} `);
             }
           }
 
           const updates = omitEmpty({
-            email,
+            email: foundEmail,
             raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
             adresse: organisme
               ? [
