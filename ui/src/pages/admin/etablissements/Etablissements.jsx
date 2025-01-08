@@ -300,10 +300,10 @@ export const Etablissements = () => {
                   (relation) => relation.responsable?.uai !== etablissement.uai
                 );
 
-                // const relationResponsableFormateur = etablissement.relations.find(
-                //   (relation) =>
-                //     relation.formateur?.uai === etablissement.uai && relation.responsable?.uai === etablissement.uai
-                // );
+                const relationResponsableFormateur = etablissement.relations.find(
+                  (relation) =>
+                    relation.formateur?.uai === etablissement.uai && relation.responsable?.uai === etablissement.uai
+                );
 
                 return (
                   <Tr key={index}>
@@ -328,40 +328,79 @@ export const Etablissements = () => {
                     </Td>
                     <Td>
                       <Text lineHeight={6}>
-                        {(() => {
-                          const responsables = [
-                            ...new Set(
-                              etablissement.relations
-                                ?.filter((relation) => !relation.delegue)
-                                .map((relation) => relation.responsable?.email ?? "Information manquante")
-                            ),
-                          ];
+                        {!isOnlyResponsableFormateur && !!relationsOnlyResponsable?.length && (
+                          <>
+                            {etablissement.email ?? "Information manquante"} <ContactResponsableTag />
+                            <br />
+                          </>
+                        )}
 
-                          const delegues = [
-                            ...new Set(
-                              etablissement.relations
-                                ?.filter((relation) => !!relation.delegue)
-                                .map((relation) => relation.delegue?.email ?? "Information manquante")
-                            ),
-                          ];
+                        {isOnlyResponsableFormateur && (
+                          <>
+                            {(() => {
+                              if (
+                                !relationResponsableFormateur.delegue &&
+                                !!relationsOnlyResponsable?.find(
+                                  (relation) =>
+                                    relation.responsable.email === relationResponsableFormateur.responsable?.email
+                                )
+                              ) {
+                                return;
+                              }
 
-                          return (
-                            <>
-                              {responsables?.map((responsable) => (
+                              return !relationResponsableFormateur.delegue ? (
                                 <>
-                                  {responsable} <ContactResponsableTag />
+                                  {relationResponsableFormateur.responsable?.email ?? "Information manquante"}{" "}
+                                  <ContactResponsableTag />
                                   <br />
                                 </>
-                              ))}
-                              {delegues?.map((delegue) => (
+                              ) : (
                                 <>
-                                  {delegue} <ContactDelegueTag />
+                                  {relationResponsableFormateur.delegue?.email ?? "Information manquante"}{" "}
+                                  <ContactDelegueTag />
                                   <br />
                                 </>
-                              ))}
-                            </>
-                          );
-                        })()}
+                              );
+                            })()}
+                          </>
+                        )}
+
+                        {!isOnlyResponsableFormateur &&
+                          !!relationsOnlyFormateur?.length &&
+                          (() => {
+                            const responsables = [
+                              ...new Set(
+                                relationsOnlyFormateur
+                                  ?.filter((relation) => !relation.delegue)
+                                  .map((relation) => relation.responsable?.email ?? "Information manquante")
+                              ),
+                            ];
+
+                            const delegues = [
+                              ...new Set(
+                                relationsOnlyFormateur
+                                  ?.filter((relation) => !!relation.delegue)
+                                  .map((relation) => relation.delegue?.email ?? "Information manquante")
+                              ),
+                            ];
+
+                            return (
+                              <>
+                                {responsables?.map((responsable) => (
+                                  <>
+                                    {responsable} <ContactResponsableTag />
+                                    <br />
+                                  </>
+                                ))}
+                                {delegues?.map((delegue) => (
+                                  <>
+                                    {delegue} <ContactDelegueTag />
+                                    <br />
+                                  </>
+                                ))}
+                              </>
+                            );
+                          })()}
                       </Text>
                     </Td>
                     <Td>
@@ -376,10 +415,21 @@ export const Etablissements = () => {
                     </Td>
                     <Td>
                       <Text lineHeight={6}>
-                        <ResponsableStatut responsable={etablissement} />{" "}
-                        {etablissement.responsables?.map((responsable) => {
-                          return <FormateurStatut responsable={responsable} formateur={etablissement} />;
-                        })}
+                        {!isOnlyResponsableFormateur && !!relationsOnlyResponsable?.length && (
+                          <ResponsableStatut responsable={etablissement} />
+                        )}
+
+                        {isOnlyResponsableFormateur && (
+                          <>
+                            <FormateurStatut relation={relationResponsableFormateur} />
+                          </>
+                        )}
+
+                        {!isOnlyResponsableFormateur &&
+                          !!relationsOnlyFormateur?.length &&
+                          relationsOnlyFormateur?.map((relation) => {
+                            return <FormateurStatut relation={relation} />;
+                          })}
                       </Text>
                     </Td>
                   </Tr>
