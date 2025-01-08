@@ -46,7 +46,9 @@ module.exports = ({ sendEmail }) => {
 
       await confirm(user.username, email);
 
-      await sendEmail({ ...user, email }, "confirmed");
+      const confirmedUser = await User.findOne({ username: user.username });
+
+      await sendEmail(confirmedUser, "confirmed");
 
       return res.json({});
     })

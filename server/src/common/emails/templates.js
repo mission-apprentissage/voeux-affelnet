@@ -38,7 +38,8 @@ module.exports = {
       },
     };
   },
-  confirmed: (user, token) => {
+  // eslint-disable-next-line no-unused-vars
+  confirmed: (user, token, variables = {}) => {
     return {
       subject: `Affelnet 2025 – Confirmation de votre adresse courriel`,
       templateFile: getTemplateFile("confirmed"),
@@ -118,10 +119,10 @@ module.exports = {
       subject: `${prefix}Activation de votre compte`,
       templateFile: getTemplateFile("activation_csaio"),
       data: {
+        token,
         actionToken: createActionToken(user.username),
         voeux_email,
         csaio: user,
-        token,
       },
     };
   },
@@ -132,12 +133,12 @@ module.exports = {
       subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} sont téléchargeables`,
       templateFile: getTemplateFile("notification_responsable"),
       data: {
+        token,
         actionToken: createActionToken(user.username),
         voeux_email,
         relation,
         responsable,
         formateur,
-        token,
       },
     };
   },
@@ -148,13 +149,13 @@ module.exports = {
       subject: `${prefix}Affelnet 2025 – La liste de candidats à l’apprentissage pour l'établissement ${formateur.uai} est téléchargeable`,
       templateFile: getTemplateFile("notification_delegue"),
       data: {
+        token,
         actionToken: createActionToken(user.username),
         voeux_email,
         relation,
         responsable,
         formateur,
         delegue,
-        token,
       },
     };
   },
@@ -165,12 +166,12 @@ module.exports = {
       subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
       templateFile: getTemplateFile("update_responsable"),
       data: {
+        token,
         actionToken: createActionToken(user.username),
         voeux_email,
         relation,
         responsable,
         formateur,
-        token,
       },
     };
   },
@@ -181,13 +182,13 @@ module.exports = {
       subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
       templateFile: getTemplateFile("update_delegue"),
       data: {
+        token,
         actionToken: createActionToken(user.username),
         voeux_email,
         relation,
         responsable,
         formateur,
         delegue,
-        token,
       },
     };
   },
@@ -196,10 +197,10 @@ module.exports = {
       subject: "Réinitialisation du mot de passe (lien valable 2 heures)",
       templateFile: getTemplateFile("reset_password"),
       data: {
-        resetPasswordToken: createResetPasswordToken(user.username),
-        user,
         token,
+        resetPasswordToken: createResetPasswordToken(user.username),
         voeux_email,
+        user,
       },
     };
   },

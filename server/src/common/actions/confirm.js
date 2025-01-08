@@ -52,7 +52,7 @@ async function confirm(username, email, options = {}) {
       break;
   }
 
-  return User.findOneAndUpdate(
+  return await User.findOneAndUpdate(
     { _id: user._id },
     {
       $set: {
