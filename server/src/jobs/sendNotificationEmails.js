@@ -69,15 +69,15 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
       const user = delegue ?? responsable;
 
       if (!user) {
-        stats.skiped++;
         logger.error("Utilisateur introuvable pour la relation " + relation._id);
+        stats.skiped++;
         return stats;
         // throw Error("Utilisateur introuvable pour la relation " + relation._id);
       }
 
       if (!user.email) {
-        stats.skiped++;
         logger.error("Absence d'adresse courriel pour l'utilisateur " + user._id);
+        stats.skiped++;
         return stats;
         // throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
       }
@@ -86,7 +86,10 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
 
       const templateName = `notification_${type}`;
       const previous = user.emails.find(
-        (e) => e.templateName === templateName && e.data?.relation?._id === relation._id
+        (e) =>
+          e.templateName === templateName &&
+          e.data?.relation?._id === relation._id &&
+          e.data?.relation.last_date_voeux === relation.last_date_voeux
       );
 
       stats.total++;
