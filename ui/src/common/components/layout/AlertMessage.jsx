@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Box, Alert, AlertIcon, AlertDescription, Text, Flex } from "@chakra-ui/react";
 import { _get } from "../../httpClient";
 
@@ -6,27 +6,35 @@ export const AlertMessage = () => {
   const [messages, setMessages] = useState([]);
   const mounted = useRef(true);
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const data = await _get("/api/alert");
-        const hasMessages = data.reduce((acc, item) => acc || item.enabled, false);
-        if (hasMessages && mounted.current) {
-          setMessages(data);
-        }
-      } catch (e) {
-        console.error(e);
+  const getMessages = useCallback(async () => {
+    try {
+      const data = await _get("/api/alert");
+      if (!mounted.current) {
+        setMessages(data?.filter((item) => item.enabled) ?? []);
       }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  useEffect(() => {
+    let interval;
+    const run = async () => {
+      await getMessages();
+      interval = setInterval(async () => {
+        await getMessages();
+      }, 60000);
     };
 
-    if (mounted.current) {
+    if (!mounted.current) {
       run();
     }
 
     return () => {
       mounted.current = false;
+      interval && clearInterval(interval);
     };
-  }, []);
+  }, [getMessages]);
 
   if (messages.length === 0) return null;
 
@@ -39,7 +47,7 @@ export const AlertMessage = () => {
           </Flex>
         </Flex>
         <AlertDescription m={0} pl={2}>
-          {messages.map(
+          {messages?.map(
             (element) =>
               element.enabled && (
                 <Text data-testid={element._id} key={element._id}>

@@ -1,28 +1,43 @@
-import { useState, useEffect, useRef } from "react";
-import { Box, Center, Heading, Button, FormControl, FormLabel, Container, Textarea, VStack } from "@chakra-ui/react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  Box,
+  Center,
+  Heading,
+  Button,
+  FormControl,
+  FormLabel,
+  Container,
+  Textarea,
+  VStack,
+  useToast,
+} from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
 import { useFormik } from "formik";
-import { _post, _get, _delete } from "../../common/httpClient";
+import { _post, _get, _delete, _patch } from "../../common/httpClient";
 import { ArrowDropRightLine } from "../../theme/components/icons";
 import useAuth from "../../common/hooks/useAuth";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Alert = () => {
   const [messages, setMessages] = useState([]);
-
+  const toast = useToast();
   const [user] = useAuth();
   const mountedRef = useRef(true);
+
+  const getMessages = useCallback(async () => {
+    try {
+      const data = await _get("/api/alert");
+
+      setMessages(data);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   useEffect(() => {
     const run = async () => {
       if (mountedRef.current) {
-        try {
-          const data = await _get("/api/alert");
-
-          setMessages(data);
-        } catch (e) {
-          console.error(e);
-        }
+        await getMessages();
       }
     };
     run();
@@ -30,7 +45,7 @@ export const Alert = () => {
     return () => {
       mountedRef.current = false;
     };
-  }, []);
+  }, [getMessages]);
 
   const {
     values: valuesM,
@@ -50,9 +65,9 @@ export const Alert = () => {
           };
           const messagePosted = await _post("/api/admin/alert", message);
           if (messagePosted) {
-            alert("Le message a bien été envoyé.");
+            toast({ description: "Le message a bien été envoyé." });
           }
-          window.location.reload();
+          await getMessages();
         } catch (e) {
           console.log(e);
         }
@@ -63,24 +78,29 @@ export const Alert = () => {
     },
   });
 
-  // const toggleMessage = async (message) => {
-  //   try {
-  //     await _patch(`/api/admin/alert/${message._id}`, {
-  //       enabled: !message.enabled,
-  //     });
-  //     window.location.reload();
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const toggleMessage = async (message) => {
+    try {
+      const messageUpdated = await _patch(`/api/admin/alert/${message._id}`, {
+        enabled: !message.enabled,
+      });
+
+      if (messageUpdated) {
+        toast({ description: message.enabled ? "Le message a été désactivé." : "Le message a été activé." });
+      }
+
+      await getMessages();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const deleteMessage = async (message) => {
     try {
       const messageDeleted = await _delete(`/api/admin/alert/${message._id}`);
       if (messageDeleted) {
-        alert("Le message a bien été supprimé.");
+        toast({ description: "Le message a bien été supprimé." });
       }
-      window.location.reload();
+      await getMessages();
     } catch (e) {
       console.error(e);
     }
@@ -110,6 +130,9 @@ export const Alert = () => {
                                 <Textarea disabled>{message.msg}</Textarea>
                               </Box>
                               <Box w="20%" alignSelf="right" alignItems="right">
+                                <Button textStyle="sm" variant="outlined" onClick={() => toggleMessage(message)}>
+                                  {message.enabled ? "Désactiver" : "Activer"}
+                                </Button>
                                 <Button textStyle="sm" variant="danger" onClick={() => deleteMessage(message)}>
                                   Supprimer
                                 </Button>
