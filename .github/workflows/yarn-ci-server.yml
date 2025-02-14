@@ -1,4 +1,5 @@
-name: CI
+name: Yarn CI Server
+
 on: [ push ]
 jobs:
   test:
