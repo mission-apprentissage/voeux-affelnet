@@ -68,7 +68,7 @@ const FormateurRoutes = () => {
         />
         <Route
           exact
-          path="responsables/:uai"
+          path="responsables/:siret"
           element={<Formateur formateur={formateur} responsables={responsables} callback={reload} />}
         /> */}
       </Routes>

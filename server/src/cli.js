@@ -35,12 +35,12 @@ const migrate = require("./jobs/migrate");
 const { injectDataset } = require("../tests/dataset/injectDataset");
 const { Responsable } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi.js");
-const { importDossiers } = require("./jobs/importDossiers.js");
-const { createCsaio } = require("./jobs/createCsaio.js");
+// const { importDossiers } = require("./jobs/importDossiers.js");
+// const { createCsaio } = require("./jobs/createCsaio.js");
+// const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUniquementEnApprentissage.js");
+// const { asArray } = require("./common/utils/stringUtils.js");
 const { getLatestImportDate } = require("./common/actions/getLatestImportDate.js");
-const { importJeunesUniquementEnApprentissage } = require("./jobs/importJeunesUniquementEnApprentissage.js");
-const { asArray } = require("./common/utils/stringUtils.js");
-const { findAcademieByCode } = require("./common/academies.js");
+// const { findAcademieByCode } = require("./common/academies.js");
 const { createActionToken } = require("./common/utils/jwtUtils");
 const config = require("./config.js");
 
@@ -365,16 +365,17 @@ cli
     });
   });
 
-cli
-  .command("createCsaio")
-  .argument("<username>", "Le nom de l'utilisateur")
-  .argument("<email>", "Le email de l'utilisateur")
-  .argument("<academies>", "La liste des codes des académies", asArray)
-  .action((username, email, academies) => {
-    runScript(() => {
-      return createCsaio(username, email, academies.map(findAcademieByCode));
-    });
-  });
+// cli
+//   .command("createCsaio")
+//   .argument("<username>", "Le nom de l'utilisateur")
+//   .argument("<email>", "Le email de l'utilisateur")
+//   .argument("<academies>", "La liste des codes des académies", asArray)
+//   .action((username, email, academies) => {
+//     runScript(() => {
+//       return createCsaio(username, email, academies.map(findAcademieByCode));
+//     });
+//   });
+
 cli
   .command("confirmResponsable")
   .description("Permet de confirmer manuellement un CFA")
@@ -525,27 +526,27 @@ cli
     });
   });
 
-cli
-  .command("importDossiers")
-  .option("--file <file>", "Fichier json contenant les dossiers du tableau de bord", createReadStream)
-  .description("Importe les dossiers du tableau de bord")
-  .action(({ file }) => {
-    runScript(() => {
-      return importDossiers({ input: file });
-    });
-  });
+// cli
+//   .command("importDossiers")
+//   .option("--file <file>", "Fichier json contenant les dossiers du tableau de bord", createReadStream)
+//   .description("Importe les dossiers du tableau de bord")
+//   .action(({ file }) => {
+//     runScript(() => {
+//       return importDossiers({ input: file });
+//     });
+//   });
 
-cli
-  .command("importJeunesUniquementEnApprentissage")
-  .argument("<file>", "Le fichier CSV contentant les INE  (default: stdin)")
-  .description("Ajoute une meta pour les jeunes ayant formulés des voeux uniquement en apprentissage")
-  .action((file) => {
-    runScript(() => {
-      const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
+// cli
+//   .command("importJeunesUniquementEnApprentissage")
+//   .argument("<file>", "Le fichier CSV contentant les INE  (default: stdin)")
+//   .description("Ajoute une meta pour les jeunes ayant formulés des voeux uniquement en apprentissage")
+//   .action((file) => {
+//     runScript(() => {
+//       const input = file ? createReadStream(file, { encoding: "UTF-8" }) : process.stdin;
 
-      return importJeunesUniquementEnApprentissage(input);
-    });
-  });
+//       return importJeunesUniquementEnApprentissage(input);
+//     });
+//   });
 
 cli
   .command("generateActionToken")

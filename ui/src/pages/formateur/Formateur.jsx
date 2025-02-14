@@ -40,7 +40,7 @@ export const Formateur = ({ formateur, responsables, callback }) => {
         </Box>
 
         {formateur?.etablissements_responsable.map((etablissement, index) => {
-          const responsable = responsables?.find((responsable) => responsable.uai === etablissement.uai);
+          const responsable = responsables?.find((responsable) => responsable.siret === etablissement.siret);
 
           if (!responsable) {
             return <Fragment key={index}></Fragment>;
@@ -51,11 +51,11 @@ export const Formateur = ({ formateur, responsables, callback }) => {
           const isDiffusionAutorisee = etablissement?.diffusion_autorisee;
 
           const voeuxTelechargementsFormateur = formateur?.voeux_telechargements_responsable.filter(
-            (telechargement) => telechargement.uai_responsable === responsable.uai
+            (telechargement) => telechargement.siret_responsable === responsable.siret
           );
 
           const voeuxTelechargementsResponsable = responsable.voeux_telechargements_formateur.filter(
-            (telechargement) => telechargement.uai_formateur === formateur?.uai
+            (telechargement) => telechargement.siret_formateur === formateur?.siret
           );
 
           const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee

@@ -30,12 +30,14 @@ module.exports = {
   },
   insertEtablissement: (custom = {}) => {
     const uai = custom.uai ?? createUAI(faker.helpers.replaceSymbols("#######"));
+    const siret = custom.siret ?? faker.helpers.replaceSymbols("##############");
 
     return Etablissement.create(
       merge(
         {},
         {
-          username: uai,
+          username: siret,
+          siret: siret,
           uai: uai,
           email: createEmail(),
           emails: [],
@@ -55,8 +57,8 @@ module.exports = {
       merge(
         {},
         {
-          etablissement_responsable: { uai: responsable.uai },
-          etablissement_formateur: { uai: formateur.uai },
+          etablissement_responsable: { siret: responsable.siret },
+          etablissement_formateur: { siret: formateur.siret },
           academie: formateur.academie,
           nombre_voeux,
           nombre_voeux_restant: faker.number.int({ min: 0, max: nombre_voeux }),

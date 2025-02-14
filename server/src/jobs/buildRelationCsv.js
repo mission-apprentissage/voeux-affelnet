@@ -40,12 +40,12 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
   let overwriteEmails = new Map();
 
   if (options.additionalRelations) {
-    // Format : uai_responsable, email_responsable, uai_formateurs
+    // Format : siret_responsable, email_responsable, siret_formateurs
     // streams.push(parseAdditionalRelationsCsv(options.additionalRelations));
 
     overwriteEmails = new Map(
-      (await getCsvContent(options.additionalRelations)).map(({ uai_responsable, email_responsable }) => [
-        uai_responsable,
+      (await getCsvContent(options.additionalRelations)).map(({ siret_responsable, email_responsable }) => [
+        siret_responsable,
         email_responsable,
       ])
     );
@@ -54,43 +54,43 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
   await oleoduc(
     mergeStreams(...streams),
 
-    transformData(({ uai_responsable, email_responsable, uai_formateurs }) => {
+    transformData(({ siret_responsable, email_responsable, siret_formateurs }) => {
       return {
-        uai_responsable,
-        email_responsable: email_responsable ?? overwriteEmails.get(uai_responsable),
-        uai_formateurs,
+        siret_responsable,
+        email_responsable: email_responsable ?? overwriteEmails.get(siret_responsable),
+        siret_formateurs,
       };
     }),
-    transformData(({ uai_responsable, email_responsable, uai_formateurs }) => {
-      const sanitized_uai_responsable = uai_responsable?.replace(/\s+/g, "")?.toUpperCase();
+    transformData(({ siret_responsable, email_responsable, siret_formateurs }) => {
+      const sanitized_siret_responsable = siret_responsable?.replace(/\s+/g, "")?.toUpperCase();
       const sanitized_email_responsable = email_responsable?.replace(/\s+/g, "")?.toLowerCase();
-      const sanitized_uai_formateurs = uai_formateurs
+      const sanitized_siret_formateurs = siret_formateurs
         ?.replace(/\s+/g, "")
         ?.toUpperCase()
         .split(",")
-        .filter((uai) => uai?.length)
-        .map((uai) => uai.toUpperCase());
+        .filter((siret) => siret?.length)
+        .map((siret) => siret.toUpperCase());
 
       return {
-        uai_responsable: sanitized_uai_responsable?.length ? sanitized_uai_responsable : undefined,
+        siret_responsable: sanitized_siret_responsable?.length ? sanitized_siret_responsable : undefined,
         email_responsable: sanitized_email_responsable?.length ? sanitized_email_responsable : undefined,
-        uai_formateurs: sanitized_uai_formateurs?.length ? sanitized_uai_formateurs : [],
+        siret_formateurs: sanitized_siret_formateurs?.length ? sanitized_siret_formateurs : [],
       };
     }),
     accumulateData(
       async (accumulator, relation) => {
-        const index = accumulator.findIndex((item) => item.uai_responsable === relation.uai_responsable);
+        const index = accumulator.findIndex((item) => item.siret_responsable === relation.siret_responsable);
 
         if (index === -1) {
           stats.valid++;
           accumulator.push({
-            uai_responsable: relation.uai_responsable,
+            siret_responsable: relation.siret_responsable,
             email_responsable: relation.email_responsable,
-            uai_formateurs: [...new Set(relation.uai_formateurs)],
+            siret_formateurs: [...new Set(relation.siret_formateurs)],
           });
         } else {
-          accumulator[index].uai_formateurs = [
-            ...new Set([...accumulator[index].uai_formateurs, ...relation.uai_formateurs]),
+          accumulator[index].siret_formateurs = [
+            ...new Set([...accumulator[index].siret_formateurs, ...relation.siret_formateurs]),
           ];
         }
         return accumulator;
@@ -100,9 +100,9 @@ async function buildRelationCsv({ outputRelations, outputInvalids }, options = {
     flattenArray(),
     filterData((relation) => {
       if (
-        !relation.uai_responsable?.length ||
+        !relation.siret_responsable?.length ||
         // !relation.email_responsable?.length ||
-        !relation.uai_formateurs?.length
+        !relation.siret_formateurs?.length
       ) {
         stats.invalid++;
         invalids.push(relation);

@@ -38,12 +38,17 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
       try {
         await _post(`/api/responsable/delegation`, {
           email: form.email,
-          uai: formateur?.uai,
+          siret: formateur?.siret,
         });
         onClose();
         toast({
           title: "Délégation mise à jour",
-          description: `La délégation de droit a été enregistrée pour le formateur ${formateur?.uai} vers l'adresse courriel ${form.email}`,
+          description: (
+            <>
+              La délégation de droit a été enregistrée pour le formateur <FormateurLibelle formateur={formateur} /> vers
+              l'adresse courriel {form.email}
+            </>
+          ),
           status: "success",
           duration: 9000,
           isClosable: true,
@@ -59,7 +64,7 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
         });
       }
     },
-    [onClose, callback, formateur?.uai, toast]
+    [onClose, callback, formateur, toast]
   );
 
   const hasVoeux = relation.nombre_voeux > 0;

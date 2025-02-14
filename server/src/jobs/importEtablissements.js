@@ -9,15 +9,15 @@ const { Etablissement } = require("../common/model");
 const logger = require("../common/logger");
 const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
-const { uaiFormat } = require("../common/utils/format");
+const { siretFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
 
-const UAI_RECENSEMENT = "0000000A";
+const SIRET_RECENSEMENT = "0000000A";
 
 const schema = Joi.object({
-  uai_responsable: Joi.string().pattern(uaiFormat).required(),
+  siret_responsable: Joi.string().pattern(siretFormat).required(),
   email_responsable: Joi.string().email(),
-  uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
+  siret_formateurs: arrayOf(Joi.string().pattern(siretFormat)).required(),
 }).unknown();
 
 async function importEtablissements(csv, options = {}) {
@@ -49,27 +49,27 @@ async function importEtablissements(csv, options = {}) {
     }),
 
     accumulateData(
-      async (accumulator, { uai_responsable, email_responsable, uai_formateurs }) => {
-        if (uai_responsable === UAI_RECENSEMENT) {
+      async (accumulator, { siret_responsable, email_responsable, siret_formateurs }) => {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return accumulator;
         }
 
-        if (!accumulator.has(uai_responsable)) {
-          accumulator.set(uai_responsable, { types: ["Responsable"], email: email_responsable });
+        if (!accumulator.has(siret_responsable)) {
+          accumulator.set(siret_responsable, { types: ["Responsable"], email: email_responsable });
         } else {
-          accumulator.set(uai_responsable, {
-            types: [...new Set([...accumulator.get(uai_responsable).types, "Responsable"])],
+          accumulator.set(siret_responsable, {
+            types: [...new Set([...accumulator.get(siret_responsable).types, "Responsable"])],
             email: email_responsable,
           });
         }
 
-        uai_formateurs.split(",").forEach((uai_formateur) => {
-          if (!accumulator.has(uai_formateur)) {
-            accumulator.set(uai_formateur, { types: ["Formateur"], email: accumulator.get(uai_formateur)?.email });
+        siret_formateurs.split(",").forEach((siret_formateur) => {
+          if (!accumulator.has(siret_formateur)) {
+            accumulator.set(siret_formateur, { types: ["Formateur"], email: accumulator.get(siret_formateur)?.email });
           } else {
-            accumulator.set(uai_formateur, {
-              types: [...new Set([...accumulator.get(uai_formateur).types, "Formateur"])],
-              email: accumulator.get(uai_formateur)?.email,
+            accumulator.set(siret_formateur, {
+              types: [...new Set([...accumulator.get(siret_formateur).types, "Formateur"])],
+              email: accumulator.get(siret_formateur)?.email,
             });
           }
         });
@@ -89,43 +89,43 @@ async function importEtablissements(csv, options = {}) {
     flattenArray(),
 
     writeData(
-      async ([uai, { types, email }]) => {
-        // console.log({ uai, types, email });
+      async ([siret, { types, email }]) => {
+        // console.log({ siret, types, email });
 
-        if (uai === UAI_RECENSEMENT) {
+        if (siret === SIRET_RECENSEMENT) {
           return;
         }
 
         try {
-          const found = await Etablissement.findOne({ uai: uai }).lean();
+          const found = await Etablissement.findOne({ siret: siret }).lean();
           let organisme;
 
           if (!found) {
             const organismes = (
-              await catalogueApi.getEtablissements({ uai: uai, published: true }).catch(() => {
+              await catalogueApi.getEtablissements({ siret: siret, published: true }).catch(() => {
                 return null;
               })
             )?.etablissements;
 
             if (organismes?.length > 1) {
-              logger.error(`Multiples organismes trouvés dans le catalogue pour l'UAI ${uai}`);
+              logger.error(`Multiples organismes trouvés dans le catalogue pour l'SIRET ${siret}`);
               stats.failed++;
               return;
             }
 
-            organisme = await catalogueApi.getEtablissement({ uai: uai, published: true }).catch(() => {
+            organisme = await catalogueApi.getEtablissement({ siret: siret, published: true }).catch(() => {
               return null;
             });
 
             if (!organisme) {
-              organisme = await catalogueApi.getEtablissement({ uai: uai }).catch(() => {
+              organisme = await catalogueApi.getEtablissement({ siret: siret }).catch(() => {
                 return null;
               });
             }
 
             if (!organisme) {
               stats.failed++;
-              logger.error(`L'établissement ${uai} n'est pas dans le catalogue`);
+              logger.error(`L'établissement ${siret} n'est pas dans le catalogue`);
               return;
             }
           }
@@ -133,12 +133,12 @@ async function importEtablissements(csv, options = {}) {
           let foundEmail = email ?? found?.email;
 
           if (!foundEmail && types.includes("Responsable")) {
-            // logger.debug(`Email non trouvé pour l'établissement ${uai}, recherche dans les formations Catalogue`);
+            // logger.debug(`Email non trouvé pour l'établissement ${siret}, recherche dans les formations Catalogue`);
             const formations = (
               await catalogueApi.getFormations({
                 published: true,
                 catalogue_published: true,
-                etablissement_gestionnaire_uai: uai,
+                etablissement_gestionnaire_siret: siret,
               })
             ).formations;
             // console.log([
@@ -151,15 +151,16 @@ async function importEtablissements(csv, options = {}) {
 
             if (emails.size === 1 && formations[0].etablissement_gestionnaire_courriel) {
               foundEmail = formations[0].etablissement_gestionnaire_courriel;
-              logger.info(`Email trouvé pour l'établissement ${uai} : "${foundEmail}"`);
+              logger.info(`Email trouvé pour l'établissement ${siret} : "${foundEmail}"`);
             } else {
-              logger.warn(`Email non trouvé pour l'établissement ${uai} `);
+              logger.warn(`Email non trouvé pour l'établissement ${siret} `);
             }
           }
 
           const updates = omitEmpty({
             email: foundEmail,
             raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
+            uai: organisme?.uai ?? found?.uai,
             adresse: organisme
               ? [
                   organisme?.numero_voie,
@@ -172,15 +173,18 @@ async function importEtablissements(csv, options = {}) {
                   .join(" ")
               : found?.adresse,
             libelle_ville: organisme?.localite ?? found?.libelle_ville,
-            academie: pick(findAcademieByUai(uai), ["code", "nom"]),
+            academie:
+              organisme?.uai ?? found?.uai
+                ? pick(findAcademieByUai(organisme?.uai ?? found?.uai), ["code", "nom"])
+                : { code: "??", nom: "N/A" },
           });
 
           const res = await Etablissement.updateOne(
-            { uai: uai },
+            { siret: siret },
             {
               $setOnInsert: {
-                uai: uai,
-                username: uai,
+                siret: siret,
+                username: siret,
               },
               $set: updates,
             },
@@ -189,19 +193,19 @@ async function importEtablissements(csv, options = {}) {
 
           if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Etablissement ${uai} ajouté`);
+            logger.info(`Etablissement ${siret} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
 
-            const previous = pick(found, ["raison_sociale", "libelle_ville", "adresse", "email", "academie"]);
+            const previous = pick(found, ["raison_sociale", "uai", "libelle_ville", "adresse", "email", "academie"]);
 
-            logger.info(`Etablissement ${uai} mis à jour \n${JSON.stringify(diff(previous, updates), null, 2)}`);
+            logger.info(`Etablissement ${siret} mis à jour \n${JSON.stringify(diff(previous, updates), null, 2)}`);
           } else {
-            logger.trace(`Etablissement ${uai} déjà à jour`);
+            logger.trace(`Etablissement ${siret} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter l'établissement ${uai}`, error);
+          logger.error(`Impossible de traiter l'établissement ${siret}`, error);
         }
       },
       { parallel: 1 }

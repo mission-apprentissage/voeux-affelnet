@@ -1,10 +1,10 @@
 const { RelationActions } = require("../../../constants/History");
 const { Relation } = require("../../../model");
 
-const saveUpdatedListAvailable = async ({ uai_responsable, uai_formateur, nombre_voeux }) => {
+const saveUpdatedListAvailable = async ({ siret_responsable, siret_formateur, nombre_voeux }) => {
   const relation = await Relation.findOne({
-    "etablissement_responsable.uai": uai_responsable,
-    "etablissement_formateur.uai": uai_formateur,
+    "etablissement_responsable.siret": siret_responsable,
+    "etablissement_formateur.siret": siret_formateur,
   }).lean();
 
   if (!relation) {

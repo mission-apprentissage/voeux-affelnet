@@ -1,4 +1,4 @@
-import { Box, Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
+import { Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
@@ -27,10 +27,10 @@ export const FormateursSansVoeux = ({ responsable, callback }) => {
           const delegue = relation.delegue;
 
           return (
-            <Tr key={formateur?.uai}>
+            <Tr key={formateur?.siret}>
               <Td>
                 {relation.formateur && (
-                  <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
+                  <Link variant="primary" href={`/responsable/formateurs/${formateur?.siret}`}>
                     Détail
                   </Link>
                 )}

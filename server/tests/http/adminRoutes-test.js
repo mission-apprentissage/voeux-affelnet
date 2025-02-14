@@ -29,7 +29,7 @@ describe("adminRoutes", () => {
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.etablissements.length, 1);
-    assert.strictEqual(response.data.etablissements[0].uai, responsable.uai);
+    assert.strictEqual(response.data.etablissements[0].siret, responsable.siret);
   });
 
   it("Vérifie qu'on peut obtenir la liste des établissements formateurs", async () => {
@@ -58,8 +58,8 @@ describe("adminRoutes", () => {
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.etablissements.length, 2);
-    assert.strictEqual(response.data.etablissements[0].uai, formateur1.uai);
-    assert.strictEqual(response.data.etablissements[1].uai, formateur2.uai);
+    assert.strictEqual(response.data.etablissements[0].siret, formateur1.siret);
+    assert.strictEqual(response.data.etablissements[1].siret, formateur2.siret);
   });
 
   it("Vérifie qu'on peut obtenir la liste des établissements responsable-formateurs", async () => {
@@ -94,8 +94,8 @@ describe("adminRoutes", () => {
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.etablissements.length, 1);
-    assert.strictEqual(response.data.etablissements[0].uai, responsable1.uai);
-    assert.strictEqual(response.data.etablissements[0].uai, formateur1.uai);
+    assert.strictEqual(response.data.etablissements[0].siret, responsable1.siret);
+    assert.strictEqual(response.data.etablissements[0].siret, formateur1.siret);
   });
 
   it("Vérifie qu'on peut obtenir la liste paginée des établissements", async () => {
@@ -113,7 +113,7 @@ describe("adminRoutes", () => {
     }
 
     const response = await httpClient.get(
-      `/api/admin/etablissements?page=${page}&items_par_page=${items_par_page}&sort=${JSON.stringify({ uai: 1 })}`,
+      `/api/admin/etablissements?page=${page}&items_par_page=${items_par_page}&sort=${JSON.stringify({ siret: 1 })}`,
       {
         headers: {
           ...auth,
@@ -132,7 +132,7 @@ describe("adminRoutes", () => {
     );
   });
 
-  it("Vérifie qu'on peut filtrer les établissements > filtrage par UAI ", async () => {
+  it("Vérifie qu'on peut filtrer les établissements > filtrage par siret ", async () => {
     const { httpClient, createAndLogUser } = await startServer();
     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
 
@@ -150,11 +150,14 @@ describe("adminRoutes", () => {
       formateur: etablissement3,
     });
 
-    const response = await httpClient.get(`/api/admin/etablissements?text=${encodeURIComponent(etablissement1.uai)}`, {
-      headers: {
-        ...auth,
-      },
-    });
+    const response = await httpClient.get(
+      `/api/admin/etablissements?text=${encodeURIComponent(etablissement1.siret)}`,
+      {
+        headers: {
+          ...auth,
+        },
+      }
+    );
 
     assert.strictEqual(response.status, 200);
     assert.strictEqual(response.data.etablissements.length, 2);
@@ -313,11 +316,11 @@ describe("adminRoutes", () => {
   //           sendDates: ["2023-05-16T16:20:39.495Z", "2023-05-18T16:20:39.495Z"],
   //         },
   //       ],
-  //       formateurs: [{ uai: "0751234J", voeux_date: new Date() }],
+  //       formateurs: [{ siret: "0751234J", voeux_date: new Date() }],
   //     });
   //     await insertVoeu({
   //       etablissement_accueil: {
-  //         uai: "0751234J",
+  //         siret: "0751234J",
   //       },
   //     });
 
@@ -343,7 +346,7 @@ describe("adminRoutes", () => {
   //     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
   //     await insertVoeu({
   //       etablissement_accueil: {
-  //         uai: "0751234J",
+  //         siret: "0751234J",
   //         nom: "Organisme de formation",
   //         ville: "Paris",
   //       },
@@ -358,7 +361,7 @@ describe("adminRoutes", () => {
   //     assert.strictEqual(response.status, 200);
   //     assert.strictEqual(
   //       response.data,
-  //       `"uai";"nom";"ville";"academie"
+  //       `"siret";"nom";"ville";"academie"
   // "0751234J";"Organisme de formation";"Paris";"Paris"
   // `
   //     );
@@ -391,28 +394,28 @@ describe("adminRoutes", () => {
   //       email: "test@apprentissage.beta.gouv.fr",
   //       statut: "activé",
   //       formateurs: [
-  //         { uai: "1234567A", voeux_date: DateTime.fromISO("2023-06-15T00:00:00.000Z") },
-  //         { uai: "1234567B", voeux_date: DateTime.fromISO("2023-06-10T00:00:00.000Z") },
-  //         { uai: "1234567C" },
+  //         { siret: "1234567A", voeux_date: DateTime.fromISO("2023-06-15T00:00:00.000Z") },
+  //         { siret: "1234567B", voeux_date: DateTime.fromISO("2023-06-10T00:00:00.000Z") },
+  //         { siret: "1234567C" },
   //       ],
   //       voeux_telechargements: [
   //         {
-  //           uai: "1234567A",
+  //           siret: "1234567A",
   //           date: DateTime.fromISO("2023-06-05T00:00:00.000Z").plus({ hours: 12 }),
   //         },
   //         {
-  //           uai: "1234567A",
+  //           siret: "1234567A",
   //           date: DateTime.fromISO("2023-06-05T00:00:00.000Z").plus({ days: 1 }),
   //         },
   //         {
-  //           uai: "1234567B",
+  //           siret: "1234567B",
   //           date: DateTime.fromISO("2023-06-15T00:00:00.000Z").plus({ days: 1 }),
   //         },
   //       ],
   //     });
   //     await insertVoeu({
   //       etablissement_accueil: {
-  //         uai: "1234567A",
+  //         siret: "1234567A",
   //       },
   //       _meta: {
   //         import_dates: [DateTime.fromISO("2023-06-05T00:00:00.000Z"), DateTime.fromISO("2023-06-15T00:00:00.000Z")],
@@ -420,7 +423,7 @@ describe("adminRoutes", () => {
   //     });
   //     await insertVoeu({
   //       etablissement_accueil: {
-  //         uai: "1234567A",
+  //         siret: "1234567A",
   //       },
   //       _meta: {
   //         import_dates: [DateTime.fromISO("2023-06-05T00:00:00.000Z")],
@@ -428,7 +431,7 @@ describe("adminRoutes", () => {
   //     });
   //     await insertVoeu({
   //       etablissement_accueil: {
-  //         uai: "1234567A",
+  //         siret: "1234567A",
   //       },
   //       _meta: {
   //         import_dates: [DateTime.fromISO("2023-06-10T00:00:00.000Z"), DateTime.fromISO("2023-06-15T00:00:00.000Z")],
@@ -437,7 +440,7 @@ describe("adminRoutes", () => {
 
   //     await insertVoeu({
   //       etablissement_accueil: {
-  //         uai: "1234567B",
+  //         siret: "1234567B",
   //       },
   //       _meta: {
   //         import_dates: [DateTime.fromISO("2023-06-10T00:00:00.000Z")],
@@ -445,7 +448,7 @@ describe("adminRoutes", () => {
   //     });
   //     await insertVoeu({
   //       etablissement_accueil: {
-  //         uai: "1234567B",
+  //         siret: "1234567B",
   //       },
   //       _meta: {
   //         import_dates: [DateTime.fromISO("2023-06-10T00:00:00.000Z")],
@@ -461,7 +464,7 @@ describe("adminRoutes", () => {
   //     assert.strictEqual(response.status, 200);
   //     assert.strictEqual(
   //       response.data,
-  //       `"Académie";"Siret de l’organisme responsable";"Raison sociale de l’organisme responsable";"Email de contact de l’organisme responsable";"Uai";"Raison sociale de l’établissement d’accueil";"Type de l'établissement d'accueil";"Statut ";"Vœux";"Nombre de vœux";"Date du dernier import de vœux";"Téléchargement";"Téléchargement effectué pour tous les établissements d’accueil liés ?";"Date du dernier téléchargement";"Nombre de vœux téléchargés au moins une fois";"Nombre de vœux jamais téléchargés";"Nombre de vœux à télécharger (nouveau+maj)"
+  //       `"Académie";"Siret de l’organisme responsable";"Raison sociale de l’organisme responsable";"Email de contact de l’organisme responsable";"siret";"Raison sociale de l’établissement d’accueil";"Type de l'établissement d'accueil";"Statut ";"Vœux";"Nombre de vœux";"Date du dernier import de vœux";"Téléchargement";"Téléchargement effectué pour tous les établissements d’accueil liés ?";"Date du dernier téléchargement";"Nombre de vœux téléchargés au moins une fois";"Nombre de vœux jamais téléchargés";"Nombre de vœux à télécharger (nouveau+maj)"
   // "Paris";"11111111100015";"Organisme de formation";"test@apprentissage.beta.gouv.fr";"1234567A";"";"";"contact responsable confirmé";"Oui";"3";"${date(
   //         new Date("2023-06-15T00:00:00.000Z")
   //       )}";"Oui";"Oui";"${date(new Date("2023-06-06T00:00:00.000Z"))}";"2";"1";"2"
@@ -516,7 +519,7 @@ describe("adminRoutes", () => {
     });
 
     const response = await httpClient.put(
-      `/api/admin/responsables/${etablissement1.uai}/setEmail`,
+      `/api/admin/responsables/${etablissement1.siret}/setEmail`,
       {
         email: "robert.hue@organisme.com",
       },
@@ -588,7 +591,7 @@ describe("adminRoutes", () => {
     });
 
     const response = await httpClient.put(
-      `/api/admin/responsables/${etablissement.uai}/resendConfirmationEmail`,
+      `/api/admin/responsables/${etablissement.siret}/resendConfirmationEmail`,
       {},
       {
         headers: {
@@ -603,8 +606,8 @@ describe("adminRoutes", () => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      `[Rappel] Affelnet 2025  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (UAI : ${etablissement.uai})`
-      // "Affelnet 2025  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (UAI : ${etablissement1.uai})"
+      `[Rappel] Affelnet 2025  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (siret : ${etablissement.siret})`
+      // "Affelnet 2025  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (siret : ${etablissement1.siret})"
     );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
@@ -631,7 +634,7 @@ describe("adminRoutes", () => {
     });
 
     const response = await httpClient.put(
-      `/api/admin/responsables/${etablissement.uai}/resendConfirmationEmail`,
+      `/api/admin/responsables/${etablissement.siret}/resendConfirmationEmail`,
       {},
       {
         headers: {
@@ -674,7 +677,7 @@ describe("adminRoutes", () => {
     });
 
     const response = await httpClient.put(
-      `/api/admin/responsables/${etablissement.uai}/resendActivationEmail`,
+      `/api/admin/responsables/${etablissement.siret}/resendActivationEmail`,
       {},
       {
         headers: {
@@ -688,8 +691,8 @@ describe("adminRoutes", () => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      `[Rappel] Affelnet 2025  – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${etablissement.uai})`
-      // `Affelnet 2025  – Veuillez activer votre compte pour l'accès aux listes de candidats (UAI : ${etablissement1.uai})`
+      `[Rappel] Affelnet 2025  – Veuillez activer votre compte pour l'accès aux listes de candidats (siret : ${etablissement.siret})`
+      // `Affelnet 2025  – Veuillez activer votre compte pour l'accès aux listes de candidats (siret : ${etablissement1.siret})`
     );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
@@ -716,7 +719,7 @@ describe("adminRoutes", () => {
     });
 
     const response = await httpClient.put(
-      `/api/admin/responsables/${etablissement.uai}/resendActivationEmail`,
+      `/api/admin/responsables/${etablissement.siret}/resendActivationEmail`,
       {},
       {
         headers: {

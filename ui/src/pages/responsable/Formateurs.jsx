@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+// import { useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
 import { Text, Box, Link, Alert, AlertIcon } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
@@ -9,14 +9,14 @@ import { FormateursSansVoeux } from "./FormateursSansVoeux";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Formateurs = ({ responsable, callback }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // useEffect(() => {
   //   if (
   //     responsable?.relations.length === 1 &&
-  //     responsable?.relations[0].etablissements_formateur.uai === responsable?.uai
+  //     responsable?.relations[0].etablissements_formateur.siret === responsable?.siret
   //   ) {
-  //     navigate(`/responsable/formateurs/${responsable?.uai}`, { replace: true });
+  //     navigate(`/responsable/formateurs/${responsable?.siret}`, { replace: true });
   //   }
   // }, [responsable, navigate]);
 

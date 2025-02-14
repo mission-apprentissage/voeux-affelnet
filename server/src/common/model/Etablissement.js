@@ -7,11 +7,18 @@ const { historySchema: historyResponsableSchema } = require("./schemas/responsab
 const User = require("./User");
 
 const schema = new Schema({
-  uai: {
+  siret: {
     type: String,
     required: true,
     index: true,
     unique: true,
+  },
+
+  uai: {
+    type: String,
+    // required: true,
+    index: true,
+    // unique: true,
   },
 
   raison_sociale: {
@@ -42,6 +49,7 @@ const schema = new Schema({
 
 schema.index(
   {
+    siret: "text",
     uai: "text",
     raison_sociale: "text",
     email: "text",

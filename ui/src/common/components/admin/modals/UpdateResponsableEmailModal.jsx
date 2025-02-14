@@ -29,7 +29,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
   const updateEmail = useCallback(
     async ({ form }) => {
       try {
-        await _put(`/api/admin/responsables/${responsable.uai}/setEmail`, { email: form.email });
+        await _put(`/api/admin/responsables/${responsable.siret}/setEmail`, { email: form.email });
         onClose();
         toast({
           title: "L'adresse courriel a été modifiée",
@@ -50,7 +50,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
         });
       }
     },
-    [onClose, callback, responsable?.uai, toast]
+    [onClose, callback, responsable?.siret, toast]
   );
 
   const hasDelegation = !!responsable.relations?.filter((relation) => !!relation.delegue)?.length;
@@ -81,7 +81,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
                   responsable de {responsable.relations?.length} organisme
                   {responsable.relations?.length > 1 && "s"} formateur
                   {responsable.relations?.length > 1 && "s"} (
-                  <Link variant="action" href={`/admin/responsable/${responsable.uai}/formateurs`}>
+                  <Link variant="action" href={`/admin/responsable/${responsable.siret}/formateurs`}>
                     voir la liste
                   </Link>
                   ). Le nouvel interlocuteur deviendra le contact responsable pour l'ensemble des établissements.

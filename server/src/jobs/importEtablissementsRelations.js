@@ -3,11 +3,11 @@ const Joi = require("@hapi/joi");
 const { pick } = require("lodash");
 const { diff } = require("deep-object-diff");
 
-const { Relation } = require("../common/model");
+const { Relation, Etablissement } = require("../common/model");
 const logger = require("../common/logger");
 const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
-const { uaiFormat } = require("../common/utils/format");
+const { siretFormat } = require("../common/utils/format");
 const { omitEmpty } = require("../common/utils/objectUtils");
 const {
   getNombreVoeux,
@@ -18,12 +18,12 @@ const {
 const { findAcademieByUai } = require("../common/academies");
 // const { getCsvContent } = require("./utils/csv");
 
-// const SIRET_RECENSEMENT = "99999999999999";
-const UAI_RECENSEMENT = "0000000A";
+const SIRET_RECENSEMENT = "99999999999999";
+// const UAI_RECENSEMENT = "0000000A";
 
 const schema = Joi.object({
-  uai_responsable: Joi.string().pattern(uaiFormat).required(),
-  uai_formateurs: arrayOf(Joi.string().pattern(uaiFormat)).required(),
+  siret_responsable: Joi.string().pattern(siretFormat).required(),
+  siret_formateurs: arrayOf(Joi.string().pattern(siretFormat)).required(),
 }).unknown();
 
 async function importEtablissementsRelations(relationsCsv /*, responsableOverwriteCsv, formateurOverwriteCsv*/) {
@@ -54,17 +54,17 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
       }
 
       stats.invalid++;
-      logger.warn(`La relation ${json.uai_responsable} / ${json.uai_formateurs} est invalide`, error);
+      logger.warn(`La relation ${json.siret_responsable} / ${json.siret_formateurs} est invalide`, error);
       return false;
     }),
     accumulateData(
-      async (accumulator, { uai_responsable, uai_formateurs }) => {
-        if (uai_responsable === UAI_RECENSEMENT) {
+      async (accumulator, { siret_responsable, siret_formateurs }) => {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return accumulator;
         }
 
-        uai_formateurs.split(",").forEach((uai_formateur) => {
-          accumulator.push({ uai_formateur, uai_responsable });
+        siret_formateurs.split(",").forEach((siret_formateur) => {
+          accumulator.push({ siret_formateur, siret_responsable });
         });
 
         return accumulator;
@@ -73,42 +73,47 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
     ),
     flattenArray(),
     writeData(
-      async ({ uai_formateur, uai_responsable }) => {
-        if (!uai_formateur?.length || !uai_responsable?.length) {
-          throw new Error(`uai_formateur ou uai_responsable invalide`);
+      async ({ siret_responsable, siret_formateur }) => {
+        if (!siret_responsable?.length || !siret_formateur?.length) {
+          throw new Error(` siret_responsable ou siret_formateur invalide`);
         }
 
-        relations.push({ uai_formateur, uai_responsable });
+        relations.push({ siret_responsable, siret_formateur });
 
         try {
-          // const responsableOverwrite = responsableOverwriteArray.find((record) => record["UAI"] === uai_responsable);
-          // const formateurOverwrite = formateurOverwriteArray.find((record) => record["UAI"] === uai_formateur);
+          // const responsableOverwrite = responsableOverwriteArray.find((record) => record["SIRET"] === siret_responsable);
+          // const formateurOverwrite = formateurOverwqriteArray.find((record) => record["SIRET"] === siret_formateur);
 
           const found = await Relation.findOne({
-            "etablissement_formateur.uai": uai_formateur,
-            "etablissement_responsable.uai": uai_responsable,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
           }).lean();
-          // const formateur = await Formateur.findOne({ uai: uai_formateur }).lean();
-          // const responsable = await Responsable.findOne({ uai: uai_responsable }).lean();
+          const formateur = await Etablissement.findOne({ siret: siret_formateur }).lean();
+          // const responsable = await Responsable.findOne({ siret: siret_responsable }).lean();
 
           const updates = {
+            etablissement_responsable: {
+              siret: siret_responsable,
+              // siret: responsableOverwrite?.SIRET ?? responsable?.siret,
+            },
             etablissement_formateur: {
-              uai: uai_formateur,
+              siret: siret_formateur,
               // siret: formateurOverwrite?.Siret ?? formateur?.siret,
             },
-            etablissement_responsable: {
-              // uai: responsableOverwrite?.UAI ?? responsable?.uai,
-              uai: uai_responsable,
-            },
-            first_date_voeux: await getFirstVoeuxDate({ uai_formateur, uai_responsable }),
-            last_date_voeux: await getLastVoeuxDate({ uai_formateur, uai_responsable }),
-            nombre_voeux: await getNombreVoeux({ uai_formateur, uai_responsable }),
-            nombre_voeux_restant: await getNombreVoeuxRestant({ uai_formateur, uai_responsable }),
-            academie: pick(findAcademieByUai(uai_formateur), ["code", "nom"]),
+            first_date_voeux: await getFirstVoeuxDate({ siret_formateur, siret_responsable }),
+            last_date_voeux: await getLastVoeuxDate({ siret_formateur, siret_responsable }),
+            nombre_voeux: await getNombreVoeux({ siret_formateur, siret_responsable }),
+            nombre_voeux_restant: await getNombreVoeuxRestant({ siret_formateur, siret_responsable }),
+            academie: formateur?.uai
+              ? pick(findAcademieByUai(formateur?.uai), ["code", "nom"])
+              : { code: "??", nom: "N/A" },
           };
 
           const res = await Relation.updateOne(
-            { "etablissement_formateur.uai": uai_formateur, "etablissement_responsable.uai": uai_responsable },
+            {
+              "etablissement_responsable.siret": siret_responsable,
+              "etablissement_formateur.siret": siret_formateur,
+            },
             {
               $set: updates,
             },
@@ -117,7 +122,7 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
 
           if (res.upsertedCount) {
             stats.created++;
-            logger.info(`Relation ${uai_responsable} / ${uai_formateur} ajouté`);
+            logger.info(`Relation ${siret_responsable} / ${siret_formateur} ajouté`);
           } else if (res.modifiedCount) {
             stats.updated++;
 
@@ -132,18 +137,18 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
             ]);
 
             logger.info(
-              `Relation ${uai_responsable} / ${uai_formateur} mis à jour \n${JSON.stringify(
+              `Relation ${siret_responsable} / ${siret_formateur} mis à jour \n${JSON.stringify(
                 diff(previous, updates),
                 null,
                 2
               )}`
             );
           } else {
-            logger.trace(`Relation ${uai_responsable} / ${uai_formateur} déjà à jour`);
+            logger.trace(`Relation ${siret_responsable} / ${siret_formateur} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter la relation ${uai_responsable} / ${uai_formateur}`, error);
+          logger.error(`Impossible de traiter la relation ${siret_responsable} / ${siret_formateur}`, error);
         }
       },
       { parallel: 10 }
@@ -156,12 +161,12 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
     if (
       !relations.find(
         (relation) =>
-          relation.uai_formateur === existingRelation.etablissement_formateur?.uai &&
-          relation.uai_responsable === existingRelation.etablissement_responsable?.uai
+          relation.siret_responsable === existingRelation.etablissement_responsable?.siret &&
+          relation.siret_formateur === existingRelation.etablissement_formateur?.siret
       )
     ) {
       logger.warn(
-        `La relation ${existingRelation.etablissement_responsable?.uai} / ${existingRelation.etablissement_formateur?.uai} n'est plus présente dans le fichier d'import`
+        `La relation ${existingRelation.etablissement_responsable?.siret} / ${existingRelation.etablissement_formateur?.siret} n'est plus présente dans le fichier d'import`
       );
       await Relation.deleteOne({ _id: existingRelation._id });
       stats.removed++;

@@ -7,7 +7,7 @@ const authMiddleware = require("../middlewares/authMiddleware.js");
 const { markVoeuxAsDownloadedByResponsable } = require("../../common/actions/markVoeuxAsDownloaded.js");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Delegue, Relation, Etablissement } = require("../../common/model");
-const { uaiFormat } = require("../../common/utils/format.js");
+const { siretFormat } = require("../../common/utils/format.js");
 const sendActivationEmails = require("../../jobs/sendActivationEmails.js");
 // const resendActivationEmails = require("../../jobs/resendActivationEmails.js");
 const sendNotificationEmails = require("../../jobs/sendNotificationEmails.js");
@@ -28,17 +28,17 @@ const { UserType } = require("../../common/constants/UserType.js");
 
 const lookupRelations = {
   from: Relation.collection.name,
-  let: { uai: "$uai" },
+  let: { siret: "$siret" },
   pipeline: [
     {
       $match: {
         $expr: {
           $or: [
             {
-              $and: [{ $eq: ["$etablissement_formateur.uai", "$$uai"] }],
+              $and: [{ $eq: ["$etablissement_formateur.siret", "$$siret"] }],
             },
             {
-              $and: [{ $eq: ["$etablissement_responsable.uai", "$$uai"] }],
+              $and: [{ $eq: ["$etablissement_responsable.siret", "$$siret"] }],
             },
           ],
         },
@@ -48,8 +48,8 @@ const lookupRelations = {
     {
       $lookup: {
         from: Etablissement.collection.name,
-        localField: "etablissement_formateur.uai",
-        foreignField: "uai",
+        localField: "etablissement_formateur.siret",
+        foreignField: "siret",
         as: "formateur",
       },
     },
@@ -57,8 +57,8 @@ const lookupRelations = {
     {
       $lookup: {
         from: Etablissement.collection.name,
-        localField: "etablissement_responsable.uai",
-        foreignField: "uai",
+        localField: "etablissement_responsable.siret",
+        foreignField: "siret",
         as: "responsable",
       },
     },
@@ -67,8 +67,8 @@ const lookupRelations = {
       $lookup: {
         from: Delegue.collection.name,
         let: {
-          uai_responsable: "$etablissement_responsable.uai",
-          uai_formateur: "$etablissement_formateur.uai",
+          siret_responsable: "$etablissement_responsable.siret",
+          siret_formateur: "$etablissement_formateur.siret",
         },
         pipeline: [
           {
@@ -87,8 +87,8 @@ const lookupRelations = {
             $match: {
               $expr: {
                 $and: [
-                  { $eq: ["$relations.etablissement_responsable.uai", "$$uai_responsable"] },
-                  { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                  { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                  { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
                   { $eq: ["$relations.active", true] },
                 ],
               },
@@ -147,7 +147,7 @@ const addTypeFields = {
           {
             $or: [
               {
-                $eq: ["$$this.etablissement_responsable.uai", "$uai"],
+                $eq: ["$$this.etablissement_responsable.siret", "$siret"],
               },
               {
                 $eq: ["$$value", true],
@@ -170,7 +170,7 @@ const addTypeFields = {
           {
             $or: [
               {
-                $eq: ["$$this.etablissement_formateur.uai", "$uai"],
+                $eq: ["$$this.etablissement_formateur.siret", "$siret"],
               },
               {
                 $eq: ["$$value", true],
@@ -193,7 +193,7 @@ const addTypeFields = {
           {
             $or: [
               {
-                $eq: ["$$this.etablissement_responsable.uai", "$$this.etablissement_formateur.uai"],
+                $eq: ["$$this.etablissement_responsable.siret", "$$this.etablissement_formateur.siret"],
               },
               {
                 $eq: ["$$value", true],
@@ -225,14 +225,14 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai } = req.user;
+      const { siret } = req.user;
 
       const responsable = (
         await Etablissement.aggregate([
           {
             $match: {
               type: UserType.ETABLISSEMENT,
-              uai,
+              siret,
             },
           },
           { $lookup: lookupRelations },
@@ -255,7 +255,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai, email: old_email } = req.user;
+      const { siret, email: old_email } = req.user;
       const { email } = await Joi.object({
         email: Joi.string().email(),
       }).validateAsync(req.body, { abortEarly: false });
@@ -264,7 +264,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       await saveAccountEmailUpdatedByAccount(req.user, email, old_email);
 
-      const updatedResponsable = await Etablissement.findOne({ uai });
+      const updatedResponsable = await Etablissement.findOne({ siret });
 
       res.json(updatedResponsable);
     })
@@ -278,20 +278,20 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai: uai_responsable } = req.user;
-      const { email, uai: uai_formateur } = await Joi.object({
+      const { siret: siret_responsable } = req.user;
+      const { email, siret: siret_formateur } = await Joi.object({
         email: Joi.string().email({ tlds: { allow: false } }),
-        uai: Joi.string().pattern(uaiFormat).required(),
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.body, { abortEarly: false });
 
-      const responsable = await Etablissement.findOne({ uai: uai_responsable }).lean();
-      const formateur = await Etablissement.findOne({ uai: uai_formateur }).lean();
+      const responsable = await Etablissement.findOne({ siret: siret_responsable }).lean();
+      const formateur = await Etablissement.findOne({ siret: siret_formateur }).lean();
 
       const previousDelegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": uai_responsable,
-            "etablissement_formateur.uai": uai_formateur,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
             active: true,
           },
         },
@@ -311,8 +311,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
           {
             arrayFilters: [
               {
-                "element.etablissement_responsable.uai": uai_responsable,
-                "element.etablissement_formateur.uai": uai_formateur,
+                "element.etablissement_responsable.siret": siret_responsable,
+                "element.etablissement_formateur.siret": siret_formateur,
               },
             ],
           }
@@ -324,8 +324,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       if (
         !delegue?.relations?.filter(
           (relation) =>
-            relation.etablissement_responsable.uai === uai_responsable &&
-            relation.etablissement_formateur.uai === uai_formateur
+            relation.etablissement_responsable.siret === siret_responsable &&
+            relation.etablissement_formateur.siret === siret_formateur
         ).length
       ) {
         await Delegue.updateOne(
@@ -338,10 +338,10 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
             $addToSet: {
               relations: {
                 etablissement_responsable: {
-                  uai: responsable.uai,
+                  siret: responsable.siret,
                 },
                 etablissement_formateur: {
-                  uai: formateur?.uai,
+                  siret: formateur?.siret,
                 },
                 active: true,
               },
@@ -373,8 +373,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
             new: true,
             arrayFilters: [
               {
-                "element.etablissement_responsable.uai": uai_responsable,
-                "element.etablissement_formateur.uai": uai_formateur,
+                "element.etablissement_responsable.siret": siret_responsable,
+                "element.etablissement_formateur.siret": siret_formateur,
               },
             ],
           }
@@ -382,9 +382,9 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       }
 
       if (previousDelegue) {
-        await saveDelegationUpdatedByResponsable({ uai_responsable, uai_formateur, email }, req.user);
+        await saveDelegationUpdatedByResponsable({ siret_responsable, siret_formateur, email }, req.user);
       } else {
-        await saveDelegationCreatedByResponsable({ uai_responsable, uai_formateur, email }, req.user);
+        await saveDelegationCreatedByResponsable({ siret_responsable, siret_formateur, email }, req.user);
       }
 
       const updatedDelegue = await Delegue.findOne({ email });
@@ -396,7 +396,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       await sendActivationEmails({ sendEmail, resendEmail }, { username: email, force: true, sender: req.user });
 
       logger.info(
-        `Délégation activée (${updatedDelegue.email}) pour le formateur ${uai_formateur} et le responsable ${uai_responsable}`
+        `Délégation activée (${updatedDelegue.email}) pour le formateur ${siret_formateur} et le responsable ${siret_responsable}`
       );
 
       res.json(updatedDelegue);
@@ -411,16 +411,16 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai: uai_responsable } = req.user;
-      const { uai: uai_formateur } = await Joi.object({
-        uai: Joi.string().pattern(uaiFormat).required(),
+      const { siret: siret_responsable } = req.user;
+      const { siret: siret_formateur } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.body, { abortEarly: false });
 
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": uai_responsable,
-            "etablissement_formateur.uai": uai_formateur,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
             active: true,
           },
         },
@@ -430,8 +430,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         {
           relations: {
             $elemMatch: {
-              "etablissement_responsable.uai": uai_responsable,
-              "etablissement_formateur.uai": uai_formateur,
+              "etablissement_responsable.siret": siret_responsable,
+              "etablissement_formateur.siret": siret_formateur,
               active: true,
             },
           },
@@ -444,17 +444,20 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         {
           arrayFilters: [
             {
-              "element.etablissement_responsable.uai": uai_responsable,
-              "element.etablissement_formateur.uai": uai_formateur,
+              "element.etablissement_responsable.siret": siret_responsable,
+              "element.etablissement_formateur.siret": siret_formateur,
             },
           ],
         }
       );
 
-      await saveDelegationCancelledByResponsable({ uai_responsable, uai_formateur, email: delegue?.email }, req.user);
+      await saveDelegationCancelledByResponsable(
+        { siret_responsable, siret_formateur, email: delegue?.email },
+        req.user
+      );
 
       logger.info(
-        `Délégation désactivée (${delegue.email}) pour le formateur ${uai_formateur} et le responsable ${uai_responsable}`
+        `Délégation désactivée (${delegue.email}) pour le formateur ${siret_formateur} et le responsable ${siret_responsable}`
       );
 
       res.json(updateDelegue);
@@ -465,44 +468,44 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
    * Retourne la liste des voeux pour un formateur donné sous forme d'un CSV.
    */
   router.get(
-    "/api/responsable/formateurs/:uai/voeux",
+    "/api/responsable/formateurs/:siret/voeux",
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai: uai_responsable } = req.user;
-      const { uai: uai_formateur } = await Joi.object({
-        uai: Joi.string().pattern(uaiFormat).required(),
+      const { siret: siret_responsable } = req.user;
+      const { siret: siret_formateur } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const relation = await Relation.findOne({
-        "etablissement_responsable.uai": uai_responsable,
-        "etablissement_formateur.uai": uai_formateur,
+        "etablissement_responsable.siret": siret_responsable,
+        "etablissement_formateur.siret": siret_formateur,
       });
 
       if (!relation) {
         throw Boom.notFound();
       }
 
-      const filename = `${uai_responsable}-${uai_formateur}.csv`;
+      const filename = `${siret_responsable}-${siret_formateur}.csv`;
 
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": uai_responsable,
-            "etablissement_formateur.uai": uai_formateur,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
             active: true,
           },
         },
       });
 
       if (!delegue) {
-        await markVoeuxAsDownloadedByResponsable(uai_responsable, uai_formateur);
+        await markVoeuxAsDownloadedByResponsable(siret_responsable, siret_formateur);
       }
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
       return compose(
-        getVoeuxStream({ uai_responsable, uai_formateur }),
+        getVoeuxStream({ siret_responsable, siret_formateur }),
         transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
         res
       );
@@ -510,20 +513,20 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/responsable/formateurs/:uai/resendActivationEmail",
+    "/api/responsable/formateurs/:siret/resendActivationEmail",
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai: uai_responsable } = req.user;
-      const { uai: uai_formateur } = await Joi.object({
-        uai: Joi.string().pattern(uaiFormat).required(),
+      const { siret: siret_responsable } = req.user;
+      const { siret: siret_formateur } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": uai_responsable,
-            "etablissement_formateur.uai": uai_formateur,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
             active: true,
           },
         },
@@ -543,20 +546,20 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/responsable/formateurs/:uai/resendNotificationEmail",
+    "/api/responsable/formateurs/:siret/resendNotificationEmail",
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai: uai_responsable } = req.user;
-      const { uai: uai_formateur } = await Joi.object({
-        uai: Joi.string().pattern(uaiFormat).required(),
+      const { siret: siret_responsable } = req.user;
+      const { siret: siret_formateur } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": uai_responsable,
-            "etablissement_formateur.uai": uai_formateur,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
             active: true,
           },
         },
@@ -580,20 +583,20 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   );
 
   router.put(
-    "/api/responsable/formateurs/:uai/resendUpdateEmail",
+    "/api/responsable/formateurs/:siret/resendUpdateEmail",
     checkApiToken(),
     ensureIs(UserType.ETABLISSEMENT),
     tryCatch(async (req, res) => {
-      const { uai: uai_responsable } = req.user;
-      const { uai: uai_formateur } = await Joi.object({
-        uai: Joi.string().pattern(uaiFormat).required(),
+      const { siret: siret_responsable } = req.user;
+      const { siret: siret_formateur } = await Joi.object({
+        siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": uai_responsable,
-            "etablissement_formateur.uai": uai_formateur,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
             active: true,
           },
         },

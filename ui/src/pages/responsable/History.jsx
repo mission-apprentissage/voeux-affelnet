@@ -2,7 +2,7 @@ import { List, ListItem, Text, Flex } from "@chakra-ui/react";
 import {
   ResponsableHistoryItems,
   FormateurHistoryItems,
-  DelegueHistoryItems,
+  // DelegueHistoryItems,
   RelationHistoryItems,
 } from "../../common/constants/History";
 
@@ -14,9 +14,9 @@ const getFormateurHistory = (history) => {
   return { ...history, value: FormateurHistoryItems.get(history.action)?.component(history.variables) };
 };
 
-const getDelegueHistory = (history) => {
-  return { ...history, value: DelegueHistoryItems.get(history.action)?.component(history.variables) };
-};
+// const getDelegueHistory = (history) => {
+//   return { ...history, value: DelegueHistoryItems.get(history.action)?.component(history.variables) };
+// };
 
 const getRelationHistory = (history) => {
   return { ...history, value: RelationHistoryItems.get(history.action)?.component(history.variables) };
@@ -25,13 +25,13 @@ const getRelationHistory = (history) => {
 export const History = ({ responsable, formateur, delegue, relation }) => {
   const responsableHistories = responsable?.histories?.map((history) => getResponsableHistory(history));
   const formateurHistories = formateur?.histories?.map((history) => getFormateurHistory(history));
-  const delegueHistories = delegue?.histories?.map((history) => getDelegueHistory(history));
+  // const delegueHistories = delegue?.histories?.map((history) => getDelegueHistory(history));
   const relationHistories = relation?.histories?.map((history) => getRelationHistory(history));
 
   const histories = [
     ...(responsableHistories ?? []),
     ...(formateurHistories ?? []),
-    ...(delegueHistories ?? []),
+    // ...(delegueHistories ?? []),
     ...(relationHistories ?? []),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 

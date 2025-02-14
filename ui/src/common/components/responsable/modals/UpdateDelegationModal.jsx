@@ -42,13 +42,18 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
       try {
         await _post(`/api/responsable/delegation`, {
           email: form.email,
-          uai: formateur?.uai,
+          siret: formateur?.siret,
         });
 
         onClose();
         toast({
           title: "Délégation mise à jour",
-          description: `La délégation de droit a été modifiée pour le formateur ${formateur?.uai} vers l'adresse courriel ${form.email}`,
+          description: (
+            <>
+              La délégation de droit a été modifiée pour le formateur <FormateurLibelle formateur={formateur} /> vers
+              l'adresse courriel {form.email}
+            </>
+          ),
           status: "success",
           duration: 9000,
           isClosable: true,
@@ -64,14 +69,14 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         });
       }
     },
-    [callback, onClose, formateur?.uai, toast]
+    [callback, onClose, formateur, toast]
   );
 
   const cancelDelegation = useCallback(
     async ({ form }) => {
       try {
         await _delete(`/api/responsable/delegation`, {
-          uai: formateur?.uai,
+          siret: formateur?.siret,
         });
         onClose();
         await callback?.();
@@ -79,7 +84,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         console.error(error);
       }
     },
-    [callback, onClose, formateur?.uai]
+    [callback, onClose, formateur?.siret]
   );
 
   return (

@@ -1,4 +1,4 @@
-const { Dossier } = require("../model");
+const { Dossier } = require("../model/index.js");
 const { removeDiacritics } = require("../utils/objectUtils.js");
 
 function getResponsables() {

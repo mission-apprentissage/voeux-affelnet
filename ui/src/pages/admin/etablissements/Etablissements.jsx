@@ -221,7 +221,7 @@ export const Etablissements = () => {
                     {({ field, meta }) => {
                       return (
                         <Input
-                          placeholder={"Chercher un UAI, une raison sociale, un email"}
+                          placeholder={"Chercher un SIRET, un UAI, une raison sociale, un email"}
                           style={{ margin: 0 }}
                           onChange={handleSubmit}
                           onInput={handleSubmit}
@@ -285,30 +285,31 @@ export const Etablissements = () => {
                   etablissement.is_responsable_formateur && etablissement.relations.length === 1;
 
                 const relationsResponsable = etablissement.relations.filter(
-                  (relation) => relation.responsable?.uai === etablissement.uai
+                  (relation) => relation.responsable?.siret === etablissement.siret
                 );
 
                 const relationsFormateur = etablissement.relations.filter(
-                  (relation) => relation.formateur?.uai === etablissement.uai
+                  (relation) => relation.formateur?.siret === etablissement.siret
                 );
 
                 const relationsOnlyResponsable = relationsResponsable.filter(
-                  (relation) => relation.formateur?.uai !== etablissement.uai
+                  (relation) => relation.formateur?.siret !== etablissement.siret
                 );
 
                 const relationsOnlyFormateur = relationsFormateur.filter(
-                  (relation) => relation.responsable?.uai !== etablissement.uai
+                  (relation) => relation.responsable?.siret !== etablissement.siret
                 );
 
                 const relationResponsableFormateur = etablissement.relations.find(
                   (relation) =>
-                    relation.formateur?.uai === etablissement.uai && relation.responsable?.uai === etablissement.uai
+                    relation.formateur?.siret === etablissement.siret &&
+                    relation.responsable?.siret === etablissement.siret
                 );
 
                 return (
                   <Tr key={index}>
                     <Td>
-                      <Link variant="primary" href={`/admin/etablissement/${etablissement.uai}`}>
+                      <Link variant="primary" href={`/admin/etablissement/${etablissement.siret}`}>
                         Détail
                       </Link>
                     </Td>

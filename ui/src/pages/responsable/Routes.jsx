@@ -46,9 +46,9 @@ const ResponsableRoutes = () => {
   // useEffect(() => {
   //   if (
   //     responsable?.relations.length === 1 &&
-  //     responsable?.relations[0].etablissements_formateur.uai === responsable?.uai
+  //     responsable?.relations[0].etablissements_formateur.siret === responsable?.siret
   //   ) {
-  //     navigate(`/responsable/formateurs/${responsable?.uai}`, { replace: true });
+  //     navigate(`/responsable/formateurs/${responsable?.siret}`, { replace: true });
   //   }
   // }, [responsable, navigate]);
 
@@ -61,7 +61,7 @@ const ResponsableRoutes = () => {
       <Routes>
         <Route exact path="" element={<Responsable responsable={responsable} callback={reload} />} />
         <Route exact path="formateurs" element={<Formateurs responsable={responsable} callback={reload} />} />
-        <Route exact path="formateurs/:uai" element={<Formateur responsable={responsable} callback={reload} />} />
+        <Route exact path="formateurs/:siret" element={<Formateur responsable={responsable} callback={reload} />} />
       </Routes>
     </>
   );

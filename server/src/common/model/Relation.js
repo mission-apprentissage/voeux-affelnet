@@ -9,7 +9,7 @@ const schema = new Schema({
     required: true,
     default: null,
     type: nested({
-      uai: {
+      siret: {
         type: String,
         required: true,
         index: true,
@@ -21,7 +21,7 @@ const schema = new Schema({
     required: true,
     default: null,
     type: nested({
-      uai: {
+      siret: {
         type: String,
         required: true,
         index: true,
@@ -85,8 +85,8 @@ const schema = new Schema({
 
 schema.index(
   {
-    "etablissement_responsable.uai": "text",
-    "etablissement_formateur.uai": "text",
+    "etablissement_responsable.siret": "text",
+    "etablissement_formateur.siret": "text",
     "academie.code": "text",
   },
   { default_language: "french" }

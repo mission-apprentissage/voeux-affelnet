@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import { Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
@@ -33,7 +32,7 @@ export const FormateursAvecVoeux = ({ responsable, callback }) => {
             <Tr key={index}>
               <Td>
                 {relation.formateur && (
-                  <Link variant="primary" href={`/responsable/formateurs/${formateur?.uai}`}>
+                  <Link variant="primary" href={`/responsable/formateurs/${formateur?.siret}`}>
                     Détail
                   </Link>
                 )}

@@ -32,12 +32,13 @@ import { DownloadType } from "../../common/constants/DownloadType";
 import { UserStatut } from "../../common/constants/UserStatut";
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
+import { ResponsableLibelle } from "../../common/components/responsable/fields/ResponsableLibelle";
 
 export const Formateur = ({ responsable, callback }) => {
-  const { uai } = useParams();
+  const { siret } = useParams();
   const toast = useToast();
 
-  const relation = responsable?.relations?.find((relation) => relation.etablissement_formateur.uai === uai);
+  const relation = responsable?.relations?.find((relation) => relation.etablissement_formateur.siret === siret);
   // const responsable = relation.responsable ?? relation.etablissements_responsable;
   const formateur = relation.formateur ?? relation.etablissements_formateur;
   const delegue = relation.delegue;
@@ -46,13 +47,13 @@ export const Formateur = ({ responsable, callback }) => {
 
   const cancelDelegation = useCallback(async () => {
     await _delete(`/api/responsable/delegation`, {
-      uai: formateur?.uai,
+      siret: formateur?.siret,
     });
   }, [formateur]);
 
   const resendActivationEmail = useCallback(async () => {
     try {
-      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendActivationEmail`);
+      await _put(`/api/responsable/formateurs/${formateur?.siret}/resendActivationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -76,7 +77,7 @@ export const Formateur = ({ responsable, callback }) => {
 
   const resendNotificationEmail = useCallback(async () => {
     try {
-      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendNotificationEmail`);
+      await _put(`/api/responsable/formateurs/${formateur?.siret}/resendNotificationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -100,7 +101,7 @@ export const Formateur = ({ responsable, callback }) => {
 
   const resendUpdateEmail = useCallback(async () => {
     try {
-      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendUpdateEmail`);
+      await _put(`/api/responsable/formateurs/${formateur?.siret}/resendUpdateEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -212,8 +213,8 @@ export const Formateur = ({ responsable, callback }) => {
           },
 
           {
-            label: `${title} (UAI : ${formateur?.uai})`,
-            url: `/responsable/formateurs/${formateur?.uai}`,
+            label: `${title} (SIRET : ${formateur?.siret} / UAI : ${formateur?.uai})`,
+            url: `/responsable/formateurs/${formateur?.siret}`,
           },
         ]}
       />
@@ -257,7 +258,7 @@ export const Formateur = ({ responsable, callback }) => {
                   <Text as="b" style={{ textDecoration: "underline" }}>
                     Organisme responsable
                   </Text>{" "}
-                  : {responsable?.raison_sociale}
+                  : <ResponsableLibelle responsable={responsable} />
                 </Text>
                 <Text mb={2}>
                   Adresse : {responsable?.adresse ?? "Inconnue"} – UAI : {responsable?.uai ?? "Inconnu"}

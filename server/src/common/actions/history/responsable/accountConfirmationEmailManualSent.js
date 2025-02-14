@@ -1,9 +1,9 @@
 const { ResponsableActions } = require("../../../constants/History");
 const { Etablissement } = require("../../../model");
 
-const saveAccountConfirmationEmailManualSent = async ({ uai, email }, admin) => {
+const saveAccountConfirmationEmailManualSent = async ({ siret, email }, admin) => {
   await Etablissement.updateOne(
-    { uai },
+    { siret },
     {
       $push: {
         histories: {

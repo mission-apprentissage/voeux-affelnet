@@ -15,7 +15,7 @@ import { OrganismeResponsableFormateurTag } from "../../../common/components/tag
 
 export const Responsables = () => {
   const navigate = useNavigate();
-  const { uai_formateur } = useParams();
+  const { siret_formateur } = useParams();
 
   const [formateur, setFormateur] = useState(undefined);
   // const [responsables, setResponsables] = useState(undefined);
@@ -24,13 +24,13 @@ export const Responsables = () => {
 
   const getFormateur = useCallback(async () => {
     try {
-      const response = await _get(`/api/admin/formateurs/${uai_formateur}`);
+      const response = await _get(`/api/admin/formateurs/${siret_formateur}`);
       setFormateur(response);
     } catch (error) {
       setFormateur(undefined);
       throw Error;
     }
-  }, [uai_formateur]);
+  }, [siret_formateur]);
 
   const reload = useCallback(async () => {
     await Promise.all([await getFormateur() /*, await getResponsables(), await getDelegues()*/]);
@@ -53,7 +53,7 @@ export const Responsables = () => {
   useEffect(() => {
     if (formateur?.relations?.length === 1) {
       const responsable = formateur?.relations[0].responsable ?? formateur?.relations[0].etablissement_responsable;
-      navigate(`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`, { replace: true });
+      navigate(`/admin/responsable/${responsable?.siret}/formateur/${formateur?.siret}`, { replace: true });
     }
   }, [formateur, navigate]);
 
@@ -75,7 +75,7 @@ export const Responsables = () => {
     </>
   );
 
-  const relationsFormateur = formateur.relations.filter((relation) => relation.formateur?.uai === formateur?.uai);
+  const relationsFormateur = formateur.relations.filter((relation) => relation.formateur?.siret === formateur?.siret);
 
   return (
     <>
@@ -88,12 +88,12 @@ export const Responsables = () => {
                 <FormateurLibelle formateur={formateur} />
               </>
             ),
-            url: `/admin/formateur/${uai_formateur}`,
+            url: `/admin/formateur/${siret_formateur}`,
           },
 
           {
             label: <>Liste des organismes responsables associés</>,
-            url: `/admin/formateur/${uai_formateur}/responsables`,
+            url: `/admin/formateur/${siret_formateur}/responsables`,
           },
         ]}
       />
@@ -120,11 +120,11 @@ export const Responsables = () => {
                   const delegue = relation.delegue;
 
                   return (
-                    <Tr key={responsable?.uai}>
+                    <Tr key={responsable?.siret}>
                       <Td>
                         <Link
                           variant="primary"
-                          href={`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`}
+                          href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.siret}`}
                         >
                           Détail
                         </Link>
@@ -132,7 +132,7 @@ export const Responsables = () => {
                       <Td>
                         <Text lineHeight={6}>
                           <ResponsableLibelle responsable={responsable} />
-                          {responsable?.uai === formateur?.uai ? (
+                          {responsable?.siret === formateur?.siret ? (
                             <OrganismeResponsableFormateurTag ml={2} verticalAlign="baseline" />
                           ) : (
                             <OrganismeResponsableTag ml={2} verticalAlign="baseline" />

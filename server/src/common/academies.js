@@ -1,4 +1,5 @@
 const ACADEMIES = [
+  { code: "??", nom: "N/A", alias: "Inconnue" },
   {
     code: "00",
     nom: "Étranger",
@@ -313,7 +314,7 @@ function findAcademieByUai(uai) {
   const metropole = ["0", "6", "7"].includes(uai.substring(0, 1));
   const found = ACADEMIES.find((academie) => {
     const code = metropole ? uai.substring(1, 3) : uai.substring(0, 3);
-    return academie.departements.map((d) => d.code).includes(code);
+    return academie.departements?.map((d) => d.code).includes(code);
   });
 
   return found || null;

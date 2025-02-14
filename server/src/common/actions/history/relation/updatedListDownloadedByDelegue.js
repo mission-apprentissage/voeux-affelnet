@@ -1,17 +1,17 @@
 const { RelationActions } = require("../../../constants/History");
 const { Relation, Delegue } = require("../../../model");
 
-const saveUpdatedListDownloadedByDelegue = async ({ uai_responsable, uai_formateur }) => {
+const saveUpdatedListDownloadedByDelegue = async ({ siret_responsable, siret_formateur }) => {
   const relation = await Relation.findOne({
-    "etablissement_responsable.uai": uai_responsable,
-    "etablissement_formateur.uai": uai_formateur,
+    "etablissement_responsable.siret": siret_responsable,
+    "etablissement_formateur.siret": siret_formateur,
   }).lean();
 
   const delegue = await Delegue.findOne({
     relations: {
       $elemMatch: {
-        "etablissement_responsable.uai": uai_responsable,
-        "etablissement_formateur.uai": uai_formateur,
+        "etablissement_responsable.siret": siret_responsable,
+        "etablissement_formateur.siret": siret_formateur,
         active: true,
       },
     },

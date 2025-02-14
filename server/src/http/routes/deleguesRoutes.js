@@ -6,7 +6,7 @@ const authMiddleware = require("../middlewares/authMiddleware.js");
 const { markVoeuxAsDownloadedByDelegue } = require("../../common/actions/markVoeuxAsDownloaded.js");
 const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Etablissement, Delegue, Relation } = require("../../common/model");
-const { uaiFormat } = require("../../common/utils/format.js");
+const { siretFormat } = require("../../common/utils/format.js");
 const { changeEmail } = require("../../common/actions/changeEmail.js");
 const { UserType } = require("../../common/constants/UserType.js");
 
@@ -36,16 +36,16 @@ module.exports = ({ users }) => {
             $lookup: {
               from: Relation.collection.name,
               let: {
-                uai_responsable: "$relations.etablissement_responsable.uai",
-                uai_formateur: "$relations.etablissement_formateur.uai",
+                siret_responsable: "$relations.etablissement_responsable.siret",
+                siret_formateur: "$relations.etablissement_formateur.siret",
               },
               pipeline: [
                 {
                   $match: {
                     $expr: {
                       $and: [
-                        { $eq: ["$etablissement_responsable.uai", "$$uai_responsable"] },
-                        { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
+                        { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
+                        { $eq: ["$etablissement_formateur.siret", "$$siret_formateur"] },
                       ],
                     },
                   },
@@ -53,16 +53,16 @@ module.exports = ({ users }) => {
                 {
                   $lookup: {
                     from: Etablissement.collection.name,
-                    localField: "etablissement_responsable.uai",
-                    foreignField: "uai",
+                    localField: "etablissement_responsable.siret",
+                    foreignField: "siret",
                     as: "responsable",
                   },
                 },
                 {
                   $lookup: {
                     from: Etablissement.collection.name,
-                    localField: "etablissement_formateur.uai",
-                    foreignField: "uai",
+                    localField: "etablissement_formateur.siret",
+                    foreignField: "siret",
                     as: "formateur",
                   },
                 },
@@ -119,15 +119,15 @@ module.exports = ({ users }) => {
    * Retourne la liste des voeux pour la relation responsable-formateur sous forme d'un CSV.
    */
   router.get(
-    "/api/delegue/:uai_responsable/:uai_formateur/voeux",
+    "/api/delegue/:siret_responsable/:siret_formateur/voeux",
     checkApiToken(),
     ensureIs(UserType.DELEGUE),
     tryCatch(async (req, res) => {
       const { email } = req.user;
 
-      const { uai_responsable, uai_formateur } = await Joi.object({
-        uai_responsable: Joi.string().pattern(uaiFormat).required(),
-        uai_formateur: Joi.string().pattern(uaiFormat).required(),
+      const { siret_responsable, siret_formateur } = await Joi.object({
+        siret_responsable: Joi.string().pattern(siretFormat).required(),
+        siret_formateur: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       const delegue = await Delegue.findOne({ email });
@@ -136,21 +136,21 @@ module.exports = ({ users }) => {
         !delegue.relations.find(
           (relation) =>
             relation.active &&
-            relation.etablissement_responsable.uai === uai_responsable &&
-            relation.etablissement_formateur.uai === uai_formateur
+            relation.etablissement_responsable.siret === siret_responsable &&
+            relation.etablissement_formateur.siret === siret_formateur
         )
       ) {
         throw Error("La ressource n'est pas accessible.");
       }
 
-      const filename = `${uai_responsable}-${uai_formateur}.csv`;
+      const filename = `${siret_responsable}-${siret_formateur}.csv`;
 
-      await markVoeuxAsDownloadedByDelegue(uai_responsable, uai_formateur);
+      await markVoeuxAsDownloadedByDelegue(siret_responsable, siret_formateur);
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
       return compose(
-        getVoeuxStream({ uai_responsable, uai_formateur }),
+        getVoeuxStream({ siret_responsable, siret_formateur }),
         transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
         res
       );

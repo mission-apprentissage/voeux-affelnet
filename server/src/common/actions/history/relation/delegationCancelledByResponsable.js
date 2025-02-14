@@ -1,10 +1,10 @@
 const { RelationActions } = require("../../../constants/History");
 const { Relation } = require("../../../model");
 
-const saveDelegationCancelledByResponsable = async ({ uai_formateur, uai_responsable, email }, responsable) => {
+const saveDelegationCancelledByResponsable = async ({ siret_formateur, siret_responsable, email }, responsable) => {
   const relation = await Relation.findOne({
-    "etablissement_formateur.uai": uai_formateur,
-    "etablissement_responsable.uai": uai_responsable,
+    "etablissement_formateur.siret": siret_formateur,
+    "etablissement_responsable.siret": siret_responsable,
   }).lean();
 
   if (!relation) {
@@ -18,8 +18,8 @@ const saveDelegationCancelledByResponsable = async ({ uai_formateur, uai_respons
         histories: {
           action: RelationActions.DELEGATION_CANCELLED_BY_RESPONSABLE,
           variables: {
-            uai_responsable,
-            uai_formateur,
+            siret_responsable,
+            siret_formateur,
             email,
             responsable: responsable.email,
           },

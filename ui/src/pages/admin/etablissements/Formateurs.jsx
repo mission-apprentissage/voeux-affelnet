@@ -14,19 +14,19 @@ import { _get } from "../../../common/httpClient";
 
 export const Formateurs = () => {
   const mounted = useRef(false);
-  const { uai_responsable } = useParams();
+  const { siret_responsable } = useParams();
 
   const [responsable, setResponsable] = useState(undefined);
 
   const getResponsable = useCallback(async () => {
     try {
-      const response = await _get(`/api/admin/responsables/${uai_responsable}`);
+      const response = await _get(`/api/admin/responsables/${siret_responsable}`);
       setResponsable(response);
     } catch (error) {
       setResponsable(undefined);
       throw Error;
     }
-  }, [uai_responsable]);
+  }, [siret_responsable]);
 
   const reload = useCallback(async () => {
     await Promise.all([await getResponsable()]);
@@ -65,7 +65,7 @@ export const Formateurs = () => {
   );
 
   const relationsResponsable = responsable.relations.filter(
-    (relation) => relation.responsable?.uai === responsable.uai
+    (relation) => relation.responsable?.siret === responsable.siret
   );
 
   return (
@@ -79,12 +79,12 @@ export const Formateurs = () => {
                 <ResponsableLibelle responsable={responsable} />
               </>
             ),
-            url: `/admin/responsable/${uai_responsable}`,
+            url: `/admin/responsable/${siret_responsable}`,
           },
 
           {
             label: <>Liste des organismes formateurs associés</>,
-            url: `/admin/responsable/${uai_responsable}/formateurs`,
+            url: `/admin/responsable/${siret_responsable}/formateurs`,
           },
         ]}
       />
@@ -119,12 +119,12 @@ export const Formateurs = () => {
                   const delegue = relation?.delegue;
 
                   return (
-                    <Tr key={formateur?.uai}>
+                    <Tr key={formateur?.siret}>
                       <Td>
                         {relation?.formateur && (
                           <Link
                             variant="primary"
-                            href={`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`}
+                            href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.siret}`}
                           >
                             Détail
                           </Link>
@@ -133,7 +133,7 @@ export const Formateurs = () => {
                       <Td>
                         <Text lineHeight={6}>
                           <FormateurLibelle formateur={formateur} />
-                          {formateur.uai === responsable.uai ? (
+                          {formateur.siret === responsable.siret ? (
                             <OrganismeResponsableFormateurTag ml={2} verticalAlign="baseline" />
                           ) : (
                             <OrganismeFormateurTag ml={2} verticalAlign="baseline" />

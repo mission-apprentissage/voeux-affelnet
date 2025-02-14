@@ -14,7 +14,7 @@ const schema = new Schema({
           required: true,
           default: null,
           type: nested({
-            uai: {
+            siret: {
               type: String,
               required: true,
               index: true,
@@ -26,7 +26,7 @@ const schema = new Schema({
           required: true,
           default: null,
           type: nested({
-            uai: {
+            siret: {
               type: String,
               required: true,
               index: true,

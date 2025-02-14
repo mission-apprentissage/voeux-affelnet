@@ -15,7 +15,7 @@ export const Responsable = ({ responsable, callback }) => {
   }
 
   const isResponsableFormateurForAtLeastOneEtablissement = !!responsable?.relations?.find(
-    (relation) => relation.etablissement_formateur.uai === responsable?.uai
+    (relation) => relation.etablissement_formateur.siret === responsable?.siret
   );
 
   return (
@@ -61,7 +61,7 @@ export const Responsable = ({ responsable, callback }) => {
           {isResponsableFormateurForAtLeastOneEtablissement && (
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
-              <Link variant="action" href={`/responsable/formateurs/${responsable?.uai}`}>
+              <Link variant="action" href={`/responsable/formateurs/${responsable?.siret}`}>
                 Accéder à la page de téléchargement des listes de candidats
               </Link>
             </Text>

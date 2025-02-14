@@ -22,7 +22,7 @@ export const Formateur = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { uai_responsable, uai_formateur } = useParams();
+  const { siret_responsable, siret_formateur } = useParams();
 
   // const {
   //   onOpen: onOpenUpdateResponsableEmailModal,
@@ -49,7 +49,7 @@ export const Formateur = () => {
   const getFormateur = useCallback(async () => {
     try {
       setLoadingFormateur(true);
-      const response = await _get(`/api/admin/formateurs/${uai_formateur}`);
+      const response = await _get(`/api/admin/formateurs/${siret_formateur}`);
 
       setLoadingFormateur(false);
       setFormateur(response);
@@ -58,12 +58,12 @@ export const Formateur = () => {
       setLoadingFormateur(false);
       throw Error;
     }
-  }, [uai_formateur]);
+  }, [siret_formateur]);
 
   const relation = formateur?.relations?.find(
     (relation) =>
-      relation.etablissement_responsable.uai === uai_responsable &&
-      relation.etablissement_formateur.uai === uai_formateur
+      relation.etablissement_responsable.siret === siret_responsable &&
+      relation.etablissement_formateur.siret === siret_formateur
   );
 
   const responsable = relation?.responsable;
@@ -85,10 +85,10 @@ export const Formateur = () => {
   }, [callback]);
 
   useEffect(() => {
-    if (!uai_responsable) {
-      navigate(`/admin/formateur/${uai_formateur}/responsables`, { replace: true });
+    if (!siret_responsable) {
+      navigate(`/admin/formateur/${siret_formateur}/responsables`, { replace: true });
     }
-  }, [uai_responsable, navigate, uai_formateur]);
+  }, [siret_responsable, navigate, siret_formateur]);
 
   const isResponsableFormateurCheck = isResponsableFormateur({
     responsable,
@@ -97,7 +97,7 @@ export const Formateur = () => {
 
   const resendActivationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/delegues/${uai_responsable}/${uai_formateur}/resendActivationEmail`);
+      await _put(`/api/admin/delegues/${siret_responsable}/${siret_formateur}/resendActivationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -117,11 +117,11 @@ export const Formateur = () => {
         isClosable: true,
       });
     }
-  }, [uai_responsable, uai_formateur, delegue, toast, callback]);
+  }, [siret_responsable, siret_formateur, delegue, toast, callback]);
 
   const resendNotificationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/delegues/${uai_responsable}/${uai_formateur}/resendNotificationEmail`);
+      await _put(`/api/admin/delegues/${siret_responsable}/${siret_formateur}/resendNotificationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -141,11 +141,11 @@ export const Formateur = () => {
         isClosable: true,
       });
     }
-  }, [uai_responsable, uai_formateur, delegue, toast, callback]);
+  }, [siret_responsable, siret_formateur, delegue, toast, callback]);
 
   const resendUpdateEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/delegues/${uai_responsable}/${uai_formateur}/resendUpdateEmail`);
+      await _put(`/api/admin/delegues/${siret_responsable}/${siret_formateur}/resendUpdateEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -165,7 +165,7 @@ export const Formateur = () => {
         isClosable: true,
       });
     }
-  }, [uai_responsable, uai_formateur, delegue, toast, callback]);
+  }, [siret_responsable, siret_formateur, delegue, toast, callback]);
 
   if (loadingFormateur) {
     return <Spinner />;
@@ -216,7 +216,7 @@ export const Formateur = () => {
                 <ResponsableLibelle responsable={responsable} />
               </>
             ),
-            url: `/admin/responsable/${uai_responsable}`,
+            url: `/admin/responsable/${siret_responsable}`,
           },
           {
             label: (
@@ -225,7 +225,7 @@ export const Formateur = () => {
                 <FormateurLibelle formateur={formateur} />
               </>
             ),
-            url: `/admin/responsable/${uai_responsable}/formateur/${uai_formateur}`,
+            url: `/admin/responsable/${siret_responsable}/formateur/${siret_formateur}`,
           },
         ]}
       />
@@ -233,7 +233,8 @@ export const Formateur = () => {
       <Page title={title}>
         <Box my={6}>
           <Text mb={4}>
-            Adresse : {formateur?.adresse} – UAI : {formateur?.uai ?? "Inconnu"}
+            Adresse : {formateur?.adresse} – SIRET : {formateur?.siret ?? "Inconnu"} – UAI :{" "}
+            {formateur?.uai ?? "Inconnu"}
           </Text>
         </Box>
         {/*
@@ -268,19 +269,20 @@ export const Formateur = () => {
                 : {responsable?.raison_sociale}
               </Text>
               <Text mb={2}>
-                Adresse : {responsable?.adresse ?? "Inconnue"} – UAI : {responsable?.uai ?? "Inconnu"}
+                Adresse : {responsable?.adresse ?? "Inconnue"} – SIRET : {responsable?.siret ?? "Inconnu"} – UAI :{" "}
+                {responsable?.siret ?? "Inconnu"}
               </Text>
               <Text mb={2}>
                 Personne habilitée à réceptionner les listes de candidats au sein de l'organisme responsable :{" "}
                 {responsable?.email ?? "Information manquante"}
               </Text>
               <Text mb={2}>
-                <Link variant="action" href={`/admin/responsable/${responsable?.uai}  `}>
+                <Link variant="action" href={`/admin/responsable/${responsable?.siret}  `}>
                   Accéder à la page de l'organisme responsable
                 </Link>
               </Text>
               <Text mb={2}>
-                <Link variant="action" href={`/admin/responsable/${responsable?.uai}/formateurs`}>
+                <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
                   Accéder à la liste des formateurs dépendants de cet organisme responsable
                 </Link>
               </Text>

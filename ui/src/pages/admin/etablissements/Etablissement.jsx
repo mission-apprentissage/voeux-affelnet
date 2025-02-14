@@ -149,23 +149,24 @@ export const Etablissement = () => {
   const isOnlyResponsableFormateur = etablissement.is_responsable_formateur && etablissement.relations.length === 1;
 
   const relationsResponsable = etablissement.relations.filter(
-    (relation) => relation.responsable?.uai === etablissement.uai
+    (relation) => relation.responsable?.siret === etablissement.siret
   );
 
   const relationsFormateur = etablissement.relations.filter(
-    (relation) => relation.formateur?.uai === etablissement.uai
+    (relation) => relation.formateur?.siret === etablissement.siret
   );
 
   const relationsOnlyResponsable = relationsResponsable.filter(
-    (relation) => relation.formateur?.uai !== etablissement.uai
+    (relation) => relation.formateur?.siret !== etablissement.siret
   );
 
   const relationsOnlyFormateur = relationsFormateur.filter(
-    (relation) => relation.responsable?.uai !== etablissement.uai
+    (relation) => relation.responsable?.siret !== etablissement.siret
   );
 
   const relationResponsableFormateur = etablissement.relations.find(
-    (relation) => relation.formateur?.uai === etablissement.uai && relation.responsable?.uai === etablissement.uai
+    (relation) =>
+      relation.formateur?.siret === etablissement.siret && relation.responsable?.siret === etablissement.siret
   );
 
   return (
@@ -176,7 +177,8 @@ export const Etablissement = () => {
         <Box my={12}>
           <Box mb={12}>
             <Text mb={8}>
-              Adresse : {etablissement?.adresse} - UAI : {etablissement?.uai ?? "Inconnu"}
+              Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
+              {etablissement?.uai ?? "Inconnu"}
             </Text>
 
             {etablissement?.is_responsable && !isOnlyResponsableFormateur && !!relationsOnlyResponsable?.length && (
@@ -184,11 +186,11 @@ export const Etablissement = () => {
                 L'organisme est responsable de l'offre de {relationsResponsable?.length} organisme
                 {relationsResponsable?.length > 1 && "s"} formateur
                 {relationsResponsable?.length > 1 && "s"}.<br />
-                <Link variant="action" href={`/admin/responsable/${etablissement?.uai}`}>
+                <Link variant="action" href={`/admin/responsable/${etablissement?.siret}`}>
                   Accéder à la page du responsable
                 </Link>
                 <br />
-                <Link variant="action" href={`/admin/responsable/${etablissement?.uai}/formateurs`}>
+                <Link variant="action" href={`/admin/responsable/${etablissement?.siret}/formateurs`}>
                   Accéder à la liste des formateurs
                 </Link>
               </Text>
@@ -200,7 +202,7 @@ export const Etablissement = () => {
                 {relationsFormateur?.length > 1 && "s"} responsable
                 {relationsFormateur?.length > 1 && "s"}.
                 <br />
-                <Link variant="action" href={`/admin/formateur/${etablissement?.uai}/responsables`}>
+                <Link variant="action" href={`/admin/formateur/${etablissement?.siret}/responsables`}>
                   Accéder à la liste
                 </Link>
               </Text>
@@ -212,7 +214,7 @@ export const Etablissement = () => {
                 <br />
                 <Link
                   variant="action"
-                  href={`/admin/responsable/${etablissement?.uai}/formateur/${etablissement?.uai}`}
+                  href={`/admin/responsable/${etablissement?.siret}/formateur/${etablissement?.siret}`}
                 >
                   Accéder à la page de téléchargement des listes de candidats
                 </Link>

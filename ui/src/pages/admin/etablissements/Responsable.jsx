@@ -22,7 +22,7 @@ export const Responsable = () => {
     onClose: onCloseUpdateResponsableEmailModal,
   } = useDisclosure();
 
-  const { uai_responsable } = useParams();
+  const { siret_responsable } = useParams();
 
   const [responsable, setResponsable] = useState(undefined);
   const [loadingResponsable, setLoadingResponsable] = useState(false);
@@ -30,7 +30,7 @@ export const Responsable = () => {
   const getResponsable = useCallback(async () => {
     try {
       setLoadingResponsable(true);
-      const response = await _get(`/api/admin/responsables/${uai_responsable}`);
+      const response = await _get(`/api/admin/responsables/${siret_responsable}`);
       setResponsable(response);
       setLoadingResponsable(false);
     } catch (error) {
@@ -38,7 +38,7 @@ export const Responsable = () => {
       setLoadingResponsable(false);
       throw Error;
     }
-  }, [uai_responsable]);
+  }, [siret_responsable]);
 
   const reload = useCallback(async () => {
     await getResponsable();
@@ -46,7 +46,7 @@ export const Responsable = () => {
 
   const resendActivationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${uai_responsable}/resendActivationEmail`);
+      await _put(`/api/admin/responsables/${siret_responsable}/resendActivationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -66,11 +66,11 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [uai_responsable, responsable, toast, reload]);
+  }, [siret_responsable, responsable, toast, reload]);
 
   const resendConfirmationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${uai_responsable}/resendConfirmationEmail`);
+      await _put(`/api/admin/responsables/${siret_responsable}/resendConfirmationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -90,11 +90,11 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [uai_responsable, responsable, toast, reload]);
+  }, [siret_responsable, responsable, toast, reload]);
 
   const resendNotificationEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${uai_responsable}/resendNotificationEmail`);
+      await _put(`/api/admin/responsables/${siret_responsable}/resendNotificationEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -114,11 +114,11 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [uai_responsable, responsable, toast, reload]);
+  }, [siret_responsable, responsable, toast, reload]);
 
   const resendUpdateEmail = useCallback(async () => {
     try {
-      await _put(`/api/admin/responsables/${uai_responsable}/resendUpdateEmail`);
+      await _put(`/api/admin/responsables/${siret_responsable}/resendUpdateEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -138,7 +138,7 @@ export const Responsable = () => {
         isClosable: true,
       });
     }
-  }, [uai_responsable, responsable, toast, reload]);
+  }, [siret_responsable, responsable, toast, reload]);
 
   useEffect(() => {
     const run = async () => {
@@ -182,13 +182,14 @@ export const Responsable = () => {
   );
   return (
     <>
-      <Breadcrumb items={[{ label: title, url: `/admin/responsable/${uai_responsable}` }]} />
+      <Breadcrumb items={[{ label: title, url: `/admin/responsable/${siret_responsable}` }]} />
 
       <Page title={title}>
         <Box my={12}>
           <Box mb={12}>
             <Text mb={4}>
-              Adresse : {responsable?.adresse} - UAI : {responsable?.uai ?? "Inconnu"}
+              Adresse : {responsable?.adresse} - SIRET : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
+              {responsable?.uai ?? "Inconnu"}
             </Text>
 
             <Text mb={4}>
@@ -196,13 +197,13 @@ export const Responsable = () => {
             </Text>
 
             {(responsable?.relations?.length === 1 &&
-              responsable?.relations[0]?.etablissement_formateur.uai !== responsable?.uai) ||
+              responsable?.relations[0]?.etablissement_formateur.siret !== responsable?.siret) ||
               (responsable?.relations?.length > 1 && (
                 <Text mb={4}>
                   L'organisme est responsable de l'offre de {responsable?.relations?.length} organisme
                   {responsable?.relations?.length > 1 && "s"} formateur
                   {responsable?.relations?.length > 1 && "s"}.{" "}
-                  <Link variant="action" href={`/admin/responsable/${responsable?.uai}/formateurs`}>
+                  <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
                     Accéder à la liste
                   </Link>
                 </Text>
@@ -211,7 +212,7 @@ export const Responsable = () => {
             {/* {isResponsableFormateurForAtLeastOneEtablissement && (
             <Text mb={4}>
               L'organisme dispense directement des formations.{" "}
-              <Link variant="action" href={`/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`}>
+              <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateur/${formateur?.siret}`}>
                 Accéder à la page de téléchargement des listes de candidats
               </Link>
             </Text>
@@ -276,7 +277,7 @@ export const Responsable = () => {
             </Heading>
 
             <Text mb={4}>
-              <Link variant="action" href={`/admin/responsable/${responsable?.uai}/formateurs`}>
+              <Link variant="action" href={`/admin/responsable/${responsable?.siret}/formateurs`}>
                 Voir la liste des organismes formateurs
               </Link>{" "}
               pour accéder aux listes de candidats disponibles et à leurs statuts de téléchargement.
