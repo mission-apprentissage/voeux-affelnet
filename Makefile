@@ -3,13 +3,13 @@ install: hooks
 	cd ui && yarn install --frozen-lockfile
 
 start:
-	docker-compose up --build --force-recreate
+	docker compose up --build --force-recreate
 
 stop:
-	docker-compose stop
+	docker compose stop
 
 clean:
-	docker-compose down
+	docker compose down
 
 dataset:
 	docker exec voeux_affelnet_server yarn --silent --cwd server cli injectDataset
