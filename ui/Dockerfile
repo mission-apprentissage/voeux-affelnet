@@ -9,6 +9,7 @@ ENV REACT_APP_VOEUX_AFFELNET_SENTRY_DSN=$VOEUX_AFFELNET_SENTRY_DSN
 ENV REACT_APP_VOEUX_AFFELNET_EMAIL=$VOEUX_AFFELNET_EMAIL
 
 WORKDIR /app
+
 RUN corepack enable &&\
     corepack prepare yarn@stable --activate && \
     yarn set version 4.5.0 && \

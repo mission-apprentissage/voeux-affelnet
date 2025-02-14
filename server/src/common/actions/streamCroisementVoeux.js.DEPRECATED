@@ -1,9 +1,9 @@
 const { Voeu, Responsable } = require("../model");
 const { compose, transformData } = require("oleoduc");
-const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils.js");
+const { dateAsString, capitalizeFirstLetter } = require("../utils/stringUtils");
 const { sortDescending } = require("../utils/dateUtils.js");
-const { ouiNon } = require("../utils/csvUtils.js");
-const { findDossiers } = require("./findDossiers.js");
+const { ouiNon } = require("../utils/csvUtils");
+const { findDossiers } = require("./findDossiers");
 
 async function findDossier(voeu) {
   const results = await findDossiers(voeu.apprenant, voeu.responsable, [

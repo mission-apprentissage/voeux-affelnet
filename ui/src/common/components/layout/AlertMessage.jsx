@@ -4,14 +4,12 @@ import { _get } from "../../httpClient";
 
 export const AlertMessage = () => {
   const [messages, setMessages] = useState([]);
-  const mounted = useRef(true);
+  const mounted = useRef(false);
 
   const getMessages = useCallback(async () => {
     try {
       const data = await _get("/api/alert");
-      if (!mounted.current) {
-        setMessages(data?.filter((item) => item.enabled) ?? []);
-      }
+      setMessages(data?.filter((item) => item.enabled) ?? []);
     } catch (e) {
       console.error(e);
     }
@@ -19,7 +17,9 @@ export const AlertMessage = () => {
 
   useEffect(() => {
     let interval;
+
     const run = async () => {
+      mounted.current = true;
       await getMessages();
       interval = setInterval(async () => {
         await getMessages();
