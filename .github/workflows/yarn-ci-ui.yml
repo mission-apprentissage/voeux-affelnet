@@ -1,14 +1,19 @@
-name: CI
-on: [ push ]
+# Worflow pour IC
+name: Yarn CI UI
+
+on: [push]
+
 jobs:
-  test:
+  # Single job
+  build:
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        working-directory: 'server'
+        working-directory: 'ui'
 
     steps:
+      # Checks-out the repository
       - uses: actions/checkout@v4.2.2
 
       - name: Enable corepack
@@ -34,20 +39,16 @@ jobs:
         run: |
           yarn install --immutable
 
-      # Lint
-      - name: Run Lint
-        run: |
-          yarn lint
-
       # Run tests
       - name: Run Tests
         run: |
-          yarn test
+          yarn test:coverage
 
+      # codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./.coverage
-          name: codecov-server
+          directory: ./coverage
+          name: codecov-ui
           verbose: true

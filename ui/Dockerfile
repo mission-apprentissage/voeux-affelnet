@@ -1,14 +1,5 @@
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Install dependencies
-COPY package.json yarn.lock /app/
-RUN yarn install --frozen-lockfile && \
-    yarn global add local-web-server
-
-# Build site
-COPY . ./
+## BASE IMAGE
+FROM node:20-alpine AS base
 
 ARG VOEUX_AFFELNET_SENTRY_DSN
 ARG VOEUX_AFFELNET_ENV
@@ -17,8 +8,31 @@ ENV REACT_APP_VOEUX_AFFELNET_ENV=$VOEUX_AFFELNET_ENV
 ENV REACT_APP_VOEUX_AFFELNET_SENTRY_DSN=$VOEUX_AFFELNET_SENTRY_DSN
 ENV REACT_APP_VOEUX_AFFELNET_EMAIL=$VOEUX_AFFELNET_EMAIL
 
-RUN INLINE_RUNTIME_CHUNK=false yarn build && \
-    mv /app/build /site
+WORKDIR /app
+RUN corepack enable &&\
+    corepack prepare yarn@stable --activate && \
+    yarn set version 4.5.0 && \
+    yarn config set nodeLinker node-modules && \
+    yarn config set defaultSemverRangePrefix '' && \
+    yarn config set --home enableTelemetry 0 && \
+    yarn config set compressionLevel mixed
 
+COPY package.json yarn.lock*  ./
+
+## DEPS
+FROM base AS deps
+RUN yarn install --immutable
+
+## BUILD
+FROM base AS builder
+COPY --from=deps /app/node_modules/  ./node_modules/
+COPY .  ./
+RUN yarn build
+
+## RUN
+FROM base AS runner
+COPY --from=deps /app/node_modules/  ./node_modules/
+COPY --from=builder /app/build  ./build/
 EXPOSE 3000
-CMD ws --port 3000 -d /site --log.format dev --spa index.html
+CMD yarn serve
+

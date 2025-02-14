@@ -1,12 +1,15 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
-COPY .yarnrc.yml* /
-RUN echo -e "yarnPath: .yarn/releases/yarn-3.3.1.cjs\n\
-nodeLinker: node-modules\n\
-defaultSemverRangePrefix: ''\n\
-" > /.yarnrc.yml ;
 WORKDIR /app
-
 VOLUME /data
-EXPOSE 5000
+
+RUN corepack enable &&\
+  corepack prepare yarn@stable --activate && \
+  yarn set version 4.5.0 && \
+  yarn config set nodeLinker node-modules && \
+  yarn config set defaultSemverRangePrefix '' && \
+  yarn config set --home enableTelemetry 0
+
 CMD yarn install --immutable && yarn debug
+
+EXPOSE 5000
