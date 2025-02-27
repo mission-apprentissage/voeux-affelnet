@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Button, Stack, Text, Breadcrumb as ChakraBreadCrumb } from "@chakra-ui/react";
+import { Button, Stack, Text, Breadcrumb as ChakraBreadCrumb, Link } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 
 const noop = () => ({});
@@ -9,18 +9,18 @@ export const Breadcrumb = ({ items, ...props }) => {
 
   return (
     <Stack direction="row" mt={8} mb={8} wrap={"wrap"}>
-      <Button variant="slight" onClick={() => navigate("/")} px={1} height={4}>
+      <Link variant="slight" href={"/"} onClick={() => navigate("/")} px={1} height={4}>
         Accueil
-      </Button>
+      </Link>
 
       {items.map((item, index) => (
         <Fragment key={index}>
           <Text as="span" variant="slight" style={{ alignContent: "center" }} px={1} height={4}>
             {"/"}
           </Text>
-          <Button variant="slight" onClick={() => navigate(item.url)} px={1} height={4}>
+          <Link variant="slight" href={item.url} onClick={() => navigate(item.url)} px={1} height={4}>
             {item.label}
-          </Button>
+          </Link>
         </Fragment>
       ))}
     </Stack>

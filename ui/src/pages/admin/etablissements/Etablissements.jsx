@@ -316,15 +316,11 @@ export const Etablissements = () => {
                     <Td>
                       <Text lineHeight={6}>
                         <EtablissementLibelle etablissement={etablissement} />{" "}
-                        {!isOnlyResponsableFormateur && !!relationsOnlyResponsable?.length && (
-                          <OrganismeResponsableTag verticalAlign="baseline" ml={2} />
-                        )}
+                        {etablissement.is_responsable && <OrganismeResponsableTag verticalAlign="baseline" ml={2} />}
                         {etablissement.is_responsable_formateur && (
                           <OrganismeResponsableFormateurTag verticalAlign="baseline" ml={2} />
                         )}
-                        {!isOnlyResponsableFormateur && !!relationsOnlyFormateur?.length && (
-                          <OrganismeFormateurTag verticalAlign="baseline" ml={2} />
-                        )}
+                        {etablissement.is_formateur && <OrganismeFormateurTag verticalAlign="baseline" ml={2} />}
                       </Text>
                     </Td>
                     <Td>

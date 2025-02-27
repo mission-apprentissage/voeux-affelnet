@@ -39,6 +39,14 @@ const Link = {
       textDecoration: "none",
       _hover: { bg: "bluefrance", color: "white", textDecoration: "none" },
     },
+    slight: {
+      ...commonButtonStyle,
+      fontWeight: 400,
+      color: "#666666",
+      fontSize: "0.8rem",
+      fontStyle: "italic",
+      textDecoration: "underline",
+    },
     popup: {
       fontSize: "zeta",
       color: "grey.800",

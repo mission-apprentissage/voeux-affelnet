@@ -78,7 +78,7 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
+    <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
@@ -98,7 +98,7 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
             onSubmit={(form) => activateDelegation({ form })}
           >
             <Form style={{ width: "100%" }} id="delegation-form">
-              <Text fontSize="lg" mb={4}>
+              <Text fontSize="lg" mb={6}>
                 {hasVoeux && voeuxTelecharges ? (
                   <>
                     {/* Voeux disponibles et téléchargés par le responsable */}
@@ -119,16 +119,16 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
                   </>
                 )}
               </Text>
-              <Text mb={4}>
+              <Text mb={6}>
                 Après validation de cette délégation, le destinataire sera automatiquement informé par courriel, et
                 devra procéder à la création de son mot de passe pour accéder à son espace de téléchargement. Si la
                 personne ne reçoit pas le courriel de notification, invitez-la à vérifier dans ses spam.
               </Text>
-              <Text mb={4}>
+              <Text mb={6}>
                 Vous pourrez également, si nécessaire, redonner le droit exclusif de réception des listes au
                 responsable, ou modifier l'email saisi.
               </Text>
-              <Box mb={8}>
+              <Box mb={6}>
                 <Field name="email" required>
                   {({ field, meta }) => {
                     return (

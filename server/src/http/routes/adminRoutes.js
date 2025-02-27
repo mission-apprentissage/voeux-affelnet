@@ -140,7 +140,53 @@ const lookupRelations = {
 };
 
 const addTypeFields = {
-  is_responsable: {
+  // is_responsable: {
+  //   $reduce: {
+  //     input: "$relations",
+  //     initialValue: false,
+  //     in: {
+  //       $cond: [
+  //         {
+  //           $or: [
+  //             {
+  //               $eq: ["$$this.etablissement_responsable.siret", "$siret"],
+  //             },
+  //             {
+  //               $eq: ["$$value", true],
+  //             },
+  //           ],
+  //         },
+  //         true,
+  //         false,
+  //       ],
+  //     },
+  //   },
+  // },
+
+  // is_formateur: {
+  //   $reduce: {
+  //     input: "$relations",
+  //     initialValue: false,
+  //     in: {
+  //       $cond: [
+  //         {
+  //           $or: [
+  //             {
+  //               $eq: ["$$this.etablissement_formateur.siret", "$siret"],
+  //             },
+  //             {
+  //               $eq: ["$$value", true],
+  //             },
+  //           ],
+  //         },
+  //         true,
+  //         false,
+  //       ],
+  //     },
+  //   },
+  // },
+
+  is_formateur: {
     $reduce: {
       input: "$relations",
       initialValue: false,
@@ -149,7 +195,14 @@ const addTypeFields = {
           {
             $or: [
               {
-                $eq: ["$$this.etablissement_responsable.siret", "$siret"],
+                $and: [
+                  {
+                    $eq: ["$$this.etablissement_formateur.siret", "$siret"],
+                  },
+                  {
+                    $ne: ["$$this.etablissement_responsable.siret", "$siret"],
+                  },
+                ],
               },
               {
                 $eq: ["$$value", true],
@@ -163,7 +216,7 @@ const addTypeFields = {
     },
   },
 
-  is_formateur: {
+  is_responsable: {
     $reduce: {
       input: "$relations",
       initialValue: false,
@@ -172,7 +225,14 @@ const addTypeFields = {
           {
             $or: [
               {
-                $eq: ["$$this.etablissement_formateur.siret", "$siret"],
+                $and: [
+                  {
+                    $ne: ["$$this.etablissement_formateur.siret", "$siret"],
+                  },
+                  {
+                    $eq: ["$$this.etablissement_responsable.siret", "$siret"],
+                  },
+                ],
               },
               {
                 $eq: ["$$value", true],
@@ -419,6 +479,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
    */
 
   /**
+   * @deprecated
+   *
    * Permet de récupérer un responsable
    */
   router.get(
@@ -838,7 +900,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
   );
 
   /**
-   * DEPRECATED :
+   * @deprecated
+   *
    * Marque un responsable comme non concerné (permet de ne plus envoyer de courriels à ce responsable)
    */
   router.put(
@@ -861,6 +924,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
    */
 
   /**
+   * @deprecated
+   *
    * Permet de récupérer un formateur
    */
   router.get(

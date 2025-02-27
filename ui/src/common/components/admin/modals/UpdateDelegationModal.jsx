@@ -49,8 +49,8 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
           title: "Délégation mise à jour",
           description: (
             <>
-              La délégation de droit a été modifiée pour le formateur <FormateurLibelle formateur={formateur} />
-              vers l'adresse courriel {form.email}
+              La délégation de droit a été modifiée pour le formateur <FormateurLibelle formateur={formateur} /> vers
+              l'adresse courriel {form.email}
             </>
           ),
           status: "success",
@@ -88,7 +88,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
+    <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
@@ -101,7 +101,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         <ModalCloseButton />
 
         <ModalBody>
-          <Text fontSize="lg" mb={4}>
+          <Text fontSize="lg" mb={6}>
             Vous vous apprêtez à modifier le destinataire de la délégation de droits au sein de l'organisme formateur{" "}
             <FormateurLibelle formateur={formateur} />, actuellement{" "}
             <FormateurEmail responsable={responsable} formateur={formateur} delegue={delegue} />.

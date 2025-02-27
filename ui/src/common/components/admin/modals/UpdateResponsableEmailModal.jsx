@@ -81,7 +81,11 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
                   responsable de {responsable.relations?.length} organisme
                   {responsable.relations?.length > 1 && "s"} formateur
                   {responsable.relations?.length > 1 && "s"} (
-                  <Link variant="action" href={`/admin/responsable/${responsable.siret}/formateurs`}>
+                  <Link
+                    variant="action"
+                    href={`/admin/etablissement/${responsable.siret}#responsable`}
+                    onClick={onClose}
+                  >
                     voir la liste
                   </Link>
                   ). Le nouvel interlocuteur deviendra le contact responsable pour l'ensemble des établissements.
