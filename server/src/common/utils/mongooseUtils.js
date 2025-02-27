@@ -78,7 +78,10 @@ async function aggregate(model, aggregation, options = {}) {
   const sort = options.sort || {};
   const skip = (page - 1) * limit;
 
-  const query = model.aggregate([...aggregation, { $sort: sort }]).cachePipeline();
+  const query = model
+    .aggregate([...aggregation, { $sort: sort }])
+    .allowDiskUse(true)
+    .cachePipeline();
 
   return {
     results: (await query).slice(skip, skip + limit),

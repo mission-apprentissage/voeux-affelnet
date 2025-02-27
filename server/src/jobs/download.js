@@ -22,16 +22,16 @@ async function download(output, options = {}) {
       {
         $lookup: {
           from: Etablissement.collection.name,
-          localField: "etablissement_formateur.uai",
-          foreignField: "uai",
+          localField: "etablissement_formateur.siret",
+          foreignField: "siret",
           as: "formateur",
         },
       },
       {
         $lookup: {
           from: Etablissement.collection.name,
-          localField: "etablissement_responsable.uai",
-          foreignField: "uai",
+          localField: "etablissement_responsable.siret",
+          foreignField: "siret",
           as: "responsable",
         },
       },
@@ -40,8 +40,8 @@ async function download(output, options = {}) {
         $lookup: {
           from: Delegue.collection.name,
           let: {
-            uai_responsable: "$etablissement_responsable.uai",
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_responsable: "$etablissement_responsable.siret",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -60,8 +60,8 @@ async function download(output, options = {}) {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$relations.etablissement_responsable.uai", "$$uai_responsable"] },
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
+                    { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
                     { $eq: ["$relations.active", true] },
                   ],
                 },
@@ -114,17 +114,19 @@ async function download(output, options = {}) {
         },
       },
       { $sort: { "academie.code": 1, nombre_voeux: -1 } },
-    ]).cursor(),
+    ])
+      .allowDiskUse(true)
+      .cursor(),
 
     transformIntoCSV({
       mapper: (v) => `"${v || ""}"`,
       columns: {
         "Académie de l’organisme responsable": ({ responsable }) => responsable?.academie?.nom,
 
-        "Uai de l'établissement responsable": ({ responsable }) => responsable?.uai,
+        "Siret de l'établissement responsable": ({ responsable }) => responsable?.siret,
 
         "Url du responsable": ({ responsable }) =>
-          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable?.uai}`,
+          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable?.siret}`,
 
         "Raison sociale de l’organisme responsable": ({ responsable }) => responsable?.raison_sociale,
 
@@ -136,10 +138,10 @@ async function download(output, options = {}) {
 
         "Académie de l’organisme formateur": ({ formateur }) => formateur?.academie?.nom,
 
-        "Uai de l'établissement formateur": ({ formateur }) => formateur?.uai,
+        "Siret de l'établissement formateur": ({ formateur }) => formateur?.siret,
 
         "Url du formateur": ({ responsable, formateur }) =>
-          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable?.uai}/formateur/${formateur?.uai}`,
+          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable?.siret}/formateur/${formateur?.siret}`,
 
         "Raison sociale de l’établissement formateur": ({ formateur }) => formateur?.raison_sociale,
 
@@ -153,8 +155,8 @@ async function download(output, options = {}) {
               await Voeu.aggregate([
                 {
                   $match: {
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                   },
                 },
                 { $group: { _id: "$etablissement_accueil.ville" } },
@@ -376,8 +378,8 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByDelegue
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByDelegue, { $first: "$_meta.import_dates" }],
                     },
@@ -396,8 +398,8 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                     $expr: {
                       $gt: [lastVoeuxTelechargementDateByResponsable, { $first: "$_meta.import_dates" }],
                     },
@@ -418,8 +420,8 @@ async function download(output, options = {}) {
         //     return number(
         //       lastVoeuxTelechargementDateByDelegue
         //         ? await Voeu.countDocuments({
-        //             "etablissement_formateur.uai": formateur?.uai,
-        //             "etablissement_responsable.uai": responsable?.uai,
+        //             "etablissement_formateur.siret": formateur?.siret,
+        //             "etablissement_responsable.siret": responsable?.siret,
         //             $expr: {
         //               $gt: [lastVoeuxTelechargementDateByDelegue, { $last: "$_meta.import_dates" }],
         //             },
@@ -430,8 +432,8 @@ async function download(output, options = {}) {
         //     return number(
         //       lastVoeuxTelechargementDateByResponsable
         //         ? await Voeu.countDocuments({
-        //             "etablissement_formateur.uai": formateur?.uai,
-        //             "etablissement_responsable.uai": responsable?.uai,
+        //             "etablissement_formateur.siret": formateur?.siret,
+        //             "etablissement_responsable.siret": responsable?.siret,
         //             $expr: {
         //               $gt: [lastVoeuxTelechargementDateByResponsable, { $last: "$_meta.import_dates" }],
         //             },
@@ -452,30 +454,30 @@ async function download(output, options = {}) {
         //     return number(
         //       lastVoeuxTelechargementDateByDelegue
         //         ? await Voeu.countDocuments({
-        //             "etablissement_formateur.uai": formateur?.uai,
-        //             "etablissement_responsable.uai": responsable?.uai,
+        //             "etablissement_formateur.siret": formateur?.siret,
+        //             "etablissement_responsable.siret": responsable?.siret,
         //             $expr: {
         //               $lte: [lastVoeuxTelechargementDateByDelegue, { $last: "$_meta.import_dates" }],
         //             },
         //           })
         //         : await Voeu.countDocuments({
-        //             "etablissement_formateur.uai": formateur?.uai,
-        //             "etablissement_responsable.uai": responsable?.uai,
+        //             "etablissement_formateur.siret": formateur?.siret,
+        //             "etablissement_responsable.siret": responsable?.siret,
         //           })
         //     );
         //   } else {
         //     return number(
         //       lastVoeuxTelechargementDateByResponsable
         //         ? await Voeu.countDocuments({
-        //             "etablissement_formateur.uai": formateur?.uai,
-        //             "etablissement_responsable.uai": responsable?.uai,
+        //             "etablissement_formateur.siret": formateur?.siret,
+        //             "etablissement_responsable.siret": responsable?.siret,
         //             $expr: {
         //               $lte: [lastVoeuxTelechargementDateByResponsable, { $last: "$_meta.import_dates" }],
         //             },
         //           })
         //         : await Voeu.countDocuments({
-        //             "etablissement_formateur.uai": formateur?.uai,
-        //             "etablissement_responsable.uai": responsable?.uai,
+        //             "etablissement_formateur.siret": formateur?.siret,
+        //             "etablissement_responsable.siret": responsable?.siret,
         //           })
         //     );
         //   }
@@ -494,8 +496,8 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByDelegue
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                     $and: [
                       {
                         $expr: {
@@ -523,8 +525,8 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                     $and: [
                       {
                         $expr: {
@@ -561,15 +563,15 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByDelegue
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                     $expr: {
                       $lt: [lastVoeuxTelechargementDateByDelegue, { $first: "$_meta.import_dates" }],
                     },
                   })
                 : await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                   })
             );
           } else {
@@ -584,15 +586,15 @@ async function download(output, options = {}) {
             return number(
               lastVoeuxTelechargementDateByResponsable
                 ? await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                     $expr: {
                       $lt: [lastVoeuxTelechargementDateByResponsable, { $first: "$_meta.import_dates" }],
                     },
                   })
                 : await Voeu.countDocuments({
-                    "etablissement_formateur.uai": formateur?.uai,
-                    "etablissement_responsable.uai": responsable?.uai,
+                    "etablissement_formateur.siret": formateur?.siret,
+                    "etablissement_responsable.siret": responsable?.siret,
                   })
             );
           }
