@@ -17,6 +17,8 @@ import { FormateurStatut } from "../../../common/components/admin/fields/Formate
 import { ContactResponsableTag } from "../../../common/components/tags/ContactResponsable";
 import { ContactDelegueTag } from "../../../common/components/tags/ContactDelegue";
 import { RelationHistoryModal } from "../../../common/components/admin/modals/RelationHistoryModal";
+import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
+import { ResponsableHistoryModal } from "../../../common/components/admin/modals/ResponsableHistoryModal";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -117,6 +119,12 @@ export const Etablissement = () => {
     onOpen: onOpenUpdateResponsableEmailModal,
     isOpen: isOpenUpdateResponsableEmailModal,
     onClose: onCloseUpdateResponsableEmailModal,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenResponsableHistoryModal,
+    onOpen: onOpenResponsableHistoryModal,
+    onClose: onCloseResponsableHistoryModal,
   } = useDisclosure();
 
   const {
@@ -296,18 +304,44 @@ export const Etablissement = () => {
           </Box>
 
           {(etablissement.is_responsable || etablissement.is_responsable_formateur) && (
-            <Box mb={12}>
-              <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
-                Email de direction enregistré
-              </Heading>
+            <>
+              <Box mb={12}>
+                <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
+                  Email de direction enregistré
+                </Heading>
 
-              <Text>
-                {etablissement.email}{" "}
-                <Link variant={"action"} onClick={onOpenUpdateResponsableEmailModal}>
-                  {etablissement?.email?.length ? "Modifier" : "Renseigner l'adresse courriel"}
+                <Text>
+                  {etablissement.email}{" "}
+                  <Link variant={"action"} onClick={onOpenUpdateResponsableEmailModal}>
+                    {etablissement?.email?.length ? "Modifier" : "Renseigner l'adresse courriel"}
+                  </Link>
+                </Text>
+              </Box>
+
+              <Box mb={12}>
+                <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
+                  Statut global
+                </Heading>
+
+                <Text mb={2}>
+                  Statut du compte : <ResponsableStatut responsable={etablissement} />
+                </Text>
+                <Text mb={2}>
+                  Nombre de voeux : {etablissement.nombre_voeux} - Restant à télécharger :{" "}
+                  {etablissement.nombre_voeux_restant}
+                </Text>
+
+                <Link variant="action" onClick={onOpenResponsableHistoryModal}>
+                  Historique des actions
                 </Link>
-              </Text>
-            </Box>
+
+                <ResponsableHistoryModal
+                  responsable={etablissement}
+                  isOpen={isOpenResponsableHistoryModal}
+                  onClose={onCloseResponsableHistoryModal}
+                />
+              </Box>
+            </>
           )}
 
           {etablissement.is_responsable_formateur && (
@@ -319,7 +353,7 @@ export const Etablissement = () => {
 
               <Box mb={6}>
                 <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
-                  Statut
+                  Organisme responsable-formateur
                 </Heading>
 
                 <RelationContact relation={relationResponsableFormateur} callback={reload} />
@@ -345,7 +379,6 @@ export const Etablissement = () => {
               </Box>
             </Box>
           )}
-
           {etablissement?.is_responsable && (
             <Box mb={12} id="responsable">
               <Alert status="info" mb={6}>
@@ -383,7 +416,6 @@ export const Etablissement = () => {
               </Box>
             </Box>
           )}
-
           {etablissement?.is_formateur && (
             <Box mb={12} id="formateur">
               {/* <Text mb={8}>
@@ -422,7 +454,6 @@ export const Etablissement = () => {
               </Text>
             </Box>
           )}
-
           <Box mb={12}>
             <Link href="/support" variant="action">
               Signaler une anomalie
