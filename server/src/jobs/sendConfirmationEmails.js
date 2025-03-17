@@ -1,6 +1,6 @@
-const { UserStatut } = require("../common/constants/UserStatut");
-const { UserType } = require("../common/constants/UserType");
-const { DownloadType } = require("../common/constants/DownloadType");
+const { USER_STATUS } = require("../common/constants/UserStatus");
+const { USER_TYPE } = require("../common/constants/UserType");
+const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
 const logger = require("../common/logger");
 const { User /*, Responsable*/, Relation } = require("../common/model");
 
@@ -31,7 +31,7 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
       ? {}
       : {
           unsubscribe: false,
-          statut: UserStatut.EN_ATTENTE,
+          statut: USER_STATUS.EN_ATTENTE,
 
           email: { $exists: true, $ne: null },
           // "emails.templateName": { $not: { $regex: "^confirmation_.*$" } },
@@ -39,7 +39,7 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
           // TODO : Définir les règles pour trouver les utilisateurs à qui envoyer les mails de confirmations (User de type formateur ou responsable,
           // mais également qui ont des voeux et qui sont destinataires de ces voeux - diffusion autorisée ou responsable sans délégation)
 
-          $or: [{ type: UserType.ETABLISSEMENT }, { type: UserType.DELEGUE }],
+          $or: [{ type: USER_TYPE.ETABLISSEMENT }, { type: USER_TYPE.DELEGUE }],
         }),
   };
 
@@ -49,10 +49,10 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      const type = user.type === UserType.ETABLISSEMENT ? DownloadType.RESPONSABLE : user.type;
+      const type = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
 
       if (
-        type === DownloadType.RESPONSABLE &&
+        type === DOWNLOAD_TYPE.RESPONSABLE &&
         (await Relation.countDocuments({ "etablissement_responsable.uai": user.uai })) === 0
       ) {
         return;
@@ -69,7 +69,7 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
         previous ? await resendEmail(previous.token) : await sendEmail(user, templateName);
 
         switch (type) {
-          case DownloadType.RESPONSABLE:
+          case DOWNLOAD_TYPE.RESPONSABLE:
             switch (!!previous) {
               case false:
                 await saveAccountConfirmationEmailAutomaticSentToResponsable(user);
@@ -81,7 +81,7 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
                 break;
             }
             break;
-          case DownloadType.DELEGUE:
+          case DOWNLOAD_TYPE.DELEGUE:
             switch (!!previous) {
               case false:
                 await saveAccountConfirmationEmailAutomaticSentToDelegue(user);

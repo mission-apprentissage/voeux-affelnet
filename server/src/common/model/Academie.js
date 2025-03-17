@@ -1,5 +1,5 @@
 const { Schema } = require("mongoose");
-const { UserType } = require("../constants/UserType");
+const { USER_TYPE } = require("../constants/UserType");
 const User = require("./User");
 const { academieSchema } = require("./schemas/academieSchema");
 
@@ -9,6 +9,6 @@ const schema = new Schema({
   },
 });
 
-const Academie = User.discriminator(UserType.ACADEMIE, schema);
+const Academie = User.discriminator(USER_TYPE.ACADEMIE, schema);
 
 module.exports = Academie;

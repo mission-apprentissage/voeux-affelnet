@@ -26,10 +26,9 @@ import { ErrorWarningLine } from "../../theme/components/icons/ErrorWarningLine"
 import { SuccessLine } from "../../theme/components/icons";
 import { UpdateResponsableEmailModal } from "../../common/components/responsable/modals/UpdateResponsableEmailModal";
 import { ResponsableEmail } from "../../common/components/responsable/fields/ResponsableEmail";
-import { History } from "./History";
-import { FormateurStatut } from "../../common/components/responsable/fields/FormateurStatut";
-import { DownloadType } from "../../common/constants/DownloadType";
-import { UserStatut } from "../../common/constants/UserStatut";
+import { HistoryList } from "../../common/components/history/HistoryList";
+import { RelationStatut } from "../../common/components/responsable/fields/RelationStatut";
+import { DOWNLOAD_TYPE } from "../../common/constants/DownloadType";
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { ResponsableLibelle } from "../../common/components/responsable/fields/ResponsableLibelle";
@@ -169,12 +168,13 @@ export const Formateur = ({ responsable, callback }) => {
   const hasUpdate = new Date(relation?.first_date_voeux).getTime() !== new Date(relation?.last_date_voeux).getTime();
 
   const voeuxTelechargementsDelegue =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.downloadType === DownloadType.DELEGUE) ??
-    [];
+    relation.voeux_telechargements?.filter(
+      (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+    ) ?? [];
 
   const voeuxTelechargementsResponsable =
     relation.voeux_telechargements?.filter(
-      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+      (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
     ) ?? [];
 
   const voeuxTelechargesAtLeastOnce = !isDiffusionAutorisee
@@ -331,27 +331,27 @@ export const Formateur = ({ responsable, callback }) => {
             <Box mb={4}>
               <Text as="span">
                 <Box mr={2} display="inline-flex">
-                  <FormateurStatut relation={relation} callback={callback} />.
+                  <RelationStatut relation={relation} callback={callback} />.
                 </Box>
 
-                {/* {UserType.DELEGUE === delegue.type && */}
+                {/* {USER_TYPE.DELEGUE === delegue.type && */}
                 {(() => {
                   switch (true) {
-                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
+                    case USER_STATUSACTIVE === delegue.statut && hasVoeux && hasUpdate:
                       return (
                         <Link variant="action" onClick={resendUpdateEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
 
-                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
+                    case USER_STATUSACTIVE === delegue.statut && hasVoeux && !hasUpdate:
                       return (
                         <Link variant="action" onClick={resendNotificationEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
 
-                    case UserStatut.CONFIRME === delegue.statut:
+                    case USER_STATUS.CONFIRME === delegue.statut:
                       return (
                         <Link variant="action" onClick={resendActivationEmail}>
                           Générer un nouvel envoi de notification
@@ -495,13 +495,13 @@ export const Formateur = ({ responsable, callback }) => {
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
                     {(() => {
                       switch (true) {
-                        case UserStatut.CONFIRME === delegue.statut:
+                        case USER_STATUS.CONFIRME === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendActivationEmail}>
                               générer un nouvel envoi de notification courriel
                             </Link>
                           );
-                        case UserStatut.ACTIVE === delegue.statut:
+                        case USER_STATUSACTIVE === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendNotificationEmail}>
                               générer un nouvel envoi de notification courriel
@@ -577,13 +577,13 @@ export const Formateur = ({ responsable, callback }) => {
                     Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
                     {(() => {
                       switch (true) {
-                        case UserStatut.CONFIRME === delegue.statut:
+                        case USER_STATUS.CONFIRME === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendActivationEmail}>
                               générer un nouvel envoi de notification courriel
                             </Link>
                           );
-                        case UserStatut.ACTIVE === delegue.statut:
+                        case USER_STATUSACTIVE === delegue.statut:
                           return (
                             <Link variant="action" onClick={resendNotificationEmail}>
                               générer un nouvel envoi de notification courriel
@@ -630,9 +630,9 @@ export const Formateur = ({ responsable, callback }) => {
           </Heading>
 
           {isResponsableFormateurCheck ? (
-            <History responsable={responsable} formateur={formateur} delegue={delegue} relation={relation} />
+            <HistoryList responsable={responsable} formateur={formateur} delegue={delegue} relation={relation} />
           ) : (
-            <History formateur={formateur} delegue={delegue} relation={relation} />
+            <HistoryList formateur={formateur} delegue={delegue} relation={relation} />
           )}
         </Box>
 

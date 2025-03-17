@@ -1,8 +1,6 @@
 import {
-  Box,
   Button,
   Heading,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,9 +10,9 @@ import {
   ModalOverlay,
 } from "@chakra-ui/react";
 
-import { History } from "../../../../pages/responsable/History";
+import { HistoryList } from "./HistoryList";
 
-export const ResponsableHistoryModal = ({ responsable, callback, isOpen, onClose }) => {
+export const HistoryModal = ({ relation, responsable, formateur, delegue, isOpen, onClose }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="4xl">
       <ModalOverlay />
@@ -28,7 +26,7 @@ export const ResponsableHistoryModal = ({ responsable, callback, isOpen, onClose
         <ModalCloseButton />
 
         <ModalBody>
-          <History responsable={responsable} />
+          <HistoryList relation={relation} responsable={responsable} formateur={formateur} delegue={delegue} />
         </ModalBody>
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>

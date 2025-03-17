@@ -1,4 +1,4 @@
-const { DownloadType } = require("../constants/DownloadType");
+const { DOWNLOAD_TYPE } = require("../constants/DownloadType");
 const { Responsable, Delegue, Voeu, Relation } = require("../model");
 const {
   saveListDownloadedByResponsable,
@@ -15,7 +15,7 @@ const markVoeuxAsDownloadedByResponsable = async (uai_responsable, uai_formateur
     {
       $push: {
         voeux_telechargements: {
-          $each: [{ user: responsable._id, downloadType: DownloadType.RESPONSABLE, date: new Date() }],
+          $each: [{ user: responsable._id, DOWNLOAD_TYPE: DOWNLOAD_TYPE.RESPONSABLE, date: new Date() }],
           $slice: 500,
         },
       },
@@ -54,7 +54,7 @@ const markVoeuxAsDownloadedByDelegue = async (uai_responsable, uai_formateur) =>
     {
       $push: {
         voeux_telechargements: {
-          $each: [{ user: delegue._id, downloadType: DownloadType.DELEGUE, date: new Date() }],
+          $each: [{ user: delegue._id, DOWNLOAD_TYPE: DOWNLOAD_TYPE.DELEGUE, date: new Date() }],
           $slice: 500,
         },
       },

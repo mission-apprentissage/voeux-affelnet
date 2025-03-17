@@ -8,7 +8,7 @@ const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
 const { Etablissement, Delegue, Relation } = require("../../common/model");
 const { siretFormat } = require("../../common/utils/format.js");
 const { changeEmail } = require("../../common/actions/changeEmail.js");
-const { UserType } = require("../../common/constants/UserType.js");
+const { USER_TYPE } = require("../../common/constants/UserType.js");
 
 const {
   saveAccountEmailUpdatedByAccount,
@@ -24,7 +24,7 @@ module.exports = ({ users }) => {
   router.get(
     "/api/delegue",
     checkApiToken(),
-    ensureIs(UserType.DELEGUE),
+    ensureIs(USER_TYPE.DELEGUE),
     tryCatch(async (req, res) => {
       const { email } = req.user;
 
@@ -100,7 +100,7 @@ module.exports = ({ users }) => {
   router.put(
     "/api/delegue/setEmail",
     checkApiToken(),
-    ensureIs(UserType.DELEGUE),
+    ensureIs(USER_TYPE.DELEGUE),
     tryCatch(async (req, res) => {
       const { email } = await Joi.object({
         email: Joi.string().email(),
@@ -121,7 +121,7 @@ module.exports = ({ users }) => {
   router.get(
     "/api/delegue/:siret_responsable/:siret_formateur/voeux",
     checkApiToken(),
-    ensureIs(UserType.DELEGUE),
+    ensureIs(USER_TYPE.DELEGUE),
     tryCatch(async (req, res) => {
       const { email } = req.user;
 

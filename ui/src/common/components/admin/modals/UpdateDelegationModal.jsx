@@ -26,7 +26,7 @@ import { Formik, Form, Field } from "formik";
 
 import { _delete, _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
-import { FormateurEmail } from "../fields/FormateurEmail";
+import { RelationEmail } from "../fields/RelationEmail";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
 
 export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) => {
@@ -103,8 +103,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         <ModalBody>
           <Text fontSize="lg" mb={6}>
             Vous vous apprêtez à modifier le destinataire de la délégation de droits au sein de l'organisme formateur{" "}
-            <FormateurLibelle formateur={formateur} />, actuellement{" "}
-            <FormateurEmail responsable={responsable} formateur={formateur} delegue={delegue} />.
+            <FormateurLibelle formateur={formateur} />, actuellement <RelationEmail relation={relation} />.
           </Text>
           <Text mb={4}>
             <strong>Précisez ce que vous souhaitez faire :</strong>

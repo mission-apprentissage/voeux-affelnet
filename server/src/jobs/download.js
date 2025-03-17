@@ -1,10 +1,10 @@
 const { Voeu, Relation, Delegue, Etablissement } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
-const { ouiNon, date, number, list } = require("../common/utils/csvUtils.js");
-const { UserStatut } = require("../common/constants/UserStatut");
-const { UserType } = require("../common/constants/UserType");
-const { DownloadType } = require("../common/constants/DownloadType");
+const { ouiNon, date, number, list } = require("../common/utils/csvUtils");
+const { USER_STATUS } = require("../common/constants/UserStatus");
+const { USER_TYPE } = require("../common/constants/UserType");
+const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
 const { ResponsableActions, DelegueActions, RelationActions } = require("../common/constants/History");
 
 async function download(output, options = {}) {
@@ -46,7 +46,7 @@ async function download(output, options = {}) {
           pipeline: [
             {
               $match: {
-                type: UserType.DELEGUE,
+                type: USER_TYPE.DELEGUE,
               },
             },
 
@@ -178,11 +178,11 @@ async function download(output, options = {}) {
           voeux_telechargements,
         }) => {
           const voeuxTelechargementsDelegue = voeux_telechargements?.filter(
-            (telechargement) => telechargement.downloadType === DownloadType.DELEGUE
+            (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
           );
 
           const voeuxTelechargementsResponsable = voeux_telechargements?.filter(
-            (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+            (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
           );
 
           const voeuxDisponible = nombre_voeux > 0;
@@ -190,7 +190,7 @@ async function download(output, options = {}) {
           switch (!!delegue) {
             case true: {
               switch (true) {
-                case UserStatut.ACTIVE === delegue?.statut &&
+                case USER_STATUS.ACTIVE === delegue?.statut &&
                   voeuxDisponible &&
                   new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
                   !!voeuxTelechargementsDelegue?.find(
@@ -198,7 +198,7 @@ async function download(output, options = {}) {
                   ): {
                   return "✅ Mise à jour téléchargée";
                 }
-                case UserStatut.ACTIVE === delegue?.statut &&
+                case USER_STATUS.ACTIVE === delegue?.statut &&
                   voeuxDisponible &&
                   new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
                   !!voeuxTelechargementsDelegue?.find(
@@ -208,7 +208,7 @@ async function download(output, options = {}) {
                   ): {
                   return "⚠️ Mise à jour non téléchargée";
                 }
-                case UserStatut.ACTIVE === delegue?.statut &&
+                case USER_STATUS.ACTIVE === delegue?.statut &&
                   voeuxDisponible &&
                   new Date(first_date_voeux).getTime() === new Date(last_date_voeux).getTime() &&
                   !!voeuxTelechargementsDelegue?.find(
@@ -216,7 +216,7 @@ async function download(output, options = {}) {
                   ): {
                   return "✅ Liste téléchargée";
                 }
-                case UserStatut.ACTIVE === delegue?.statut &&
+                case USER_STATUS.ACTIVE === delegue?.statut &&
                   voeuxDisponible &&
                   (!voeuxTelechargementsDelegue?.length ||
                     !voeuxTelechargementsDelegue?.find(
@@ -224,16 +224,16 @@ async function download(output, options = {}) {
                     )): {
                   return "⚠️ Compte créé, liste non téléchargée";
                 }
-                case UserStatut.ACTIVE === delegue?.statut && !voeuxDisponible: {
+                case USER_STATUS.ACTIVE === delegue?.statut && !voeuxDisponible: {
                   return "✅ Compte créé";
                 }
-                case UserStatut.CONFIRME === delegue?.statut: {
+                case USER_STATUS.CONFIRME === delegue?.statut: {
                   return "⚠️ Délégation activée, compte non créé";
                 }
-                case !!delegue?.emails.length && UserStatut.EN_ATTENTE === delegue?.statut: {
+                case !!delegue?.emails.length && USER_STATUS.EN_ATTENTE === delegue?.statut: {
                   return "⚠️ En attente de confirmation d'email";
                 }
-                case !delegue?.emails.length && UserStatut.EN_ATTENTE === delegue?.statut: {
+                case !delegue?.emails.length && USER_STATUS.EN_ATTENTE === delegue?.statut: {
                   return "✅ En attente de diffusion de campagne";
                 }
                 default: {
@@ -243,7 +243,7 @@ async function download(output, options = {}) {
             }
             case false: {
               switch (true) {
-                case UserStatut.ACTIVE === responsable?.statut &&
+                case USER_STATUS.ACTIVE === responsable?.statut &&
                   voeuxDisponible &&
                   new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
                   !!voeuxTelechargementsResponsable.find(
@@ -251,7 +251,7 @@ async function download(output, options = {}) {
                   ): {
                   return "✅ Mise à jour téléchargée";
                 }
-                case UserStatut.ACTIVE === responsable?.statut &&
+                case USER_STATUS.ACTIVE === responsable?.statut &&
                   voeuxDisponible &&
                   new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
                   !!voeuxTelechargementsResponsable.find(
@@ -261,7 +261,7 @@ async function download(output, options = {}) {
                   ): {
                   return "⚠️ Mise à jour non téléchargée";
                 }
-                case UserStatut.ACTIVE === responsable?.statut &&
+                case USER_STATUS.ACTIVE === responsable?.statut &&
                   voeuxDisponible &&
                   new Date(first_date_voeux).getTime() === new Date(last_date_voeux).getTime() &&
                   !!voeuxTelechargementsResponsable.find(
@@ -269,7 +269,7 @@ async function download(output, options = {}) {
                   ): {
                   return "✅ Liste téléchargée";
                 }
-                case UserStatut.ACTIVE === responsable?.statut &&
+                case USER_STATUS.ACTIVE === responsable?.statut &&
                   voeuxDisponible &&
                   (!voeuxTelechargementsResponsable.length ||
                     !voeuxTelechargementsResponsable.find(
@@ -277,16 +277,16 @@ async function download(output, options = {}) {
                     )): {
                   return "⚠️ Compte créé, liste non téléchargée";
                 }
-                case UserStatut.ACTIVE === responsable?.statut && !voeuxDisponible: {
+                case USER_STATUS.ACTIVE === responsable?.statut && !voeuxDisponible: {
                   return "✅ Compte créé";
                 }
-                case UserStatut.CONFIRME === responsable?.statut: {
+                case USER_STATUS.CONFIRME === responsable?.statut: {
                   return "⚠️ Email confirmé, compte non créé";
                 }
-                case !!responsable.emails.length && UserStatut.EN_ATTENTE === responsable?.statut: {
+                case !!responsable.emails.length && USER_STATUS.EN_ATTENTE === responsable?.statut: {
                   return "⚠️ En attente de confirmation d'email";
                 }
-                case !responsable.emails.length && UserStatut.EN_ATTENTE === responsable?.statut: {
+                case !responsable.emails.length && USER_STATUS.EN_ATTENTE === responsable?.statut: {
                   return "✅ En attente de diffusion de campagne";
                 }
 
@@ -318,11 +318,13 @@ async function download(output, options = {}) {
         Téléchargement: async ({ voeux_telechargements, delegue }) => {
           if (delegue) {
             return ouiNon(
-              !!voeux_telechargements.find((telechargement) => telechargement.downloadType === DownloadType.DELEGUE)
+              !!voeux_telechargements.find((telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE)
             );
           } else {
             return ouiNon(
-              !!voeux_telechargements.find((telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE)
+              !!voeux_telechargements.find(
+                (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
+              )
             );
           }
         },
@@ -330,7 +332,7 @@ async function download(output, options = {}) {
         "Date du dernier téléchargement": ({ voeux_telechargements, delegue }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.DELEGUE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -340,7 +342,7 @@ async function download(output, options = {}) {
             return date(lastVoeuxTelechargementDateByDelegue);
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length
@@ -359,7 +361,7 @@ async function download(output, options = {}) {
         }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.DELEGUE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -388,7 +390,7 @@ async function download(output, options = {}) {
             );
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length
@@ -486,7 +488,7 @@ async function download(output, options = {}) {
         "Vœux à télécharger pour mise à jour": async ({ responsable, formateur, delegue, voeux_telechargements }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.DELEGUE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -515,7 +517,7 @@ async function download(output, options = {}) {
             );
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length
@@ -553,7 +555,7 @@ async function download(output, options = {}) {
         }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.DELEGUE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -576,7 +578,7 @@ async function download(output, options = {}) {
             );
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length

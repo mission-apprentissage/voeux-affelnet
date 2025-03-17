@@ -1,6 +1,6 @@
 const { omit } = require("lodash");
 const assert = require("assert");
-const { Csaio } = require("../../src/common/model");
+const { Csaio } = require("../../src/common/model/index.js");
 const { createCsaio } = require("../../src/jobs/createCsaio.js");
 
 describe("createCsaio", () => {

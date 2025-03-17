@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
-import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
+import { RelationStatut } from "../../../common/components/admin/fields/RelationStatut";
 import { Breadcrumb } from "../../../common/components/Breadcrumb";
 import { FormateurLibelle } from "../../../common/components/formateur/fields/FormateurLibelle";
 import { Page } from "../../../common/components/layout/Page";
@@ -158,7 +158,7 @@ export const Formateurs = () => {
                       </Td>
                       <Td>
                         <Text lineHeight={6}>
-                          <FormateurStatut relation={relation} />
+                          <RelationStatut relation={relation} />
                         </Text>
                       </Td>
                     </Tr>

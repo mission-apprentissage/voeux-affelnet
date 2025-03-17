@@ -2,7 +2,7 @@ const { Schema } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 const User = require("./User");
 const { historySchema } = require("./schemas/delegueHistorySchema");
-const { UserType } = require("../constants/UserType");
+const { USER_TYPE } = require("../constants/UserType");
 
 const schema = new Schema({
   relations: {
@@ -55,6 +55,6 @@ schema.index(
   { default_language: "french" }
 );
 
-const Delegue = User.discriminator(UserType.DELEGUE, schema);
+const Delegue = User.discriminator(USER_TYPE.DELEGUE, schema);
 
 module.exports = Delegue;

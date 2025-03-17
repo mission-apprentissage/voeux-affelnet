@@ -3,17 +3,25 @@ import { getHeaders } from "../httpClient";
 import { downloadCSV } from "../utils/downloadUtils";
 import queryString from "query-string";
 
-export const useDownloadVoeux = () => {
-  return useCallback(async ({ responsable, formateur }) => {
-    const filename = `${responsable?.uai}-${formateur?.uai}.csv`;
+export const useDownloadVoeux = ({ responsable: initialResponsable, formateur: initialFormateur, callback }) => {
+  return useCallback(
+    async ({ responsable, formateur } = { responsable: initialResponsable, formateur: initialFormateur }) => {
+      const filename = `${responsable?.siret}-${formateur?.siret}.csv`;
 
-    const content = await fetch(`/api/admin/responsables/${responsable?.uai}/formateurs/${formateur?.uai}/voeux`, {
-      method: "GET",
-      headers: getHeaders(),
-    });
+      const content = await fetch(
+        `/api/admin/responsables/${responsable?.siret}/formateurs/${formateur?.siret}/voeux`,
+        {
+          method: "GET",
+          headers: getHeaders(),
+        }
+      );
 
-    downloadCSV(filename, await content.blob());
-  }, []);
+      downloadCSV(filename, await content.blob());
+
+      await callback?.();
+    },
+    [initialFormateur, initialResponsable, callback]
+  );
 };
 
 export const useDownloadStatut = () => {

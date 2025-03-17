@@ -1,7 +1,6 @@
 const express = require("express");
-const { /*oleoduc, transformIntoJSON,*/ compose, transformIntoCSV } = require("oleoduc");
+const { compose, transformIntoCSV } = require("oleoduc");
 const Joi = require("@hapi/joi");
-// const { sendJsonStream } = require("../utils/httpUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { User, Etablissement, Delegue, Relation } = require("../../common/model");
 const { getAcademies } = require("../../common/academies");
@@ -10,23 +9,23 @@ const authMiddleware = require("../middlewares/authMiddleware");
 const { changeEmail } = require("../../common/actions/changeEmail");
 const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
-const { dateAsString } = require("../../common/utils/stringUtils.js");
+const { dateAsString } = require("../../common/utils/stringUtils");
 const { siretFormat } = require("../../common/utils/format");
-const { UserStatut } = require("../../common/constants/UserStatut");
-const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
+const { getVoeuxStream } = require("../../common/actions/getVoeuxStream");
 const sendConfirmationEmails = require("../../jobs/sendConfirmationEmails");
 const sendActivationEmails = require("../../jobs/sendActivationEmails");
 const sendNotificationEmails = require("../../jobs/sendNotificationEmails");
 const sendUpdateEmails = require("../../jobs/sendUpdateEmails");
-const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history/responsable/index.js");
+const { saveAccountEmailUpdatedByAdmin } = require("../../common/actions/history/responsable/index");
 const { saveDelegationCreatedByAdmin } = require("../../common/actions/history/relation");
 const { saveDelegationUpdatedByAdmin } = require("../../common/actions/history/relation");
 const { saveDelegationCancelledByAdmin } = require("../../common/actions/history/relation");
-const { UserType } = require("../../common/constants/UserType");
+const { USER_STATUS } = require("../../common/constants/UserStatus");
+const { USER_TYPE } = require("../../common/constants/UserType");
+// const { RELATION_TYPE } = require("../../common/constants/RelationType");
 const { download } = require("../../jobs/download");
-const logger = require("../../common/logger.js");
+const logger = require("../../common/logger");
 const Boom = require("boom");
-const { RelationType } = require("../../common/constants/RelationType.js");
 
 const lookupRelations = {
   from: Relation.collection.name,
@@ -75,7 +74,7 @@ const lookupRelations = {
         pipeline: [
           {
             $match: {
-              type: UserType.DELEGUE,
+              type: USER_TYPE.DELEGUE,
             },
           },
 
@@ -321,7 +320,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const admin = await User.findOne({ username }).lean();
       const defaultAcademies = admin?.academies?.map((academie) => academie.code);
 
-      const { academie, text, type, missing_email, page, items_par_page, sort } = await Joi.object({
+      const { academie, text, /*type,*/ missing_email, page, items_par_page, sort } = await Joi.object({
         academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
         text: Joi.string(),
         type: Joi.string(),
@@ -335,7 +334,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const regexQuery = { $regex: regex, $options: "i" };
 
       const pipeline = [
-        { $match: { type: UserType.ETABLISSEMENT } },
+        { $match: { type: USER_TYPE.ETABLISSEMENT } },
 
         ...(academie || !!defaultAcademies?.length
           ? [
@@ -345,12 +344,31 @@ module.exports = ({ sendEmail, resendEmail }) => {
             ]
           : []),
 
+        ...(missing_email
+          ? [
+              {
+                $match: {
+                  $or: [
+                    {
+                      email: { $exists: false },
+                    },
+                    {
+                      email: "",
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+
         { $lookup: lookupRelations },
         { $addFields: addTypeFields },
 
-        ...(type === RelationType.RESPONSABLE ? [{ $match: { is_responsable: true } }] : []),
-        ...(type === RelationType.FORMATEUR ? [{ $match: { is_formateur: true } }] : []),
-        ...(type === RelationType.RESPONSABLE_FORMATEUR ? [{ $match: { is_responsable_formateur: true } }] : []),
+        { $match: { $or: [{ is_responsable_formateur: true }, { is_responsable: true }] } },
+
+        // ...(type === RELATION_TYPE.RESPONSABLE ? [{ $match: { is_responsable: true } }] : []),
+        // ...(type === RELATION_TYPE.FORMATEUR ? [{ $match: { is_formateur: true } }] : []),
+        // ...(type === RELATION_TYPE.RESPONSABLE_FORMATEUR ? [{ $match: { is_responsable_formateur: true } }] : []),
 
         ...(text
           ? [
@@ -373,30 +391,30 @@ module.exports = ({ sendEmail, resendEmail }) => {
             ]
           : []),
 
-        ...(missing_email
-          ? [
-              {
-                $match: {
-                  $or: [
-                    {
-                      relations: {
-                        $elemMatch: {
-                          "responsable.email": { $exists: false },
-                        },
-                      },
-                    },
-                    {
-                      relations: {
-                        $elemMatch: {
-                          "responsable.email": "",
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ]
-          : []),
+        // ...(missing_email
+        //   ? [
+        //       {
+        //         $match: {
+        //           $or: [
+        //             {
+        //               relations: {
+        //                 $elemMatch: {
+        //                   "responsable.email": { $exists: false },
+        //                 },
+        //               },
+        //             },
+        //             {
+        //               relations: {
+        //                 $elemMatch: {
+        //                   "responsable.email": "",
+        //                 },
+        //               },
+        //             },
+        //           ],
+        //         },
+        //       },
+        //     ]
+        //   : []),
 
         { $addFields: addCountFields },
       ];
@@ -668,8 +686,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       const updatedDelegue = await Delegue.findOne({ email });
 
-      if (updatedDelegue.statut === UserStatut.EN_ATTENTE) {
-        await Delegue.updateOne({ email }, { $set: { statut: UserStatut.CONFIRME } });
+      if (updatedDelegue.statut === USER_STATUS.EN_ATTENTE) {
+        await Delegue.updateOne({ email }, { $set: { statut: USER_STATUS.CONFIRME } });
       }
 
       await sendActivationEmails({ sendEmail, resendEmail }, { username: email, force: true, sender: req.user });
@@ -795,8 +813,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       await saveAccountEmailUpdatedByAdmin({ siret_responsable, email }, responsable.email, req.user);
 
-      await Etablissement.updateOne({ siret: siret_responsable }, { $set: { statut: UserStatut.EN_ATTENTE } });
-      // await Etablissement.updateOne({ ...responsableFilter, siret_responsable }, { $set: { statut: UserStatut.EN_ATTENTE } });
+      await Etablissement.updateOne({ siret: siret_responsable }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
+      // await Etablissement.updateOne({ ...responsableFilter, siret_responsable }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
 
       await sendConfirmationEmails(
         { sendEmail, resendEmail },

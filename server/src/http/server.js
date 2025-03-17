@@ -23,7 +23,7 @@ module.exports = async (actions) => {
   app.use(require("./routes/passwordRoutes")(actions));
   app.use(require("./routes/emailsRoutes")(actions));
   app.use(require("./routes/healthcheckRoutes")(actions));
-  // app.use(require("./routes/relationRoutes.js.DEPRECATED")(actions));
+  // app.use(require("./routes/relationRoutes.js")(actions));
   app.use(require("./routes/statsRoutes")(actions));
   app.use(require("./routes/alertRoutes")(actions));
   app.use(require("./routes/adminRoutes")(actions));

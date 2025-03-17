@@ -2,9 +2,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { _get } from "../../common/httpClient";
+
 import { Delegue } from "./Delegue";
-import { Relations } from "./Relations";
-import { Relation } from "./Relation";
+// import { Relations } from "./Relations";
+// import { Relation } from "./Relation";
 
 const DelegueRoutes = () => {
   const [delegue, setDelegue] = useState(undefined);
@@ -46,14 +47,6 @@ const DelegueRoutes = () => {
     <>
       <Routes>
         <Route exact path="" element={<Delegue delegue={delegue} callback={reload} />} />
-
-        <Route exact path="relations" element={<Relations delegue={delegue} callback={reload} />} />
-
-        <Route
-          exact
-          path="relations/:uai_responsable/:uai_formateur"
-          element={<Relation delegue={delegue} callback={reload} />}
-        />
       </Routes>
     </>
   );

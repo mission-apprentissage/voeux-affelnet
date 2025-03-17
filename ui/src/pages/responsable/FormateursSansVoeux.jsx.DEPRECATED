@@ -2,9 +2,9 @@ import { Link, Table, Tbody, Td, Th, Thead, Tr, Text } from "@chakra-ui/react";
 
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { FormateurEmail } from "../../common/components/responsable/fields/FormateurEmail";
-import { FormateurStatut } from "../../common/components/responsable/fields/FormateurStatut";
+import { RelationStatut } from "../../common/components/responsable/fields/RelationStatut";
 
-export const FormateursAvecVoeux = ({ responsable, callback }) => {
+export const FormateursSansVoeux = ({ responsable, callback }) => {
   const relations = responsable?.relations;
 
   if (!relations) {
@@ -18,18 +18,16 @@ export const FormateursAvecVoeux = ({ responsable, callback }) => {
           <Th width="100px"></Th>
           <Th width="400px">Raison sociale / Ville</Th>
           <Th width="450px">Courriel habilité</Th>
-          <Th>Candidats</Th>
-          <Th width={"70px"}>Restant à télécharger</Th>
-          <Th>Statut</Th>
+          <Th></Th>
         </Tr>
       </Thead>
       <Tbody>
-        {relations.map((relation, index) => {
+        {relations.map((relation) => {
           const formateur = relation.formateur ?? relation.etablissement_formateur;
           const delegue = relation.delegue;
 
           return (
-            <Tr key={index}>
+            <Tr key={formateur?.siret}>
               <Td>
                 {relation.formateur && (
                   <Link variant="primary" href={`/responsable/formateurs/${formateur?.siret}`}>
@@ -53,15 +51,8 @@ export const FormateursAvecVoeux = ({ responsable, callback }) => {
                 </Text>
               </Td>
               <Td>
-                <Text lineHeight={6}>{relation.nombre_voeux.toLocaleString()}</Text>
-              </Td>
-              <Td>
-                <Text lineHeight={6}>{relation.nombre_voeux_restant.toLocaleString()}</Text>
-              </Td>
-
-              <Td>
                 <Text lineHeight={6}>
-                  <FormateurStatut relation={relation} callback={callback} showDownloadButton />
+                  <RelationStatut relation={relation} callback={callback} />
                 </Text>
               </Td>
             </Tr>

@@ -4,9 +4,9 @@ const Joi = require("@hapi/joi");
 const authMiddleware = require("../middlewares/authMiddleware");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
-const validators = require("../../common/validators.js");
+const validators = require("../../common/validators");
 const { activateUser } = require("../../common/actions/activateUser");
-const { UserStatut } = require("../../common/constants/UserStatut.js");
+const { USER_STATUS } = require("../../common/constants/UserStatus");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -17,7 +17,7 @@ module.exports = () => {
     checkActionToken(),
     tryCatch(async (req, res) => {
       const user = req.user;
-      if (user.statut !== UserStatut.CONFIRME) {
+      if (user.statut !== USER_STATUS.CONFIRME) {
         throw Boom.badRequest(`L'utilisateur ${user.username} est déjà activé`);
       }
 

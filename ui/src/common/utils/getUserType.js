@@ -1,4 +1,4 @@
-import { UserType } from "../constants/UserType";
+import { USER_TYPE } from "../constants/UserType";
 
 export const getUserType = (auth) => {
   return auth?.permissions?.isAdmin ? "admin" : auth?.type?.toLowerCase();
@@ -13,7 +13,7 @@ export const isAdmin = (auth) => {
 // };
 
 export const isCsaio = (auth) => {
-  return getUserType(auth) === UserType.CSAIO;
+  return getUserType(auth) === USER_TYPE.CSAIO;
 };
 
 export const isResponsableFormateur = ({ responsable, formateur }) => {

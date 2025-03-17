@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
   Alert,
   Box,
   Button,
@@ -18,7 +13,6 @@ import {
   Grid,
   Heading,
   HStack,
-  IconButton,
   Input,
   InputGroup,
   InputRightElement,
@@ -36,9 +30,9 @@ import useAuth from "../common/hooks/useAuth";
 import { uaiFormat } from "../common/utils/format";
 import decodeJWT from "../common/utils/decodeJWT";
 import { useFetch } from "../common/hooks/useFetch";
-import { UserStatut } from "../common/constants/UserStatut";
 import { AlertMessage } from "../common/components/layout/AlertMessage";
 import { EyeFill, EyeOffFill } from "../theme/components/icons";
+import { USER_STATUS } from "../common/constants/UserStatus";
 
 const mailVoeux = process.env.REACT_APP_VOEUX_AFFELNET_EMAIL;
 
@@ -90,10 +84,10 @@ function LoginPage() {
 
   useEffect(() => {
     switch (data?.statut) {
-      case UserStatut.EN_ATTENTE:
+      case USER_STATUS.EN_ATTENTE:
         navigate(`/confirmation?actionToken=${actionToken}`, { replace: true });
         break;
-      case UserStatut.CONFIRME:
+      case USER_STATUS.CONFIRME:
         navigate(`/activation?actionToken=${actionToken}`, { replace: true });
         break;
       default:

@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 const { nested } = require("../utils/mongooseUtils");
 const { historySchema } = require("./schemas/relationHistorySchema");
-const { DownloadType } = require("../constants/DownloadType");
+const { DOWNLOAD_TYPE } = require("../constants/DownloadType");
 const { academieSchema } = require("./schemas/academieSchema");
 
 const schema = new Schema({
@@ -46,12 +46,12 @@ const schema = new Schema({
         user: {
           type: Schema.Types.ObjectId,
           required: true,
-          refPath: "userType",
+          refPath: "USER_TYPE",
         },
-        downloadType: {
+        DOWNLOAD_TYPE: {
           type: String,
           required: true,
-          enum: Object.values(DownloadType),
+          enum: Object.values(DOWNLOAD_TYPE),
         },
       }),
     ],

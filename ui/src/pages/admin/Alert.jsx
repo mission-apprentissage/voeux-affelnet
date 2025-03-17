@@ -1,22 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Box,
-  Center,
   Heading,
   Button,
   FormControl,
   FormLabel,
-  Container,
   Textarea,
   VStack,
   useToast,
   Switch,
   IconButton,
 } from "@chakra-ui/react";
-import { NavLink } from "react-router-dom";
 import { useFormik } from "formik";
 import { _post, _get, _delete, _patch } from "../../common/httpClient";
-import { ArrowDropRightLine } from "../../theme/components/icons";
 import useAuth from "../../common/hooks/useAuth";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { CheckIcon, CloseIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";

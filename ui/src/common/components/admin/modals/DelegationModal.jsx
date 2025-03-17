@@ -23,7 +23,7 @@ import { Formik, Form, Field } from "formik";
 import { _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
-import { DownloadType } from "../../../constants/DownloadType";
+import { DOWNLOAD_TYPE } from "../../../constants/DownloadType";
 
 export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -70,7 +70,7 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
 
   const voeuxTelechargementsResponsable =
     relation.voeux_telechargements?.filter(
-      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+      (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
     ) ?? [];
 
   const voeuxTelecharges = !!voeuxTelechargementsResponsable.find(

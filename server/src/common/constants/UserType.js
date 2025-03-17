@@ -1,8 +1,8 @@
-const UserType = {
+const USER_TYPE = {
   ETABLISSEMENT: "Etablissement",
   DELEGUE: "Delegue",
   CSAIO: "Csaio",
   ACADEMIE: "Academie",
 };
 
-module.exports = { UserType };
+module.exports = { USER_TYPE };

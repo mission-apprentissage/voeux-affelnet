@@ -1,96 +1,113 @@
-import { Box, Text, Heading, Link, useDisclosure } from "@chakra-ui/react";
+import { Box, Text, Heading, Button } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
-import { UpdateDelegueEmailModal } from "../../common/components/delegue/modals/UpdateDelegueEmailModal";
-import { History } from "../responsable/History";
+
 import { Breadcrumb } from "../../common/components/Breadcrumb";
+import { EtablissementLibelle } from "../../common/components/etablissement/fields/EtablissementLibelle";
+import { RelationStatut } from "../../common/components/delegue/fields/RelationStatut";
+import { HistoryBlock } from "../../common/components/history/HistoryBlock";
+import { useDownloadVoeux } from "../../common/hooks/delegueHooks";
 
 export const Delegue = ({ delegue, callback }) => {
-  const { onOpen, isOpen, onClose } = useDisclosure();
+  const downloadVoeux = useDownloadVoeux({ callback });
 
   if (!delegue) {
     return;
   }
 
-  const relations = delegue?.relations?.filter((relation) => relation.active) ?? [];
+  const title = <>Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation</>;
+  const activeRelations = delegue?.relations?.filter((relation) => relation.active) ?? [];
 
-  const title = (
-    <>
-      Compte délégué :&nbsp;<strong>{delegue.email}</strong>
-    </>
-  );
+  const responsables = [...new Set(activeRelations?.map((relation) => relation.responsable?.siret))];
 
+  console.log(responsables);
   return (
     <>
       <Breadcrumb
         items={[
           {
-            label: "Profil",
-            url: "/profil",
+            label: title,
+            url: "/delegue",
           },
         ]}
       />
 
       <Page title={title}>
-        <Box mb={12}>
-          <Text mb={4}>
-            Votre adresse courriel : {delegue.email}.{" "}
-            <Link variant="action" onClick={onOpen}>
-              Modifier
-            </Link>
-          </Text>
+        <Heading as="h4" size="sm" mb={4}>
+          Liste des organismes pour lesquels le responsable vous a délégué le droit exclusif d'accès aux listes de
+          candidats aux offres de formation en apprentissage, ayant exprimé des vœux sur le service en ligne
+          affectation.
+        </Heading>
 
-          <Text mb={4}>
-            Des délégations de droits au téléchargement des listes de candidats vous ont été accordées pour{" "}
-            {relations?.length} organisme
-            {relations?.length > 1 && "s"} formateur
-            {relations?.length > 1 && "s"}.{" "}
-            <Link variant="action" href="/delegue/relations">
-              {relations?.length === 1 ? <>Accéder au téléchargement</> : <>Accéder à la liste</>}
-            </Link>
-          </Text>
+        <Box mt={12}>
+          {responsables?.map((siret) => {
+            const relations = activeRelations?.filter((relation) => relation.responsable?.siret === siret);
+            const responsable = relations?.find((relation) => relation.responsable?.siret === siret)?.responsable;
+
+            return (
+              <Box key={siret}>
+                <Text></Text>
+
+                <Heading as="h4" size="md" style={{ textDecoration: "underline" }}>
+                  Organisme responsable : <EtablissementLibelle etablissement={responsable} />
+                </Heading>
+
+                <Text mt={4}>
+                  Adresse : {responsable?.adresse} - SIRET : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
+                  {responsable?.uai ?? "Inconnu"}
+                </Text>
+                <Text mt={4}>
+                  Contact au sein de l'organisme responsable : <Text as="b">{responsable?.email ?? "Inconnu"}</Text>
+                </Text>
+
+                <Box mt={12}>
+                  <Box>
+                    <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
+                      Organismes formateurs associés
+                    </Heading>
+
+                    {relations.map((relation) => (
+                      <Box mt={12} key={relation?.formateur?.siret}>
+                        <Box mt={8} key={relation.etablissement_formateur.siret}>
+                          <Heading as="h4" size="md">
+                            <EtablissementLibelle etablissement={relation.formateur} />
+                          </Heading>
+                          <Text mt={4}>
+                            Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} -
+                            UAI : {relation.formateur?.uai ?? "Inconnu"}
+                          </Text>
+                          <Text mt={6}>
+                            {/* Statut de diffusion des listes : */}
+                            <RelationStatut relation={relation} />
+                          </Text>
+
+                          {!!relation?.nombre_voeux && (
+                            <Button
+                              mt={6}
+                              variant="primary"
+                              onClick={async () =>
+                                await downloadVoeux({
+                                  responsable: relation.responsable,
+                                  formateur: relation.formateur,
+                                })
+                              }
+                            >
+                              Télécharger la liste
+                            </Button>
+                          )}
+
+                          <Box mt={6}>
+                            <HistoryBlock relation={relation} formateur={relation.formateur} />
+                          </Box>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+            );
+          })}
         </Box>
-
-        <Box mb={12} id="statut">
-          <Heading as="h3" size="md" mb={4}>
-            Statut
-          </Heading>
-
-          <Heading as="h4" size="sm" mb={4}>
-            Nombre de candidats : {relations.reduce((acc, relation) => acc + relation.nombre_voeux, 0)}
-          </Heading>
-          <Heading as="h4" size="sm" mb={4}>
-            Nombre de candidats restant à télécharger :{" "}
-            {relations.reduce((acc, relation) => acc + relation.nombre_voeux_restant, 0)}
-          </Heading>
-
-          <Text mb={4}>
-            <Link variant="action" href={`/delegue/relations`}>
-              {relations?.length === 1 ? (
-                <>Accéder à la page de l'organisme</>
-              ) : (
-                <>Voir la liste des délégations de droits accordées</>
-              )}
-            </Link>{" "}
-            pour accéder aux listes de candidats.
-          </Text>
-        </Box>
-
-        <Box mb={12}>
-          <Heading as="h3" size="md" mb={4}>
-            Historique des actions
-          </Heading>
-
-          <History delegue={delegue} />
-        </Box>
-
-        <Box mb={12}>
-          <Link href="/support" variant="action">
-            Signaler une anomalie
-          </Link>
-        </Box>
-
-        <UpdateDelegueEmailModal isOpen={isOpen} onClose={onClose} callback={callback} delegue={delegue} />
       </Page>
     </>
   );

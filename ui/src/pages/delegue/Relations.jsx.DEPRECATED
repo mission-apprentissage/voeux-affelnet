@@ -1,12 +1,12 @@
 import { useCallback, Fragment, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Text, Heading, Link, Alert, Button, Tr, Td, Tbody, Th, Thead, Table } from "@chakra-ui/react";
+import { Box, Text, Link, Tr, Td, Tbody, Th, Thead, Table } from "@chakra-ui/react";
 
 import { useDownloadVoeux } from "../../common/hooks/delegueHooks";
 import { Page } from "../../common/components/layout/Page";
 import { FormateurLibelle } from "../../common/components/formateur/fields/FormateurLibelle";
 import { ResponsableLibelle } from "../../common/components/responsable/fields/ResponsableLibelle";
-import { FormateurStatut } from "../../common/components/delegue/fields/FormateurStatut";
+import { RelationStatut } from "../../common/components/delegue/fields/RelationStatut";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 
 export const Relations = ({ delegue, callback }) => {
@@ -146,7 +146,7 @@ export const Relations = ({ delegue, callback }) => {
 
                       <Td>
                         <Text lineHeight={6}>
-                          <FormateurStatut relation={relation} callback={callback} showDownloadButton />
+                          <RelationStatut relation={relation} callback={callback} showDownloadButton />
                         </Text>
                       </Td>
                     </Tr>

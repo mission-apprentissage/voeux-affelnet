@@ -1,4 +1,4 @@
-const logger = require("../common/logger");
+const logger = require("../common/logger.js");
 const { oleoduc, writeData } = require("oleoduc");
 const { parseCsv } = require("../common/utils/csvUtils.js");
 const { markVoeuxUniquementEnApprentissage } = require("../common/actions/markVoeuxUniquementEnApprentissage.js");

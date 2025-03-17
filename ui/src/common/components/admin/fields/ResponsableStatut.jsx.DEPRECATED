@@ -1,4 +1,4 @@
-import { UserStatut } from "../../../constants/UserStatut";
+import { USER_STATUS } from "../../../constants/UserStatus";
 import { StatutBadge, statuses } from "../../StatutBadge";
 
 export const ResponsableStatut = ({ responsable }) => {
@@ -7,17 +7,17 @@ export const ResponsableStatut = ({ responsable }) => {
   }
 
   switch (true) {
-    case UserStatut.ACTIVE === responsable?.statut: {
+    case USER_STATUS.ACTIVE === responsable?.statut: {
       return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
     }
-    case UserStatut.CONFIRME === responsable?.statut: {
+    case USER_STATUS.CONFIRME === responsable?.statut: {
       return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
     }
 
-    case UserStatut.EN_ATTENTE === responsable?.statut && !!responsable?.emails.length: {
+    case USER_STATUS.EN_ATTENTE === responsable?.statut && !!responsable?.emails.length: {
       return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
     }
-    case UserStatut.EN_ATTENTE === responsable?.statut && !responsable?.emails.length: {
+    case USER_STATUS.EN_ATTENTE === responsable?.statut && !responsable?.emails.length: {
       return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
     }
 

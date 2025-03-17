@@ -7,8 +7,7 @@ import { _get, _put } from "../../../common/httpClient";
 import { ResponsableLibelle } from "../../../common/components/responsable/fields/ResponsableLibelle";
 import { UpdateResponsableEmailModal } from "../../../common/components/admin/modals/UpdateResponsableEmailModal";
 import { History } from "../../responsable/History";
-import { UserType } from "../../../common/constants/UserType";
-import { UserStatut } from "../../../common/constants/UserStatut";
+import { USER_STATUS } from "../../../common/constants/UserStatus";
 import { ResponsableStatut } from "../../../common/components/admin/fields/ResponsableStatut";
 import { Breadcrumb } from "../../../common/components/Breadcrumb";
 
@@ -236,28 +235,28 @@ export const Responsable = () => {
 
                 {(() => {
                   switch (true) {
-                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && hasUpdate:
+                    case USER_STATUS.ACTIVE === responsable?.statut && hasVoeux && hasUpdate:
                       /* !!responsable?.emails.filter((email) => email.templateName === "update_responsable").length */
                       return (
                         <Link variant="action" onClick={resendUpdateEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    case UserStatut.ACTIVE === responsable?.statut && hasVoeux && !hasUpdate:
+                    case USER_STATUS.ACTIVE === responsable?.statut && hasVoeux && !hasUpdate:
                       /* !!responsable?.emails.filter((email) => email.templateName === "notification_responsable").length */
                       return (
                         <Link variant="action" onClick={resendNotificationEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    case UserStatut.CONFIRME === responsable?.statut:
+                    case USER_STATUS.CONFIRME === responsable?.statut:
                       /* !!responsable?.emails.filter((email) => email.templateName === "activation_responsable").length */
                       return (
                         <Link variant="action" onClick={resendActivationEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    case UserStatut.EN_ATTENTE === responsable?.statut /*&&
+                    case USER_STATUS.EN_ATTENTE === responsable?.statut /*&&
                     !!responsable?.emails.filter((email) => email.templateName === "confirmation_responsable").length*/:
                       return (
                         <Link variant="action" onClick={resendConfirmationEmail}>

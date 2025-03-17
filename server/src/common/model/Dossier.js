@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
-const { nested } = require("../utils/mongooseUtils.js");
-const { academieSchema } = require("./schemas/academieSchema.js");
+const { nested } = require("../utils/mongooseUtils");
+const { academieSchema } = require("./schemas/academieSchema");
 
 const schema = new Schema({
   __v: { type: Number, select: false },

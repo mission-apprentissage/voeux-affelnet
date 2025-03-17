@@ -1,5 +1,5 @@
 const { findAcademieByCode } = require("../common/academies");
-const { UserStatut } = require("../common/constants/UserStatut");
+const { USER_STATUS } = require("../common/constants/UserStatus");
 
 const logger = require("../common/logger");
 const { User, Academie } = require("../common/model");
@@ -18,14 +18,14 @@ async function createAdmin(username, email, codesAcademie) {
         username,
         email,
         isAdmin: true,
-        statut: UserStatut.CONFIRME,
+        statut: USER_STATUS.CONFIRME,
         academies,
       })
     : await User.create({
         username,
         email,
         isAdmin: true,
-        statut: UserStatut.CONFIRME,
+        statut: USER_STATUS.CONFIRME,
       });
 }
 module.exports = { createAdmin };

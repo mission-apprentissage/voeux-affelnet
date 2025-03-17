@@ -1,4 +1,4 @@
-const { UserType } = require("../constants/UserType");
+const { USER_TYPE } = require("../constants/UserType");
 const { User } = require("../model");
 
 async function changeEmail(username, newEmail, options = {}) {
@@ -10,7 +10,7 @@ async function changeEmail(username, newEmail, options = {}) {
     {
       $set: {
         email: newEmail,
-        ...(previous.type === UserType.DELEGUE ? { username: newEmail } : {}),
+        ...(previous.type === USER_TYPE.DELEGUE ? { username: newEmail } : {}),
       },
       ...(previous.email
         ? {

@@ -4,7 +4,7 @@ const Boom = require("boom");
 const { changeEmail } = require("./changeEmail");
 const { removePassword } = require("./removePassword");
 const { getUser } = require("./getUser");
-const { UserStatut } = require("../constants/UserStatut");
+const { USER_STATUS } = require("../constants/UserStatus");
 const {
   saveAccountConfirmed: saveAccountConfirmedAsResponsable,
   saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsResponsable,
@@ -13,14 +13,14 @@ const {
   saveAccountConfirmed: saveAccountConfirmedAsDelegue,
   saveAccountEmailUpdatedByAccount: saveAccountEmailUpdatedByAccountAsDelegue,
 } = require("./history/delegue");
-const { UserType } = require("../constants/UserType");
+const { USER_TYPE } = require("../constants/UserType");
 
 async function confirm(username, email, options = {}) {
   const user = await getUser(username);
   const isNewEmail = user.email !== email;
   const oldEmail = user.email;
 
-  if (!email || (!options.force && user.statut !== UserStatut.EN_ATTENTE)) {
+  if (!email || (!options.force && user.statut !== USER_STATUS.EN_ATTENTE)) {
     throw Boom.badRequest(`Une confirmation a déjà été enregistrée pour le compte ${username}`);
   }
 
@@ -28,10 +28,10 @@ async function confirm(username, email, options = {}) {
     await changeEmail(username, email, { auteur: username });
 
     switch (user.type) {
-      case UserType.ETABLISSEMENT:
+      case USER_TYPE.ETABLISSEMENT:
         await saveAccountEmailUpdatedByAccountAsResponsable(user, email, oldEmail);
         break;
-      case UserType.DELEGUE:
+      case USER_TYPE.DELEGUE:
         await saveAccountEmailUpdatedByAccountAsDelegue(user, email, oldEmail);
         break;
     }
@@ -42,10 +42,10 @@ async function confirm(username, email, options = {}) {
   }
 
   switch (user.type) {
-    case UserType.ETABLISSEMENT:
+    case USER_TYPE.ETABLISSEMENT:
       await saveAccountConfirmedAsResponsable(user, email);
       break;
-    case UserType.DELEGUE:
+    case USER_TYPE.DELEGUE:
       await saveAccountConfirmedAsDelegue(user, email);
       break;
     default:
@@ -56,7 +56,7 @@ async function confirm(username, email, options = {}) {
     { _id: user._id },
     {
       $set: {
-        statut: UserStatut.CONFIRME,
+        statut: USER_STATUS.CONFIRME,
       },
     },
     { new: true }

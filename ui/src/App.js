@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-d
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
 import { getUserType } from "./common/utils/getUserType";
-import { UserType } from "./common/constants/UserType";
+import { USER_TYPE } from "./common/constants/UserType";
 
 const ForgottenPasswordPage = lazy(() => import("./pages/password/ForgottenPasswordPage"));
 const ActivationPage = lazy(() => import("./pages/ActivationPage"));
@@ -12,7 +12,7 @@ const StatsPage = lazy(() => import("./pages/StatsPage"));
 const ReceptionVoeuxPage = lazy(() => import("./pages/ReceptionVoeuxPage"));
 
 const ResponsableRoutes = lazy(() => import("./pages/responsable/Routes"));
-const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
+// const FormateurRoutes = lazy(() => import("./pages/formateur/Routes"));
 const DelegueRoutes = lazy(() => import("./pages/delegue/Routes"));
 const AdminRoutes = lazy(() => import("./pages/admin/Routes"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -46,10 +46,10 @@ const App = () => {
 
   const getDefaultRedirection = () => {
     switch (auth.type) {
-      case UserType.ETABLISSEMENT:
-        return "responsable/formateurs";
-      case UserType.DELEGUE:
-        return "delegue/relations";
+      case USER_TYPE.ETABLISSEMENT:
+        return "responsable";
+      case USER_TYPE.DELEGUE:
+        return "delegue";
       default:
         return getUserType(auth);
     }
@@ -85,7 +85,7 @@ const App = () => {
             path="/responsable/*"
             element={
               <Suspense>
-                <RequireAuth allowed={[UserType.ETABLISSEMENT]}>
+                <RequireAuth allowed={[USER_TYPE.ETABLISSEMENT]}>
                   <ResponsableRoutes />
                 </RequireAuth>
               </Suspense>
@@ -95,7 +95,7 @@ const App = () => {
             path="/etablissement/*"
             element={
               <Suspense>
-                <RequireAuth allowed={[UserType.ETABLISSEMENT]}>
+                <RequireAuth allowed={[USER_TYPE.ETABLISSEMENT]}>
                   <ResponsableRoutes />
                 </RequireAuth>
               </Suspense>
@@ -106,7 +106,7 @@ const App = () => {
             path="/delegue/*"
             element={
               <Suspense>
-                <RequireAuth allowed={[UserType.DELEGUE]}>
+                <RequireAuth allowed={[USER_TYPE.DELEGUE]}>
                   <DelegueRoutes />
                 </RequireAuth>
               </Suspense>
@@ -118,7 +118,7 @@ const App = () => {
             path="/profil"
             element={
               <Suspense>
-                <RequireAuth allowed={[UserType.ETABLISSEMENT, UserType.DELEGUE]}>
+                <RequireAuth allowed={[USER_TYPE.ETABLISSEMENT, USER_TYPE.DELEGUE]}>
                   <Navigate to={`/${getUserType(auth)}`} />;
                 </RequireAuth>
               </Suspense>

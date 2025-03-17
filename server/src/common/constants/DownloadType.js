@@ -1,6 +1,6 @@
-const DownloadType = {
+const DOWNLOAD_TYPE = {
   RESPONSABLE: "Responsable",
   DELEGUE: "Delegue",
 };
 
-module.exports = { DownloadType };
+module.exports = { DOWNLOAD_TYPE };

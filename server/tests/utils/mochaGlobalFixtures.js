@@ -1,4 +1,4 @@
-require("./fakeConfig.js");
+require("./fakeConfig");
 const { stopMongod, removeAll, startMongod } = require("./mongoMemoryServer");
 const nock = require("nock"); // eslint-disable-line node/no-unpublished-require
 nock.disableNetConnect();

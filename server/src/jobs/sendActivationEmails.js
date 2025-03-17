@@ -1,6 +1,6 @@
-const { UserStatut } = require("../common/constants/UserStatut");
-const { UserType } = require("../common/constants/UserType");
-const { DownloadType } = require("../common/constants/DownloadType");
+const { USER_STATUS } = require("../common/constants/UserStatus");
+const { USER_TYPE } = require("../common/constants/UserType");
+const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
 const logger = require("../common/logger");
 const { User, Relation } = require("../common/model");
 
@@ -32,7 +32,7 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
       : {
           unsubscribe: false,
           $or: [{ password: { $exists: false } }, { password: null }],
-          statut: UserStatut.CONFIRME,
+          statut: USER_STATUS.CONFIRME,
           "emails.templateName": { $not: { $regex: "^activation_.*$" } },
         }),
   };
@@ -45,10 +45,10 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
     .eachAsync(async (user) => {
       // console.log({ user });
 
-      const type = user.type === UserType.ETABLISSEMENT ? DownloadType.RESPONSABLE : user.type;
+      const type = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
 
       if (
-        type === DownloadType.RESPONSABLE &&
+        type === DOWNLOAD_TYPE.RESPONSABLE &&
         (await Relation.countDocuments({ "etablissement_responsable.uai": user.uai })) === 0
       ) {
         return;
@@ -68,7 +68,7 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
         previous ? await resendEmail(previous.token) : await sendEmail(user, templateName);
 
         switch (type) {
-          case DownloadType.RESPONSABLE:
+          case DOWNLOAD_TYPE.RESPONSABLE:
             switch (!!previous) {
               case false:
                 await saveAccountActivationEmailAutomaticSentToResponsable(user);
@@ -80,7 +80,7 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
                 break;
             }
             break;
-          case DownloadType.DELEGUE:
+          case DOWNLOAD_TYPE.DELEGUE:
             switch (!!previous) {
               case false:
                 await saveAccountActivationEmailAutomaticSentToDelegue(user);

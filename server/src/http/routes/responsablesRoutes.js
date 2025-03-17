@@ -2,29 +2,29 @@ const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
 const { compose, transformIntoCSV } = require("oleoduc");
-const tryCatch = require("../middlewares/tryCatchMiddleware.js");
-const authMiddleware = require("../middlewares/authMiddleware.js");
-const { markVoeuxAsDownloadedByResponsable } = require("../../common/actions/markVoeuxAsDownloaded.js");
-const { getVoeuxStream } = require("../../common/actions/getVoeuxStream.js");
+const tryCatch = require("../middlewares/tryCatchMiddleware");
+const authMiddleware = require("../middlewares/authMiddleware");
+const { markVoeuxAsDownloadedByResponsable } = require("../../common/actions/markVoeuxAsDownloaded");
+const { getVoeuxStream } = require("../../common/actions/getVoeuxStream");
 const { Delegue, Relation, Etablissement } = require("../../common/model");
-const { siretFormat } = require("../../common/utils/format.js");
-const sendActivationEmails = require("../../jobs/sendActivationEmails.js");
-// const resendActivationEmails = require("../../jobs/resendActivationEmails.js");
-const sendNotificationEmails = require("../../jobs/sendNotificationEmails.js");
-// const resendNotificationEmails = require("../../jobs/resendNotificationEmails.js");
-const sendUpdateEmails = require("../../jobs/sendUpdateEmails.js");
-// const resendUpdateEmails = require("../../jobs/resendUpdateEmails.js");
+const { siretFormat } = require("../../common/utils/format");
+const sendActivationEmails = require("../../jobs/sendActivationEmails");
+// const resendActivationEmails = require("../../jobs/resendActivationEmails");
+const sendNotificationEmails = require("../../jobs/sendNotificationEmails");
+// const resendNotificationEmails = require("../../jobs/resendNotificationEmails");
+const sendUpdateEmails = require("../../jobs/sendUpdateEmails");
+// const resendUpdateEmails = require("../../jobs/resendUpdateEmails");
 
-const { UserStatut } = require("../../common/constants/UserStatut.js");
-const { changeEmail } = require("../../common/actions/changeEmail.js");
-const { saveAccountEmailUpdatedByAccount } = require("../../common/actions/history/responsable/index.js");
+const { USER_STATUS } = require("../../common/constants/UserStatus");
+const { changeEmail } = require("../../common/actions/changeEmail");
+const { saveAccountEmailUpdatedByAccount } = require("../../common/actions/history/responsable/index");
 const {
   saveDelegationUpdatedByResponsable,
   saveDelegationCreatedByResponsable,
   saveDelegationCancelledByResponsable,
 } = require("../../common/actions/history/relation");
-const logger = require("../../common/logger.js");
-const { UserType } = require("../../common/constants/UserType.js");
+const logger = require("../../common/logger");
+const { USER_TYPE } = require("../../common/constants/UserType");
 
 const lookupRelations = {
   from: Relation.collection.name,
@@ -73,7 +73,7 @@ const lookupRelations = {
         pipeline: [
           {
             $match: {
-              type: UserType.DELEGUE,
+              type: USER_TYPE.DELEGUE,
             },
           },
 
@@ -138,7 +138,7 @@ const lookupRelations = {
 };
 
 const addTypeFields = {
-  is_responsable: {
+  is_formateur: {
     $reduce: {
       input: "$relations",
       initialValue: false,
@@ -147,7 +147,14 @@ const addTypeFields = {
           {
             $or: [
               {
-                $eq: ["$$this.etablissement_responsable.siret", "$siret"],
+                $and: [
+                  {
+                    $eq: ["$$this.etablissement_formateur.siret", "$siret"],
+                  },
+                  {
+                    $ne: ["$$this.etablissement_responsable.siret", "$siret"],
+                  },
+                ],
               },
               {
                 $eq: ["$$value", true],
@@ -161,7 +168,7 @@ const addTypeFields = {
     },
   },
 
-  is_formateur: {
+  is_responsable: {
     $reduce: {
       input: "$relations",
       initialValue: false,
@@ -170,7 +177,14 @@ const addTypeFields = {
           {
             $or: [
               {
-                $eq: ["$$this.etablissement_formateur.siret", "$siret"],
+                $and: [
+                  {
+                    $ne: ["$$this.etablissement_formateur.siret", "$siret"],
+                  },
+                  {
+                    $eq: ["$$this.etablissement_responsable.siret", "$siret"],
+                  },
+                ],
               },
               {
                 $eq: ["$$value", true],
@@ -223,7 +237,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.get(
     "/api/responsable",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret } = req.user;
 
@@ -231,13 +245,13 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         await Etablissement.aggregate([
           {
             $match: {
-              type: UserType.ETABLISSEMENT,
+              type: USER_TYPE.ETABLISSEMENT,
               siret,
             },
           },
           { $lookup: lookupRelations },
           { $addFields: addTypeFields },
-          { $match: { is_responsable: true } },
+          { $match: { $or: [{ is_responsable_formateur: true }, { is_responsable: true }] } },
           { $addFields: addCountFields },
         ])
       )?.[0];
@@ -253,7 +267,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.put(
     "/api/responsable/setEmail",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret, email: old_email } = req.user;
       const { email } = await Joi.object({
@@ -276,7 +290,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.post(
     "/api/responsable/delegation",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret: siret_responsable } = req.user;
       const { email, siret: siret_formateur } = await Joi.object({
@@ -389,8 +403,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       const updatedDelegue = await Delegue.findOne({ email });
 
-      if (updatedDelegue.statut === UserStatut.EN_ATTENTE) {
-        await Delegue.updateOne({ email }, { $set: { statut: UserStatut.CONFIRME } });
+      if (updatedDelegue.statut === USER_STATUS.EN_ATTENTE) {
+        await Delegue.updateOne({ email }, { $set: { statut: USER_STATUS.CONFIRME } });
       }
 
       await sendActivationEmails({ sendEmail, resendEmail }, { username: email, force: true, sender: req.user });
@@ -409,7 +423,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.delete(
     "/api/responsable/delegation",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret: siret_responsable } = req.user;
       const { siret: siret_formateur } = await Joi.object({
@@ -470,7 +484,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.get(
     "/api/responsable/formateurs/:siret/voeux",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret: siret_responsable } = req.user;
       const { siret: siret_formateur } = await Joi.object({
@@ -515,7 +529,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.put(
     "/api/responsable/formateurs/:siret/resendActivationEmail",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret: siret_responsable } = req.user;
       const { siret: siret_formateur } = await Joi.object({
@@ -548,7 +562,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.put(
     "/api/responsable/formateurs/:siret/resendNotificationEmail",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret: siret_responsable } = req.user;
       const { siret: siret_formateur } = await Joi.object({
@@ -585,7 +599,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
   router.put(
     "/api/responsable/formateurs/:siret/resendUpdateEmail",
     checkApiToken(),
-    ensureIs(UserType.ETABLISSEMENT),
+    ensureIs(USER_TYPE.ETABLISSEMENT),
     tryCatch(async (req, res) => {
       const { siret: siret_responsable } = req.user;
       const { siret: siret_formateur } = await Joi.object({

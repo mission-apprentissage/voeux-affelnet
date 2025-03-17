@@ -1,4 +1,4 @@
-const { DownloadType } = require("../common/constants/DownloadType");
+const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
 const logger = require("../common/logger");
 const { Relation, Etablissement, Delegue } = require("../common/model");
 // const { RelationActions } = require("../common/constants/History");
@@ -82,7 +82,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
         // throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
       }
 
-      const type = (delegue ? DownloadType.DELEGUE : DownloadType.RESPONSABLE).toLowerCase();
+      const type = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
 
       const templateName = `notification_${type}`;
       const previous = user.emails.find(
@@ -100,7 +100,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
         );
 
         switch (type) {
-          case DownloadType.RESPONSABLE:
+          case DOWNLOAD_TYPE.RESPONSABLE:
             previous
               ? await resendEmail(previous.token)
               : await sendEmail(user, templateName, {
@@ -113,7 +113,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
               : await saveListAvailableEmailAutomaticSentToResponsable({ relation, responsable });
             break;
 
-          case DownloadType.DELEGUE:
+          case DOWNLOAD_TYPE.DELEGUE:
             previous
               ? await resendEmail(previous.token)
               : await sendEmail(user, templateName, {

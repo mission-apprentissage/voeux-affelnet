@@ -1,8 +1,8 @@
 const { Responsable, Formateur, Voeu, Relation, Delegue } = require("../common/model");
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
-const { UserType } = require("../common/constants/UserType");
-const { UserStatut } = require("../common/constants/UserStatut");
+const { USER_TYPE } = require("../common/constants/UserType");
+const { USER_STATUS } = require("../common/constants/UserStatus");
 
 const SIRET_RECENSEMENT = "99999999999999";
 
@@ -91,7 +91,7 @@ const computeOrganismesStats = async (filter = {}) => {
             {
               $match: {
                 $expr: {
-                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", UserType.RESPONSABLE] }],
+                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", USER_TYPE.RESPONSABLE] }],
                 },
               },
             },
@@ -102,7 +102,7 @@ const computeOrganismesStats = async (filter = {}) => {
       { $unwind: "$responsable" },
       {
         $match: {
-          "responsable.statut": UserStatut.CONFIRME,
+          "responsable.statut": USER_STATUS.CONFIRME,
         },
       },
       {
@@ -138,7 +138,7 @@ const computeOrganismesStats = async (filter = {}) => {
             {
               $match: {
                 $expr: {
-                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", UserType.RESPONSABLE] }],
+                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", USER_TYPE.RESPONSABLE] }],
                 },
               },
             },
@@ -149,7 +149,7 @@ const computeOrganismesStats = async (filter = {}) => {
       { $unwind: "$responsable" },
       {
         $match: {
-          "responsable.statut": UserStatut.ACTIVE,
+          "responsable.statut": USER_STATUS.ACTIVE,
         },
       },
       {
@@ -178,7 +178,7 @@ const computeOrganismesStats = async (filter = {}) => {
           pipeline: [
             {
               $match: {
-                type: UserType.DELEGUE,
+                type: USER_TYPE.DELEGUE,
               },
             },
 
@@ -283,7 +283,7 @@ const computeOrganismesStats = async (filter = {}) => {
           pipeline: [
             {
               $match: {
-                type: UserType.DELEGUE,
+                type: USER_TYPE.DELEGUE,
               },
             },
 
@@ -358,7 +358,7 @@ const computeOrganismesStats = async (filter = {}) => {
           pipeline: [
             {
               $match: {
-                type: UserType.DELEGUE,
+                type: USER_TYPE.DELEGUE,
               },
             },
 
@@ -408,7 +408,7 @@ const computeOrganismesStats = async (filter = {}) => {
       { $group: { _id: "$delegue.username", delegue: { $first: "$delegue" } } },
       {
         $match: {
-          "delegue.statut": UserStatut.ACTIVE,
+          "delegue.statut": USER_STATUS.ACTIVE,
         },
       },
       {
@@ -460,7 +460,7 @@ const computeOrganismesStats = async (filter = {}) => {
           pipeline: [
             {
               $match: {
-                type: UserType.DELEGUE,
+                type: USER_TYPE.DELEGUE,
               },
             },
 
@@ -961,7 +961,7 @@ const computeVoeuxStats = async (filter = {}) => {
           pipeline: [
             {
               $match: {
-                type: UserType.DELEGUE,
+                type: USER_TYPE.DELEGUE,
               },
             },
 
@@ -1040,7 +1040,7 @@ const computeVoeuxStats = async (filter = {}) => {
           pipeline: [
             {
               $match: {
-                type: UserType.DELEGUE,
+                type: USER_TYPE.DELEGUE,
               },
             },
 

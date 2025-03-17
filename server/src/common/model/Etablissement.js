@@ -1,6 +1,6 @@
 const { Schema } = require("mongoose");
 // const { nested } = require("../utils/mongooseUtils");
-const { UserType } = require("../constants/UserType");
+const { USER_TYPE } = require("../constants/UserType");
 const { academieSchema } = require("./schemas/academieSchema");
 const { historySchema: historyResponsableSchema } = require("./schemas/responsableHistorySchema");
 // const { historySchema: historyFormateurSchema } = require("./schemas/formateurHistorySchema");
@@ -57,6 +57,6 @@ schema.index(
   { default_language: "french" }
 );
 
-const Etablissement = User.discriminator(UserType.ETABLISSEMENT, schema);
+const Etablissement = User.discriminator(USER_TYPE.ETABLISSEMENT, schema);
 
 module.exports = Etablissement;

@@ -1,5 +1,5 @@
-import { UserStatut } from "../../../constants/UserStatut";
-import { DownloadType } from "../../../constants/DownloadType";
+import { USER_STATUS } from "../../../constants/UserStatus";
+import { DOWNLOAD_TYPE } from "../../../constants/DownloadType";
 import { StatutBadge, statuses } from "../../StatutBadge";
 
 export const FormateurStatut = ({ relation }) => {
@@ -16,18 +16,19 @@ export const FormateurStatut = ({ relation }) => {
   const voeuxDisponible = relation?.nombre_voeux > 0;
 
   const voeuxTelechargementsDelegue =
-    relation.voeux_telechargements?.filter((telechargement) => telechargement.downloadType === DownloadType.DELEGUE) ??
-    [];
+    relation.voeux_telechargements?.filter(
+      (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+    ) ?? [];
 
   const voeuxTelechargementsResponsable =
     relation.voeux_telechargements?.filter(
-      (telechargement) => telechargement.downloadType === DownloadType.RESPONSABLE
+      (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
     ) ?? [];
 
   switch (isDiffusionAutorisee) {
     case true: {
       switch (true) {
-        case UserStatut.ACTIVE === delegue.statut &&
+        case USER_STATUS.ACTIVE === delegue.statut &&
           voeuxDisponible &&
           new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsDelegue.find(
@@ -35,7 +36,7 @@ export const FormateurStatut = ({ relation }) => {
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === delegue.statut &&
+        case USER_STATUS.ACTIVE === delegue.statut &&
           voeuxDisponible &&
           new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsDelegue.find(
@@ -45,7 +46,7 @@ export const FormateurStatut = ({ relation }) => {
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === delegue.statut &&
+        case USER_STATUS.ACTIVE === delegue.statut &&
           voeuxDisponible &&
           new Date(relation.first_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsDelegue.find(
@@ -53,7 +54,7 @@ export const FormateurStatut = ({ relation }) => {
           ): {
           return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === delegue.statut &&
+        case USER_STATUS.ACTIVE === delegue.statut &&
           voeuxDisponible &&
           (!voeuxTelechargementsDelegue.length ||
             !voeuxTelechargementsDelegue.find(
@@ -61,16 +62,16 @@ export const FormateurStatut = ({ relation }) => {
             )): {
           return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === delegue.statut && !voeuxDisponible: {
+        case USER_STATUS.ACTIVE === delegue.statut && !voeuxDisponible: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
-        case UserStatut.CONFIRME === delegue.statut: {
+        case USER_STATUS.CONFIRME === delegue.statut: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
         }
-        case !!delegue.emails?.length && UserStatut.EN_ATTENTE === delegue.statut: {
+        case !!delegue.emails?.length && USER_STATUS.EN_ATTENTE === delegue.statut: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
-        case !delegue.emails?.length && UserStatut.EN_ATTENTE === delegue.statut: {
+        case !delegue.emails?.length && USER_STATUS.EN_ATTENTE === delegue.statut: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
         }
         default: {
@@ -80,7 +81,7 @@ export const FormateurStatut = ({ relation }) => {
     }
     case false: {
       switch (true) {
-        case UserStatut.ACTIVE === responsable?.statut &&
+        case USER_STATUS.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
           new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
@@ -88,7 +89,7 @@ export const FormateurStatut = ({ relation }) => {
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable?.statut &&
+        case USER_STATUS.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
           new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
@@ -98,7 +99,7 @@ export const FormateurStatut = ({ relation }) => {
           ): {
           return <StatutBadge statut={statuses.MISE_A_JOUR_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable?.statut &&
+        case USER_STATUS.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
           new Date(relation.first_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime() &&
           !!voeuxTelechargementsResponsable.find(
@@ -106,7 +107,7 @@ export const FormateurStatut = ({ relation }) => {
           ): {
           return <StatutBadge statut={statuses.LISTE_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable?.statut &&
+        case USER_STATUS.ACTIVE === responsable?.statut &&
           voeuxDisponible &&
           (!voeuxTelechargementsResponsable.length ||
             !voeuxTelechargementsResponsable.find(
@@ -114,16 +115,16 @@ export const FormateurStatut = ({ relation }) => {
             )): {
           return <StatutBadge statut={statuses.LISTE_NON_TELECHARGEE} />;
         }
-        case UserStatut.ACTIVE === responsable?.statut && !voeuxDisponible: {
+        case USER_STATUS.ACTIVE === responsable?.statut && !voeuxDisponible: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_CREE} />;
         }
-        case UserStatut.CONFIRME === responsable?.statut: {
+        case USER_STATUS.CONFIRME === responsable?.statut: {
           return <StatutBadge statut={statuses.EMAIL_CONFIRME_COMPTE_NON_CREE} />;
         }
-        case UserStatut.EN_ATTENTE === responsable?.statut && !!responsable?.emails.length: {
+        case USER_STATUS.EN_ATTENTE === responsable?.statut && !!responsable?.emails.length: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_CONFIRMATION} />;
         }
-        case UserStatut.EN_ATTENTE === responsable?.statut && !responsable?.emails.length: {
+        case USER_STATUS.EN_ATTENTE === responsable?.statut && !responsable?.emails.length: {
           return <StatutBadge statut={statuses.EN_ATTENTE_DE_DIFFUSION} />;
         }
 

@@ -1,17 +1,35 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { useParams } from "react-router-dom";
-import { Text, Link, Heading, Box, useDisclosure, Spinner, Button } from "@chakra-ui/react";
+import {
+  Text,
+  Link,
+  Heading,
+  Box,
+  useDisclosure,
+  useToast,
+  Spinner,
+  Alert,
+  AlertIcon,
+  Flex,
+  Button,
+} from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
-import { _get } from "../../common/httpClient";
+import { _get, _put } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { EtablissementLibelle } from "../../common/components/etablissement/fields/EtablissementLibelle";
-import { UpdateResponsableEmailModal } from "../../common/components/responsable/modals/UpdateResponsableEmailModal";
-import { DelegationModal } from "../../common/components/responsable/modals/DelegationModal";
-import { UpdateDelegationModal } from "../../common/components/responsable/modals/UpdateDelegationModal";
-import { RelationStatut } from "../../common/components/responsable/fields/RelationStatut";
+import { OrganismeResponsableTag } from "../../common/components/tags/OrganismeResponsable";
+import { OrganismeFormateurTag } from "../../common/components/tags/OrganismeFormateur";
+import { OrganismeResponsableFormateurTag } from "../../common/components/tags/OrganismeResponsableFormateur";
+// import { ContactResponsableTag } from "../../../common/components/tags/ContactResponsable";
+// import { ContactDelegueTag } from "../../../common/components/tags/ContactDelegue";
+import { UpdateResponsableEmailModal } from "../../common/components/admin/modals/UpdateResponsableEmailModal";
+import { DelegationModal } from "../../common/components/admin/modals/DelegationModal";
+import { UpdateDelegationModal } from "../../common/components/admin/modals/UpdateDelegationModal";
+import { ContactStatut } from "../../common/components/admin/fields/ContactStatut";
+import { RelationStatut } from "../../common/components/admin/fields/RelationStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
-import { useDownloadVoeux } from "../../common/hooks/responsableHooks";
+import { useDownloadVoeux } from "../../common/hooks/adminHooks";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -105,22 +123,24 @@ const RelationFormateur = ({ relation, callback }) => {
   );
 };
 
-export const Responsable = () => {
+export const Etablissement = () => {
   const {
     onOpen: onOpenUpdateResponsableEmailModal,
     isOpen: isOpenUpdateResponsableEmailModal,
     onClose: onCloseUpdateResponsableEmailModal,
   } = useDisclosure();
 
+  const { identifiant } = useParams();
+
   const [etablissement, setEtablissement] = useState(undefined);
   const [loadingEtablissement, setLoadingEtablissement] = useState(false);
   const mounted = useRef(false);
-  // const toast = useToast();
+  const toast = useToast();
 
   const getEtablissement = useCallback(async () => {
     try {
       setLoadingEtablissement(true);
-      const response = await _get(`/api/responsable`);
+      const response = await _get(`/api/admin/etablissements/${identifiant}`);
       setEtablissement(response);
       setLoadingEtablissement(false);
     } catch (error) {
@@ -128,7 +148,7 @@ export const Responsable = () => {
       setLoadingEtablissement(false);
       throw Error;
     }
-  }, []);
+  }, [identifiant]);
 
   const reload = useCallback(async () => {
     await getEtablissement();
@@ -136,9 +156,14 @@ export const Responsable = () => {
 
   const downloadVoeux = useDownloadVoeux({ responsable: etablissement, formateur: etablissement, callback: reload });
 
+  // const downloadVoeuxAndReload = useCallback(async () => {
+  //   await downloadVoeux();
+  //   await reload?.();
+  // }, [downloadVoeux, reload]);
+
   // const resendActivationEmail = useCallback(async () => {
   //   try {
-  //     await _put(`/api/responsable/etablissements/${identifiant}/resendActivationEmail`);
+  //     await _put(`/api/admin/etablissements/${identifiant}/resendActivationEmail`);
 
   //     toast({
   //       title: "Courriel envoyé",
@@ -162,7 +187,7 @@ export const Responsable = () => {
 
   // const resendConfirmationEmail = useCallback(async () => {
   //   try {
-  //     await _put(`/api/responsable/etablissements/${identifiant}/resendConfirmationEmail`);
+  //     await _put(`/api/admin/etablissements/${identifiant}/resendConfirmationEmail`);
 
   //     toast({
   //       title: "Courriel envoyé",
@@ -184,9 +209,9 @@ export const Responsable = () => {
   //   }
   // }, [identifiant, etablissement, toast, reload]);
 
-  // const resendNotificationEmail = useCallback(async () => {
+  // // const resendNotificationEmail = useCallback(async () => {
   //   try {
-  //     await _put(`/api/responsable/etablissements/${identifiant}/resendNotificationEmail`);
+  //     await _put(`/api/admin/etablissements/${identifiant}/resendNotificationEmail`);
 
   //     toast({
   //       title: "Courriel envoyé",
@@ -240,17 +265,17 @@ export const Responsable = () => {
     (relation) => relation.responsable?.siret === etablissement.siret
   );
 
-  // const relationsFormateur = etablissement.relations.filter(
-  //   (relation) => relation.formateur?.siret === etablissement.siret
-  // );
+  const relationsFormateur = etablissement.relations.filter(
+    (relation) => relation.formateur?.siret === etablissement.siret
+  );
 
   // const relationsOnlyResponsable = relationsResponsable.filter(
   //   (relation) => relation.formateur?.siret !== etablissement.siret
   // );
 
-  // const relationsOnlyFormateur = relationsFormateur.filter(
-  //   (relation) => relation.responsable?.siret !== etablissement.siret
-  // );
+  const relationsOnlyFormateur = relationsFormateur.filter(
+    (relation) => relation.responsable?.siret !== etablissement.siret
+  );
 
   const relationResponsableFormateur = etablissement.relations.find(
     (relation) =>
@@ -259,11 +284,19 @@ export const Responsable = () => {
 
   return (
     <>
-      <Breadcrumb items={[{ label: title, url: `/responsable` }]} />
+      <Breadcrumb items={[{ label: title, url: `/admin/etablissement/${identifiant}` }]} />
 
       <Page title={title}>
         <Box my={6}>
           <Box>
+            <Box>
+              {etablissement.is_responsable && <OrganismeResponsableTag verticalAlign="baseline" ml={2} />}
+              {etablissement.is_responsable_formateur && (
+                <OrganismeResponsableFormateurTag verticalAlign="baseline" ml={2} />
+              )}
+              {etablissement.is_formateur && <OrganismeFormateurTag verticalAlign="baseline" ml={2} />}
+            </Box>
+
             <Text mt={8}>
               Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
               {etablissement?.uai ?? "Inconnu"}
@@ -278,6 +311,13 @@ export const Responsable = () => {
               </Link>
             </Text>
           </Box>
+
+          {(etablissement.is_responsable || etablissement.is_responsable_formateur) && (
+            <Box mt={4}>
+              {/* Statut de création de compte : */}
+              <ContactStatut user={etablissement} />
+            </Box>
+          )}
 
           {etablissement.is_responsable ? (
             <>
@@ -306,11 +346,9 @@ export const Responsable = () => {
                     <RelationStatut relation={relationResponsableFormateur} />{" "}
                   </Text>
 
-                  {!!relationResponsableFormateur?.nombre_voeux && (
-                    <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
-                      Télécharger la liste
-                    </Button>
-                  )}
+                  <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
+                    Télécharger la liste
+                  </Button>
 
                   <Box mt={6}>
                     <HistoryBlock
@@ -323,6 +361,36 @@ export const Responsable = () => {
                 </Box>
               )}
             </>
+          )}
+
+          {etablissement?.is_formateur && (
+            <Box mt={12} id="formateur">
+              <Alert status="warning">
+                <AlertIcon />
+                Pour une partie de ses offres, cet organisme est formateur non responsable. Cette page permet le suivi
+                des candidatures uniquement sur les formations dont l’organisme est responsable.{" "}
+              </Alert>
+
+              <Text mt={6}>
+                {relationsOnlyFormateur.length === 1 ? (
+                  <Link variant="action" href={`/admin/etablissement/${relationsOnlyFormateur[0]?.responsable?.siret}`}>
+                    Accéder à la page de l’organisme responsable
+                  </Link>
+                ) : (
+                  <>
+                    Accéder aux pages des organismes responsables :{" "}
+                    {relationsOnlyFormateur.map((relation, index) => (
+                      <Fragment key={relation?.responsable?.siret}>
+                        <Link href={`/admin/etablissement/${relation?.responsable?.siret}`} variant="action">
+                          {relation?.responsable?.raison_sociale}
+                        </Link>
+                        {index !== relationsOnlyFormateur.length - 1 && ", "}
+                      </Fragment>
+                    ))}
+                  </>
+                )}
+              </Text>
+            </Box>
           )}
 
           <Box mt={12}>
@@ -343,4 +411,4 @@ export const Responsable = () => {
   );
 };
 
-export default Responsable;
+export default Etablissement;

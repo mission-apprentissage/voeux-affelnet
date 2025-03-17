@@ -2,7 +2,7 @@ const { User } = require("../model");
 const sha512Utils = require("../utils/passwordUtils");
 const { saveAccountActivated: saveResponsableAccountActivated } = require("./history/responsable");
 const { saveAccountActivated: saveDelegueAccountActivated } = require("./history/delegue");
-const { UserType } = require("../constants/UserType");
+const { USER_TYPE } = require("../constants/UserType");
 
 async function activateUser(username, password, options = {}) {
   const user = await User.findOneAndUpdate(
@@ -21,10 +21,10 @@ async function activateUser(username, password, options = {}) {
   }
 
   switch (user.type) {
-    case UserType.ETABLISSEMENT:
+    case USER_TYPE.ETABLISSEMENT:
       await saveResponsableAccountActivated(user);
       break;
-    case UserType.DELEGUE:
+    case USER_TYPE.DELEGUE:
       await saveDelegueAccountActivated(user);
       break;
     default:

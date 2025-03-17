@@ -11,11 +11,11 @@ import { History } from "../../responsable/History";
 import { UpdateDelegationModal } from "../../../common/components/admin/modals/UpdateDelegationModal";
 import { DelegationModal } from "../../../common/components/admin/modals/DelegationModal";
 // import { UpdateResponsableEmailModal } from "../../../common/components/admin/modals/UpdateResponsableEmailModal";
-import { FormateurStatut } from "../../../common/components/admin/fields/FormateurStatut";
-import { UserStatut } from "../../../common/constants/UserStatut";
+import { RelationStatut } from "../../../common/components/admin/fields/RelationStatut";
 import { FormateurEmail } from "../../../common/components/admin/fields/FormateurEmail";
 import { Breadcrumb } from "../../../common/components/Breadcrumb";
 import { ResponsableLibelle } from "../../../common/components/responsable/fields/ResponsableLibelle";
+import { USER_STATUS } from "../../../common/constants/UserStatus";
 
 export const Formateur = () => {
   const mounted = useRef(false);
@@ -340,26 +340,26 @@ export const Formateur = () => {
           <Box mb={4}>
             <Text display={"inline-flex"}>
               <Box mr={2} display="inline-flex">
-                <FormateurStatut relation={relation} />.
+                <RelationStatut relation={relation} />.
               </Box>
               {isDiffusionAutorisee /*|| isResponsableFormateurCheck*/ &&
                 (() => {
                   switch (true) {
-                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
+                    case USER_STATUS.ACTIVE === delegue.statut && hasVoeux && hasUpdate:
                       //!!delegue.emails.filter((email) => email.templateName === "update_delegue").length:
                       return (
                         <Link variant="action" onClick={resendUpdateEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    case UserStatut.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
+                    case USER_STATUS.ACTIVE === delegue.statut && hasVoeux && !hasUpdate:
                       //!!delegue.emails.filter((email) => email.templateName === "notification_delegue").length:
                       return (
                         <Link variant="action" onClick={resendNotificationEmail}>
                           Générer un nouvel envoi de notification
                         </Link>
                       );
-                    case UserStatut.CONFIRME === delegue.statut:
+                    case USER_STATUS.CONFIRME === delegue.statut:
                       // !!delegue.emails.filter((email) => email.templateName === "activation_delegue").length:
                       return (
                         <Link variant="action" onClick={resendActivationEmail}>
