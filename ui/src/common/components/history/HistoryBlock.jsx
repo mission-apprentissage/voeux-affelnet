@@ -1,8 +1,9 @@
-import { Box, Flex, Text, useDisclosure, Link } from "@chakra-ui/react";
-import { getDelegueHistory, getFormateurHistory, getRelationHistory, getResponsableHistory } from "./HistoryList";
+import { Box, Text, useDisclosure, Link } from "@chakra-ui/react";
+import { getDelegueHistory, /* getFormateurHistory,*/ getRelationHistory, getResponsableHistory } from "./HistoryList";
+import { HistoryItem } from "./HistoryItem";
 import { HistoryModal } from "./HistoryModal";
 
-export const HistoryBlock = ({ relation, responsable, formateur, delegue }) => {
+export const HistoryBlock = ({ relation, responsable, delegue }) => {
   const {
     isOpen: isOpenRelationHistoryModal,
     onOpen: onOpenRelationHistoryModal,
@@ -10,19 +11,14 @@ export const HistoryBlock = ({ relation, responsable, formateur, delegue }) => {
   } = useDisclosure();
 
   const responsableHistories = responsable?.histories?.map((history) => getResponsableHistory(history));
-  const formateurHistories = formateur?.histories?.map((history) => getFormateurHistory(history));
   const delegueHistories = delegue?.histories?.map((history) => getDelegueHistory(history));
   const relationHistories = relation?.histories?.map((history) => getRelationHistory(history));
 
-  const histories = [
-    ...(responsableHistories ?? []),
-    ...(formateurHistories ?? []),
-    ...(delegueHistories ?? []),
-    ...(relationHistories ?? []),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const histories = [...(responsableHistories ?? []), ...(delegueHistories ?? []), ...(relationHistories ?? [])].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
   const lastHistory = histories[0];
-  const date = new Date(lastHistory?.date);
 
   return (
     <>
@@ -31,14 +27,7 @@ export const HistoryBlock = ({ relation, responsable, formateur, delegue }) => {
           <Text fontWeight={"bold"}>Historique d'activité</Text>
 
           <Box mt={2}>
-            <Flex alignItems={"center"}>
-              <Text color="var(--chakra-colors-gray-500)" minW={"168px"} align={"right"}>
-                {date.toLocaleDateString()} à {date.toLocaleTimeString()}
-              </Text>
-              <Text borderLeft="2px solid black" ml={4} pl={4}>
-                {lastHistory.value}
-              </Text>
-            </Flex>
+            <HistoryItem history={lastHistory} />
           </Box>
           {!!histories[1] && (
             <Text mt={2}>
@@ -48,7 +37,6 @@ export const HistoryBlock = ({ relation, responsable, formateur, delegue }) => {
               <HistoryModal
                 relation={relation}
                 responsable={responsable}
-                formateur={formateur}
                 delegue={delegue}
                 isOpen={isOpenRelationHistoryModal}
                 onClose={onCloseRelationHistoryModal}

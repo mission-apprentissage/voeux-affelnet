@@ -57,7 +57,7 @@ export const RelationStatut = ({ relation }) => {
   const nombreVoeuxRestant = relation?.nombre_voeux_restant;
 
   switch (true) {
-    case nombreVoeux && nombreVoeuxRestant !== nombreVoeux:
+    case nombreVoeux && nombreVoeuxRestant && nombreVoeuxRestant !== nombreVoeux:
       return <StatutBadge descriptions={descriptions} statut={partialDownload} />;
 
     case nombreVoeux && nombreVoeuxRestant === nombreVoeux:

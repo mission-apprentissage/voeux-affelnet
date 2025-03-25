@@ -2,7 +2,7 @@ import { SuccessFill, WarningFill } from "../../../../theme/components/icons";
 import { StatutBadge } from "../../StatutBadge";
 
 export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) => {
-  const partialDownload = `${nombre_voeux} candidatures, dont ${nombre_voeux_restant} non téléchargés`;
+  const partialDownload = `${nombre_voeux} candidatures, dont ${nombre_voeux_restant} non téléchargées`;
   const noDownload = `${nombre_voeux} candidatures, non téléchargées`;
   const fullDownload = `${nombre_voeux} candidatures, toutes téléchargées`;
   const noCandidature = `Aucune candidature`;
@@ -57,7 +57,7 @@ export const RelationStatut = ({ relation }) => {
   const nombreVoeuxRestant = relation?.nombre_voeux_restant;
 
   switch (true) {
-    case nombreVoeux && nombreVoeuxRestant !== nombreVoeux:
+    case nombreVoeux && nombreVoeuxRestant && nombreVoeuxRestant !== nombreVoeux:
       return <StatutBadge descriptions={descriptions} statut={partialDownload} />;
 
     case nombreVoeux && nombreVoeuxRestant === nombreVoeux:

@@ -12,7 +12,7 @@ import {
 
 import { HistoryList } from "./HistoryList";
 
-export const HistoryModal = ({ relation, responsable, formateur, delegue, isOpen, onClose }) => {
+export const HistoryModal = ({ relation, responsable, delegue, isOpen, onClose }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="4xl">
       <ModalOverlay />
@@ -26,7 +26,7 @@ export const HistoryModal = ({ relation, responsable, formateur, delegue, isOpen
         <ModalCloseButton />
 
         <ModalBody>
-          <HistoryList relation={relation} responsable={responsable} formateur={formateur} delegue={delegue} />
+          <HistoryList relation={relation} responsable={responsable} delegue={delegue} />
         </ModalBody>
         <ModalFooter>
           <Button variant="ghost" onClick={onClose}>

@@ -1,13 +1,13 @@
 const assert = require("assert");
-const { insertUser } = require("../utils/fakeData");
+const { insertAdmin } = require("../utils/fakeData");
 const { User } = require("../../src/common/model");
 const { startServer, waitUntil } = require("../utils/testUtils");
 
 describe("emailsRoute", () => {
   it("Vérifie qu'on peut prévisualier un email", async () => {
     const { httpClient, sendEmail } = await startServer();
-    const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await sendEmail(user, "activation_user");
+    const user = await insertAdmin({ email: "test@apprentissage.beta.gouv.fr" });
+    const token = await sendEmail(user, "activation_admin");
 
     const response = await httpClient.get(`/api/emails/${token}/preview`);
 
@@ -25,8 +25,8 @@ describe("emailsRoute", () => {
 
   it("Vérifie qu'on peut marquer un email comme ouvert", async () => {
     const { httpClient, sendEmail } = await startServer();
-    const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr" });
-    const token = await sendEmail(user, "activation_user");
+    const user = await insertAdmin({ email: "test@apprentissage.beta.gouv.fr" });
+    const token = await sendEmail(user, "activation_admin");
 
     const response = await httpClient.get(`/api/emails/${token}/markAsOpened`);
 
@@ -36,8 +36,8 @@ describe("emailsRoute", () => {
 
   it("Vérifie qu'un utilisateur peut se désinscrire du service", async () => {
     const { httpClient, sendEmail } = await startServer();
-    const user = await insertUser({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
-    const token = await sendEmail(user, "activation_user");
+    const user = await insertAdmin({ email: "test@apprentissage.beta.gouv.fr", statut: "confirmé" });
+    const token = await sendEmail(user, "activation_admin");
 
     const response = await httpClient.get(`/api/emails/${token}/unsubscribe`);
 
@@ -57,12 +57,12 @@ describe("emailsRoute", () => {
 
   it("Vérifie qu'on peut prendre en compte des notifications d'erreur via webhook", async () => {
     const { httpClient } = await startServer();
-    await insertUser({
+    await insertAdmin({
       email: "test@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN1",
-          templateName: "activation_user",
+          templateName: "activation_admin",
           to: "test@apprentissage.beta.gouv.fr",
           sendDates: [new Date()],
           messageIds: ["60ae479632bd2611ce1bfd54@domain.com"],
@@ -98,12 +98,12 @@ describe("emailsRoute", () => {
 
   it("Vérifie qu'on peut prendre en compte des notifications de réception via webhook", async () => {
     const { httpClient } = await startServer();
-    await insertUser({
+    await insertAdmin({
       email: "test@apprentissage.beta.gouv.fr",
       emails: [
         {
           token: "TOKEN1",
-          templateName: "activation_user",
+          templateName: "activation_admin",
           to: "test@apprentissage.beta.gouv.fr",
           sendDates: [new Date()],
           messageIds: ["60ae479632bd2611ce1bfd54@domain.com"],

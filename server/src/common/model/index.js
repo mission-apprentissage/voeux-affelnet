@@ -1,5 +1,6 @@
 module.exports = {
   User: require("./User"),
+  Admin: require("./Admin"),
   Alert: require("./Alert"),
   Etablissement: require("./Etablissement"),
   // Responsable: require("./Responsable"),

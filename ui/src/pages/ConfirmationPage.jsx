@@ -25,6 +25,7 @@ import ErrorMessage from "../common/components/ErrorMessage";
 import { useFetch } from "../common/hooks/useFetch";
 import { AlertMessage } from "../common/components/layout/AlertMessage";
 import { emailConfirmationSchema } from "../common/utils/validationUtils";
+import { USER_TYPE } from "../common/constants/UserType";
 
 function ServerErrorMessage() {
   return (
@@ -149,12 +150,12 @@ const ConfirmationPage = () => {
                 <Box>
                   <Text mb={4}>
                     Afin d’accéder au téléchargement des listes de candidats en apprentissage, veuillez confirmer{" "}
-                    {data.type === "Responsable" ? (
-                      <>l’adresse courriel du directeur de votre établissement (UAI: {username})</>
+                    {data.type === USER_TYPE.ETABLISSEMENT ? (
+                      <>l’adresse courriel du directeur de votre établissement (Siret: {username})</>
                     ) : (
                       <>
                         l'adresse courriel renseignée par le directeur de l'établissement responsable pour délégation
-                        des droits de téléchargements des listes de candidats à votre compte (UAI: {username})
+                        des droits de téléchargements des listes de candidats à votre compte (Siret: {username})
                       </>
                     )}
                   </Text>

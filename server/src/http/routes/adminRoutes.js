@@ -90,7 +90,7 @@ const lookupRelations = {
                 $and: [
                   { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
                   { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
-                  { $eq: ["$relations.active", true] },
+                  // { $eq: ["$relations.active", true] },
                 ],
               },
             },
@@ -276,7 +276,7 @@ const addCountFields = {
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router();
-  const { checkApiToken, checkIsAdmin } = authMiddleware();
+  const { checkApiToken, checkIsAdminOrAcademie } = authMiddleware();
 
   function asCsvResponse(name, res) {
     const now = dateAsString(new Date());
@@ -295,7 +295,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/admin",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { username } = req.user;
       const user = await User.findOne({ username }).lean();
@@ -314,7 +314,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/admin/etablissements",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { username } = req.user;
       const admin = await User.findOne({ username }).lean();
@@ -439,7 +439,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/admin/etablissements/export.csv",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { username } = req.user;
       const admin = await User.findOne({ username }).lean();
@@ -465,7 +465,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/admin/etablissements/:siret",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret } = await Joi.object({
         siret: Joi.string().pattern(siretFormat).required(),
@@ -504,7 +504,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/admin/responsables/:siret_responsable",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -533,7 +533,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   // router.get(
   //   "/api/admin/responsables/:siret_responsable/formateurs",
   //   checkApiToken(),
-  //   checkIsAdmin(),
+  //   checkIsAdminOrAcademie(),
   //   tryCatch(async (req, res) => {
   //     const { username } = req.user;
   //     const admin = await User.findOne({ username }).lean();
@@ -570,7 +570,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.post(
     "/api/admin/responsables/:siret_responsable/delegation",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -588,7 +588,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
           $elemMatch: {
             "etablissement_responsable.siret": siret_responsable,
             "etablissement_formateur.siret": siret_formateur,
-            active: true,
+            // active: true,
           },
         },
       });
@@ -601,17 +601,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
             _id: previousDelegue._id,
           },
           {
-            $set: {
-              "relations.$[element].active": false,
-            },
-          },
-          {
-            arrayFilters: [
-              {
-                "element.etablissement_responsable.siret": siret_responsable,
-                "element.etablissement_formateur.siret": siret_formateur,
+            $pull: {
+              relations: {
+                "etablissement_responsable.siret": siret_responsable,
+                "etablissement_formateur.siret": siret_formateur,
               },
-            ],
+            },
           }
         );
       }
@@ -706,7 +701,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.delete(
     "/api/admin/responsables/:siret_responsable/delegation",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -732,22 +727,22 @@ module.exports = ({ sendEmail, resendEmail }) => {
             $elemMatch: {
               "etablissement_responsable.siret": siret_responsable,
               "etablissement_formateur.siret": siret_formateur,
-              active: true,
+              // active: true,
             },
           },
         },
+        // {
+        //   $set: {
+        //     "relations.$[element].active": false,
+        //   },
+        // },
         {
-          $set: {
-            "relations.$[element].active": false,
-          },
-        },
-        {
-          arrayFilters: [
-            {
-              "element.etablissement_responsable.siret": siret_responsable,
-              "element.etablissement_formateur.siret": siret_formateur,
+          $pull: {
+            relations: {
+              "etablissement_responsable.siret": siret_responsable,
+              "etablissement_formateur.siret": siret_formateur,
             },
-          ],
+          },
         }
       );
 
@@ -767,7 +762,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/admin/responsables/:siret_responsable/formateurs/:siret_formateur/voeux",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable, siret_formateur } = await Joi.object({
         siret_formateur: Joi.string().pattern(siretFormat).required(),
@@ -793,7 +788,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/responsables/:siret_responsable/setEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable, email } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -831,7 +826,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/responsables/:siret_responsable/resendConfirmationEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -854,7 +849,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/responsables/:siret_responsable/resendActivationEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -877,7 +872,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/responsables/:siret_responsable/resendNotificationEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -900,7 +895,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/responsables/:siret_responsable/resendUpdateEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -925,7 +920,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/responsables/:siret_responsable/markAsNonConcerne",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -949,7 +944,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.get(
     "/api/admin/formateurs/:siret_formateur",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       // const { username } = req.user;
       // const admin = await User.findOne({ username }).lean();
@@ -993,7 +988,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/delegues/:siret_responsable/:siret_formateur/resendActivationEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable, siret_formateur } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -1031,7 +1026,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/delegues/:siret_responsable/:siret_formateur/resendNotificationEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable, siret_formateur } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
@@ -1069,7 +1064,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   router.put(
     "/api/admin/delegues/:siret_responsable/:siret_formateur/resendUpdateEmail",
     checkApiToken(),
-    checkIsAdmin(),
+    checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
       const { siret_responsable, siret_formateur } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),

@@ -1,5 +1,5 @@
 const { DOWNLOAD_TYPE } = require("../constants/DownloadType");
-const { Responsable, Delegue, Voeu, Relation } = require("../model");
+const { Etablissement, Delegue, Voeu, Relation } = require("../model");
 const {
   saveListDownloadedByResponsable,
   saveListDownloadedByDelegue,
@@ -7,11 +7,11 @@ const {
   saveUpdatedListDownloadedByDelegue,
 } = require("./history/relation");
 
-const markVoeuxAsDownloadedByResponsable = async (uai_responsable, uai_formateur) => {
-  const responsable = await Responsable.findOne({ uai: uai_responsable }).lean();
+const markVoeuxAsDownloadedByResponsable = async ({ siret_responsable, siret_formateur }) => {
+  const responsable = await Etablissement.findOne({ siret: siret_responsable }).lean();
 
   await Relation.updateOne(
-    { "etablissement_responsable.uai": uai_responsable, "etablissement_formateur.uai": uai_formateur },
+    { "etablissement_responsable.siret": siret_responsable, "etablissement_formateur.siret": siret_formateur },
     {
       $push: {
         voeux_telechargements: {
@@ -25,32 +25,32 @@ const markVoeuxAsDownloadedByResponsable = async (uai_responsable, uai_formateur
 
   if (
     await Voeu.countDocuments({
-      "etablissement_responsable.uai": uai_responsable,
-      "etablissement_formateur.uai": uai_formateur,
+      "etablissement_responsable.siret": siret_responsable,
+      "etablissement_formateur.siret": siret_formateur,
       "_meta.import_dates.1": { $exists: true },
     })
   ) {
-    await saveUpdatedListDownloadedByResponsable({ uai_responsable, uai_formateur });
+    await saveUpdatedListDownloadedByResponsable({ siret_responsable, siret_formateur });
   } else {
-    await saveListDownloadedByResponsable({ uai_responsable, uai_formateur });
+    await saveListDownloadedByResponsable({ siret_responsable, siret_formateur });
   }
 };
 
-const markVoeuxAsDownloadedByDelegue = async (uai_responsable, uai_formateur) => {
-  console.log("markVoeuxAsDownloadedByDelegue", { uai_responsable, uai_formateur });
+const markVoeuxAsDownloadedByDelegue = async ({ siret_responsable, siret_formateur }) => {
+  console.log("markVoeuxAsDownloadedByDelegue", { siret_responsable, siret_formateur });
 
   const delegue = await Delegue.findOne({
     relations: {
       $elemMatch: {
-        "etablissement_responsable.uai": uai_responsable,
-        "etablissement_formateur.uai": uai_formateur,
+        "etablissement_responsable.siret": siret_responsable,
+        "etablissement_formateur.siret": siret_formateur,
         active: true,
       },
     },
   });
 
   await Relation.updateOne(
-    { "etablissement_responsable.uai": uai_responsable, "etablissement_formateur.uai": uai_formateur },
+    { "etablissement_responsable.siret": siret_responsable, "etablissement_formateur.siret": siret_formateur },
     {
       $push: {
         voeux_telechargements: {
@@ -64,14 +64,14 @@ const markVoeuxAsDownloadedByDelegue = async (uai_responsable, uai_formateur) =>
 
   if (
     await Voeu.countDocuments({
-      "etablissement_responsable.uai": uai_responsable,
-      "etablissement_formateur.uai": uai_formateur,
+      "etablissement_responsable.siret": siret_responsable,
+      "etablissement_formateur.siret": siret_formateur,
       "_meta.import_dates.1": { $exists: true },
     })
   ) {
-    return await saveUpdatedListDownloadedByDelegue({ uai_responsable, uai_formateur });
+    return await saveUpdatedListDownloadedByDelegue({ siret_responsable, siret_formateur });
   } else {
-    return await saveListDownloadedByDelegue({ uai_responsable, uai_formateur });
+    return await saveListDownloadedByDelegue({ siret_responsable, siret_formateur });
   }
 };
 

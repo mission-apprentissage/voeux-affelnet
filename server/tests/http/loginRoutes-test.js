@@ -27,9 +27,7 @@ describe("loginRoutes", () => {
     assert.deepStrictEqual(_.omit(decoded, ["iat", "exp"]), {
       sub: "user1",
       iss: "voeux-affelnet",
-      permissions: {
-        isAdmin: false,
-      },
+      permissions: {},
     });
   });
 
@@ -54,7 +52,6 @@ describe("loginRoutes", () => {
     await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
-      isAdmin: true,
     });
     await activateUser("user1", "password");
 

@@ -24,6 +24,7 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
   const stats = { total: 0, sent: 0, resent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
+  const type = options.type;
 
   const query = {
     ...(options.username ? { username: options.username } : {}),
@@ -31,9 +32,39 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
       ? {}
       : {
           unsubscribe: false,
+
+          email: { $exists: true, $ne: null },
+
           $or: [{ password: { $exists: false } }, { password: null }],
+
           statut: USER_STATUS.CONFIRME,
-          "emails.templateName": { $not: { $regex: "^activation_.*$" } },
+
+          $and: [
+            ...(type ? [{ type }] : []),
+
+            {
+              $or: [
+                {
+                  "emails.templateName": { $not: /^activation_.*$/ },
+                },
+                {
+                  emails: {
+                    $elemMatch: {
+                      templateName: /^activation_.*$/,
+                      $or: [
+                        {
+                          sendDates: { $not: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7) } },
+                        },
+                        {
+                          error: { $exists: true },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          ],
         }),
   };
 
@@ -45,29 +76,28 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
     .eachAsync(async (user) => {
       // console.log({ user });
 
-      const type = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
+      const templateType = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
 
       if (
-        type === DOWNLOAD_TYPE.RESPONSABLE &&
-        (await Relation.countDocuments({ "etablissement_responsable.uai": user.uai })) === 0
+        templateType === DOWNLOAD_TYPE.RESPONSABLE &&
+        (await Relation.countDocuments({ "etablissement_responsable.siret": user.siret })) === 0
       ) {
         return;
       }
 
-      const templateName =
-        user.isAdmin && user.academie?.code
-          ? `activation_academie`
-          : `activation_${(type?.toLowerCase() || "user").toLowerCase()}`;
+      const templateName = `activation_${(templateType?.toLowerCase() || "user").toLowerCase()}`;
       const previous = user.emails.find((email) => email.templateName === templateName);
       stats.total++;
 
       try {
         logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${type} ${user.username} (${user.email})...`
+          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
         );
-        previous ? await resendEmail(previous.token) : await sendEmail(user, templateName);
+        previous
+          ? await resendEmail(previous.token, { retry: !!previous?.error })
+          : await sendEmail(user, templateName);
 
-        switch (type) {
+        switch (templateType) {
           case DOWNLOAD_TYPE.RESPONSABLE:
             switch (!!previous) {
               case false:

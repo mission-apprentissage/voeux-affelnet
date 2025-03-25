@@ -10,7 +10,7 @@ describe("createAdmin", () => {
     const found = await User.findOne({ username: "admin" }).lean();
     assert.deepStrictEqual(omit(found, ["_id", "__v"]), {
       username: "admin",
-      isAdmin: true,
+      type: "Admin",
       statut: "confirmé",
       email: "admin@beta.gouv.fr",
       emails: [],

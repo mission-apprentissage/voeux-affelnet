@@ -273,10 +273,6 @@ export const DelegueHistoryItems = new Map([
   ],
 ]);
 
-export const FormateurActions = {};
-
-export const FormateurHistoryItems = new Map([]);
-
 export const ResponsableActions = {
   ACCOUNT_ACTIVATED: "RESPONSABLE_ACCOUNT_ACTIVATED",
   ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT: "RESPONSABLE_ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT",

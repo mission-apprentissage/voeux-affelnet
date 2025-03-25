@@ -2,7 +2,7 @@ const { USER_STATUS } = require("../common/constants/UserStatus");
 const { USER_TYPE } = require("../common/constants/UserType");
 const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
 const logger = require("../common/logger");
-const { User /*, Responsable*/, Relation } = require("../common/model");
+const { User, Relation } = require("../common/model");
 
 const {
   saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentToResponsable,
@@ -24,6 +24,7 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
   const stats = { total: 0, sent: 0, resent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
+  const type = options.type;
 
   const query = {
     ...(options.username ? { username: options.username } : {}),
@@ -31,15 +32,38 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
       ? {}
       : {
           unsubscribe: false,
-          statut: USER_STATUS.EN_ATTENTE,
 
           email: { $exists: true, $ne: null },
-          // "emails.templateName": { $not: { $regex: "^confirmation_.*$" } },
 
-          // TODO : Définir les règles pour trouver les utilisateurs à qui envoyer les mails de confirmations (User de type formateur ou responsable,
-          // mais également qui ont des voeux et qui sont destinataires de ces voeux - diffusion autorisée ou responsable sans délégation)
+          statut: USER_STATUS.EN_ATTENTE,
 
-          $or: [{ type: USER_TYPE.ETABLISSEMENT }, { type: USER_TYPE.DELEGUE }],
+          $and: [
+            // { type: { $in: [USER_TYPE.ETABLISSEMENT, USER_TYPE.DELEGUE] } },
+            ...(type ? [{ type }] : []),
+
+            {
+              $or: [
+                {
+                  "emails.templateName": { $not: /^confirmation_.*$/ },
+                },
+                {
+                  emails: {
+                    $elemMatch: {
+                      templateName: /^confirmation_.*$/,
+                      $or: [
+                        {
+                          sendDates: { $not: { $gte: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7) } },
+                        },
+                        {
+                          error: { $exists: true },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          ],
         }),
   };
 
@@ -49,26 +73,28 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      const type = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
+      const templateType = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
 
       if (
-        type === DOWNLOAD_TYPE.RESPONSABLE &&
-        (await Relation.countDocuments({ "etablissement_responsable.uai": user.uai })) === 0
+        templateType === DOWNLOAD_TYPE.RESPONSABLE &&
+        (await Relation.countDocuments({ "etablissement_responsable.siret": user.siret })) === 0
       ) {
         return;
       }
 
-      const templateName = `confirmation_${(type?.toLowerCase() || "user").toLowerCase()}`;
+      const templateName = `confirmation_${(templateType?.toLowerCase() || "user").toLowerCase()}`;
       const previous = user.emails.find((email) => email.templateName === templateName);
       stats.total++;
 
       try {
         logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${type} ${user.username} (${user.email})...`
+          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
         );
-        previous ? await resendEmail(previous.token) : await sendEmail(user, templateName);
+        previous
+          ? await resendEmail(previous.token, { retry: !!previous?.error })
+          : await sendEmail(user, templateName);
 
-        switch (type) {
+        switch (templateType) {
           case DOWNLOAD_TYPE.RESPONSABLE:
             switch (!!previous) {
               case false:
@@ -99,7 +125,10 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
 
         previous ? stats.resent++ : stats.sent++;
       } catch (e) {
-        logger.error(`Unable to ${previous ? "re" : ""}sent ${templateName} email to ${type} ${user.username}`, e);
+        logger.error(
+          `Unable to ${previous ? "re" : ""}sent ${templateName} email to ${templateType} ${user.username}`,
+          e
+        );
         stats.failed++;
       }
     });

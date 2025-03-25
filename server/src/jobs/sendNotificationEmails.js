@@ -5,8 +5,10 @@ const { Relation, Etablissement, Delegue } = require("../common/model");
 
 const {
   saveListAvailableEmailAutomaticSentToResponsable,
+  saveListAvailableEmailAutomaticResentToResponsable,
   saveListAvailableEmailManualSentToResponsable,
   saveListAvailableEmailAutomaticSentToDelegue,
+  saveListAvailableEmailAutomaticResentToDelegue,
   saveListAvailableEmailManualSentToDelegue,
 } = require("../common/actions/history/relation");
 
@@ -14,6 +16,8 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
   const stats = { total: 0, sent: 0, resent: 0, failed: 0, skiped: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
+  const type = options.type;
+
   let query;
 
   query = {
@@ -45,8 +49,8 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
     .limit(limit)
     .cursor()
     .eachAsync(async (relation) => {
-      const responsable = await Etablissement.findOne({ uai: relation.etablissement_responsable.uai });
-      const formateur = await Etablissement.findOne({ uai: relation.etablissement_formateur.uai });
+      const responsable = await Etablissement.findOne({ siret: relation.etablissement_responsable.siret });
+      const formateur = await Etablissement.findOne({ siret: relation.etablissement_formateur.siret });
 
       if (!responsable || !formateur) {
         stats.skiped++;
@@ -57,8 +61,8 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": relation.etablissement_responsable.uai,
-            "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+            "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+            "etablissement_formateur.siret": relation.etablissement_formateur.siret,
             active: true,
           },
         },
@@ -67,6 +71,10 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
         .lean();
 
       const user = delegue ?? responsable;
+
+      if (type && user.type !== type) {
+        return;
+      }
 
       if (!user) {
         logger.error("Utilisateur introuvable pour la relation " + relation._id);
@@ -82,9 +90,9 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
         // throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
       }
 
-      const type = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
+      const templateType = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
 
-      const templateName = `notification_${type}`;
+      const templateName = `notification_${templateType}`;
       const previous = user.emails.find(
         (e) =>
           e.templateName === templateName &&
@@ -96,13 +104,14 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
 
       try {
         logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${type} ${user.username} (${user.email})...`
+          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
         );
 
-        switch (type) {
-          case DOWNLOAD_TYPE.RESPONSABLE:
+        switch (templateType) {
+          case DOWNLOAD_TYPE.RESPONSABLE.toLowerCase():
+            console.log("responsable template type");
             previous
-              ? await resendEmail(previous.token)
+              ? await resendEmail(previous.token, { retry: !!previous?.error })
               : await sendEmail(user, templateName, {
                   relation,
                   responsable,
@@ -110,12 +119,15 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
                 });
             options.sender
               ? await saveListAvailableEmailManualSentToResponsable({ relation, responsable }, options.sender)
+              : previous
+              ? await saveListAvailableEmailAutomaticResentToResponsable({ relation, responsable })
               : await saveListAvailableEmailAutomaticSentToResponsable({ relation, responsable });
             break;
 
-          case DOWNLOAD_TYPE.DELEGUE:
+          case DOWNLOAD_TYPE.DELEGUE.toLowerCase():
+            console.log("delegue template type");
             previous
-              ? await resendEmail(previous.token)
+              ? await resendEmail(previous.token, { retry: !!previous?.error })
               : await sendEmail(user, templateName, {
                   relation,
                   responsable,
@@ -124,15 +136,22 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
                 });
             options.sender
               ? await saveListAvailableEmailManualSentToDelegue({ relation, delegue }, options.sender)
+              : previous
+              ? await saveListAvailableEmailAutomaticResentToDelegue({ relation, delegue })
               : await saveListAvailableEmailAutomaticSentToDelegue({ relation, delegue });
             break;
+
           default:
+            console.log("Unknown template type", templateType);
             break;
         }
 
         previous ? stats.resent++ : stats.sent++;
       } catch (e) {
-        logger.error(`Unable to ${previous ? "re" : ""}sent ${templateName} email to ${type} ${user.username}`, e);
+        logger.error(
+          `Unable to ${previous ? "re" : ""}sent ${templateName} email to ${templateType} ${user.username}`,
+          e
+        );
         stats.failed++;
       }
     });

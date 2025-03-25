@@ -22,11 +22,11 @@ const User = model(
         default: "en attente",
         enum: [USER_STATUS.EN_ATTENTE, USER_STATUS.CONFIRME, USER_STATUS.ACTIVE, USER_STATUS.NON_CONCERNE],
       },
-      isAdmin: {
-        type: Boolean,
-        default: false,
-        description: "true si l'utilisateur est administrateur",
-      },
+      // isAdmin: {
+      //   type: Boolean,
+      //   default: false,
+      //   description: "true si l'utilisateur est administrateur",
+      // },
       unsubscribe: {
         type: Boolean,
         default: false,

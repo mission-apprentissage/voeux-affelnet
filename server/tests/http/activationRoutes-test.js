@@ -44,7 +44,6 @@ describe("activationRoutes", () => {
     const user = await insertUser({
       username: "user1",
       email: "user1@apprentissage.beta.gouv.fr",
-      isAdmin: true,
     });
 
     const response = await httpClient.post("/api/activation", {
@@ -59,9 +58,7 @@ describe("activationRoutes", () => {
     assert.deepStrictEqual(_.omit(decoded, ["iat", "exp"]), {
       sub: "user1",
       iss: "voeux-affelnet",
-      permissions: {
-        isAdmin: true,
-      },
+      permissions: {},
     });
   });
 
@@ -82,9 +79,7 @@ describe("activationRoutes", () => {
       sub: etablissement.username,
       iss: "voeux-affelnet",
       type: "Etablissement",
-      permissions: {
-        isAdmin: false,
-      },
+      permissions: {},
     });
   });
 

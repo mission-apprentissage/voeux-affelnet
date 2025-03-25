@@ -13,6 +13,10 @@ const { uaiFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 const { catalogue } = require("./utils/catalogue");
 const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/relation");
 const { fixExtractionVoeux } = require("./utils/extractionVoeux.js");
+const {
+  getSiretFormateurFromCleMinistereEducatif,
+  getSiretResponsableFromCleMinistereEducatif,
+} = require("../common/utils/cleMinistereEducatifUtils.js");
 
 const academieValidationSchema = Joi.object({
   code: Joi.string().required(),
@@ -133,8 +137,17 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase();
       const cle_ministere_educatif = line["clé ministère éducatif"]?.toUpperCase();
 
-      const uaiEtablissementFormateur = line["UAI Établissement formateur"]?.toUpperCase();
       const uaiEtablissementResponsable = line["UAI Établissement responsable"]?.toUpperCase();
+      const uaiEtablissementFormateur = line["UAI Établissement formateur"]?.toUpperCase();
+
+      const siretEtablissementResponsable = getSiretResponsableFromCleMinistereEducatif(
+        cle_ministere_educatif,
+        line["SIRET UAI gestionnaire"]?.toUpperCase()
+      );
+      const siretEtablissementFormateur = getSiretFormateurFromCleMinistereEducatif(
+        cle_ministere_educatif,
+        line["SIRET UAI formateur"]?.toUpperCase()
+      );
 
       const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase();
       const academieDuVoeu = pickAcademie(
@@ -143,18 +156,8 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const academieOrigine = pickAcademie(findAcademieByUai(uaiCIO || uaiEtablissementOrigine));
       const academieAccueil = pickAcademie(findAcademieByUai(uaiEtablissementAccueil));
 
-      // const siretResponsableFromLine = getSiretResponsableFromCleMinistereEducatif(
-      //   cle_ministere_educatif,
-      //   line["SIRET UAI gestionnaire"]
-      // );
-
-      // const siretFormateurFromLine = getSiretFormateurFromCleMinistereEducatif(
-      //   cle_ministere_educatif,
-      //   line["SIRET UAI formateur"]
-      // );
-
-      // let siretResponsable = siretResponsableFromLine;
-      // let siretFormateur = siretFormateurFromLine;
+      let siretResponsable = siretEtablissementResponsable;
+      let siretFormateur = siretEtablissementFormateur;
       let uaiResponsable = uaiEtablissementResponsable;
       let uaiFormateur = uaiEtablissementFormateur;
 
@@ -163,7 +166,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const affelnet_id = `${academie}/${code_offre}`;
 
       if (
-        /* !siretResponsable ||!siretFormateur  ||*/ (!uaiResponsable || !uaiFormateur) &&
+        (!siretResponsable || !siretFormateur || !uaiResponsable || !uaiFormateur) &&
         (affelnet_id || cle_ministere_educatif)
       ) {
         let formation;
@@ -181,16 +184,16 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
         }
 
         if (formation) {
-          // siretResponsable ??= formation.etablissement_gestionnaire_siret;
+          siretResponsable ??= formation.etablissement_gestionnaire_siret;
           uaiResponsable ??= formation.etablissement_gestionnaire_uai;
-          // siretFormateur ??= formation.etablissement_formateur_siret;
+          siretFormateur ??= formation.etablissement_formateur_siret;
           uaiFormateur ??= formation.etablissement_formateur_uai;
         }
       }
 
       if (!uaiResponsable || !uaiFormateur) {
-        const responsable = await Etablissement.findOne({ uai: uaiResponsable }).lean();
-        const formateur = await Etablissement.findOne({ uai: uaiFormateur }).lean();
+        const responsable = await Etablissement.findOne({ siret: siretResponsable }).lean();
+        const formateur = await Etablissement.findOne({ siret: siretFormateur }).lean();
 
         // siretResponsable ??= responsable?.siret;
         uaiResponsable ??= responsable?.uai;
@@ -245,11 +248,11 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
           academie: academieAccueil || academieDuVoeu,
         },
         etablissement_formateur: {
-          // siret: siretFormateur,
+          siret: siretFormateur,
           uai: uaiFormateur,
         },
         etablissement_responsable: {
-          // siret: siretResponsable,
+          siret: siretResponsable,
           uai: uaiResponsable,
         },
       });

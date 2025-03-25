@@ -9,8 +9,8 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
 
     // Set up default mongoose connection
     mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      // useNewUrlParser: true,
+      // useUnifiedTopology: true,
     });
 
     applySpeedGooseCacheLayer(mongoose, {

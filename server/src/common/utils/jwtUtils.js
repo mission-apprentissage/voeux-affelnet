@@ -19,7 +19,7 @@ function createToken(type, subject, options = {}) {
 function createApiToken(user, options = {}) {
   // console.log("createApiToken", user.username, options);
   return createToken("apiToken", user.username, {
-    payload: { type: user.type, permissions: pick(user, ["isAdmin"]) },
+    payload: { type: user.type, permissions: pick(user, ["academies"]) },
     ...options,
   });
 }

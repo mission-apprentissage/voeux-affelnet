@@ -89,7 +89,7 @@ const lookupRelations = {
                 $and: [
                   { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
                   { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
-                  { $eq: ["$relations.active", true] },
+                  // { $eq: ["$relations.active", true] },
                 ],
               },
             },
@@ -306,7 +306,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
           $elemMatch: {
             "etablissement_responsable.siret": siret_responsable,
             "etablissement_formateur.siret": siret_formateur,
-            active: true,
+            // active: true,
           },
         },
       });
@@ -318,17 +318,12 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
             _id: previousDelegue._id,
           },
           {
-            $set: {
-              "relations.$[element].active": false,
-            },
-          },
-          {
-            arrayFilters: [
-              {
-                "element.etablissement_responsable.siret": siret_responsable,
-                "element.etablissement_formateur.siret": siret_formateur,
+            $pull: {
+              relations: {
+                "etablissement_responsable.siret": siret_responsable,
+                "etablissement_formateur.siret": siret_formateur,
               },
-            ],
+            },
           }
         );
       }
@@ -446,22 +441,17 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
             $elemMatch: {
               "etablissement_responsable.siret": siret_responsable,
               "etablissement_formateur.siret": siret_formateur,
-              active: true,
+              // active: true,
             },
           },
         },
         {
-          $set: {
-            "relations.$[element].active": false,
-          },
-        },
-        {
-          arrayFilters: [
-            {
-              "element.etablissement_responsable.siret": siret_responsable,
-              "element.etablissement_formateur.siret": siret_formateur,
+          $pull: {
+            relations: {
+              "etablissement_responsable.siret": siret_responsable,
+              "etablissement_formateur.siret": siret_formateur,
             },
-          ],
+          },
         }
       );
 
@@ -513,7 +503,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       });
 
       if (!delegue) {
-        await markVoeuxAsDownloadedByResponsable(siret_responsable, siret_formateur);
+        await markVoeuxAsDownloadedByResponsable({ siret_responsable, siret_formateur });
       }
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);

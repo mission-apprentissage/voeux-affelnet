@@ -98,12 +98,20 @@ const schema = new Schema({
         type: String,
         index: true,
       },
+      siret: {
+        type: String,
+        index: true,
+      },
     }),
   },
   etablissement_responsable: {
     required: true,
     type: nested({
       uai: {
+        type: String,
+        index: true,
+      },
+      siret: {
         type: String,
         index: true,
       },

@@ -19,6 +19,7 @@ import { AlertMessage } from "./AlertMessage";
 
 import useAuth from "../../hooks/useAuth";
 import { USER_TYPE } from "../../constants/UserType";
+import { isAdmin } from "../../utils/aclUtils";
 
 const Header = () => {
   const [auth, setAuth] = useAuth();
@@ -64,23 +65,23 @@ const Header = () => {
                       <Text color="bluefrance" textStyle="sm">
                         {auth.sub}{" "}
                         <Text color="grey.600" as="span">
-                          ({auth.permissions?.isAdmin ? "admin" : auth.type})
+                          ({auth.type})
                         </Text>
                       </Text>
                     </Box>
                   </Flex>
                 </MenuButton>
                 <MenuList>
-                  {[USER_TYPE.ETABLISSEMENT, USER_TYPE.DELEGUE].includes(auth.type) && (
+                  {/* {[USER_TYPE.ETABLISSEMENT, USER_TYPE.DELEGUE].includes(auth.type) && (
                     <>
                       <MenuItem as="a" href="/profil">
                         Profil
                       </MenuItem>
                       <MenuDivider />
                     </>
-                  )}
+                  )} */}
 
-                  {auth.permissions?.isAdmin && !auth.academies?.length && (
+                  {isAdmin(auth) && (
                     <>
                       <MenuItem as={NavLink} to="/admin/alert">
                         Gestion des messages d'alerte

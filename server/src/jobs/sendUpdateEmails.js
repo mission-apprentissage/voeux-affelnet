@@ -18,6 +18,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
   const stats = { total: 0, sent: 0, resent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
+  const type = options.type;
   let query;
 
   query = {
@@ -49,14 +50,14 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
     .limit(limit)
     .cursor()
     .eachAsync(async (relation) => {
-      const responsable = await Etablissement.findOne({ uai: relation.etablissement_responsable.uai });
-      const formateur = await Etablissement.findOne({ uai: relation.etablissement_formateur.uai });
+      const responsable = await Etablissement.findOne({ siret: relation.etablissement_responsable.siret });
+      const formateur = await Etablissement.findOne({ siret: relation.etablissement_formateur.siret });
 
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
-            "etablissement_responsable.uai": relation.etablissement_responsable.uai,
-            "etablissement_formateur.uai": relation.etablissement_formateur.uai,
+            "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+            "etablissement_formateur.siret": relation.etablissement_formateur.siret,
             active: true,
           },
         },
@@ -65,6 +66,10 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
         .lean();
 
       const user = delegue ?? responsable;
+
+      if (type && user.type !== type) {
+        return;
+      }
 
       if (!user) {
         logger.error("Utilisateur introuvable pour la relation " + relation._id);
@@ -80,9 +85,9 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
         // throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
       }
 
-      const type = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
+      const templateType = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
 
-      const templateName = `notification_${type}`;
+      const templateName = `update_${templateType}`;
       const previous = user.emails.find(
         (e) =>
           e.templateName === templateName &&
@@ -93,11 +98,11 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
 
       try {
         logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${type} ${user.username} (${user.email})...`
+          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
         );
 
-        switch (type) {
-          case DOWNLOAD_TYPE.RESPONSABLE:
+        switch (templateType) {
+          case DOWNLOAD_TYPE.RESPONSABLE.toLowerCase():
             switch (!!previous) {
               case false:
                 await sendEmail(user, templateName, {
@@ -131,7 +136,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
                 break;
             }
             break;
-          case DOWNLOAD_TYPE.DELEGUE:
+          case DOWNLOAD_TYPE.DELEGUE.toLowerCase():
             switch (!!previous) {
               case false:
                 await sendEmail(user, templateName, {
@@ -174,7 +179,10 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
 
         previous ? stats.resent++ : stats.sent++;
       } catch (e) {
-        logger.error(`Unable to ${previous ? "re" : ""}sent ${templateName} email to ${type} ${user.username}`, e);
+        logger.error(
+          `Unable to ${previous ? "re" : ""}sent ${templateName} email to ${templateType} ${user.username}`,
+          e
+        );
         stats.failed++;
       }
     });

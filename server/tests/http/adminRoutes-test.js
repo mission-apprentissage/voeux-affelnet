@@ -1,6 +1,6 @@
 const assert = require("assert");
 // const { DateTime } = require("luxon");
-const { Etablissement, Delegue, Relation } = require("../../src/common/model");
+const { Admin, Etablissement, Delegue, Relation } = require("../../src/common/model");
 // const { date } = require("../../src/common/utils/csvUtils.js");
 const { fakerFR: faker } = require("@faker-js/faker");
 
@@ -11,6 +11,7 @@ const { omit } = require("lodash");
 describe("adminRoutes", () => {
   beforeEach(async () => {
     console.log("Initialising...");
+    await Admin.deleteMany({});
     await Etablissement.deleteMany({});
     await Delegue.deleteMany({});
     await Relation.deleteMany({});
@@ -18,7 +19,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'on peut obtenir la liste des établissements responsables", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
     const responsable = await insertEtablissement();
 
     const formateur = await insertEtablissement();
@@ -41,7 +42,7 @@ describe("adminRoutes", () => {
 
   it.skip("Vérifie qu'on peut obtenir la liste des établissements formateurs", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
     const responsable1 = await insertEtablissement();
 
     const formateur1 = await insertEtablissement();
@@ -71,7 +72,7 @@ describe("adminRoutes", () => {
 
   it.skip("Vérifie qu'on peut obtenir la liste des établissements responsable-formateurs", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
 
     const responsable1 = await insertEtablissement();
 
@@ -93,7 +94,7 @@ describe("adminRoutes", () => {
 
   it.skip("Vérifie qu'on peut obtenir la liste paginée des établissements", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
 
     const total = faker.number.int({ min: 30, max: 130 });
     const items_par_page = faker.number.int({ min: 5, max: 25 });
@@ -133,7 +134,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'on peut filtrer les établissements > filtrage par siret ", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
 
     const etablissement1 = await insertEtablissement();
     const etablissement2 = await insertEtablissement();
@@ -176,7 +177,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'on peut filtrer les établissements > filtrage par adresse courriel ", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
 
     const etablissement1 = await insertEtablissement();
     const etablissement2 = await insertEtablissement();
@@ -219,7 +220,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'on peut retrouver des établissements à partir d'un délégué", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
 
     const etablissement1 = await insertEtablissement();
     const etablissement2 = await insertEtablissement();
@@ -258,7 +259,7 @@ describe("adminRoutes", () => {
 
   //   xit("Vérifie qu'on peut exporter les responsables injoinables", async () => {
   //     const { httpClient, createAndLogUser } = await startServer();
-  //     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+  //     const { auth } = await createAndLogUser("admin", "password", { model: Admin });});
   //     const sendDate = new Date();
   //     await insertResponsable({
   //       siret: "11111111100015",
@@ -297,7 +298,7 @@ describe("adminRoutes", () => {
 
   //   xit("Vérifie qu'on peut exporter les responsables à relancer", async () => {
   //     const { httpClient, createAndLogUser } = await startServer();
-  //     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+  //     const { auth } = await createAndLogUser("admin", "password", { model: Admin });});
   //     await insertResponsable({
   //       siret: "11111111100015",
   //       raison_sociale: "Organisme de formation",
@@ -342,7 +343,7 @@ describe("adminRoutes", () => {
 
   //   xit("Vérifie qu'on peut exporter les établissements inconnus", async () => {
   //     const { httpClient, createAndLogUser } = await startServer();
-  //     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+  //     const { auth } = await createAndLogUser("admin", "password", { model: Admin });});
   //     await insertVoeu({
   //       etablissement_accueil: {
   //         siret: "0751234J",
@@ -368,7 +369,7 @@ describe("adminRoutes", () => {
 
   //   xit("Vérifie qu'il faut être admin pour exporter", async () => {
   //     const { httpClient, createAndLogUser } = await startServer();
-  //     const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+  //     const { auth } = await createAndLogUser("admin", "password", { model: Etablissement });
 
   //     const response = await httpClient.get("/api/admin/fichiers/injoinables.csv", {
   //       headers: {
@@ -386,7 +387,7 @@ describe("adminRoutes", () => {
 
   //   xit("Vérifie qu'on peut exporter le statut des téléchargements des voeux", async () => {
   //     const { httpClient, createAndLogUser } = await startServer();
-  //     const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+  //     const { auth } = await createAndLogUser("admin", "password", { model: Admin });});
   //     await insertResponsable({
   //       siret: "11111111100015",
   //       raison_sociale: "Organisme de formation",
@@ -477,7 +478,7 @@ describe("adminRoutes", () => {
 
   // xit("Vérifie qu'on peut voir les consultations de la page stats par académie", async () => {
   //   const { httpClient, createAndLogUser } = await startServer();
-  //   const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+  //   const { auth } = await createAndLogUser("admin", "password", { model: Admin });});
   //   await insertLog({
   //     request: {
   //       method: "GET",
@@ -509,7 +510,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'on peut modifier l'adresse email d'un responsable", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
     const etablissement1 = await insertEtablissement({
       email: "x@organisme.com",
     });
@@ -544,7 +545,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'il faut être admin pour changer l'email", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { auth } = await createAndLogUser("admin", "password", { model: Etablissement });
 
     const response = await httpClient.put(
       "/api/admin/responsables/11111111100006/setEmail",
@@ -566,7 +567,7 @@ describe("adminRoutes", () => {
 
   it.skip("Vérifie qu'on ne peut renvoyer un email de confirmation", async () => {
     const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
     const etablissement = await insertEtablissement({
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
@@ -618,7 +619,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'il faut être admin pour changer renvoyer un email de confirmation", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { auth } = await createAndLogUser("admin", "password", { model: Etablissement });
 
     const etablissement = await insertEtablissement({
       statut: "en attente",
@@ -652,7 +653,7 @@ describe("adminRoutes", () => {
 
   it.skip("Vérifie qu'on peut renvoyer un email d'activation", async () => {
     const { httpClient, createAndLogUser, getEmailsSent } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+    const { auth } = await createAndLogUser("admin", "password", { model: Admin });
     const etablissement = await insertEtablissement({
       statut: "en attente",
       email: "test1@apprentissage.beta.gouv.fr",
@@ -703,7 +704,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'il faut être admin pour changer renvoyer un email d'activation", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+    const { auth } = await createAndLogUser("admin", "password", { model: Etablissement });
 
     const etablissement = await insertEtablissement({
       statut: "en attente",
@@ -737,7 +738,7 @@ describe("adminRoutes", () => {
 
   // xit("Vérifie qu'on peut marquer un CFA comme non concerné", async () => {
   //   const { httpClient, createAndLogUser } = await startServer();
-  //   const { auth } = await createAndLogUser("admin", "password", { isAdmin: true });
+  //   const { auth } = await createAndLogUser("admin", "password", { model: Admin });});
   //   await insertResponsable({
   //     siret: "11111111100006",
   //     statut: "confirmé",
@@ -767,7 +768,7 @@ describe("adminRoutes", () => {
 
   // xit("Vérifie qu'il faut être admin pour le statut d'un CFA", async () => {
   //   const { httpClient, createAndLogUser } = await startServer();
-  //   const { auth } = await createAndLogUser("admin", "password", { isAdmin: false });
+  //   const { auth } = await createAndLogUser("admin", "password", { model: Etablissement });
 
   //   const response = await httpClient.put(
   //     "/api/admin/responsables/11111111100006/markAsNonConcerne",

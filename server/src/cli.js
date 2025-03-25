@@ -31,9 +31,10 @@ const computeStats = require("./jobs/computeStats");
 const exportResponsables = require("./jobs/exportResponsables");
 const buildRelationCsv = require("./jobs/buildRelationCsv");
 const { createAdmin } = require("./jobs/createAdmin");
-const migrate = require("./jobs/migrate");
+const { createAcademie } = require("./jobs/createAcademie");
+const migrate = require("./jobs/migrate.js.DEPRECATED");
 const { injectDataset } = require("../tests/dataset/injectDataset");
-const { Responsable } = require("./common/model");
+const { Etablissement } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi");
 // const { importDossiers } = require("./jobs/importDossiers");
 // const { createCsaio } = require("./jobs/createCsaio");
@@ -241,6 +242,7 @@ cli
 cli
   .command("sendConfirmationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul CFA")
+  .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .action((options) => {
@@ -262,28 +264,9 @@ cli
 //   });
 
 cli
-  .command("importVoeux")
-  .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
-  .argument("<file>", "Le fichier CSV contentant les voeux ")
-  .argument("<overwriteFile", "Le fichier CSV écransant les offres de formation")
-  .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
-  .action((file, overwriteFile, options) => {
-    runScript(async () => {
-      const inputFile = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
-      const inputOverwriteFile = overwriteFile ? createReadStream(overwriteFile, { encoding: "UTF-8" }) : null;
-
-      let importDate = new Date();
-      if (options.refresh) {
-        importDate = await getLatestImportDate();
-      }
-
-      return importVoeux(inputFile, inputOverwriteFile, { importDate });
-    });
-  });
-
-cli
   .command("sendActivationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+  .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .action((options) => {
@@ -307,6 +290,7 @@ cli
 cli
   .command("sendNotificationEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+  .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .option("--force", "Ignore les règles d'envoi habituelles")
@@ -332,6 +316,7 @@ cli
 cli
   .command("sendUpdateEmails")
   .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+  .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .option("--force", "Ignore les règles d'envoi habituelles")
@@ -355,13 +340,43 @@ cli
 //   });
 
 cli
+  .command("importVoeux")
+  .description("Importe les voeux depuis le fichier d'extraction des voeux AFFELNET")
+  .argument("<file>", "Le fichier CSV contentant les voeux ")
+  .argument("[overwriteFile]", "Le fichier CSV écrasant les offres de formation")
+  .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
+  .action((file, overwriteFile, options) => {
+    runScript(async () => {
+      const inputFile = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
+      const inputOverwriteFile = overwriteFile ? createReadStream(overwriteFile, { encoding: "UTF-8" }) : null;
+
+      let importDate = new Date();
+      if (options.refresh) {
+        importDate = await getLatestImportDate();
+      }
+
+      return importVoeux(inputFile, inputOverwriteFile, { importDate });
+    });
+  });
+
+cli
   .command("createAdmin")
   .argument("<username>", "Le nom de l'utilisateur")
   .argument("<email>", "Le email de l'utilisateur")
-  .argument("[academie]", "Le code d'une académie -- crée un utilisateur académique'")
   .action((username, email, academie) => {
     runScript(() => {
       return createAdmin(username, email, academie);
+    });
+  });
+
+cli
+  .command("createAcademie")
+  .argument("<username>", "Le nom de l'utilisateur")
+  .argument("<email>", "Le email de l'utilisateur")
+  .argument("[academie]", "Le code d'une académie ou plusieurs académies séparées par des virgules ex: 01,14")
+  .action((username, email, academie) => {
+    runScript(() => {
+      return createAcademie(username, email, academie);
     });
   });
 
@@ -475,7 +490,7 @@ cli
       };
 
       return await oleoduc(
-        Responsable.aggregate([
+        Etablissement.aggregate([
           { $unwind: "$etablissements_formateur" },
           { $project: { uai: "$etablissements_formateur.uai" } },
         ]).cursor(),
@@ -505,7 +520,8 @@ cli
       const output = out || writeToStdout();
 
       // Récupération des adresses emails des CFAs responsables
-      const etablissement_responsable_emails = await Responsable.distinct("email");
+      // TODO :
+      const etablissement_responsable_emails = await Etablissement.distinct("email");
 
       const source = Readable.from(etablissement_responsable_emails);
 

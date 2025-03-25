@@ -57,6 +57,45 @@ const schema = new Schema({
     ],
   },
 
+  emails: {
+    type: [
+      nested({
+        token: {
+          type: String,
+          required: true,
+          index: true,
+        },
+        templateName: {
+          type: String,
+          index: true,
+          required: true,
+        },
+        sendDates: {
+          type: [Date],
+          required: true,
+        },
+        openDate: {
+          type: Date,
+        },
+        messageIds: {
+          type: [String],
+        },
+        error: {
+          type: nested({
+            type: {
+              type: String,
+              index: true,
+              enum: ["fatal", "soft_bounce", "hard_bounce", "complaint", "invalid_email", "blocked", "error"],
+            },
+            message: {
+              type: String,
+            },
+          }),
+        },
+      }),
+    ],
+  },
+
   histories: {
     default: [],
     type: [historySchema],

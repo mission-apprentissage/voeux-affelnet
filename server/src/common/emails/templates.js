@@ -52,12 +52,12 @@ module.exports = {
     };
   },
   // eslint-disable-next-line no-unused-vars
-  activation_user: (user, token, variables = {}, options = {}) => {
+  activation_admin: (user, token, variables = {}, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
       subject: `${prefix}Diffusion des listes de candidats Affelnet : activation de votre compte administrateur`,
-      templateFile: getTemplateFile("activation_user"),
+      templateFile: getTemplateFile("activation_admin"),
       data: {
         token,
         actionToken: createActionToken(user.username),
@@ -145,8 +145,9 @@ module.exports = {
   notification_delegue: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
+    console.log({ relation, responsable, formateur, delegue });
     return {
-      subject: `${prefix}Affelnet 2025 – La liste de candidats à l’apprentissage pour l'établissement ${formateur.uai} est téléchargeable`,
+      subject: `${prefix}Affelnet 2025 – La liste de candidats à l’apprentissage pour l'établissement ${formateur.siret} est téléchargeable`,
       templateFile: getTemplateFile("notification_delegue"),
       data: {
         token,

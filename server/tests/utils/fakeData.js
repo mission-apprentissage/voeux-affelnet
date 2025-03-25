@@ -1,6 +1,6 @@
 const { fakerFR: faker } = require("@faker-js/faker");
 const { merge } = require("lodash");
-const { Etablissement, Voeu, User, Delegue, Mef, Log, Relation } = require("../../src/common/model");
+const { Etablissement, Voeu, User, Delegue, Mef, Log, Relation, Admin, Academie } = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 // const { Csaio, Dossier } = require("../../src/common/model");
 
@@ -28,6 +28,34 @@ module.exports = {
       )
     );
   },
+  insertAdmin: (custom = {}) => {
+    return Admin.create(
+      merge(
+        {},
+        {
+          username: createUsername(),
+          email: createEmail(),
+          emails: [],
+        },
+        custom
+      )
+    );
+  },
+  insertAcademie: (custom = {}) => {
+    return Academie.create(
+      merge(
+        {},
+        {
+          username: createUsername(),
+          email: createEmail(),
+          emails: [],
+          academies: [],
+        },
+        custom
+      )
+    );
+  },
+
   insertEtablissement: (custom = {}) => {
     const uai = custom.uai ?? createUAI(faker.helpers.replaceSymbols("#######"));
     const siret = custom.siret ?? faker.helpers.replaceSymbols("##############");

@@ -248,8 +248,12 @@ export const Etablissements = () => {
               </Tr>
             ) : (
               data.map((etablissement, index) => {
-                const relationsDelegues = etablissement.relations.filter((relation) => !!relation.delegue);
-                const relationsNonDelegues = etablissement.relations.filter((relation) => !relation.delegue);
+                const relationsDelegues = etablissement.relations.filter(
+                  (relation) => !!relation.delegue && !!relation.delegue.relations?.active
+                );
+                const relationsNonDelegues = etablissement.relations.filter(
+                  (relation) => !relation.delegue || !relation.delegue.relations?.active
+                );
 
                 // const isOnlyResponsableFormateur =
                 //   etablissement.is_responsable_formateur && etablissement.relations.length === 1;
@@ -385,15 +389,19 @@ export const Etablissements = () => {
                                             - <ContactStatut user={relation?.delegue} short />
                                           </>
                                         )}{" "}
-                                        - <RelationStatut relation={relation} />
+                                        {!!relation.nombre_voeux && (
+                                          <>
+                                            - <RelationStatut relation={relation} />
+                                          </>
+                                        )}
                                       </Text>
-                                      {!!relation.nombre_voeux_restant && (
+                                      {/* {!!relation.nombre_voeux_restant && (
                                         <Text>
                                           {relation.nombre_voeux_restant} candidature
                                           {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
                                           {relation.nombre_voeux_restant > 1 && "s"}
                                         </Text>
-                                      )}
+                                      )} */}
                                     </ListItem>
                                   ))}
                                   {!!(relationsDelegues?.length > 5) && (

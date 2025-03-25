@@ -1,7 +1,7 @@
 import { useAuthState, anonymous } from "../auth";
 import decodeJWT from "../utils/decodeJWT";
 
-export default function useAuth() {
+export const useAuth = () => {
   const [auth, setAuth] = useAuthState();
 
   const setAuthFromToken = (token) => {
@@ -15,4 +15,6 @@ export default function useAuth() {
   };
 
   return [auth, setAuthFromToken];
-}
+};
+
+export default useAuth;

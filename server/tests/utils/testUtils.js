@@ -4,7 +4,7 @@ const axiosist = require("axiosist");
 const { createFakeMailer } = require("./fakeMailer");
 const createEmailActions = require("../../src/common/actions/createEmailActions");
 const { User } = require("../../src/common/model");
-const { insertResponsable, insertUser, insertCsaio } = require("./fakeData");
+const { insertAdmin, insertEtablissement, insertDelegue, insertUser } = require("./fakeData");
 const { activateUser } = require("../../src/common/actions/activateUser");
 const { Readable } = require("stream");
 const { delay } = require("../../src/common/utils/asyncUtils");
@@ -57,9 +57,11 @@ async function startServer(options) {
     const { model, ...rest } = options;
     const Model = model || User;
     const insertMapper = {
-      Responsable: insertResponsable,
-      Csaio: insertCsaio,
+      Admin: insertAdmin,
+      Delegue: insertDelegue,
+      Etablissement: insertEtablissement,
       User: insertUser,
+      // Csaio: insertCsaio,
     };
 
     await insertMapper[Model.modelName]({

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-d
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
 import { getUserType } from "./common/utils/getUserType";
+import { isAcademie, isAdmin } from "./common/utils/aclUtils";
 import { USER_TYPE } from "./common/constants/UserType";
 
 const ForgottenPasswordPage = lazy(() => import("./pages/password/ForgottenPasswordPage"));
@@ -42,14 +43,18 @@ const RequireAuth = ({ children, allowed }) => {
 };
 
 const App = () => {
+  // TO FIX
   const [auth] = useAuth();
 
   const getDefaultRedirection = () => {
-    switch (auth.type) {
+    switch (true) {
+      case isAdmin(auth) || isAcademie(auth):
+        return "admin";
       case USER_TYPE.ETABLISSEMENT:
         return "responsable";
       case USER_TYPE.DELEGUE:
         return "delegue";
+
       default:
         return getUserType(auth);
     }

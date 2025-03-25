@@ -5,6 +5,7 @@ const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 const { Strategy: LocalStrategy } = require("passport-local");
 const sha512Utils = require("../../common/utils/passwordUtils");
 const { getUser } = require("../../common/actions/getUser");
+const { isAdmin, isAcademie } = require("../../common/utils/aclUtils");
 
 const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 
@@ -86,13 +87,32 @@ module.exports = () => {
     },
     checkIsAdmin: () => {
       return (req, res, next) => {
-        if (!req.user.isAdmin) {
+        if (!isAdmin(req.user)) {
           next(Boom.forbidden());
         } else {
           next();
         }
       };
     },
+    checkIsAcademie: () => {
+      return (req, res, next) => {
+        if (!isAcademie(req.user)) {
+          next(Boom.forbidden());
+        } else {
+          next();
+        }
+      };
+    },
+    checkIsAdminOrAcademie: () => {
+      return (req, res, next) => {
+        if (!isAdmin(req.user) && !isAcademie(req.user)) {
+          next(Boom.forbidden());
+        } else {
+          next();
+        }
+      };
+    },
+
     ensureIs: (type) => {
       return (req, res, next) => {
         if (req.user.type !== type) {

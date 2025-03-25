@@ -30,12 +30,19 @@ import { ContactStatut } from "../../common/components/admin/fields/ContactStatu
 import { RelationStatut } from "../../common/components/admin/fields/RelationStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/adminHooks";
+import { ConfirmDelegationModal } from "../../common/components/admin/modals/ConfirmDelegationModal";
 
 const RelationContact = ({ relation, callback }) => {
   const {
     isOpen: isOpenUpdateDelegationModal,
     onOpen: onOpenUpdateDelegationModal,
     onClose: onCloseUpdateDelegationModal,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenConfirmDelegationModal,
+    onOpen: onOpenConfirmDelegationModal,
+    onClose: onCloseConfirmDelegationModal,
   } = useDisclosure();
 
   const {
@@ -50,11 +57,30 @@ const RelationContact = ({ relation, callback }) => {
         {relation.delegue ? (
           <>
             <Text>
-              Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.{" "}
+              {!relation.delegue.relations.active ? (
+                <>
+                  Contact habilité en 2024 à réceptionner les listes de candidats :
+                  <Text as="b"> {relation.delegue?.email}</Text>.{" "}
+                  <Link variant="action" onClick={onOpenConfirmDelegationModal}>
+                    Confirme la délégation
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+                </>
+              )}{" "}
               <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                 Modifier ou annuler la délégation
               </Link>
             </Text>
+
+            <ConfirmDelegationModal
+              relation={relation}
+              callback={callback}
+              isOpen={isOpenConfirmDelegationModal}
+              onClose={onCloseConfirmDelegationModal}
+            />
             <UpdateDelegationModal
               relation={relation}
               callback={callback}
@@ -354,7 +380,6 @@ export const Etablissement = () => {
                     <HistoryBlock
                       relation={relationResponsableFormateur}
                       responsable={etablissement}
-                      formateur={etablissement}
                       delegue={relationResponsableFormateur?.delegue}
                     />
                   </Box>

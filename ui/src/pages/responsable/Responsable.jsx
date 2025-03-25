@@ -12,8 +12,15 @@ import { UpdateDelegationModal } from "../../common/components/responsable/modal
 import { RelationStatut } from "../../common/components/responsable/fields/RelationStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/responsableHooks";
+import { ConfirmDelegationModal } from "../../common/components/responsable/modals/ConfirmDelegationModal";
 
 const RelationContact = ({ relation, callback }) => {
+  const {
+    isOpen: isOpenConfirmDelegationModal,
+    onOpen: onOpenConfirmDelegationModal,
+    onClose: onCloseConfirmDelegationModal,
+  } = useDisclosure();
+
   const {
     isOpen: isOpenUpdateDelegationModal,
     onOpen: onOpenUpdateDelegationModal,
@@ -32,11 +39,30 @@ const RelationContact = ({ relation, callback }) => {
         {relation.delegue ? (
           <>
             <Text>
-              Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.{" "}
+              {!relation.delegue.relations.active ? (
+                <>
+                  Contact habilité en 2024 à réceptionner les listes de candidats :
+                  <Text as="b"> {relation.delegue?.email}</Text>.{" "}
+                  <Link variant="action" onClick={onOpenConfirmDelegationModal}>
+                    Confirme la délégation
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+                </>
+              )}{" "}
               <Link variant="action" onClick={onOpenUpdateDelegationModal}>
                 Modifier ou annuler la délégation
               </Link>
             </Text>
+
+            <ConfirmDelegationModal
+              relation={relation}
+              callback={callback}
+              isOpen={isOpenConfirmDelegationModal}
+              onClose={onCloseConfirmDelegationModal}
+            />
             <UpdateDelegationModal
               relation={relation}
               callback={callback}
@@ -99,7 +125,7 @@ const RelationFormateur = ({ relation, callback }) => {
       )}
 
       <Box mt={6}>
-        <HistoryBlock relation={relation} formateur={relation.formateur} delegue={relation.delegue} />
+        <HistoryBlock relation={relation} delegue={relation.delegue} />
       </Box>
     </Box>
   );
@@ -316,7 +342,6 @@ export const Responsable = () => {
                     <HistoryBlock
                       relation={relationResponsableFormateur}
                       responsable={etablissement}
-                      formateur={etablissement}
                       delegue={relationResponsableFormateur?.delegue}
                     />
                   </Box>

@@ -7,7 +7,7 @@ export const RelationEmail = ({ relation }) => {
     return;
   }
 
-  const isDiffusionAutorisee = !!relation.delegue;
+  const isDiffusionAutorisee = !!relation.delegue && relation.delegue.relations.active;
 
   return (
     <>

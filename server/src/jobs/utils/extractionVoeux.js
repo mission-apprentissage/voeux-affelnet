@@ -9,7 +9,7 @@ const fixExtractionVoeux = async (originalCsv, overwriteCsv) => {
   // console.log("originalCsv", originalCsv);
   // console.log("overwriteCsv", overwriteCsv);
 
-  const overwriteArray = await getCsvContent(overwriteCsv);
+  const overwriteArray = !!overwriteCsv && (await getCsvContent(overwriteCsv));
 
   console.log(overwriteArray);
 

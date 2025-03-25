@@ -97,7 +97,7 @@ export const Delegue = ({ delegue, callback }) => {
                           )}
 
                           <Box mt={6}>
-                            <HistoryBlock relation={relation} formateur={relation.formateur} />
+                            <HistoryBlock relation={relation} />
                           </Box>
                         </Box>
                       </Box>

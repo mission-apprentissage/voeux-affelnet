@@ -3,6 +3,7 @@ const USER_TYPE = {
   DELEGUE: "Delegue",
   CSAIO: "Csaio",
   ACADEMIE: "Academie",
+  ADMIN: "Admin",
 };
 
 module.exports = { USER_TYPE };

@@ -145,7 +145,7 @@ module.exports = ({ users }) => {
 
       const filename = `${siret_responsable}-${siret_formateur}.csv`;
 
-      await markVoeuxAsDownloadedByDelegue(siret_responsable, siret_formateur);
+      await markVoeuxAsDownloadedByDelegue({ siret_responsable, siret_formateur });
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);

@@ -81,7 +81,7 @@ describe("passwordRoutes", () => {
 
   it("Vérifie qu'un utilisateur peut changer son mot de passe", async () => {
     const { httpClient, createAndLogUser } = await startServer();
-    await createAndLogUser("admin", "password", { isAdmin: true });
+    await createAndLogUser("admin", "password", {});
 
     const response = await httpClient.post("/api/password/reset-password", {
       resetPasswordToken: createResetPasswordToken("admin"),
@@ -95,9 +95,7 @@ describe("passwordRoutes", () => {
     assert.deepStrictEqual(_.omit(decoded, ["iat", "exp"]), {
       sub: "admin",
       iss: "voeux-affelnet",
-      permissions: {
-        isAdmin: true,
-      },
+      permissions: {},
     });
   });
 
