@@ -7,7 +7,7 @@ export const descriptions = new Map([
   [
     CONTACT_STATUS.EN_ATTENTE_DE_DIFFUSION,
     {
-      icon: <SuccessFill verticalAlign="middle" />,
+      icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
       long: `Le destinataire n'a pas encore reçu de courriel l'invitant à confirmer son adresse courriel et créer son compte.`,
       short: "En attente de diffusion de campagne",
     },
@@ -15,7 +15,7 @@ export const descriptions = new Map([
   [
     CONTACT_STATUS.EN_ATTENTE_DE_CONFIRMATION,
     {
-      icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+      icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
       long: `Le destinataire a reçu un courriel l'invitant à confirmer son adresse courriel, mais n'a pas cliqué sur le lien de confirmation d'adresse.`,
       short: "Adresse courriel en attente de confirmation",
     },
@@ -23,7 +23,7 @@ export const descriptions = new Map([
   [
     CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_NON_CREE,
     {
-      icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+      icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
       long: `Le destinataire a confirmé son adresse courriel mais n'a pas encore créé son mot de passe de connexion au service de téléchargement des listes de candidats.`,
       short: "Compte utilisateur non finalisé",
     },
@@ -31,15 +31,23 @@ export const descriptions = new Map([
   [
     CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_CREE,
     {
-      icon: <SuccessFill verticalAlign="middle" />,
+      icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
       long: `Le destinataire a créé son compte pour l'accès aux listes de candidats. Aucune liste n'est pour l'instant disponible. Une notification courriel lui sera envoyée lorsqu'une liste sera disponible.`,
       short: "Compte utilisateur finalisé",
     },
   ],
   [
+    CONTACT_STATUS.EMAIL_MANQUANT,
+    {
+      icon: <WarningFill fontSize="18px" color="red" verticalAlign="middle" />,
+      long: `Nous n'avons pas l'adresse courriel du destinataire et ne pourrons pas le contacter.`,
+      short: "Adresse courriel manquante",
+    },
+  ],
+  [
     CONTACT_STATUS.INCONNU,
     {
-      icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+      icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
       long: `État inconnu`,
     },
   ],
@@ -51,6 +59,10 @@ export const ContactStatut = ({ user, short = false }) => {
   }
 
   switch (true) {
+    case !user.email: {
+      return <StatutBadge descriptions={descriptions} statut={CONTACT_STATUS.EMAIL_MANQUANT} short={short} />;
+    }
+
     case USER_STATUS.ACTIVE === user.statut: {
       return (
         <StatutBadge descriptions={descriptions} statut={CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_CREE} short={short} />

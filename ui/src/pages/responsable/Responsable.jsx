@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { Text, Link, Heading, Box, useDisclosure, Spinner, Button } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
@@ -13,6 +13,7 @@ import { RelationStatut } from "../../common/components/responsable/fields/Relat
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/responsableHooks";
 import { ConfirmDelegationModal } from "../../common/components/responsable/modals/ConfirmDelegationModal";
+import { DownloadVoeuxModal } from "../../common/components/responsable/modals/DownloadVoeuxModal";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -44,7 +45,7 @@ const RelationContact = ({ relation, callback }) => {
                   Contact habilité en 2024 à réceptionner les listes de candidats :
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
                   <Link variant="action" onClick={onOpenConfirmDelegationModal}>
-                    Confirme la délégation
+                    Confirmer la délégation
                   </Link>
                 </>
               ) : (
@@ -99,14 +100,16 @@ const RelationFormateur = ({ relation, callback }) => {
   });
 
   return (
-    <Box mt={8} key={relation.etablissement_formateur.siret}>
+    <Box mt={8}>
       <Heading as="h4" size="md">
         <EtablissementLibelle etablissement={relation.formateur} />
       </Heading>
 
-      <Text mt={4}>
-        Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-        {relation.formateur?.uai ?? "Inconnu"}
+      <Text mt={2}>
+        <Text as="i" color="gray.500">
+          {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+          {relation.formateur?.uai ?? "Inconnu"}
+        </Text>
       </Text>
 
       <Box mt={2}>
@@ -132,10 +135,20 @@ const RelationFormateur = ({ relation, callback }) => {
 };
 
 export const Responsable = () => {
+  const [searchParams] = useSearchParams();
+
+  const siret_formateur = searchParams.get("siret_formateur");
+
   const {
     onOpen: onOpenUpdateResponsableEmailModal,
     isOpen: isOpenUpdateResponsableEmailModal,
     onClose: onCloseUpdateResponsableEmailModal,
+  } = useDisclosure();
+
+  const {
+    onOpen: onOpenUDownloadVoeuxModal,
+    isOpen: isOpenDownloadVoeuxModal,
+    onClose: onCloseDownloadVoeuxModal,
   } = useDisclosure();
 
   const [etablissement, setEtablissement] = useState(undefined);
@@ -161,6 +174,12 @@ export const Responsable = () => {
   }, [getEtablissement]);
 
   const downloadVoeux = useDownloadVoeux({ responsable: etablissement, formateur: etablissement, callback: reload });
+
+  useEffect(() => {
+    if (siret_formateur) {
+      onOpenUDownloadVoeuxModal();
+    }
+  }, [onOpenUDownloadVoeuxModal, siret_formateur]);
 
   // const resendActivationEmail = useCallback(async () => {
   //   try {
@@ -283,16 +302,29 @@ export const Responsable = () => {
       relation.formateur?.siret === etablissement.siret && relation.responsable?.siret === etablissement.siret
   );
 
+  const downloadRelation = etablissement.relations.find(
+    (relation) => relation.formateur?.siret === siret_formateur && relation.responsable?.siret === etablissement.siret
+  );
+
   return (
     <>
+      <DownloadVoeuxModal
+        relation={downloadRelation}
+        callback={reload}
+        isOpen={isOpenDownloadVoeuxModal}
+        onClose={onCloseDownloadVoeuxModal}
+      />
+
       <Breadcrumb items={[{ label: title, url: `/responsable` }]} />
 
       <Page title={title}>
         <Box my={6}>
           <Box>
-            <Text mt={8}>
-              Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
-              {etablissement?.uai ?? "Inconnu"}
+            <Text mt={6}>
+              <Text as="i" color="gray.500">
+                Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
+                {etablissement?.uai ?? "Inconnu"}
+              </Text>
             </Text>
           </Box>
 
@@ -314,8 +346,8 @@ export const Responsable = () => {
                       Organismes formateurs associés
                     </Heading>
 
-                    {relationsResponsable.map((relation) => (
-                      <Box mt={12} key={relation?.formateur?.siret}>
+                    {relationsResponsable.map((relation, index) => (
+                      <Box mt={index && 16} key={relation?.formateur?.siret}>
                         <RelationFormateur relation={relation} callback={reload} />
                       </Box>
                     ))}

@@ -1,0 +1,48 @@
+<mjml>
+  <%- include('./common/head.ejs'); %>
+
+  <mj-body background-color="#f9fafc">
+    <%- include('./common/header.ejs'); %>
+    <mj-wrapper padding="10px 20px">
+      <mj-section background-color="#ffffff" padding-top="0">
+        <mj-column>
+          <mj-text> Madame, monsieur, </mj-text>
+
+          <mj-text>
+            Vous pouvez dès à présent télécharger les <%= data.relation.nombre_voeux %> candidatures exprimées sur le service en ligne affectation pour
+            l'organisme <%= data.formateur.raison_sociale %> (SIRET : <%= data.formateur.siret %> / UAI : <%= data.formateur.uai %>) .
+          </mj-text>
+
+          <mj-button
+            href="<%= utils.getPublicUrl(`/responsable?siret_formateur=${data.formateur.siret}&actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            Télécharger les candidatures
+          </mj-button>
+
+          <mj-text> Votre identifiant de connexion : <strong><%= data.responsable.username %></strong> </mj-text>
+
+          <mj-text>
+            Si vous n’avez pas encore confirmé votre adresse courriel, vous serez dirigé sur une demande de confirmation
+            d’adresse. Suite à cette opération,vous devrez définir votre mot de passe.
+          </mj-text>
+
+          <mj-text>
+            Prochaine et dernière étape : dans la semaine du 18 juin, une mise à jour de cette liste pourra vous être
+            transmise, pour tenir compte des ajouts, suppressions et/ou modifications de candidatures.
+          </mj-text>
+
+          <mj-text>
+            La réception des candidatures vous engage à une réponse auprès des jeunes concernés. Ceci permettra
+            d’établir plus rapidement avec eux un premier contact et favorisera l’efficacité de l’accompagnement vers
+            l’emploi que vous leur proposerez.
+          </mj-text>
+
+          <%- include('./common/signature.ejs'); %>
+        </mj-column>
+      </mj-section>
+    </mj-wrapper>
+    <%- include('./common/footer.ejs'); %>
+  </mj-body>
+</mjml>

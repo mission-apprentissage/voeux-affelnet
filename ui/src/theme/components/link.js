@@ -42,7 +42,7 @@ const Link = {
     slight: {
       ...commonButtonStyle,
       fontWeight: 400,
-      color: "#666666",
+      color: "gray.500",
       fontSize: "0.8rem",
       fontStyle: "italic",
       textDecoration: "underline",

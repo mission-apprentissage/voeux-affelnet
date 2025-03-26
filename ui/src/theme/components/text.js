@@ -12,7 +12,7 @@ const Text = {
       color: "bluefrance",
     },
     slight: {
-      color: "#666666",
+      color: "gray.500",
       fontSize: "0.8rem",
       fontStyle: "italic",
     },

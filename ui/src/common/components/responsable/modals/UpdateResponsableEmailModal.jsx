@@ -57,7 +57,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
       <ModalContent>
         <ModalHeader>
           <Heading as="h2" size="lg">
-            Modifier votre adresse email
+            Modifier votre adresse courriel
           </Heading>
         </ModalHeader>
 
@@ -77,11 +77,11 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
                   {({ field, meta }) => {
                     return (
                       <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                        <FormLabel name={field.name}>Indiquez votre nouvel email</FormLabel>
+                        <FormLabel name={field.name}>Indiquez votre nouvelle adresse courriel</FormLabel>
                         <Input
                           type="email"
                           role="presentation"
-                          placeholder="Renseigner l'email"
+                          placeholder="Renseigner l'adresse courriel"
                           style={{ margin: 0 }}
                           {...field}
                         />
@@ -95,7 +95,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
                   {({ field, meta }) => {
                     return (
                       <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
-                        <FormLabel name={field.name}>Veuillez saisir l'email une seconde fois</FormLabel>
+                        <FormLabel name={field.name}>Veuillez saisir l'adresse courriel une seconde fois</FormLabel>
                         <Input
                           type="email"
                           role="presentation"

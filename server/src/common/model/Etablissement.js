@@ -25,6 +25,10 @@ const schema = new Schema({
     type: String,
   },
 
+  enseigne: {
+    type: String,
+  },
+
   libelle_ville: {
     type: String,
   },

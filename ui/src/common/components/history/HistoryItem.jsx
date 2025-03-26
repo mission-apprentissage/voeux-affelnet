@@ -9,14 +9,14 @@ export const HistoryItem = ({ history }) => {
 
   return (
     <Flex alignItems={"center"}>
-      <Text color="var(--chakra-colors-gray-500)" minW={"168px"} align={"right"}>
+      <Text color="gray.500" minW={"168px"} align={"right"}>
         {date.toLocaleDateString()} à {date.toLocaleTimeString()}
       </Text>
       <Text borderLeft="2px solid black" ml={4} pl={4}>
         {history.value}{" "}
         {isAdmin(auth) && (
           <Tooltip label={history.action}>
-            <Icon name="info" color="var(--chakra-colors-gray-500)" />
+            <Icon name="info" color="gray.500" />
           </Tooltip>
         )}
       </Text>

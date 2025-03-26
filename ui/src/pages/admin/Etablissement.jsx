@@ -62,7 +62,7 @@ const RelationContact = ({ relation, callback }) => {
                   Contact habilité en 2024 à réceptionner les listes de candidats :
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
                   <Link variant="action" onClick={onOpenConfirmDelegationModal}>
-                    Confirme la délégation
+                    Confirmer la délégation
                   </Link>
                 </>
               ) : (
@@ -117,14 +117,16 @@ const RelationFormateur = ({ relation, callback }) => {
   });
 
   return (
-    <Box mt={8} key={relation.etablissement_formateur.siret}>
+    <Box mt={8}>
       <Heading as="h4" size="md">
         <EtablissementLibelle etablissement={relation.formateur} />
       </Heading>
 
-      <Text mt={4}>
-        Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-        {relation.formateur?.uai ?? "Inconnu"}
+      <Text mt={2}>
+        <Text as="i" color="gray.500">
+          Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+          {relation.formateur?.uai ?? "Inconnu"}
+        </Text>
       </Text>
 
       <Box mt={2}>
@@ -323,9 +325,11 @@ export const Etablissement = () => {
               {etablissement.is_formateur && <OrganismeFormateurTag verticalAlign="baseline" ml={2} />}
             </Box>
 
-            <Text mt={8}>
-              Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
-              {etablissement?.uai ?? "Inconnu"}
+            <Text mt={6}>
+              <Text as="i" color="gray.500">
+                Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
+                {etablissement?.uai ?? "Inconnu"}
+              </Text>
             </Text>
           </Box>
 
@@ -354,8 +358,8 @@ export const Etablissement = () => {
                       Organismes formateurs associés
                     </Heading>
 
-                    {relationsResponsable.map((relation) => (
-                      <Box mt={12} key={relation?.formateur?.siret}>
+                    {relationsResponsable.map((relation, index) => (
+                      <Box mt={index && 16} key={relation?.formateur?.siret}>
                         <RelationFormateur relation={relation} callback={reload} />
                       </Box>
                     ))}

@@ -9,7 +9,7 @@ const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, flattenObject } = require("../common/utils/objectUtils");
 // const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
 const { findAcademieByUai } = require("../common/academies.js");
-const { uaiFormat, mef10Format, cfdFormat } = require("../common/utils/format");
+const { siretFormat, uaiFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 const { catalogue } = require("./utils/catalogue");
 const { saveListAvailable, saveUpdatedListAvailable } = require("../common/actions/history/relation");
 const { fixExtractionVoeux } = require("./utils/extractionVoeux.js");
@@ -77,9 +77,11 @@ const schema = Joi.object({
   }).required(),
   etablissement_formateur: Joi.object({
     uai: Joi.string().pattern(uaiFormat),
+    siret: Joi.string().pattern(siretFormat),
   }).required(),
   etablissement_responsable: Joi.object({
     uai: Joi.string().pattern(uaiFormat),
+    siret: Joi.string().pattern(siretFormat),
   }).required(),
 });
 
@@ -291,6 +293,7 @@ const hasAnomaliesOnMandatoryFields = (anomalies) => {
   );
 };
 
+// IMPORTANT : Lancer importMefs avant
 const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
   const stats = {
     total: 0,
@@ -314,8 +317,8 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
     writeData(
       async (data) => {
         const key = JSON.stringify({
-          siret: data.etablissement_responsable.siret,
-          uai: data.etablissement_formateur.uai,
+          siret_responsable: data.etablissement_responsable.siret,
+          siret_formateur: data.etablissement_formateur.siret,
         });
 
         stats.total++;
@@ -379,7 +382,7 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
             }
 
             // await markVoeuxAsAvailable(
-            //   { uai_responsable: data.etablissement_responsable.uai, uai_formateur: data.etablissement_formateur.uai },
+            //   { siret_responsable: data.etablissement_responsable.siret, siret_formateur: data.etablissement_formateur.siret },
             //   importDate
             // );
           }
@@ -414,30 +417,30 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
 
   await Promise.all(
     [...relations].map(async (relation) => {
-      const { uai_responsable, uai_formateur } = JSON.parse(relation);
+      const { siret_responsable, siret_formateur } = JSON.parse(relation);
 
       const nombre_voeux = await Voeu.countDocuments({
-        "etablissement_responsable.uai": uai_responsable,
-        "etablissement_formateur.uai": uai_formateur,
+        "etablissement_responsable.siret": siret_responsable,
+        "etablissement_formateur.siret": siret_formateur,
       });
 
       if (
         await Voeu.countDocuments({
-          "etablissement_responsable.uai": uai_responsable,
-          "etablissement_formateur.uai": uai_formateur,
+          "etablissement_responsable.siret": siret_responsable,
+          "etablissement_formateur.siret": siret_formateur,
           "_meta.import_dates": { $in: [importDate] },
         })
       ) {
         if (
           await Voeu.countDocuments({
-            "etablissement_responsable.uai": uai_responsable,
-            "etablissement_formateur.uai": uai_formateur,
+            "etablissement_responsable.siret": siret_responsable,
+            "etablissement_formateur.siret": siret_formateur,
             "_meta.import_dates": { $nin: [importDate] },
           })
         ) {
-          return await saveUpdatedListAvailable({ uai_responsable, uai_formateur, nombre_voeux });
+          return await saveUpdatedListAvailable({ siret_responsable, siret_formateur, nombre_voeux });
         } else {
-          return await saveListAvailable({ uai_responsable, uai_formateur, nombre_voeux });
+          return await saveListAvailable({ siret_responsable, siret_formateur, nombre_voeux });
         }
       }
     })

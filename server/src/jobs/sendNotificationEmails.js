@@ -92,7 +92,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
 
       const templateType = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
 
-      const templateName = `notification_${templateType}`;
+      const templateName = `notification_relation_${templateType}`;
       const previous = user.emails.find(
         (e) =>
           e.templateName === templateName &&

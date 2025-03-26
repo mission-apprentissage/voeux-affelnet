@@ -16,6 +16,7 @@ import { Formik, Form } from "formik";
 
 import { _post } from "../../../httpClient";
 import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
+import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
 
 export const ConfirmDelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -66,7 +67,7 @@ export const ConfirmDelegationModal = ({ relation, callback, isOpen, onClose }) 
         <ModalHeader>
           <Heading as="h2" size="lg">
             Confirmation de la délégation de droit de réception de la liste de candidats pour{" "}
-            <FormateurLibelle formateur={formateur} />
+            <EtablissementLibelle etablissement={formateur} />
           </Heading>
         </ModalHeader>
 
@@ -75,8 +76,8 @@ export const ConfirmDelegationModal = ({ relation, callback, isOpen, onClose }) 
         <ModalBody>
           <Text fontSize="lg" mb={6}>
             Vous vous apprêtez à confirmer <Text as="b">{delegue.email}</Text>, précédemment destinataire de la
-            délégation de droits 2024 au sein de l'organisme formateur <FormateurLibelle formateur={formateur} /> comme
-            destinataire pour cette campagne 2025.
+            délégation de droits 2024 au sein de l'organisme formateur{" "}
+            <EtablissementLibelle etablissement={formateur} /> comme destinataire pour cette campagne 2025.
           </Text>
 
           <Formik

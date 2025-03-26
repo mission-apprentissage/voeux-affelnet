@@ -34,7 +34,7 @@ const RequireAuth = ({ children, allowed }) => {
   const isNotAllowed = allowed && !allowed.map((v) => v.toLowerCase()).includes(type);
 
   if (!auth || auth.sub === "anonymous" || isNotAllowed) {
-    const previousPath = window.location.pathname;
+    const previousPath = window.location.pathname + window.location.search;
 
     return <Navigate to={`/login?redirect=${encodeURIComponent(previousPath)}`} />;
   }

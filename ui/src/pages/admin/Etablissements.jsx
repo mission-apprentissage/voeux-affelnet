@@ -232,11 +232,11 @@ export const Etablissements = () => {
           <Thead>
             <Tr>
               {/* <Th width="80px"></Th> */}
+              <Th width="750px">Organismes et contacts habilités</Th>
+              {/* <Th width="350px">Organismes responsable</Th>
+              <Th width="450px">Organismes formateurs et contacts habilités</Th> */}
 
-              <Th width="350px">Organisme responsable</Th>
-              <Th width="450px">Organismes formateurs et contacts habilités</Th>
-
-              <Th width={"70px"}>Candidatures</Th>
+              <Th width={"120px"}>Candidatures</Th>
               {/* <Th width={"70px"}>Restant à télécharger</Th> */}
               {/* <Th>Statut</Th> */}
             </Tr>
@@ -287,14 +287,16 @@ export const Etablissements = () => {
                         Détail
                       </Link>
                     </Td> */}
-                    <Td>
+                    <Td verticalAlign={"top"}>
                       <Box lineHeight={6}>
                         <Text as="b">
                           {etablissement.raison_sociale ?? "Raison sociale inconnue"},{" "}
                           {etablissement.libelle_ville ?? "Ville inconnue"}{" "}
                         </Text>
                         <Text>
-                          Siret : {etablissement.siret ?? "Inconnu"} - UAI : {etablissement.uai ?? "Inconnu"}
+                          <Text as="i" color="gray.500">
+                            Siret : {etablissement.siret ?? "Inconnu"} - UAI : {etablissement.uai ?? "Inconnu"}
+                          </Text>
                         </Text>
 
                         {/* {etablissement.is_responsable && <OrganismeResponsableTag verticalAlign="baseline" ml={2} />}
@@ -303,10 +305,12 @@ export const Etablissements = () => {
                         )}
                         {etablissement.is_formateur && <OrganismeFormateurTag verticalAlign="baseline" ml={2} />} */}
                       </Box>
-                    </Td>
-                    <Td>
+                      {/* </Td>
+                    <Td> */}
                       <Box lineHeight={6}>
-                        <Text>Contact responsable : {etablissement.email ?? "Information manquante"}</Text>
+                        <Text>
+                          Contact responsable : <Text as="b">{etablissement.email ?? "Information manquante"}</Text>
+                        </Text>
                         {etablissement.relations?.length === 1 && etablissement.relations?.[0].delegue ? (
                           <Text mt={4}>
                             Délégation de droit d'accès accordée à {etablissement.relations?.[0].delegue?.email}
@@ -321,26 +325,29 @@ export const Etablissements = () => {
                                   Accès exclusif aux candidatures :
                                 </Text>
                                 <UnorderedList>
-                                  {relationsNonDelegues.slice(0, 5).map((relation, index) => (
-                                    <ListItem mt={2} key={index}>
-                                      <Text display="inline">
-                                        {relation.formateur?.raison_sociale ?? "Raison sociale inconnue"},{" "}
-                                        {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
-                                      </Text>
-                                      <Text>
-                                        Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-                                        {relation.formateur?.uai ?? "Inconnu"}
-                                      </Text>
-                                      {!!relation.nombre_voeux_restant && (
-                                        <Text>
-                                          {relation.nombre_voeux_restant} candidature
-                                          {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
-                                          {relation.nombre_voeux_restant > 1 && "s"}
+                                  {relationsNonDelegues /*.slice(0, 5)*/
+                                    .map((relation, index) => (
+                                      <ListItem mt={2} key={index}>
+                                        <Text display="inline">
+                                          {relation.formateur?.raison_sociale ?? "Raison sociale inconnue"},{" "}
+                                          {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
                                         </Text>
-                                      )}
-                                    </ListItem>
-                                  ))}
-                                  {!!(relationsNonDelegues?.length > 5) && (
+                                        <Text>
+                                          <Text as="i" color="gray.500">
+                                            Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+                                            {relation.formateur?.uai ?? "Inconnu"}
+                                          </Text>
+                                        </Text>
+                                        {!!relation.nombre_voeux_restant && (
+                                          <Text>
+                                            {relation.nombre_voeux_restant} candidature
+                                            {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
+                                            {relation.nombre_voeux_restant > 1 && "s"}
+                                          </Text>
+                                        )}
+                                      </ListItem>
+                                    ))}
+                                  {/* {!!(relationsNonDelegues?.length > 5) && (
                                     <ListItem mt={2}>
                                       <Text>
                                         {relationsNonDelegues?.length - 5} autre
@@ -363,7 +370,7 @@ export const Etablissements = () => {
                                         </Text>
                                       )}
                                     </ListItem>
-                                  )}
+                                  )} */}
                                 </UnorderedList>
                               </>
                             )}
@@ -372,39 +379,42 @@ export const Etablissements = () => {
                               <>
                                 <Text mt={4}>Délégation{relationsDelegues?.length > 1 && "s"} de droit d'accès :</Text>
                                 <UnorderedList>
-                                  {relationsDelegues.slice(0, 5).map((relation, index) => (
-                                    <ListItem mt={2} key={index}>
-                                      <Text display="inline">
-                                        {relation.formateur?.raison_sociale ?? "Raison sociale inconnue"},{" "}
-                                        {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
-                                      </Text>
-                                      <Text>
-                                        Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-                                        {relation.formateur?.uai ?? "Inconnu"}
-                                      </Text>
-                                      <Text>
-                                        Délégué : {relation.delegue?.email}{" "}
-                                        {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
-                                          <>
-                                            - <ContactStatut user={relation?.delegue} short />
-                                          </>
-                                        )}{" "}
-                                        {!!relation.nombre_voeux && (
-                                          <>
-                                            - <RelationStatut relation={relation} />
-                                          </>
-                                        )}
-                                      </Text>
-                                      {/* {!!relation.nombre_voeux_restant && (
+                                  {relationsDelegues /*.slice(0, 5)*/
+                                    .map((relation, index) => (
+                                      <ListItem mt={2} key={index}>
+                                        <Text display="inline">
+                                          {relation.formateur?.raison_sociale ?? "Raison sociale inconnue"},{" "}
+                                          {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+                                        </Text>
+                                        <Text>
+                                          <Text as="i" color="gray.500">
+                                            Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+                                            {relation.formateur?.uai ?? "Inconnu"}
+                                          </Text>
+                                        </Text>
+                                        <Text>
+                                          Délégué : <Text as="b">{relation.delegue?.email}</Text>{" "}
+                                          {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
+                                            <>
+                                              - <ContactStatut user={relation?.delegue} short />
+                                            </>
+                                          )}{" "}
+                                          {!!relation.nombre_voeux && (
+                                            <>
+                                              - <RelationStatut relation={relation} />
+                                            </>
+                                          )}
+                                        </Text>
+                                        {/* {!!relation.nombre_voeux_restant && (
                                         <Text>
                                           {relation.nombre_voeux_restant} candidature
                                           {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
                                           {relation.nombre_voeux_restant > 1 && "s"}
                                         </Text>
                                       )} */}
-                                    </ListItem>
-                                  ))}
-                                  {!!(relationsDelegues?.length > 5) && (
+                                      </ListItem>
+                                    ))}
+                                  {/* {!!(relationsDelegues?.length > 5) && (
                                     <ListItem mt={2}>
                                       <Text>
                                         {relationsDelegues?.length - 5} autre
@@ -427,7 +437,7 @@ export const Etablissements = () => {
                                         </Text>
                                       )}
                                     </ListItem>
-                                  )}
+                                  )} */}
                                 </UnorderedList>
                               </>
                             )}
@@ -435,11 +445,17 @@ export const Etablissements = () => {
                         )}
                       </Box>
                     </Td>
-                    <Td>
+                    <Td verticalAlign={"top"}>
                       <Box lineHeight={6}>
+                        <Text mt={4}>
+                          <Link variant="primary" href={`/admin/etablissement/${etablissement.siret}`}>
+                            Accéder au détail
+                          </Link>
+                        </Text>
+
                         {USER_STATUS.ACTIVE !== etablissement.statut && (
                           <>
-                            <Text>
+                            <Text mt={6}>
                               <ContactStatut user={etablissement} short />
                             </Text>
                             {/* <Text mt={4}>Nombre de candidatures : {etablissement.nombre_voeux}</Text> */}
@@ -447,14 +463,8 @@ export const Etablissements = () => {
                           </>
                         )}
 
-                        <Text mt={4}>
+                        <Text mt={6}>
                           <RelationsStatut relations={etablissement.relations} />
-                        </Text>
-
-                        <Text mt={4}>
-                          <Link variant="action" href={`/admin/etablissement/${etablissement.siret}`}>
-                            Accéder au détail
-                          </Link>
                         </Text>
                       </Box>
                     </Td>
