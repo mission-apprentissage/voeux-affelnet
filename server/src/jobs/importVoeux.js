@@ -7,7 +7,7 @@ const { Voeu, Mef, Etablissement } = require("../common/model");
 const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, flattenObject } = require("../common/utils/objectUtils");
-// const { markVoeuxAsAvailable } = require("../common/actions/markVoeuxAsAvailable.js");
+
 const { findAcademieByUai } = require("../common/academies.js");
 const { siretFormat, uaiFormat, mef10Format, cfdFormat } = require("../common/utils/format");
 const { catalogue } = require("./utils/catalogue");
@@ -380,11 +380,6 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
               stats.updated++;
               Object.keys(differences).forEach((key) => updatedFields.add(key));
             }
-
-            // await markVoeuxAsAvailable(
-            //   { siret_responsable: data.etablissement_responsable.siret, siret_formateur: data.etablissement_formateur.siret },
-            //   importDate
-            // );
           }
 
           ids.add((await Voeu.findOne(query, { _id: 1 }).lean())._id);

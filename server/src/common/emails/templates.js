@@ -163,7 +163,7 @@ module.exports = {
   //   };
   // },
 
-  notification_relation_responsable: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
+  notification_relation_responsable: (user, token, { relation, responsable, formateur }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
@@ -176,11 +176,10 @@ module.exports = {
         relation,
         responsable,
         formateur,
-        delegue,
       },
     };
   },
-  notification_relation_delegue: (user, token, { relation, responsable, formateur }, options = {}) => {
+  notification_relation_delegue: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
@@ -193,6 +192,7 @@ module.exports = {
         relation,
         responsable,
         formateur,
+        delegue,
       },
     };
   },

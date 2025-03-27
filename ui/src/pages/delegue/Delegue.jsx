@@ -1,4 +1,4 @@
-import { Box, Text, Heading, Button } from "@chakra-ui/react";
+import { Box, Text, Heading, Button, useDisclosure } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
 
@@ -7,9 +7,28 @@ import { EtablissementLibelle } from "../../common/components/etablissement/fiel
 import { RelationStatut } from "../../common/components/delegue/fields/RelationStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/delegueHooks";
+import { useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { DownloadVoeuxModal } from "../../common/components/delegue/modals/DownloadVoeuxModal";
 
 export const Delegue = ({ delegue, callback }) => {
   const downloadVoeux = useDownloadVoeux({ callback });
+  const [searchParams] = useSearchParams();
+
+  const siret_responsable = searchParams.get("siret_responsable");
+  const siret_formateur = searchParams.get("siret_formateur");
+
+  const {
+    onOpen: onOpenUDownloadVoeuxModal,
+    isOpen: isOpenDownloadVoeuxModal,
+    onClose: onCloseDownloadVoeuxModal,
+  } = useDisclosure();
+
+  useEffect(() => {
+    if (siret_responsable && siret_formateur) {
+      onOpenUDownloadVoeuxModal();
+    }
+  }, [onOpenUDownloadVoeuxModal, siret_responsable, siret_formateur]);
 
   if (!delegue) {
     return;
@@ -20,9 +39,21 @@ export const Delegue = ({ delegue, callback }) => {
 
   const responsables = [...new Set(activeRelations?.map((relation) => relation.responsable?.siret))];
 
-  console.log(responsables);
+  // console.log(responsables);
+
+  const downloadRelation = activeRelations.find(
+    (relation) => relation.formateur?.siret === siret_formateur && relation.responsable?.siret === siret_responsable
+  );
+
   return (
     <>
+      <DownloadVoeuxModal
+        relation={downloadRelation}
+        callback={callback}
+        isOpen={isOpenDownloadVoeuxModal}
+        onClose={onCloseDownloadVoeuxModal}
+      />
+
       <Breadcrumb
         items={[
           {
