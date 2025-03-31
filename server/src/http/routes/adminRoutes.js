@@ -375,14 +375,19 @@ module.exports = ({ sendEmail, resendEmail }) => {
               {
                 $match: {
                   $or: [
-                    { siret: regexQuery },
-                    { uai: regexQuery },
-                    { raison_sociale: regexQuery },
-                    { email: regexQuery },
+                    // { siret: regexQuery },
+                    // { uai: regexQuery },
+                    // { raison_sociale: regexQuery },
+                    // { enseigne: regexQuery },
+                    // { email: regexQuery },
                     { "relations.responsable.siret": regexQuery },
                     { "relations.responsable.uai": regexQuery },
+                    { "relations.responsable.raison_sociale": regexQuery },
+                    { "relations.responsable.enseigne": regexQuery },
                     { "relations.formateur.siret": regexQuery },
                     { "relations.formateur.uai": regexQuery },
+                    { "relations.formateur.raison_sociale": regexQuery },
+                    { "relations.formateur.enseigne": regexQuery },
                     { "relations.responsable.email": regexQuery },
                     { "relations.delegue.email": regexQuery },
                   ],
