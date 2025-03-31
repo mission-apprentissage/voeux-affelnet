@@ -33,6 +33,7 @@ import { ContactStatut } from "../../common/components/admin/fields/ContactStatu
 import { RelationStatut } from "../../common/components/admin/fields/RelationStatut";
 import { RelationsStatut } from "../../common/components/admin/fields/RelationsStatut";
 import { FileDownloadLine } from "../../theme/components/icons/FileDownloadLine";
+import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 
 export const Etablissements = () => {
   const mounted = useRef(true);
@@ -290,7 +291,7 @@ export const Etablissements = () => {
                     <Td verticalAlign={"top"}>
                       <Box lineHeight={6}>
                         <Text as="b">
-                          {etablissement.raison_sociale ?? "Raison sociale inconnue"},{" "}
+                          <EtablisssementRaisonSociale etablissement={etablissement} />,{" "}
                           {etablissement.libelle_ville ?? "Ville inconnue"}{" "}
                         </Text>
                         <Text>
@@ -329,7 +330,7 @@ export const Etablissements = () => {
                                     .map((relation, index) => (
                                       <ListItem mt={2} key={index}>
                                         <Text display="inline">
-                                          {relation.formateur?.raison_sociale ?? "Raison sociale inconnue"},{" "}
+                                          <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
                                           {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
                                         </Text>
                                         <Text>
@@ -383,7 +384,7 @@ export const Etablissements = () => {
                                     .map((relation, index) => (
                                       <ListItem mt={2} key={index}>
                                         <Text display="inline">
-                                          {relation.formateur?.raison_sociale ?? "Raison sociale inconnue"},{" "}
+                                          <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
                                           {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
                                         </Text>
                                         <Text>

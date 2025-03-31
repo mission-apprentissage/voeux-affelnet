@@ -160,6 +160,7 @@ async function importEtablissements(csv, options = {}) {
           const updates = omitEmpty({
             email: foundEmail,
             raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
+            enseigne: organisme?.enseigne ?? found?.enseigne,
             uai: organisme?.uai ?? found?.uai,
             adresse: organisme
               ? [
@@ -197,7 +198,15 @@ async function importEtablissements(csv, options = {}) {
           } else if (res.modifiedCount) {
             stats.updated++;
 
-            const previous = pick(found, ["raison_sociale", "uai", "libelle_ville", "adresse", "email", "academie"]);
+            const previous = pick(found, [
+              "raison_sociale",
+              "enseigne",
+              "uai",
+              "libelle_ville",
+              "adresse",
+              "email",
+              "academie",
+            ]);
 
             logger.info(`Etablissement ${siret} mis à jour \n${JSON.stringify(diff(previous, updates), null, 2)}`);
           } else {
