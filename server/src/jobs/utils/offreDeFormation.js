@@ -16,9 +16,7 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
   // console.log("originalCsv", originalCsv);
   // console.log("overwriteCsv", overwriteCsv);
 
-  const overwriteArray = await getCsvContent(overwriteCsv);
-
-  console.log(overwriteArray);
+  const overwriteArray = overwriteCsv && (await getCsvContent(overwriteCsv));
 
   return compose(
     originalCsv,
@@ -30,6 +28,7 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
         }, {});
       },
     }),
+
     transformData(async (data) => {
       let overwriteItem;
 
@@ -88,7 +87,7 @@ async function streamOffreDeFormation(options = {}) {
 
   const { onConflict = () => ({}), affelnet, overwrite } = options;
 
-  console.log({ affelnet, overwrite });
+  // console.log({ affelnet, overwrite });
 
   return compose(
     await fixOffreDeFormation(affelnet, overwrite),
