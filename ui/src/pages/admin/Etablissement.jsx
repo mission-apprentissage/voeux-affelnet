@@ -12,6 +12,10 @@ import {
   AlertIcon,
   Flex,
   Button,
+  Table,
+  Tr,
+  Tbody,
+  Td,
 } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
@@ -117,7 +121,7 @@ const RelationFormateur = ({ relation, callback }) => {
   });
 
   return (
-    <Box mt={8}>
+    <Box>
       <Heading as="h4" size="md">
         <EtablissementLibelle etablissement={relation.formateur} />
       </Heading>
@@ -289,13 +293,13 @@ export const Etablissement = () => {
     </>
   );
 
-  const relationsResponsable = etablissement.relations.filter(
-    (relation) => relation.responsable?.siret === etablissement.siret
-  );
+  const relationsResponsable = etablissement.relations
+    .filter((relation) => relation.responsable?.siret === etablissement.siret)
+    .sort((a, b) => b.nombre_voeux_restant - a.nombre_voeux_restant);
 
-  const relationsFormateur = etablissement.relations.filter(
-    (relation) => relation.formateur?.siret === etablissement.siret
-  );
+  const relationsFormateur = etablissement.relations
+    .filter((relation) => relation.formateur?.siret === etablissement.siret)
+    .sort((a, b) => b.nombre_voeux_restant - a.nombre_voeux_restant);
 
   // const relationsOnlyResponsable = relationsResponsable.filter(
   //   (relation) => relation.formateur?.siret !== etablissement.siret
@@ -358,11 +362,17 @@ export const Etablissement = () => {
                       Organismes formateurs associés
                     </Heading>
 
-                    {relationsResponsable.map((relation, index) => (
-                      <Box mt={index && 16} key={relation?.formateur?.siret}>
-                        <RelationFormateur relation={relation} callback={reload} />
-                      </Box>
-                    ))}
+                    <Table>
+                      <Tbody>
+                        {relationsResponsable.map((relation, index) => (
+                          <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
+                            <Td py={8}>
+                              <RelationFormateur relation={relation} callback={reload} />
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
                   </Box>
                 </Box>
               )}

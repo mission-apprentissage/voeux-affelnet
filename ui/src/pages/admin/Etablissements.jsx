@@ -14,8 +14,8 @@ import {
   Spinner,
   Progress,
   Checkbox,
-  UnorderedList,
   ListItem,
+  UnorderedList,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import queryString from "query-string";
@@ -35,7 +35,179 @@ import { RelationsStatut } from "../../common/components/admin/fields/RelationsS
 import { FileDownloadLine } from "../../theme/components/icons/FileDownloadLine";
 import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 
+export const ListRelations = ({ relations, delegation, limit }) => {
+  const [showMore, setShowMore] = useState(false);
+
+  const toggleShowMore = () => {
+    setShowMore(!showMore);
+  };
+
+  return !delegation ? (
+    <>
+      <Text mt={4}>Accès exclusif aux candidatures :</Text>
+      <UnorderedList>
+        {relations.slice(0, limit).map((relation, index) => (
+          <ListItem mt={2} key={index}>
+            <Text display="inline">
+              <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+              {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+            </Text>
+            <Text>
+              <Text as="i" color="gray.500">
+                Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
+              </Text>
+            </Text>
+            {!!relation.nombre_voeux_restant && (
+              <Text>
+                {relation.nombre_voeux_restant} candidature
+                {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
+                {relation.nombre_voeux_restant > 1 && "s"}
+              </Text>
+            )}
+          </ListItem>
+        ))}
+
+        {!showMore && !!(relations?.length > limit) && (
+          <Box mt={2} onClick={toggleShowMore}>
+            <Text textDecoration={"underline"} cursor="pointer" display={"inline"}>
+              Voir {relations?.length - limit} autre
+              {!!(relations?.length - limit > 1) && "s"} établissement
+              {!!(relations?.length - limit > 1) && "s"}
+            </Text>
+
+            {!!relations
+              .slice(limit, relations?.length)
+              ?.reduce((prev, curr) => prev + curr.nombre_voeux_restant, 0) && (
+              <Text>
+                {relations.slice(limit, relations?.length)?.reduce((prev, curr) => prev + curr.nombre_voeux_restant, 0)}{" "}
+                candidatures non téléchargées
+              </Text>
+            )}
+          </Box>
+        )}
+
+        {showMore && !!(relations?.length > limit) && (
+          <>
+            {relations.slice(limit, relations.length).map((relation, index) => (
+              <ListItem mt={2} key={index}>
+                <Text display="inline">
+                  <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+                  {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+                </Text>
+                <Text>
+                  <Text as="i" color="gray.500">
+                    Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
+                  </Text>
+                </Text>
+                {!!relation.nombre_voeux_restant && (
+                  <Text>
+                    {relation.nombre_voeux_restant} candidature
+                    {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
+                    {relation.nombre_voeux_restant > 1 && "s"}
+                  </Text>
+                )}
+              </ListItem>
+            ))}
+
+            <Text mt={2} textDecoration={"underline"} cursor="pointer" onClick={toggleShowMore}>
+              Voir moins
+            </Text>
+          </>
+        )}
+      </UnorderedList>
+    </>
+  ) : (
+    <>
+      <Text mt={4}>Délégation{relations?.length > 1 && "s"} de droit d'accès :</Text>
+      <UnorderedList>
+        {relations.slice(0, limit).map((relation, index) => (
+          <ListItem mt={2} key={index}>
+            <Text display="inline">
+              <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+              {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+            </Text>
+            <Text>
+              <Text as="i" color="gray.500">
+                Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
+              </Text>
+            </Text>
+            <Text>
+              Délégué : <Text as="b">{relation?.delegue?.email}</Text>{" "}
+              {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
+                <>
+                  - <ContactStatut user={relation?.delegue} short />
+                </>
+              )}{" "}
+              {!!relation.nombre_voeux && (
+                <>
+                  - <RelationStatut relation={relation} />
+                </>
+              )}
+            </Text>
+          </ListItem>
+        ))}
+
+        {!showMore && !!(relations?.length > limit) && (
+          <Box mt={2} onClick={toggleShowMore}>
+            <Text textDecoration={"underline"} cursor="pointer" display={"inline"}>
+              Voir {relations?.length - limit} autre
+              {!!(relations?.length - limit > 1) && "s"} établissement
+              {!!(relations?.length - limit > 1) && "s"}
+            </Text>
+
+            {!!relations
+              .slice(limit, relations?.length)
+              ?.reduce((prev, curr) => prev + curr.nombre_voeux_restant, 0) && (
+              <Text>
+                {relations.slice(limit, relations?.length)?.reduce((prev, curr) => prev + curr.nombre_voeux_restant, 0)}{" "}
+                candidatures non téléchargées
+              </Text>
+            )}
+          </Box>
+        )}
+
+        {showMore && !!(relations?.length > limit) && (
+          <>
+            {relations.slice(limit, relations.length).map((relation, index) => (
+              <ListItem mt={2} key={index}>
+                <Text display="inline">
+                  <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+                  {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+                </Text>
+                <Text>
+                  <Text as="i" color="gray.500">
+                    Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
+                  </Text>
+                </Text>
+                <Text>
+                  Délégué : <Text as="b">{relation?.delegue?.email}</Text>{" "}
+                  {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
+                    <>
+                      - <ContactStatut user={relation?.delegue} short />
+                    </>
+                  )}{" "}
+                  {!!relation.nombre_voeux && (
+                    <>
+                      - <RelationStatut relation={relation} />
+                    </>
+                  )}
+                </Text>
+              </ListItem>
+            ))}
+
+            <Text mt={2} textDecoration={"underline"} cursor="pointer" onClick={toggleShowMore}>
+              Voir moins
+            </Text>
+          </>
+        )}
+      </UnorderedList>
+    </>
+  );
+};
+
 export const Etablissements = () => {
+  const defaultLimit = 3;
+  const [limit, setLimit] = useState(defaultLimit);
   const mounted = useRef(true);
 
   const [abortController, setAbortController] = useState(new AbortController());
@@ -109,9 +281,10 @@ export const Etablissements = () => {
 
   const callback = useCallback(
     async (values) => {
+      values?.text?.length ? setLimit(100) : setLimit(defaultLimit);
       await search({ page: 1, ...values });
     },
-    [search]
+    [search, setLimit, defaultLimit]
   );
 
   useEffect(() => {
@@ -249,12 +422,12 @@ export const Etablissements = () => {
               </Tr>
             ) : (
               data.map((etablissement, index) => {
-                const relationsDelegues = etablissement.relations.filter(
-                  (relation) => !!relation.delegue && !!relation.delegue.relations?.active
-                );
-                const relationsNonDelegues = etablissement.relations.filter(
-                  (relation) => !relation.delegue || !relation.delegue.relations?.active
-                );
+                const relationsDelegues = etablissement.relations
+                  .sort((a, b) => b.nombre_voeux_restant - a.nombre_voeux_restant)
+                  .filter((relation) => !!relation.delegue && !!relation.delegue.relations?.active);
+                const relationsNonDelegues = etablissement.relations
+                  .sort((a, b) => b.nombre_voeux_restant - a.nombre_voeux_restant)
+                  .filter((relation) => !relation.delegue || !relation.delegue.relations?.active);
 
                 // const isOnlyResponsableFormateur =
                 //   etablissement.is_responsable_formateur && etablissement.relations.length === 1;
@@ -282,7 +455,7 @@ export const Etablissements = () => {
                 // );
 
                 return (
-                  <Tr key={index}>
+                  <Tr key={index} borderBottom="2px solid" borderColor="gray.200">
                     {/* <Td>
                       <Link variant="primary" href={`/admin/etablissement/${etablissement.siret}`}>
                         Détail
@@ -319,128 +492,11 @@ export const Etablissements = () => {
                         ) : (
                           <>
                             {!!relationsNonDelegues?.length && (
-                              <>
-                                <Text mt={4}>
-                                  {/* Habilité pour {relationsNonDelegues.length} établissement
-                                    {relationsNonDelegues.length > 1 && "s"} : */}
-                                  Accès exclusif aux candidatures :
-                                </Text>
-                                <UnorderedList>
-                                  {relationsNonDelegues /*.slice(0, 5)*/
-                                    .map((relation, index) => (
-                                      <ListItem mt={2} key={index}>
-                                        <Text display="inline">
-                                          <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
-                                          {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
-                                        </Text>
-                                        <Text>
-                                          <Text as="i" color="gray.500">
-                                            Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-                                            {relation.formateur?.uai ?? "Inconnu"}
-                                          </Text>
-                                        </Text>
-                                        {!!relation.nombre_voeux_restant && (
-                                          <Text>
-                                            {relation.nombre_voeux_restant} candidature
-                                            {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
-                                            {relation.nombre_voeux_restant > 1 && "s"}
-                                          </Text>
-                                        )}
-                                      </ListItem>
-                                    ))}
-                                  {/* {!!(relationsNonDelegues?.length > 5) && (
-                                    <ListItem mt={2}>
-                                      <Text>
-                                        {relationsNonDelegues?.length - 5} autre
-                                        {!!(relationsNonDelegues?.length - 5 > 1) && "s"} établissement
-                                        {!!(relationsNonDelegues?.length - 5 > 1) && "s"}
-                                      </Text>
-
-                                      {!!(relationsNonDelegues
-                                        .slice(0, 5)
-                                        ?.reduce((prev, curr) => prev + curr.nombre_voeux_restant),
-                                      0) && (
-                                        <Text>
-                                          {
-                                            (relationsNonDelegues
-                                              .slice(0, 5)
-                                              ?.reduce((prev, curr) => prev + curr.nombre_voeux_restant),
-                                            0)
-                                          }{" "}
-                                          candidatures non téléchargées
-                                        </Text>
-                                      )}
-                                    </ListItem>
-                                  )} */}
-                                </UnorderedList>
-                              </>
+                              <ListRelations relations={relationsNonDelegues} limit={limit} />
                             )}
 
                             {!!relationsDelegues?.length && (
-                              <>
-                                <Text mt={4}>Délégation{relationsDelegues?.length > 1 && "s"} de droit d'accès :</Text>
-                                <UnorderedList>
-                                  {relationsDelegues /*.slice(0, 5)*/
-                                    .map((relation, index) => (
-                                      <ListItem mt={2} key={index}>
-                                        <Text display="inline">
-                                          <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
-                                          {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
-                                        </Text>
-                                        <Text>
-                                          <Text as="i" color="gray.500">
-                                            Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-                                            {relation.formateur?.uai ?? "Inconnu"}
-                                          </Text>
-                                        </Text>
-                                        <Text>
-                                          Délégué : <Text as="b">{relation.delegue?.email}</Text>{" "}
-                                          {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
-                                            <>
-                                              - <ContactStatut user={relation?.delegue} short />
-                                            </>
-                                          )}{" "}
-                                          {!!relation.nombre_voeux && (
-                                            <>
-                                              - <RelationStatut relation={relation} />
-                                            </>
-                                          )}
-                                        </Text>
-                                        {/* {!!relation.nombre_voeux_restant && (
-                                        <Text>
-                                          {relation.nombre_voeux_restant} candidature
-                                          {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
-                                          {relation.nombre_voeux_restant > 1 && "s"}
-                                        </Text>
-                                      )} */}
-                                      </ListItem>
-                                    ))}
-                                  {/* {!!(relationsDelegues?.length > 5) && (
-                                    <ListItem mt={2}>
-                                      <Text>
-                                        {relationsDelegues?.length - 5} autre
-                                        {!!(relationsDelegues?.length - 5 > 1) && "s"} établissement
-                                        {!!(relationsDelegues?.length - 5 > 1) && "s"}
-                                      </Text>
-
-                                      {!!(relationsDelegues
-                                        .slice(0, 5)
-                                        ?.reduce((prev, curr) => prev + curr.nombre_voeux_restant),
-                                      0) && (
-                                        <Text>
-                                          {
-                                            (relationsDelegues
-                                              .slice(0, 5)
-                                              ?.reduce((prev, curr) => prev + curr.nombre_voeux_restant),
-                                            0)
-                                          }{" "}
-                                          candidatures non téléchargées
-                                        </Text>
-                                      )}
-                                    </ListItem>
-                                  )} */}
-                                </UnorderedList>
-                              </>
+                              <ListRelations relations={relationsDelegues} limit={limit} delegation />
                             )}
                           </>
                         )}
