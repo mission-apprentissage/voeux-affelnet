@@ -160,14 +160,14 @@ describe("adminRoutes", () => {
     );
 
     assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.etablissements.length, 2);
+    assert.strictEqual(response.data.etablissements.length, 1);
     assert.strictEqual(
       !!response.data.etablissements.find((etablissement) => etablissement.email == etablissement1.email),
       true
     );
     assert.strictEqual(
       !!response.data.etablissements.find((etablissement) => etablissement.email == etablissement2.email),
-      true
+      false
     );
     assert.strictEqual(
       !!response.data.etablissements.find((etablissement) => etablissement.email == etablissement3.email),
@@ -203,14 +203,14 @@ describe("adminRoutes", () => {
     );
 
     assert.strictEqual(response.status, 200);
-    assert.strictEqual(response.data.etablissements.length, 2);
+    assert.strictEqual(response.data.etablissements.length, 1);
     assert.strictEqual(
       !!response.data.etablissements.find((etablissement) => etablissement.email == etablissement1.email),
       true
     );
     assert.strictEqual(
       !!response.data.etablissements.find((etablissement) => etablissement.email == etablissement2.email),
-      true
+      false
     );
     assert.strictEqual(
       !!response.data.etablissements.find((etablissement) => etablissement.email == etablissement3.email),
