@@ -1,5 +1,5 @@
 ARG NGINX_VERSION="1.20.2"
-FROM nginx:${NGINX_VERSION} as nginxModules
+FROM nginx:${NGINX_VERSION} AS nginxModules
 
 ARG HEADERS_MORE_VERSION="v0.33"
 

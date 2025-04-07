@@ -13,6 +13,7 @@ import {
   Tr,
   Th,
   Tbody,
+  Td,
 } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
