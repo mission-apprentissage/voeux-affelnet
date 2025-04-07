@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Text, Link, Heading, Box, useDisclosure, Spinner, Button } from "@chakra-ui/react";
+import {
+  Text,
+  Link,
+  Heading,
+  Box,
+  useDisclosure,
+  Spinner,
+  Button,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+} from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
 import { _get } from "../../common/httpClient";
@@ -105,7 +118,7 @@ const RelationFormateur = ({ relation, callback }) => {
         <EtablissementLibelle etablissement={relation.formateur} />
       </Heading>
 
-      <Text mt={2}>
+      <Text mt={4}>
         <Text as="i" color="gray.500">
           {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
           {relation.formateur?.uai ?? "Inconnu"}
@@ -341,7 +354,7 @@ export const Responsable = () => {
             <>
               {!!relationsResponsable.length && (
                 <Box mt={12} id="responsable">
-                  <Box>
+                  {/* <Box>
                     <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
                       Organismes formateurs associés
                     </Heading>
@@ -351,7 +364,25 @@ export const Responsable = () => {
                         <RelationFormateur relation={relation} callback={reload} />
                       </Box>
                     ))}
-                  </Box>
+                  </Box> */}
+
+                  <Table>
+                    <Thead>
+                      <Tr borderBottom="2px solid" borderColor="gray.200">
+                        <Th> Organismes formateurs associés</Th>
+                      </Tr>
+                    </Thead>
+
+                    <Tbody>
+                      {relationsResponsable.map((relation, index) => (
+                        <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
+                          <Td py={8}>
+                            <RelationFormateur relation={relation} callback={reload} />
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
                 </Box>
               )}
             </>

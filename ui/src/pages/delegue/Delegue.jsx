@@ -70,75 +70,71 @@ export const Delegue = ({ delegue, callback }) => {
           affectation.
         </Heading>
 
-        <Box mt={12}>
-          {responsables?.map((siret) => {
-            const relations = activeRelations?.filter((relation) => relation.responsable?.siret === siret);
-            const responsable = relations?.find((relation) => relation.responsable?.siret === siret)?.responsable;
+        {responsables?.map((siret) => {
+          const relations = activeRelations?.filter((relation) => relation.responsable?.siret === siret);
+          const responsable = relations?.find((relation) => relation.responsable?.siret === siret)?.responsable;
 
-            return (
-              <Box key={siret}>
-                <Text></Text>
+          return (
+            <Box key={siret} mt={12}>
+              <Heading as="h4" size="md" style={{ textDecoration: "underline" }}>
+                Organisme responsable : <EtablissementLibelle etablissement={responsable} />
+              </Heading>
 
-                <Heading as="h4" size="md" style={{ textDecoration: "underline" }}>
-                  Organisme responsable : <EtablissementLibelle etablissement={responsable} />
-                </Heading>
+              <Text mt={4}>
+                Adresse : {responsable?.adresse} - SIRET : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
+                {responsable?.uai ?? "Inconnu"}
+              </Text>
+              <Text mt={4}>
+                Contact au sein de l'organisme responsable : <Text as="b">{responsable?.email ?? "Inconnu"}</Text>
+              </Text>
 
-                <Text mt={4}>
-                  Adresse : {responsable?.adresse} - SIRET : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
-                  {responsable?.uai ?? "Inconnu"}
-                </Text>
-                <Text mt={4}>
-                  Contact au sein de l'organisme responsable : <Text as="b">{responsable?.email ?? "Inconnu"}</Text>
-                </Text>
+              <Box mt={12}>
+                <Box>
+                  <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
+                    Organismes formateurs associés
+                  </Heading>
 
-                <Box mt={12}>
-                  <Box>
-                    <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
-                      Organismes formateurs associés
-                    </Heading>
+                  {relations.map((relation) => (
+                    <Box mt={12} key={relation?.formateur?.siret}>
+                      <Box mt={8} key={relation.etablissement_formateur.siret}>
+                        <Heading as="h4" size="md">
+                          <EtablissementLibelle etablissement={relation.formateur} />
+                        </Heading>
+                        <Text mt={4}>
+                          Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} -
+                          UAI : {relation.formateur?.uai ?? "Inconnu"}
+                        </Text>
+                        <Text mt={6}>
+                          {/* Statut de diffusion des listes : */}
+                          <RelationStatut relation={relation} />
+                        </Text>
 
-                    {relations.map((relation) => (
-                      <Box mt={12} key={relation?.formateur?.siret}>
-                        <Box mt={8} key={relation.etablissement_formateur.siret}>
-                          <Heading as="h4" size="md">
-                            <EtablissementLibelle etablissement={relation.formateur} />
-                          </Heading>
-                          <Text mt={4}>
-                            Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} -
-                            UAI : {relation.formateur?.uai ?? "Inconnu"}
-                          </Text>
-                          <Text mt={6}>
-                            {/* Statut de diffusion des listes : */}
-                            <RelationStatut relation={relation} />
-                          </Text>
+                        {!!relation?.nombre_voeux && (
+                          <Button
+                            mt={6}
+                            variant="primary"
+                            onClick={async () =>
+                              await downloadVoeux({
+                                responsable: relation.responsable,
+                                formateur: relation.formateur,
+                              })
+                            }
+                          >
+                            Télécharger la liste
+                          </Button>
+                        )}
 
-                          {!!relation?.nombre_voeux && (
-                            <Button
-                              mt={6}
-                              variant="primary"
-                              onClick={async () =>
-                                await downloadVoeux({
-                                  responsable: relation.responsable,
-                                  formateur: relation.formateur,
-                                })
-                              }
-                            >
-                              Télécharger la liste
-                            </Button>
-                          )}
-
-                          <Box mt={6}>
-                            <HistoryBlock relation={relation} />
-                          </Box>
+                        <Box mt={6}>
+                          <HistoryBlock relation={relation} />
                         </Box>
                       </Box>
-                    ))}
-                  </Box>
+                    </Box>
+                  ))}
                 </Box>
               </Box>
-            );
-          })}
-        </Box>
+            </Box>
+          );
+        })}
       </Page>
     </>
   );

@@ -404,7 +404,7 @@ export const Etablissements = () => {
 
         <Table style={{ marginTop: "15px" }}>
           <Thead>
-            <Tr>
+            <Tr borderBottom="2px solid" borderColor="gray.200">
               {/* <Th width="80px"></Th> */}
               <Th width="750px">Organismes et contacts habilités</Th>
               {/* <Th width="350px">Organismes responsable</Th>
@@ -417,7 +417,7 @@ export const Etablissements = () => {
           </Thead>
           <Tbody>
             {loading || data.length === 0 ? (
-              <Tr>
+              <Tr borderBottom="2px solid" borderColor="gray.200">
                 <Td colSpan={6}>{loading ? <Progress size="xs" isIndeterminate /> : "Pas de résultats"}</Td>
               </Tr>
             ) : (

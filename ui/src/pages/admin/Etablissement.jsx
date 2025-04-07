@@ -16,6 +16,8 @@ import {
   Tr,
   Tbody,
   Td,
+  Th,
+  Thead,
 } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
@@ -126,7 +128,7 @@ const RelationFormateur = ({ relation, callback }) => {
         <EtablissementLibelle etablissement={relation.formateur} />
       </Heading>
 
-      <Text mt={2}>
+      <Text mt={4}>
         <Text as="i" color="gray.500">
           Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
           {relation.formateur?.uai ?? "Inconnu"}
@@ -358,11 +360,17 @@ export const Etablissement = () => {
               {!!relationsResponsable.length && (
                 <Box mt={12} id="responsable">
                   <Box>
-                    <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
+                    {/* <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
                       Organismes formateurs associés
-                    </Heading>
+                    </Heading> */}
 
                     <Table>
+                      <Thead>
+                        <Tr borderBottom="2px solid" borderColor="gray.200">
+                          <Th> Organismes formateurs associés</Th>
+                        </Tr>
+                      </Thead>
+
                       <Tbody>
                         {relationsResponsable.map((relation, index) => (
                           <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
