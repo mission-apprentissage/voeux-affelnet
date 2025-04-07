@@ -21,8 +21,13 @@ module.exports = {
     await db.collection("users").updateMany({}, { $set: { emails: [] } });
 
     // Suppression des entrées d'historique de la campagne précédente.
-    await db.collection("users").updateMany({}, { $set: { histories: [] } });
-    await db.collection("relations").updateMany({}, { $set: { histories: [] } });
+    // await db.collection("relations").updateMany({}, { $set: { histories: [] } });
+    await db.collection("relations").deleteMany({});
+
+    // Suppression des responsables
+    await db.collection("users").updateMany({ type: "Responsable" }, { $set: { type: USER_TYPE.ETABLISSEMENT } });
+    // Suppression des responsables
+    await db.collection("users").deleteMany({ type: "Formateur" });
 
     // Désactivation des délégations de la campagne précédente.
     await db.collection("users").updateMany(
@@ -33,6 +38,8 @@ module.exports = {
         },
       }
     );
+
+    // TODO : supprimer les relations enregistrées sur les délégués qui n'existent pas en base cette année, ou faire attention lorsqu'il faudra les réactiver
   },
 
   /**

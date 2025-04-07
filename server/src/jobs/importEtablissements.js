@@ -27,9 +27,12 @@ async function importEtablissements(csv, options = {}) {
     total: 0,
     created: 0,
     updated: 0,
+    removed: 0,
     invalid: 0,
     failed: 0,
   };
+
+  const sirets = new Set();
 
   await oleoduc(
     csv,
@@ -90,6 +93,8 @@ async function importEtablissements(csv, options = {}) {
 
     writeData(
       async ([siret, { types, email }]) => {
+        sirets.add(siret);
+
         // console.log({ siret, types, email });
 
         if (siret === SIRET_RECENSEMENT) {
@@ -108,7 +113,7 @@ async function importEtablissements(csv, options = {}) {
             )?.etablissements;
 
             if (organismes?.length > 1) {
-              logger.error(`Multiples organismes trouvés dans le catalogue pour l'SIRET ${siret}`);
+              logger.error(`Multiples organismes trouvés dans le catalogue pour le SIRET ${siret}`);
               stats.failed++;
               return;
             }
@@ -220,6 +225,8 @@ async function importEtablissements(csv, options = {}) {
       { parallel: 1 }
     )
   );
+
+  stats.removed = (await Etablissement.deleteMany({ siret: { $nin: [...sirets] } })).deletedCount || 0;
 
   return stats;
 }
