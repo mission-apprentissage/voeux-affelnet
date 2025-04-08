@@ -1,3 +1,4 @@
+const { USER_STATUS } = require("../src/common/constants/UserStatus");
 const { USER_TYPE } = require("../src/common/constants/UserType");
 
 module.exports = {
@@ -13,7 +14,7 @@ module.exports = {
     // Suppression des relations de la campagne précédente.
     await db.collection("relations").deleteMany({});
 
-    // Mise à jour des utilisateurs admin vers le nouveau model.
+    // Mise à jour des utilisateurs admin vers le nouveau modèle.
     await db.collection("users").updateMany({ type: { $exists: false } }, { $set: { type: USER_TYPE.ADMIN } });
     await db.collection("users").updateMany({}, { $unset: { isAdmin: "" } });
 
@@ -21,12 +22,16 @@ module.exports = {
     await db.collection("users").updateMany({}, { $set: { emails: [] } });
 
     // Suppression des entrées d'historique de la campagne précédente.
-    // await db.collection("relations").updateMany({}, { $set: { histories: [] } });
+    await db.collection("users").updateMany({}, { $set: { histories: [] } });
     await db.collection("relations").deleteMany({});
 
-    // Suppression des responsables
+    // Mise à jour des utilisateurs responsable vers le nouveau modèle.
     await db.collection("users").updateMany({ type: "Responsable" }, { $set: { type: USER_TYPE.ETABLISSEMENT } });
-    // Suppression des responsables
+    await db
+      .collection("users")
+      .updateMany({ type: USER_TYPE.ETABLISSEMENT }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
+
+    // Suppression des formateurs
     await db.collection("users").deleteMany({ type: "Formateur" });
 
     // Désactivation des délégations de la campagne précédente.
