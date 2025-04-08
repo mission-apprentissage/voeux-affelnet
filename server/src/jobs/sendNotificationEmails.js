@@ -17,6 +17,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
   const type = options.type;
+  const username = options.username;
 
   let query;
 
@@ -71,6 +72,10 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
         .lean();
 
       const user = delegue ?? responsable;
+
+      if (username && user.username !== username) {
+        return;
+      }
 
       if (type && user.type !== type) {
         return;
