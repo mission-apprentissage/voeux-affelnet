@@ -394,9 +394,11 @@ export const Etablissement = () => {
                     <RelationStatut relation={relationResponsableFormateur} />{" "}
                   </Text>
 
-                  <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
-                    Télécharger la liste
-                  </Button>
+                  {!!etablissement?.nombre_voeux && (
+                    <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
+                      Télécharger la liste
+                    </Button>
+                  )}
 
                   <Box mt={6}>
                     <HistoryBlock

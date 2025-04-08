@@ -91,7 +91,7 @@ module.exports = ({ users }) => {
         ])
       )?.[0];
 
-      // TODO : filter active delegatiosn
+      // TODO : filter active delegations
 
       res.json(delegue);
     })

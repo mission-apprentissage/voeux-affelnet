@@ -35,13 +35,7 @@ export const MentionsLegales = () => {
               61-65 rue Dutot, 75357 Paris Cedex 15
             </Text>
           </Box>
-          {/* TODO: */}
-          {/* <Box mb={8}>
-          <Heading as={"h3"} size="md" mb={4}>
-            Directeur de la publication
-          </Heading>
-          <Text>Monsieur Guillaume Houzel.</Text>
-        </Box> */}
+
           <Box mb={8}>
             <Heading as={"h3"} size="md" mb={4}>
               Hébergement du site
@@ -56,6 +50,7 @@ export const MentionsLegales = () => {
               Tél. : 09 72 10 10 07
             </Text>
           </Box>
+
           <Box mb={8}>
             <Heading as={"h3"} size="md" mb={4}>
               Amélioration et contact
@@ -78,6 +73,7 @@ export const MentionsLegales = () => {
             . */}
             </Text>
           </Box>
+
           <Box mb={8}>
             <Heading as={"h3"} size="md" mb={4}>
               Sécurité
