@@ -15,7 +15,6 @@ import {
 import { Formik, Form } from "formik";
 
 import { _post } from "../../../httpClient";
-import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
 
 export const ConfirmDelegationModal = ({ relation, callback, isOpen, onClose }) => {
@@ -38,8 +37,8 @@ export const ConfirmDelegationModal = ({ relation, callback, isOpen, onClose }) 
           title: "Délégation confirmée",
           description: (
             <>
-              La délégation de droit a été confirmée pour le formateur <FormateurLibelle formateur={formateur} /> vers
-              l'adresse courriel {delegue.email}
+              La délégation de droit a été confirmée pour le formateur{" "}
+              <EtablissementLibelle etablissement={formateur} /> vers l'adresse courriel {delegue.email}
             </>
           ),
           status: "success",

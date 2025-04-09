@@ -21,9 +21,9 @@ import {
 import { Formik, Form, Field } from "formik";
 
 import { _post } from "../../../httpClient";
-import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
 import { DOWNLOAD_TYPE } from "../../../constants/DownloadType";
+import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
 
 export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -44,8 +44,8 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
           title: "Délégation mise à jour",
           description: (
             <>
-              La délégation de droit a été enregistrée pour le formateur <FormateurLibelle formateur={formateur} /> vers
-              l'adresse courriel {form.email}
+              La délégation de droit a été enregistrée pour le formateur{" "}
+              <EtablissementLibelle etablissement={formateur} /> vers l'adresse courriel {form.email}
             </>
           ),
           status: "success",
@@ -83,7 +83,8 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
       <ModalContent>
         <ModalHeader>
           <Heading as="h2" size="lg">
-            Déléguer le droit de réception de la liste de candidats pour <FormateurLibelle formateur={formateur} />
+            Déléguer le droit de réception de la liste de candidats pour{" "}
+            <EtablissementLibelle etablissement={formateur} />
           </Heading>
         </ModalHeader>
 

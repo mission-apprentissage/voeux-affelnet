@@ -20,8 +20,8 @@ import {
 import { Formik, Form, Field } from "formik";
 
 import { _put } from "../../../httpClient";
-import { ResponsableLibelle } from "../../responsable/fields/ResponsableLibelle";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
+import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
 
 export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -61,7 +61,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
       <ModalContent>
         <ModalHeader>
           Modifier l'adresse courriel de contact pour l'organisme responsable{" "}
-          <ResponsableLibelle responsable={responsable} /> :
+          <EtablissementLibelle etablissement={responsable} /> :
         </ModalHeader>
 
         <ModalCloseButton />

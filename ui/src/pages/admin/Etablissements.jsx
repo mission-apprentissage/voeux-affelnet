@@ -50,13 +50,14 @@ export const ListRelations = ({ relations, delegation, limit }) => {
           <ListItem mt={2} key={index}>
             <Text display="inline">
               <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
-              {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+              {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret : {relation.formateur?.siret ?? "Inconnu"}{" "}
+              - UAI : {relation.formateur?.uai ?? "Inconnu"}
             </Text>
-            <Text>
+            {/* <Text>
               <Text as="i" color="gray.500">
                 Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
               </Text>
-            </Text>
+            </Text> */}
             {!!relation.nombre_voeux_restant && (
               <Text>
                 {relation.nombre_voeux_restant} candidature
@@ -465,13 +466,14 @@ export const Etablissements = () => {
                       <Box lineHeight={6}>
                         <Text as="b">
                           <EtablisssementRaisonSociale etablissement={etablissement} />,{" "}
-                          {etablissement.libelle_ville ?? "Ville inconnue"}{" "}
+                          {etablissement.libelle_ville ?? "Ville inconnue"} - Siret : {etablissement.siret ?? "Inconnu"}{" "}
+                          - UAI : {etablissement.uai ?? "Inconnu"}
                         </Text>
-                        <Text>
+                        {/* <Text>
                           <Text as="i" color="gray.500">
                             Siret : {etablissement.siret ?? "Inconnu"} - UAI : {etablissement.uai ?? "Inconnu"}
                           </Text>
-                        </Text>
+                        </Text> */}
 
                         {/* {etablissement.is_responsable && <OrganismeResponsableTag verticalAlign="baseline" ml={2} />}
                         {etablissement.is_responsable_formateur && (
@@ -483,7 +485,9 @@ export const Etablissements = () => {
                     <Td> */}
                       <Box lineHeight={6}>
                         <Text>
-                          Contact responsable : <Text as="b">{etablissement.email ?? "Information manquante"}</Text>
+                          Contact responsable : {/*<Text as="b">*/}
+                          {etablissement.email ?? "Information manquante"}
+                          {/*</Text>*/}
                         </Text>
                         {etablissement.relations?.length === 1 && etablissement.relations?.[0].delegue ? (
                           <Text mt={4}>

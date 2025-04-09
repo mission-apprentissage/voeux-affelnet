@@ -23,7 +23,10 @@ import {
 import { Page } from "../../common/components/layout/Page";
 import { _get, _put } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
-import { EtablissementLibelle } from "../../common/components/etablissement/fields/EtablissementLibelle";
+import {
+  EtablissementLibelle,
+  EtablisssementRaisonSociale,
+} from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { OrganismeResponsableTag } from "../../common/components/tags/OrganismeResponsable";
 import { OrganismeFormateurTag } from "../../common/components/tags/OrganismeFormateur";
 import { OrganismeResponsableFormateurTag } from "../../common/components/tags/OrganismeResponsableFormateur";
@@ -125,14 +128,14 @@ const RelationFormateur = ({ relation, callback }) => {
   return (
     <Box>
       <Heading as="h4" size="md">
-        <EtablissementLibelle etablissement={relation.formateur} />
+        <EtablisssementRaisonSociale etablissement={relation.formateur} />
       </Heading>
 
       <Text mt={4}>
-        <Text as="i" color="gray.500">
-          Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-          {relation.formateur?.uai ?? "Inconnu"}
-        </Text>
+        {/* <Text as="i" color="gray.500"> */}
+        Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+        {relation.formateur?.uai ?? "Inconnu"}
+        {/* </Text> */}
       </Text>
 
       <Box mt={2}>
@@ -150,9 +153,15 @@ const RelationFormateur = ({ relation, callback }) => {
         </Button>
       )}
 
-      <Box mt={6}>
-        <HistoryBlock relation={relation} formateur={relation.formateur} delegue={relation.delegue} />
-      </Box>
+      {!![
+        ...(relation?.histories ?? []),
+        ...(relation.responsable?.histories ?? []),
+        ...(relation.delegue?.histories ?? []),
+      ].length && (
+        <Box mt={6}>
+          <HistoryBlock relation={relation} formateur={relation.formateur} delegue={relation.delegue} />
+        </Box>
+      )}
     </Box>
   );
 };
@@ -291,7 +300,7 @@ export const Etablissement = () => {
 
   const title = (
     <>
-      <EtablissementLibelle etablissement={etablissement} />
+      <EtablisssementRaisonSociale etablissement={etablissement} />
     </>
   );
 
@@ -332,10 +341,10 @@ export const Etablissement = () => {
             </Box>
 
             <Text mt={6}>
-              <Text as="i" color="gray.500">
-                Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
-                {etablissement?.uai ?? "Inconnu"}
-              </Text>
+              {/* <Text as="i" color="gray.500"> */}
+              Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
+              {etablissement?.uai ?? "Inconnu"}
+              {/* </Text> */}
             </Text>
           </Box>
 

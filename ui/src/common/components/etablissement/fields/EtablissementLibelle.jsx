@@ -16,7 +16,7 @@ export const EtablissementLibelle = ({ etablissement }) => {
   return (
     <Text display={"inline"}>
       <EtablisssementRaisonSociale etablissement={etablissement} />, {etablissement.libelle_ville ?? "Ville inconnue"}{" "}
-      (UAI : {etablissement.uai ?? "Inconnu"})
+      (Siret : {etablissement.siret ?? "Inconnu"} - UAI : {etablissement.uai ?? "Inconnu"})
     </Text>
   );
 };

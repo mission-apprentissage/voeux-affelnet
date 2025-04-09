@@ -22,8 +22,7 @@ import { Yup } from "../common/Yup";
 import { _get } from "../common/httpClient";
 import ErrorMessage from "../common/components/ErrorMessage";
 import { Page } from "../common/components/layout/Page";
-import { FormateurLibelle } from "../common/components/formateur/fields/FormateurLibelle";
-import { ResponsableLibelle } from "../common/components/responsable/fields/ResponsableLibelle";
+import { EtablissementLibelle } from "../common/components/etablissement/fields/EtablissementLibelle";
 
 // function getDownloadStatus(responsable, formateur) {
 //   let statut;
@@ -162,7 +161,7 @@ function ReceptionVoeuxPage() {
 
             {responsableData && (
               <Box pl={8} mb={12}>
-                Organisme responsable trouvé : <ResponsableLibelle responsable={responsableData.responsable} />
+                Organisme responsable trouvé : <EtablissementLibelle etablissement={responsableData.responsable} />
                 <br />
                 <br />
                 Cet organisme recevra les vœux exprimés pour les établissements d'accueil suivants :
@@ -244,7 +243,7 @@ function ReceptionVoeuxPage() {
 
             {formateurData && (
               <Box pl={8} mb={12}>
-                Établissement d'accueil trouvé : <FormateurLibelle formateur={formateurData.formateur} />
+                Établissement d'accueil trouvé : <EtablissementLibelle etablissement={formateurData.formateur} />
                 <br />
                 <br />
                 Cet établissement d'accueil dispense des formations pour les organismes responsables suivants :

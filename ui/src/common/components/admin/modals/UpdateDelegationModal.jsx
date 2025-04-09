@@ -23,11 +23,10 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
-
 import { _delete, _post } from "../../../httpClient";
-import { FormateurLibelle } from "../../formateur/fields/FormateurLibelle";
 import { RelationEmail } from "../fields/RelationEmail";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
+import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
 
 export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) => {
   const toast = useToast();
@@ -49,8 +48,8 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
           title: "Délégation mise à jour",
           description: (
             <>
-              La délégation de droit a été modifiée pour le formateur <FormateurLibelle formateur={formateur} /> vers
-              l'adresse courriel {form.email}
+              La délégation de droit a été modifiée pour le formateur <EtablissementLibelle etablissement={formateur} />{" "}
+              vers l'adresse courriel {form.email}
             </>
           ),
           status: "success",
@@ -94,7 +93,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         <ModalHeader>
           <Heading as="h2" size="lg">
             Modifier la délégation de droit de réception de la liste de candidats pour{" "}
-            <FormateurLibelle formateur={formateur} />
+            <EtablissementLibelle etablissement={formateur} />
           </Heading>
         </ModalHeader>
 
@@ -103,7 +102,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
         <ModalBody>
           <Text fontSize="lg" mb={6}>
             Vous vous apprêtez à modifier le destinataire de la délégation de droits au sein de l'organisme formateur{" "}
-            <FormateurLibelle formateur={formateur} />, actuellement <RelationEmail relation={relation} />.
+            <EtablissementLibelle etablissement={formateur} />, actuellement <RelationEmail relation={relation} />.
           </Text>
           <Text mb={4}>
             <strong>Précisez ce que vous souhaitez faire :</strong>
