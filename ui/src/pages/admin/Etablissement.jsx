@@ -10,7 +10,6 @@ import {
   Spinner,
   Alert,
   AlertIcon,
-  Flex,
   Button,
   Table,
   Tr,
@@ -21,17 +20,12 @@ import {
 } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
-import { _get, _put } from "../../common/httpClient";
+import { _get } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
-import {
-  EtablissementLibelle,
-  EtablisssementRaisonSociale,
-} from "../../common/components/etablissement/fields/EtablissementLibelle";
+import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { OrganismeResponsableTag } from "../../common/components/tags/OrganismeResponsable";
 import { OrganismeFormateurTag } from "../../common/components/tags/OrganismeFormateur";
 import { OrganismeResponsableFormateurTag } from "../../common/components/tags/OrganismeResponsableFormateur";
-// import { ContactResponsableTag } from "../../../common/components/tags/ContactResponsable";
-// import { ContactDelegueTag } from "../../../common/components/tags/ContactDelegue";
 import { UpdateResponsableEmailModal } from "../../common/components/admin/modals/UpdateResponsableEmailModal";
 import { DelegationModal } from "../../common/components/admin/modals/DelegationModal";
 import { UpdateDelegationModal } from "../../common/components/admin/modals/UpdateDelegationModal";

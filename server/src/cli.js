@@ -32,7 +32,6 @@ const exportResponsables = require("./jobs/exportResponsables");
 const buildRelationCsv = require("./jobs/buildRelationCsv");
 const { createAdmin } = require("./jobs/createAdmin");
 const { createAcademie } = require("./jobs/createAcademie");
-const migrate = require("./jobs/migrate.js.DEPRECATED");
 const { injectDataset } = require("../tests/dataset/injectDataset");
 const { Etablissement } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi");
@@ -439,12 +438,6 @@ cli
 cli.command("computeStats").action(() => {
   runScript(() => {
     return computeStats();
-  });
-});
-
-cli.command("migrate").action(() => {
-  runScript(() => {
-    return migrate();
   });
 });
 
