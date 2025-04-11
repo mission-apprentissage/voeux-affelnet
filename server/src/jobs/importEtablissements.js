@@ -226,7 +226,7 @@ async function importEtablissements(csv, options = {}) {
     )
   );
 
-  stats.removed = (await Etablissement.deleteMany({ siret: { $nin: [...sirets] } })).deletedCount || 0;
+  // stats.removed = (await Etablissement.deleteMany({ siret: { $nin: [...sirets] } })).deletedCount || 0;
 
   return stats;
 }

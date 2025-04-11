@@ -22,16 +22,16 @@ async function cleanEtablissements(relationsCsv, options = {}) {
       on_record: (record) => omitEmpty(record),
     }),
     accumulateData(
-      async (accumulator, { uai_responsable, uai_formateurs }) => {
-        if (uai_responsable === UAI_RECENSEMENT) {
+      async (accumulator, { siret_responsable, siret_formateurs }) => {
+        if (siret_responsable === UAI_RECENSEMENT) {
           return accumulator;
         }
 
-        accumulator = [...new Set([...accumulator, uai_responsable])];
+        accumulator = [...new Set([...accumulator, siret_responsable])];
 
-        uai_formateurs.split(",").forEach((uai) => {
-          if (uai !== UAI_RECENSEMENT) {
-            accumulator = [...new Set([...accumulator, uai])];
+        siret_formateurs.split(",").forEach((siret) => {
+          if (siret !== UAI_RECENSEMENT) {
+            accumulator = [...new Set([...accumulator, siret])];
           }
         });
 
@@ -51,11 +51,11 @@ async function cleanEtablissements(relationsCsv, options = {}) {
 
   logger.warn(
     "Les établissement suivants vont être supprimés :",
-    JSON.stringify((await Etablissement.find({ uai: { $nin: toKeep } })).map((etablissement) => etablissement?.uai))
+    JSON.stringify((await Etablissement.find({ siret: { $nin: toKeep } })).map((etablissement) => etablissement?.siret))
   );
 
   if (options.proceed) {
-    const results = await Etablissement.deleteMany({ uai: { $nin: toKeep } });
+    const results = await Etablissement.deleteMany({ siret: { $nin: toKeep } });
 
     stats.total = toKeep.length;
     stats.removed = results.deletedCount;
