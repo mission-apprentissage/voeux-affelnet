@@ -514,15 +514,9 @@ export const Etablissements = () => {
                           </Link>
                         </Text>
 
-                        {USER_STATUS.ACTIVE !== etablissement.statut && (
-                          <>
-                            <Text mt={6}>
-                              <ContactStatut user={etablissement} short />
-                            </Text>
-                            {/* <Text mt={4}>Nombre de candidatures : {etablissement.nombre_voeux}</Text> */}
-                            {/* <Text mt={4}>Restant à télécharger : {etablissement.nombre_voeux_restant}</Text> */}
-                          </>
-                        )}
+                        <Text mt={6}>
+                          <ContactStatut user={etablissement} short />
+                        </Text>
 
                         <Text mt={6}>
                           <RelationsStatut relations={etablissement.relations} />

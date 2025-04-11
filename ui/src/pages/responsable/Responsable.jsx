@@ -19,7 +19,10 @@ import {
 import { Page } from "../../common/components/layout/Page";
 import { _get } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
-import { EtablissementLibelle } from "../../common/components/etablissement/fields/EtablissementLibelle";
+import {
+  EtablissementLibelle,
+  EtablisssementRaisonSociale,
+} from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { UpdateResponsableEmailModal } from "../../common/components/responsable/modals/UpdateResponsableEmailModal";
 import { DelegationModal } from "../../common/components/responsable/modals/DelegationModal";
 import { UpdateDelegationModal } from "../../common/components/responsable/modals/UpdateDelegationModal";
@@ -120,10 +123,8 @@ const RelationFormateur = ({ relation, callback }) => {
       </Heading>
 
       <Text mt={4}>
-        <Text as="i" color="gray.500">
-          {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-          {relation.formateur?.uai ?? "Inconnu"}
-        </Text>
+        Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+        {relation.formateur?.uai ?? "Inconnu"}
       </Text>
 
       <Box mt={2}>
@@ -291,7 +292,7 @@ export const Responsable = () => {
 
   const title = (
     <>
-      <EtablissementLibelle etablissement={etablissement} />
+      <EtablisssementRaisonSociale etablissement={etablissement} />
     </>
   );
 
@@ -335,10 +336,8 @@ export const Responsable = () => {
         <Box my={6}>
           <Box>
             <Text mt={6}>
-              <Text as="i" color="gray.500">
-                Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
-                {etablissement?.uai ?? "Inconnu"}
-              </Text>
+              Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
+              {etablissement?.uai ?? "Inconnu"}
             </Text>
           </Box>
 

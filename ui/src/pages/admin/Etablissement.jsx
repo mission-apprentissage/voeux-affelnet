@@ -132,10 +132,8 @@ const RelationFormateur = ({ relation, callback }) => {
       </Heading>
 
       <Text mt={4}>
-        {/* <Text as="i" color="gray.500"> */}
         Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
         {relation.formateur?.uai ?? "Inconnu"}
-        {/* </Text> */}
       </Text>
 
       <Box mt={2}>
@@ -341,10 +339,8 @@ export const Etablissement = () => {
             </Box>
 
             <Text mt={6}>
-              {/* <Text as="i" color="gray.500"> */}
               Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
               {etablissement?.uai ?? "Inconnu"}
-              {/* </Text> */}
             </Text>
           </Box>
 

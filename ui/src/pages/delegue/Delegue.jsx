@@ -3,7 +3,7 @@ import { Box, Text, Heading, Button, useDisclosure } from "@chakra-ui/react";
 import { Page } from "../../common/components/layout/Page";
 
 import { Breadcrumb } from "../../common/components/Breadcrumb";
-import { EtablissementLibelle } from "../../common/components/etablissement/fields/EtablissementLibelle";
+import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { RelationStatut } from "../../common/components/delegue/fields/RelationStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/delegueHooks";
@@ -77,7 +77,7 @@ export const Delegue = ({ delegue, callback }) => {
           return (
             <Box key={siret} mt={12}>
               <Heading as="h4" size="md" style={{ textDecoration: "underline" }}>
-                Organisme responsable : <EtablissementLibelle etablissement={responsable} />
+                Organisme responsable : <EtablisssementRaisonSociale etablissement={responsable} />
               </Heading>
 
               <Text mt={4}>
@@ -98,7 +98,7 @@ export const Delegue = ({ delegue, callback }) => {
                     <Box mt={12} key={relation?.formateur?.siret}>
                       <Box mt={8} key={relation.etablissement_formateur.siret}>
                         <Heading as="h4" size="md">
-                          <EtablissementLibelle etablissement={relation.formateur} />
+                          <EtablisssementRaisonSociale etablissement={relation.formateur} />
                         </Heading>
                         <Text mt={4}>
                           Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} -
