@@ -12,35 +12,35 @@ export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) 
     [
       partialDownload,
       {
-        icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
         long: partialDownload,
       },
     ],
     [
       noDownload,
       {
-        icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
         long: noDownload,
       },
     ],
     [
       fullDownload,
       {
-        icon: <SuccessFill verticalAlign="middle" />,
+        icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
         long: fullDownload,
       },
     ],
     [
       noCandidature,
       {
-        icon: <SuccessFill verticalAlign="middle" />,
+        icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
         long: noCandidature,
       },
     ],
     [
       unknown,
       {
-        icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
         long: unknown,
       },
     ],
@@ -202,7 +202,7 @@ export const RelationStatut = ({ relation }) => {
 //   //     case !voeuxDisponible: {
 //   //       return (
 //   //         <Text as="span">
-//   //           <SuccessFill verticalAlign="text-bottom" /> Pas de vœux disponibles
+//   //           <SuccessFill fontSize="18px" verticalAlign="text-bottom" /> Pas de vœux disponibles
 //   //         </Text>
 //   //       );
 //   //     }

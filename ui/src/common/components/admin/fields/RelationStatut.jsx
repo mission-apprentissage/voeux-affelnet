@@ -12,35 +12,35 @@ export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) 
     [
       partialDownload,
       {
-        icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
         long: partialDownload,
       },
     ],
     [
       noDownload,
       {
-        icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
         long: noDownload,
       },
     ],
     [
       fullDownload,
       {
-        icon: <SuccessFill verticalAlign="middle" />,
+        icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
         long: fullDownload,
       },
     ],
     [
       noCandidature,
       {
-        icon: <SuccessFill verticalAlign="middle" />,
+        icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
         long: noCandidature,
       },
     ],
     [
       unknown,
       {
-        icon: <WarningFill color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
         long: unknown,
       },
     ],
@@ -74,54 +74,3 @@ export const RelationStatut = ({ relation }) => {
     }
   }
 };
-
-// export const RelationStatut = ({ relation }) => {
-//   const voeuxDisponible = relation?.nombre_voeux > 0;
-
-//   switch (true) {
-//     // TODO : [Candidatures chargées, non diffusées]
-//     // RELATION_STATUS.CANDIDATURES_TELECHARGEES
-//     case voeuxDisponible &&
-//       new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
-//       !!relation.voeux_telechargement.find(
-//         (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
-//       ): {
-//       return <>{relation?.nombre_voeux} candidatures toutes téléchargées</>;
-//     }
-//     // RELATION_STATUS.CANDIDATURES_NON_TELECHARGEES
-//     case voeuxDisponible &&
-//       new Date(relation.first_date_voeux).getTime() !== new Date(relation.last_date_voeux).getTime() &&
-//       !!relation.voeux_telechargement.find(
-//         (telechargement) =>
-//           new Date(telechargement.date).getTime() <= new Date(relation.last_date_voeux).getTime() &&
-//           new Date(telechargement.date).getTime() > new Date(relation.first_date_voeux).getTime()
-//       ): {
-//       return <>{relation?.nombre_voeux_restant} candidatures non téléchargées</>;
-//     }
-//     // RELATION_STATUS.CANDIDATURES_TELECHARGEES
-//     case voeuxDisponible &&
-//       new Date(relation.first_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime() &&
-//       !!relation.voeux_telechargement.find(
-//         (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
-//       ): {
-//       return <>{relation?.nombre_voeux} candidatures toutes téléchargées</>;
-//     }
-//     // RELATION_STATUS.CANDIDATURES_NON_TELECHARGEES
-//     case voeuxDisponible &&
-//       (!relation.voeux_telechargement.length ||
-//         !relation.voeux_telechargement.find(
-//           (telechargement) => new Date(telechargement.date).getTime() > new Date(relation.last_date_voeux).getTime()
-//         )): {
-//       return <>{relation?.nombre_voeux_restant} candidatures non téléchargées</>;
-//     }
-
-//     // RELATION_STATUS.PAS_DE_CANDIDATURE
-//     case !voeuxDisponible:
-//       return <>Aucune candidature</>;
-
-//     // RELATION_STATUS.INCONNU
-//     default: {
-//       return <>État inconnu</>;
-//     }
-//   }
-// };
