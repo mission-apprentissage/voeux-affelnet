@@ -6,6 +6,7 @@ const { USER_STATUS } = require("../common/constants/UserStatus");
 const { USER_TYPE } = require("../common/constants/UserType");
 const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
 const { ResponsableActions, DelegueActions, RelationActions } = require("../common/constants/History");
+const { CONTACT_STATUS } = require("../common/constants/ContactStatus");
 
 async function download(output, options = {}) {
   const columns = options.columns || {};
@@ -126,7 +127,7 @@ async function download(output, options = {}) {
         "Siret de l'établissement responsable": ({ responsable }) => responsable?.siret,
 
         "Url du responsable": ({ responsable }) =>
-          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable?.siret}`,
+          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/etablissement/${responsable?.siret}`,
 
         "Raison sociale de l’organisme responsable": ({ responsable }) => responsable?.raison_sociale,
 
@@ -140,8 +141,8 @@ async function download(output, options = {}) {
 
         "Siret de l'établissement formateur": ({ formateur }) => formateur?.siret,
 
-        "Url du formateur": ({ responsable, formateur }) =>
-          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/responsable/${responsable?.siret}/formateur/${formateur?.siret}`,
+        "Url du formateur": ({ formateur }) =>
+          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/etablissement/${formateur?.siret}`,
 
         "Raison sociale de l’établissement formateur": ({ formateur }) => formateur?.raison_sociale,
 
@@ -169,134 +170,85 @@ async function download(output, options = {}) {
 
         "Email du délégué": async ({ delegue }) => delegue?.email,
 
-        "Statut ": async ({
-          responsable,
-          delegue,
-          nombre_voeux,
-          first_date_voeux,
-          last_date_voeux,
-          voeux_telechargements,
-        }) => {
-          const voeuxTelechargementsDelegue = voeux_telechargements?.filter(
-            (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
-          );
-
-          const voeuxTelechargementsResponsable = voeux_telechargements?.filter(
-            (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
-          );
-
-          const voeuxDisponible = nombre_voeux > 0;
-
+        "Statut de création du compte": async ({ responsable, delegue }) => {
           switch (!!delegue) {
             case true: {
               switch (true) {
-                case USER_STATUS.ACTIVE === delegue?.statut &&
-                  voeuxDisponible &&
-                  new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsDelegue?.find(
-                    (telechargement) => new Date(telechargement.date).getTime() > new Date(last_date_voeux).getTime()
-                  ): {
-                  return "✅ Mise à jour téléchargée";
+                case !delegue.email: {
+                  return `⚠️ ${CONTACT_STATUS.EMAIL_MANQUANT}`;
                 }
-                case USER_STATUS.ACTIVE === delegue?.statut &&
-                  voeuxDisponible &&
-                  new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsDelegue?.find(
-                    (telechargement) =>
-                      new Date(telechargement.date).getTime() <= new Date(last_date_voeux).getTime() &&
-                      new Date(telechargement.date).getTime() > new Date(first_date_voeux).getTime()
-                  ): {
-                  return "⚠️ Mise à jour non téléchargée";
+
+                case USER_STATUS.ACTIVE === delegue.statut: {
+                  return `✅ ${CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_CREE}`;
                 }
-                case USER_STATUS.ACTIVE === delegue?.statut &&
-                  voeuxDisponible &&
-                  new Date(first_date_voeux).getTime() === new Date(last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsDelegue?.find(
-                    (telechargement) => new Date(telechargement.date).getTime() > new Date(last_date_voeux).getTime()
-                  ): {
-                  return "✅ Liste téléchargée";
+
+                case USER_STATUS.CONFIRME === delegue.statut: {
+                  return `⚠️ ${CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_NON_CREE}`;
                 }
-                case USER_STATUS.ACTIVE === delegue?.statut &&
-                  voeuxDisponible &&
-                  (!voeuxTelechargementsDelegue?.length ||
-                    !voeuxTelechargementsDelegue?.find(
-                      (telechargement) => new Date(telechargement.date).getTime() > new Date(last_date_voeux).getTime()
-                    )): {
-                  return "⚠️ Compte créé, liste non téléchargée";
+
+                case USER_STATUS.EN_ATTENTE === delegue.statut && !!delegue.emails.length: {
+                  return `⚠️ ${CONTACT_STATUS.EN_ATTENTE_DE_CONFIRMATION}`;
                 }
-                case USER_STATUS.ACTIVE === delegue?.statut && !voeuxDisponible: {
-                  return "✅ Compte créé";
-                }
-                case USER_STATUS.CONFIRME === delegue?.statut: {
-                  return "⚠️ Délégation activée, compte non créé";
-                }
-                case !!delegue?.emails.length && USER_STATUS.EN_ATTENTE === delegue?.statut: {
-                  return "⚠️ En attente de confirmation d'email";
-                }
-                case !delegue?.emails.length && USER_STATUS.EN_ATTENTE === delegue?.statut: {
-                  return "✅ En attente de diffusion de campagne";
+
+                case USER_STATUS.EN_ATTENTE === delegue.statut && !delegue.emails.length: {
+                  return `✅ ${CONTACT_STATUS.EN_ATTENTE_DE_DIFFUSION}`;
                 }
                 default: {
-                  return "⚠️ Etat inconnu";
+                  return `⚠️ ${CONTACT_STATUS.INCONNU}`;
                 }
               }
             }
             case false: {
               switch (true) {
-                case USER_STATUS.ACTIVE === responsable?.statut &&
-                  voeuxDisponible &&
-                  new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsResponsable.find(
-                    (telechargement) => new Date(telechargement.date).getTime() > new Date(last_date_voeux).getTime()
-                  ): {
-                  return "✅ Mise à jour téléchargée";
-                }
-                case USER_STATUS.ACTIVE === responsable?.statut &&
-                  voeuxDisponible &&
-                  new Date(first_date_voeux).getTime() !== new Date(last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsResponsable.find(
-                    (telechargement) =>
-                      new Date(telechargement.date).getTime() <= new Date(last_date_voeux).getTime() &&
-                      new Date(telechargement.date).getTime() > new Date(first_date_voeux).getTime()
-                  ): {
-                  return "⚠️ Mise à jour non téléchargée";
-                }
-                case USER_STATUS.ACTIVE === responsable?.statut &&
-                  voeuxDisponible &&
-                  new Date(first_date_voeux).getTime() === new Date(last_date_voeux).getTime() &&
-                  !!voeuxTelechargementsResponsable.find(
-                    (telechargement) => new Date(telechargement.date).getTime() > new Date(last_date_voeux).getTime()
-                  ): {
-                  return "✅ Liste téléchargée";
-                }
-                case USER_STATUS.ACTIVE === responsable?.statut &&
-                  voeuxDisponible &&
-                  (!voeuxTelechargementsResponsable.length ||
-                    !voeuxTelechargementsResponsable.find(
-                      (telechargement) => new Date(telechargement.date).getTime() > new Date(last_date_voeux).getTime()
-                    )): {
-                  return "⚠️ Compte créé, liste non téléchargée";
-                }
-                case USER_STATUS.ACTIVE === responsable?.statut && !voeuxDisponible: {
-                  return "✅ Compte créé";
-                }
-                case USER_STATUS.CONFIRME === responsable?.statut: {
-                  return "⚠️ Email confirmé, compte non créé";
-                }
-                case !!responsable.emails.length && USER_STATUS.EN_ATTENTE === responsable?.statut: {
-                  return "⚠️ En attente de confirmation d'email";
-                }
-                case !responsable.emails.length && USER_STATUS.EN_ATTENTE === responsable?.statut: {
-                  return "✅ En attente de diffusion de campagne";
+                case !responsable.email: {
+                  return `⚠️ ${CONTACT_STATUS.EMAIL_MANQUANT}`;
                 }
 
+                case USER_STATUS.ACTIVE === responsable.statut: {
+                  return `✅ ${CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_CREE}`;
+                }
+
+                case USER_STATUS.CONFIRME === responsable.statut: {
+                  return `⚠️ ${CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_NON_CREE}`;
+                }
+
+                case USER_STATUS.EN_ATTENTE === responsable.statut && !!responsable.emails.length: {
+                  return `⚠️ ${CONTACT_STATUS.EN_ATTENTE_DE_CONFIRMATION}`;
+                }
+
+                case USER_STATUS.EN_ATTENTE === responsable.statut && !responsable.emails.length: {
+                  return `✅ ${CONTACT_STATUS.EN_ATTENTE_DE_DIFFUSION}`;
+                }
                 default: {
-                  return "⚠️ Etat inconnu";
+                  return `⚠️ ${CONTACT_STATUS.INCONNU}`;
                 }
               }
             }
+          }
+        },
+
+        "Statut de diffusion des candidatures": async ({ nombre_voeux, nombre_voeux_restant }) => {
+          const partialDownload = `⚠️ ${nombre_voeux} candidatures, dont ${nombre_voeux_restant} non téléchargées`;
+          const noDownload = `⚠️ ${nombre_voeux} candidatures, non téléchargées`;
+          const fullDownload = `✅ ${nombre_voeux} candidatures, toutes téléchargées`;
+          const noCandidature = `✅ Aucune candidature`;
+          const unknown = `⚠️ État inconnu`;
+
+          switch (true) {
+            case nombre_voeux && nombre_voeux_restant && nombre_voeux_restant !== nombre_voeux:
+              return partialDownload;
+
+            case nombre_voeux && nombre_voeux_restant === nombre_voeux:
+              return noDownload;
+
+            case nombre_voeux && !nombre_voeux_restant:
+              return fullDownload;
+
+            case !nombre_voeux:
+              return noCandidature;
+
             default: {
-              return "⚠️ Etat inconnu";
+              return unknown;
             }
           }
         },
