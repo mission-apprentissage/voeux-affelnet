@@ -221,6 +221,25 @@ function LoginPage() {
               </Alert>
             ) : (
               <Alert display={"flex"} flexDirection={"column"}>
+                <Text as="h3" fontWeight={"bold"}>
+                  Diffusion des candidatures apprentissage des élèves de 3e pour la rentrée 2025
+                </Text>
+                <Text mt={4} fontWeight={"bold"}>
+                  Le service de diffusion des candidatures aux organismes de formation en apprentissage sera accessible
+                  la dernière semaine de mai 2025
+                </Text>
+                <Text mt={4}>
+                  Dernière semaine de mai 2025 : un courriel sera envoyé aux organismes responsables des offres, afin de
+                  confirmer ou modifier les destinataires habilités à réceptionner les listes.
+                </Text>
+                <Text mt={4}>
+                  Première semaine de juin 2025 : les listes de candidatures seront diffusées aux personnes habilitées.
+                </Text>
+                <Text mt={4}>
+                  Dernière semaine de juin 2025 : les mises à jour de listes (éventuels ajouts ou suppressions de
+                  candidatures) seront diffusées aux personne habilitées.
+                </Text>
+
                 {/* <Text mb={4}>
                   Le service de diffusion des candidatures sera accessible dans la semaine du 21 mai 2024 : un courriel
                   sera envoyé aux organismes responsables des offres pour leur permettre de confirmer l'adresse courriel
@@ -264,7 +283,7 @@ function LoginPage() {
                     {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
                   </Link>
                 </Text> */}
-
+                {/*
                 <Text mb={4}>
                   Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, puis ont été mises à
                   jour, selon les organismes, le 20 juin, le 24 juin ou le 27 juin. Des courriels ont été diffusés aux
@@ -293,7 +312,7 @@ function LoginPage() {
                       en indiquant vos numéros Siret et UAI.
                     </ListItem>
                   </UnorderedList>
-                </Text>
+                </Text> */}
 
                 {/* <Text mb={4}>
                   <strong>
