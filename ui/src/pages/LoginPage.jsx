@@ -222,13 +222,12 @@ function LoginPage() {
                 </Text>
 
                 <Text mb={4}>
-                  Les listes de candidatures seront ensuite diffusées entre le 3 juin et le 7 juin 2024. Les contacts
+                  Les listes de candidatures seront ensuite diffusées entre la première semaine de juin. Les contacts
                   habilités en seront informés par courriel.
                 </Text>
 
                 <Text mb={4}>
-                  En cas de mise à jour de ces listes, une deuxième et dernière version sera diffusée entre le 18 juin
-                  et le 21 juin 2024.
+                  En cas de mise à jour de ces listes, une deuxième et dernière version sera diffusée la troisième semaine de juin.
                 </Text>
 
                 <Text mb={4}>
@@ -325,14 +324,14 @@ function LoginPage() {
                         <Text mb={4}>
                           <UnorderedList>
                             <ListItem>
-                              Mi-mai : une première campagne sera diffusée par courriel pour identifier les directeurs
+                              Mi-mai: une première campagne sera diffusée par courriel pour identifier les directeurs
                               d’organismes responsables, confirmer l’adresse email de réception, créer le mot de passe
-                              de connexion (les mots de passe créés en 2022 ne seront pas utilisables).
+                              de connexion (les mots de passe créés en 2024 ne seront pas utilisables).
                             </ListItem>
                             <ListItem>
-                              Semaine du 3 juin : diffusion des listes de candidats sur l’adresse courriel confirmée.
+                              Première semaine de juin: diffusion des listes de candidats sur l’adresse courriel confirmée.
                             </ListItem>
-                            <ListItem>Semaine du 18 juin : diffusion des listes mises à jour.</ListItem>
+                            <ListItem>Troisième semaine de juin: diffusion des listes mises à jour.</ListItem>
                           </UnorderedList>
                         </Text>
                       </AccordionPanel>

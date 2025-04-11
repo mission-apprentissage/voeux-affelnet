@@ -71,7 +71,8 @@ function StatusErrorMessage({ error, username, actionToken }) {
               ).
             </Text>
             <Text mb={4}>
-              C’est à cette adresse que les listes de candidats seront transmises, à partir de la semaine du 3 juin.
+              C’est à cette adresse que les listes de candidats seront transmises, à partir de la première semaine de
+              juin.
             </Text>
             <Text mb={4}>
               Vous pouvez désormais définir votre mot de passe en suivant ce lien si ce n'est déjà fait :{" "}
@@ -161,7 +162,7 @@ const ConfirmationPage = () => {
                   </Text>
                   <Text mb={8}>
                     Cette étape est indispensable pour vous permettre de recevoir les listes de candidats qui seront
-                    diffusées à partir de la semaine du 3 juin.
+                    diffusées à partir de la première semaine de juin.
                   </Text>
 
                   <Formik

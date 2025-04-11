@@ -18,10 +18,13 @@
 
           <mj-text> Votre identifiant de connexion : <strong><%= data.user.username %></strong> </mj-text>
 
-          <!-- <mj-text>
-            Il vous reste à activer votre compte et définir votre mot de passe : un courriel de demande d'activation
-            vous a été envoyé. Veuillez vérifier votre boîte SPAM si nécessaire.
-          </mj-text> -->
+          <mj-button
+            href="<%= utils.getPublicUrl(`/login?actionToken=${data.actionToken}`) %>"
+            background-color="#0e4194"
+            color="white"
+          >
+            Accéder au service
+          </mj-button>
 
           <%- include('./common/arrete.ejs'); %> <%- include('./common/signature.ejs'); %>
         </mj-column>
