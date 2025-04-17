@@ -15,6 +15,7 @@ import {
   Tbody,
   Td,
 } from "@chakra-ui/react";
+import { CheckIcon, EditIcon } from "@chakra-ui/icons";
 
 import { Page } from "../../common/components/layout/Page";
 import { _get } from "../../common/httpClient";
@@ -61,18 +62,38 @@ const RelationContact = ({ relation, callback }) => {
                 <>
                   Contact habilité en 2024 à réceptionner les listes de candidats :
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
-                  <Link variant="action" onClick={onOpenConfirmDelegationModal}>
-                    Confirmer la délégation
-                  </Link>
+                  <Box>
+                    <Link
+                      mt={4}
+                      variant="action"
+                      display="inline"
+                      color="greenmedium.500"
+                      onClick={onOpenConfirmDelegationModal}
+                    >
+                      <CheckIcon mx={2} />
+                      Confirmer la délégation
+                    </Link>
+                    <Link
+                      mt={4}
+                      variant="action"
+                      display="inline"
+                      color="redmarianne"
+                      onClick={onOpenUpdateDelegationModal}
+                    >
+                      <EditIcon mx={2} />
+                      Modifier ou annuler la délégation
+                    </Link>
+                    <Text as="i">
+                      En l'absence de confirmation ou modification, le délégué définit sur la précédente campagne
+                      recevra les listes de candidats.
+                    </Text>
+                  </Box>
                 </>
               ) : (
                 <>
                   Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
                 </>
               )}{" "}
-              <Link variant="action" onClick={onOpenUpdateDelegationModal}>
-                Modifier ou annuler la délégation
-              </Link>
             </Text>
 
             <ConfirmDelegationModal
@@ -90,7 +111,8 @@ const RelationContact = ({ relation, callback }) => {
           </>
         ) : (
           <>
-            <Link variant="action" onClick={onOpenDelegationModal}>
+            <Link variant="action" color="bluefrance" onClick={onOpenDelegationModal}>
+              <EditIcon mx={2} />
               Déléguer le droit de réception des listes de candidats.
             </Link>{" "}
             <Text as="i">
