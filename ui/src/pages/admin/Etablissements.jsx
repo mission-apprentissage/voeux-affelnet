@@ -411,14 +411,22 @@ export const Etablissements = () => {
             ) : (
               data.map((etablissement, index) => {
                 const relationsDelegues = etablissement.relations
-                  .filter((relation) => !!relation.delegue /* && !!relation.delegue.relations?.active*/)
+                  .filter(
+                    (relation) =>
+                      relation.responsable.siret === etablissement.siret &&
+                      !!relation.delegue /* && !!relation.delegue.relations?.active*/
+                  )
                   .sort(
                     (a, b) =>
                       b.nombre_voeux_restant - a.nombre_voeux_restant ||
                       -b.formateur?.raison_sociale.localeCompare(a.formateur.raison_sociale)
                   );
                 const relationsNonDelegues = etablissement.relations
-                  .filter((relation) => !relation.delegue /* || !relation.delegue.relations?.active*/)
+                  .filter(
+                    (relation) =>
+                      relation.responsable.siret === etablissement.siret &&
+                      !relation.delegue /* || !relation.delegue.relations?.active*/
+                  )
                   .sort(
                     (a, b) =>
                       b.nombre_voeux_restant - a.nombre_voeux_restant ||
