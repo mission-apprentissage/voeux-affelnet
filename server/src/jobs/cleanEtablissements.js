@@ -5,7 +5,7 @@ const logger = require("../common/logger");
 const { Etablissement } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
 
-const UAI_RECENSEMENT = "0000000A";
+const SIRET_RECENSEMENT = "99999999999999";
 
 async function cleanEtablissements(relationsCsv, options = {}) {
   const stats = {
@@ -23,14 +23,14 @@ async function cleanEtablissements(relationsCsv, options = {}) {
     }),
     accumulateData(
       async (accumulator, { siret_responsable, siret_formateurs }) => {
-        if (siret_responsable === UAI_RECENSEMENT) {
+        if (siret_responsable === SIRET_RECENSEMENT) {
           return accumulator;
         }
 
         accumulator = [...new Set([...accumulator, siret_responsable])];
 
         siret_formateurs.split(",").forEach((siret) => {
-          if (siret !== UAI_RECENSEMENT) {
+          if (siret !== SIRET_RECENSEMENT) {
             accumulator = [...new Set([...accumulator, siret])];
           }
         });
@@ -50,7 +50,9 @@ async function cleanEtablissements(relationsCsv, options = {}) {
   );
 
   logger.warn(
-    "Les établissement suivants vont être supprimés :",
+    `Les ${await Etablissement.countDocuments({
+      siret: { $nin: toKeep },
+    })} établissements suivants vont être supprimés :`,
     JSON.stringify((await Etablissement.find({ siret: { $nin: toKeep } })).map((etablissement) => etablissement?.siret))
   );
 
