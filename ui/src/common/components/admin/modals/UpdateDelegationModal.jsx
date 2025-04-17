@@ -143,7 +143,7 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
               <AccordionPanel pb={4}>
                 <Formik
                   initialValues={{
-                    email: delegue.email,
+                    email: null,
                   }}
                   validationSchema={emailConfirmationSchema}
                   onSubmit={(form) => updateDelegationEmail({ form })}
