@@ -7,7 +7,6 @@ const { getAcademies } = require("../../common/academies");
 const { aggregate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { changeEmail } = require("../../common/actions/changeEmail");
-const { markAsNonConcerne } = require("../../common/actions/markAsNonConcerne");
 const { cancelUnsubscription } = require("../../common/actions/cancelUnsubscription");
 const { dateAsString } = require("../../common/utils/stringUtils");
 const { siretFormat } = require("../../common/utils/format");
@@ -538,40 +537,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
-  // router.get(
-  //   "/api/admin/responsables/:siret_responsable/formateurs",
-  //   checkApiToken(),
-  //   checkIsAdminOrAcademie(),
-  //   tryCatch(async (req, res) => {
-  //     const { username } = req.user;
-  //     const admin = await User.findOne({ username }).lean();
-
-  //     const { siret_responsable } = await Joi.object({
-  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
-  //     }).validateAsync(req.params, { abortEarly: false });
-
-  //     const responsable = (
-  //       await Responsable.aggregate([
-  //         { $match: { siret_responsable } },
-  //         {
-  //           $lookup: lookupRelations,
-  //         },
-  //       ])
-  //     )?.[0];
-
-  //      res.json(
-  //       await Promise.all(
-  //         responsable?.relations?.map(async (relation) => {
-  //           return await Formateur.aggregate([
-  //             { $match: { siret: relation.etablissement_formateur.siret } },
-  //             { $lookup: lookupRelations },
-  //           ])?.[0];
-  //         }) ?? []
-  //       )
-  //     );
-  //   })
-  // );
-
   /**
    * Permet à un administrateur de modifier les paramètres de diffusion d'un responsable à un de ses formateurs associés (ajout / modification)
    */
@@ -724,7 +689,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
           $elemMatch: {
             "etablissement_responsable.siret": siret_responsable,
             "etablissement_formateur.siret": siret_formateur,
-            active: true,
+            // active: true,
           },
         },
       });
@@ -807,17 +772,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
         siret: siret_responsable,
       });
 
-      // const responsable = await Etablissement.findOne({
-      //   ...responsableFilter,
-      //   siret_responsable,
-      // });
-
       await changeEmail(siret_responsable, email, { auteur: req.user.username });
 
       await saveAccountEmailUpdatedByAdmin({ siret_responsable, email }, responsable.email, req.user);
 
       await Etablissement.updateOne({ siret: siret_responsable }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
-      // await Etablissement.updateOne({ ...responsableFilter, siret_responsable }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
 
       await sendConfirmationEmails(
         { sendEmail, resendEmail },
@@ -920,71 +879,25 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
-  /**
-   * @deprecated
-   *
-   * Marque un responsable comme non concerné (permet de ne plus envoyer de courriels à ce responsable)
-   */
-  router.put(
-    "/api/admin/responsables/:siret_responsable/markAsNonConcerne",
-    checkApiToken(),
-    checkIsAdminOrAcademie(),
-    tryCatch(async (req, res) => {
-      const { siret_responsable } = await Joi.object({
-        siret_responsable: Joi.string().pattern(siretFormat).required(),
-      }).validateAsync(req.params, { abortEarly: false });
+  // /**
+  //  * @deprecated
+  //  *
+  //  * Marque un responsable comme non concerné (permet de ne plus envoyer de courriels à ce responsable)
+  //  */
+  // router.put(
+  //   "/api/admin/responsables/:siret_responsable/markAsNonConcerne",
+  //   checkApiToken(),
+  //   checkIsAdminOrAcademie(),
+  //   tryCatch(async (req, res) => {
+  //     const { siret_responsable } = await Joi.object({
+  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
+  //     }).validateAsync(req.params, { abortEarly: false });
 
-      await markAsNonConcerne(siret_responsable);
+  //     await markAsNonConcerne(siret_responsable);
 
-      res.json({ statut: "non concerné" });
-    })
-  );
-
-  /** FORMATEURS
-   * =============
-   */
-
-  /**
-   * @deprecated
-   *
-   * Permet de récupérer un formateur
-   */
-  router.get(
-    "/api/admin/formateurs/:siret_formateur",
-    checkApiToken(),
-    checkIsAdminOrAcademie(),
-    tryCatch(async (req, res) => {
-      // const { username } = req.user;
-      // const admin = await User.findOne({ username }).lean();
-
-      const { siret_formateur } = await Joi.object({
-        siret_formateur: Joi.string().pattern(siretFormat).required(),
-      }).validateAsync(req.params, { abortEarly: false });
-
-      const formateur = (
-        await Etablissement.aggregate([
-          { $match: { siret: siret_formateur } },
-          {
-            $lookup: lookupRelations,
-          },
-          { $addFields: addTypeFields },
-          { $match: { is_formateur: true } },
-          { $addFields: addCountFields },
-        ])
-      )?.[0];
-
-      if (!formateur) {
-        throw Error("Formateur introuvable");
-      }
-
-      res.json(formateur);
-
-      // const formateur = await Formateur.findOne({ siret }).lean();
-      // // const formateur = await Etablissement.findOne({ ...formateurFilter, siret }).lean();
-
-      // res.json(await fillFormateur(formateur, admin));
-    })
-  );
+  //     res.json({ statut: "non concerné" });
+  //   })
+  // );
 
   /** DELEGUES
    * =============
