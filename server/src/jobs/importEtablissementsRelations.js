@@ -29,7 +29,6 @@ const schema = Joi.object({
 async function importEtablissementsRelations(relationsCsv /*, responsableOverwriteCsv, formateurOverwriteCsv*/) {
   // const responsableOverwriteArray = await getCsvContent(responsableOverwriteCsv);
   // const formateurOverwriteArray = await getCsvContent(formateurOverwriteCsv);
-  const existingRelations = await Relation.find({});
 
   const stats = {
     total: 0,
@@ -145,7 +144,7 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
               )}`
             );
           } else {
-            logger.trace(`Relation ${siret_responsable} / ${siret_formateur} déjà à jour`);
+            logger.info(`Relation ${siret_responsable} / ${siret_formateur} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
@@ -155,6 +154,8 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
       { parallel: 10 }
     )
   );
+
+  const existingRelations = await Relation.find({});
 
   for await (const existingRelation of existingRelations) {
     if (

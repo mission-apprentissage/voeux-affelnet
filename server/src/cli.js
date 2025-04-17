@@ -89,16 +89,14 @@ cli
   .description(
     "Créé les comptes des établissements à partir d'un fichier csv des relations avec les colonnes suivantes : 'uai_responsable,email,uai_formateurs'"
   )
-  .action((relationCsv) => {
-    runScript(() => {
+  .action(async (relationCsv) => {
+    await runScript(() => {
       const input = relationCsv ? createReadStream(relationCsv) : process.stdin;
 
-      const toReturn = importEtablissements(input);
-
-      return toReturn;
+      return importEtablissements(input);
     });
 
-    logger.info(
+    logger.warn(
       "[IMPORTANT] Vous pouvez désormais appeler le script cleanEtablissements pour nettoyer la base des entités n'existant pas dans le fichier des relations"
     );
   });

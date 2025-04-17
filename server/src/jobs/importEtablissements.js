@@ -226,7 +226,7 @@ async function importEtablissements(csv, options = {}) {
 
             logger.info(`Etablissement ${siret} mis à jour \n${JSON.stringify(diff(previous, updates), null, 2)}`);
           } else {
-            logger.trace(`Etablissement ${siret} déjà à jour`);
+            logger.info(`Etablissement ${siret} déjà à jour`);
           }
         } catch (error) {
           stats.failed++;
@@ -236,8 +236,6 @@ async function importEtablissements(csv, options = {}) {
       { parallel: 1 }
     )
   );
-
-  // stats.removed = (await Etablissement.deleteMany({ siret: { $nin: [...sirets] } })).deletedCount || 0;
 
   return stats;
 }
