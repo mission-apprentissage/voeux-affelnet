@@ -27,7 +27,7 @@ import { Yup } from "../common/Yup";
 import { _post } from "../common/httpClient";
 import { useQuery } from "../common/hooks/useQuery";
 import useAuth from "../common/hooks/useAuth";
-import { uaiFormat } from "../common/utils/format";
+import { siretFormat } from "../common/utils/format";
 import decodeJWT from "../common/utils/decodeJWT";
 import { useFetch } from "../common/hooks/useFetch";
 import { AlertMessage } from "../common/components/layout/AlertMessage";
@@ -43,11 +43,11 @@ const checkUsername = async (username, { path, createError }) => {
     }
     return true;
   } catch (err) {
-    if (!username?.match(uaiFormat)) {
+    if (!username?.match(siretFormat)) {
       return createError({
         path,
         message:
-          "Si vous représentez un organisme responsable, vous devez indiquer un code UAI valide (7 chiffres et 1 lettre). Si vous avez reçu une délégation pour l’accès aux candidatures, vous devez indiquer une adresse courriel valide et déclarée par l’organisme responsable.",
+          "Si vous représentez un organisme responsable, vous devez indiquer un code SIRET valide. Si vous avez reçu une délégation pour l’accès aux candidatures, vous devez indiquer une adresse courriel valide et déclarée par l’organisme responsable.",
       });
     } else {
       const mailTo = `mailto:${mailVoeux}?subject=Problème de connexion (Identifiant ${username})`;
@@ -55,9 +55,9 @@ const checkUsername = async (username, { path, createError }) => {
         path,
         message: (
           <Text>
-            Cet identifiant ne correspond pas au code UAI d'un organisme responsable enregistré comme tel dans Affelnet
-            ni à celui d'un organisme formateur. Veuillez utiliser l'identifiant figurant dans nos précédents emails. En
-            cas de difficulté, veuillez contacter le service support en indiquant votre identifiant à{" "}
+            Cet identifiant ne correspond pas au code SIRET d'un organisme responsable enregistré comme tel dans
+            Affelnet ni à celui d'un organisme formateur. Veuillez utiliser l'identifiant figurant dans nos précédents
+            emails. En cas de difficulté, veuillez contacter le service support en indiquant votre identifiant à{" "}
             <a href={mailTo}>{mailVoeux}</a>
           </Text>
         ),
@@ -143,7 +143,7 @@ function LoginPage() {
                                 <FormHelperText mb={4}>
                                   Votre identifiant figure dans nos correspondances courriel
                                   <ul style={{ listStyle: "none" }}>
-                                    <li>Organisme responsable : votre code UAI</li>
+                                    <li>Organisme responsable : votre code Siret</li>
                                     <li>Personne déléguée: votre adresse courriel</li>
                                     <li>Autres utilisateurs : prenom.nom</li>
                                   </ul>
