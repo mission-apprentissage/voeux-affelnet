@@ -3,7 +3,7 @@ const Joi = require("@hapi/joi");
 const { pick } = require("lodash");
 const { diff } = require("deep-object-diff");
 
-const { Relation, Etablissement } = require("../common/model");
+const { Relation, Etablissement, Delegue } = require("../common/model");
 const logger = require("../common/logger");
 const { arrayOf } = require("../common/validators");
 const { parseCsv } = require("../common/utils/csvUtils");
@@ -29,6 +29,7 @@ const schema = Joi.object({
 async function importEtablissementsRelations(relationsCsv /*, responsableOverwriteCsv, formateurOverwriteCsv*/) {
   // const responsableOverwriteArray = await getCsvContent(responsableOverwriteCsv);
   // const formateurOverwriteArray = await getCsvContent(formateurOverwriteCsv);
+  const existingRelations = await Relation.find({});
 
   const stats = {
     total: 0,
@@ -155,8 +156,6 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
     )
   );
 
-  const existingRelations = await Relation.find({});
-
   for await (const existingRelation of existingRelations) {
     if (
       !relations.find(
@@ -169,6 +168,32 @@ async function importEtablissementsRelations(relationsCsv /*, responsableOverwri
         `La relation ${existingRelation.etablissement_responsable?.siret} / ${existingRelation.etablissement_formateur?.siret} n'est plus présente dans le fichier d'import`
       );
       await Relation.deleteOne({ _id: existingRelation._id });
+
+      const { modifiedCount } = await Delegue.updateMany(
+        {
+          relations: {
+            $elemMatch: {
+              "etablissement_responsable.siret": existingRelation.etablissement_responsable?.siret,
+              "etablissement_formateur.siret": existingRelation.etablissement_formateur?.siret,
+            },
+          },
+        },
+        {
+          $pull: {
+            relations: {
+              "etablissement_responsable.siret": existingRelation.etablissement_responsable?.siret,
+              "etablissement_formateur.siret": existingRelation.etablissement_formateur?.siret,
+            },
+          },
+        }
+      );
+
+      if (modifiedCount > 0) {
+        logger.warn(
+          `Suppression de la relation ${existingRelation.etablissement_responsable?.siret} / ${existingRelation.etablissement_formateur?.siret} pour ${modifiedCount} délégué(s)`
+        );
+      }
+
       stats.removed++;
     }
   }

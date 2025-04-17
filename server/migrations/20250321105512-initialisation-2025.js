@@ -9,6 +9,7 @@ module.exports = {
    */
   async up(db) {
     // Suppression des candidatures de la campagne précédente.
+    await db.collection("logs").deleteMany({});
     await db.collection("voeux").deleteMany({});
 
     // Suppression des relations de la campagne précédente.
@@ -23,7 +24,7 @@ module.exports = {
 
     // Suppression des entrées d'historique de la campagne précédente.
     await db.collection("users").updateMany({}, { $set: { histories: [] } });
-    await db.collection("relations").deleteMany({});
+    // await db.collection("relations").deleteMany({}); // DONE during importEtablissementRelations
 
     // Mise à jour des utilisateurs responsable vers le nouveau modèle.
     await db.collection("users").updateMany({ type: "Responsable" }, { $set: { type: USER_TYPE.ETABLISSEMENT } });
@@ -43,8 +44,6 @@ module.exports = {
         },
       }
     );
-
-    // TODO : supprimer les relations enregistrées sur les délégués qui n'existent pas en base cette année, ou faire attention lorsqu'il faudra les réactiver
   },
 
   /**

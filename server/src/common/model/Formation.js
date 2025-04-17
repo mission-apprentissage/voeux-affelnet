@@ -19,12 +19,6 @@ const schema = new Schema({
   commune: {
     type: String,
   },
-  telephone: {
-    type: String,
-  },
-  mel: {
-    type: String,
-  },
   academie: {
     type: String,
   },

@@ -93,7 +93,11 @@ cli
     runScript(() => {
       const input = relationCsv ? createReadStream(relationCsv) : process.stdin;
 
-      return importEtablissements(input);
+      const toReturn = importEtablissements(input);
+      console.log(
+        "[IMPORTANT] Vous pouvez désormais appeler le script cleanEtablissements pour nettoyer la base des entités n'existant pas dans le fichier des relations"
+      );
+      return toReturn;
     });
   });
 
