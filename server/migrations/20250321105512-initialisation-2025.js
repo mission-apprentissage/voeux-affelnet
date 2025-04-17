@@ -32,6 +32,8 @@ module.exports = {
       .collection("users")
       .updateMany({ type: USER_TYPE.ETABLISSEMENT }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
 
+    await db.collection("users").updateMany({ type: USER_TYPE.DELEGUE }, { $set: { statut: USER_STATUS.CONFIRME } });
+
     // Suppression des formateurs
     await db.collection("users").deleteMany({ type: "Formateur" });
 
