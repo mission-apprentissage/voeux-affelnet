@@ -57,47 +57,49 @@ const RelationContact = ({ relation, callback }) => {
 
   return (
     <>
-      <Text>
+      <Box mt={3}>
         {relation.delegue ? (
           <>
-            <Text>
-              {!relation.delegue.relations.active ? (
-                <>
+            {!relation.delegue.relations.active ? (
+              <>
+                <Text>
                   Contact habilité en 2024 à réceptionner les listes de candidats :
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
-                  <Box>
-                    <Link
-                      mt={4}
-                      variant="action"
-                      display="inline"
-                      color="greenmedium.500"
-                      onClick={onOpenConfirmDelegationModal}
-                    >
-                      <CheckIcon mx={2} />
-                      Confirmer la délégation
-                    </Link>
-                    <Link
-                      mt={4}
-                      variant="action"
-                      display="inline"
-                      color="redmarianne"
-                      onClick={onOpenUpdateDelegationModal}
-                    >
-                      <EditIcon mx={2} />
-                      Modifier ou annuler la délégation
-                    </Link>
-                    <Text as="i">
-                      En l'absence de confirmation ou modification, le délégué définit sur la précédente campagne
-                      recevra les listes de candidats.
-                    </Text>
-                  </Box>
-                </>
-              ) : (
-                <>
-                  Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
-                </>
-              )}{" "}
-            </Text>
+                </Text>
+                <Box mt={3}>
+                  <Link
+                    mr={3}
+                    variant="action"
+                    display="inline"
+                    color="greenmedium.500"
+                    onClick={onOpenConfirmDelegationModal}
+                  >
+                    <CheckIcon mx={2} />
+                    Confirmer la délégation
+                  </Link>
+                  <Link
+                    mr={3}
+                    variant="action"
+                    display="inline"
+                    color="redmarianne"
+                    onClick={onOpenUpdateDelegationModal}
+                  >
+                    <EditIcon mx={2} />
+                    Modifier ou annuler la délégation
+                  </Link>
+                </Box>
+                <Box mt={3}>
+                  <Text as="i">
+                    En l'absence de confirmation ou modification, le délégué définit sur la précédente campagne recevra
+                    les listes de candidats.
+                  </Text>
+                </Box>
+              </>
+            ) : (
+              <Text>
+                Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+              </Text>
+            )}
 
             <ConfirmDelegationModal
               relation={relation}
@@ -117,10 +119,13 @@ const RelationContact = ({ relation, callback }) => {
             <Link variant="action" color="bluefrance" onClick={onOpenDelegationModal}>
               <EditIcon mx={2} />
               Déléguer le droit de réception des listes de candidats.
-            </Link>{" "}
-            <Text as="i">
-              En l'absence de délégation, le responsable sera seul destinataire des listes de candidats.
-            </Text>
+            </Link>
+            <Box mt={4}>
+              <Text as="i">
+                En l'absence de délégation, le responsable sera seul destinataire des listes de candidats.
+              </Text>
+            </Box>
+
             <DelegationModal
               relation={relation}
               callback={callback}
@@ -129,7 +134,7 @@ const RelationContact = ({ relation, callback }) => {
             />
           </>
         )}
-      </Text>
+      </Box>
     </>
   );
 };
