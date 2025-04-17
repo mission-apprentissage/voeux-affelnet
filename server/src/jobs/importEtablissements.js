@@ -193,6 +193,17 @@ async function importEtablissements(csv, options = {}) {
                 username: siret,
               },
               $set: updates,
+              ...(found && found?.email !== foundEmail
+                ? {
+                    $push: {
+                      anciens_emails: {
+                        email: found.email,
+                        modification_date: new Date(),
+                        auteur: process.env.VOEUX_AFFELNET_EMAIL,
+                      },
+                    },
+                  }
+                : {}),
             },
             { upsert: true, setDefaultsOnInsert: true, runValidators: true }
           );
