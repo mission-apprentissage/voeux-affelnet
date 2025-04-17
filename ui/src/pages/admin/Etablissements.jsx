@@ -411,11 +411,19 @@ export const Etablissements = () => {
             ) : (
               data.map((etablissement, index) => {
                 const relationsDelegues = etablissement.relations
-                  .sort((a, b) => b.nombre_voeux_restant - a.nombre_voeux_restant)
-                  .filter((relation) => !!relation.delegue && !!relation.delegue.relations?.active);
+                  .filter((relation) => !!relation.delegue && !!relation.delegue.relations?.active)
+                  .sort(
+                    (a, b) =>
+                      b.nombre_voeux_restant - a.nombre_voeux_restant ||
+                      -b.formateur?.raison_sociale.localeCompare(a.formateur.raison_sociale)
+                  );
                 const relationsNonDelegues = etablissement.relations
-                  .sort((a, b) => b.nombre_voeux_restant - a.nombre_voeux_restant)
-                  .filter((relation) => !relation.delegue || !relation.delegue.relations?.active);
+                  .filter((relation) => !relation.delegue || !relation.delegue.relations?.active)
+                  .sort(
+                    (a, b) =>
+                      b.nombre_voeux_restant - a.nombre_voeux_restant ||
+                      -b.formateur?.raison_sociale.localeCompare(a.formateur.raison_sociale)
+                  );
 
                 // const isOnlyResponsableFormateur =
                 //   etablissement.is_responsable_formateur && etablissement.relations.length === 1;
