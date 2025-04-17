@@ -4,7 +4,7 @@ const { encodeStream } = require("iconv-lite");
 const { ouiNon, date, number, list } = require("../common/utils/csvUtils");
 const { USER_STATUS } = require("../common/constants/UserStatus");
 const { USER_TYPE } = require("../common/constants/UserType");
-const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
+const { CONTACT_TYPE } = require("../common/constants/ContactType");
 const { ResponsableActions, DelegueActions, RelationActions } = require("../common/constants/History");
 const { CONTACT_STATUS } = require("../common/constants/ContactStatus");
 
@@ -270,13 +270,11 @@ async function download(output, options = {}) {
         Téléchargement: async ({ voeux_telechargements, delegue }) => {
           if (delegue) {
             return ouiNon(
-              !!voeux_telechargements.find((telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE)
+              !!voeux_telechargements.find((telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE)
             );
           } else {
             return ouiNon(
-              !!voeux_telechargements.find(
-                (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
-              )
+              !!voeux_telechargements.find((telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE)
             );
           }
         },
@@ -284,7 +282,7 @@ async function download(output, options = {}) {
         "Date du dernier téléchargement": ({ voeux_telechargements, delegue }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -294,7 +292,7 @@ async function download(output, options = {}) {
             return date(lastVoeuxTelechargementDateByDelegue);
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length
@@ -313,7 +311,7 @@ async function download(output, options = {}) {
         }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -342,7 +340,7 @@ async function download(output, options = {}) {
             );
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length
@@ -440,7 +438,7 @@ async function download(output, options = {}) {
         "Vœux à télécharger pour mise à jour": async ({ responsable, formateur, delegue, voeux_telechargements }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -469,7 +467,7 @@ async function download(output, options = {}) {
             );
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length
@@ -507,7 +505,7 @@ async function download(output, options = {}) {
         }) => {
           if (delegue) {
             const voeuxTelechargementsDelegue = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
             );
 
             const lastVoeuxTelechargementDateByDelegue = voeuxTelechargementsDelegue?.length
@@ -530,7 +528,7 @@ async function download(output, options = {}) {
             );
           } else {
             const voeuxTelechargementsResponsable = voeux_telechargements.filter(
-              (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
+              (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
             );
 
             const lastVoeuxTelechargementDateByResponsable = voeuxTelechargementsResponsable?.length

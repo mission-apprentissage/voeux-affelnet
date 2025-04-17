@@ -1,6 +1,6 @@
 const { USER_STATUS } = require("../common/constants/UserStatus");
 const { USER_TYPE } = require("../common/constants/UserType");
-const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
+const { CONTACT_TYPE } = require("../common/constants/ContactType");
 const logger = require("../common/logger");
 const { User, Relation } = require("../common/model");
 
@@ -25,6 +25,7 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
   const type = options.type;
+  const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
 
   const query = {
     ...(options.username ? { username: options.username } : {}),
@@ -76,10 +77,10 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
     .eachAsync(async (user) => {
       // console.log({ user });
 
-      const templateType = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
+      const templateType = user.type === USER_TYPE.ETABLISSEMENT ? CONTACT_TYPE.RESPONSABLE : user.type;
 
       if (
-        templateType === DOWNLOAD_TYPE.RESPONSABLE &&
+        templateType === CONTACT_TYPE.RESPONSABLE &&
         (await Relation.countDocuments({ "etablissement_responsable.siret": user.siret })) === 0
       ) {
         return;
@@ -89,49 +90,74 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
       const previous = user.emails.find((email) => email.templateName === templateName);
       stats.total++;
 
-      try {
-        logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
-        );
-        previous
-          ? await resendEmail(previous.token, { retry: !!previous?.error })
-          : await sendEmail(user, templateName);
+      switch (true) {
+        case proceed: {
+          try {
+            previous
+              ? await resendEmail(previous.token, { retry: !!previous?.error })
+              : await sendEmail(user, templateName);
 
-        switch (templateType) {
-          case DOWNLOAD_TYPE.RESPONSABLE:
-            switch (!!previous) {
-              case false:
-                await saveAccountActivationEmailAutomaticSentToResponsable(user);
+            switch (templateType) {
+              case CONTACT_TYPE.RESPONSABLE:
+                switch (!!previous) {
+                  case false:
+                    await saveAccountActivationEmailAutomaticSentToResponsable(user);
+                    break;
+                  case true:
+                    options.sender
+                      ? await saveAccountActivationEmailManualResentToResponsable(user, options.sender)
+                      : await saveAccountActivationEmailAutomaticResentToResponsable(user);
+                    break;
+                }
                 break;
-              case true:
-                options.sender
-                  ? await saveAccountActivationEmailManualResentToResponsable(user, options.sender)
-                  : await saveAccountActivationEmailAutomaticResentToResponsable(user);
+              case CONTACT_TYPE.DELEGUE:
+                switch (!!previous) {
+                  case false:
+                    await saveAccountActivationEmailAutomaticSentToDelegue(user);
+                    break;
+                  case true:
+                    options.sender
+                      ? await saveAccountActivationEmailManualResentToDelegue(user, options.sender)
+                      : await saveAccountActivationEmailAutomaticResentToDelegue(user);
+                    break;
+                }
+                break;
+              default:
                 break;
             }
-            break;
-          case DOWNLOAD_TYPE.DELEGUE:
-            switch (!!previous) {
-              case false:
-                await saveAccountActivationEmailAutomaticSentToDelegue(user);
-                break;
-              case true:
-                options.sender
-                  ? await saveAccountActivationEmailManualResentToDelegue(user, options.sender)
-                  : await saveAccountActivationEmailAutomaticResentToDelegue(user);
-                break;
-            }
-            break;
-          default:
-            break;
+
+            logger.info(
+              `[DONE] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+                user.email
+              })...`
+            );
+
+            previous ? stats.resent++ : stats.sent++;
+          } catch (e) {
+            logger.error(
+              `[ERROR] ${previous ? "Res" : "S"}end ${templateName} email to ${user.type} ${user.username}`,
+              e
+            );
+            stats.failed++;
+          }
+          break;
         }
 
-        previous ? stats.resent++ : stats.sent++;
-      } catch (e) {
-        logger.error(`Unable to ${previous ? "re" : ""}sent ${templateName} email to ${user.type} ${user.username}`, e);
-        stats.failed++;
+        default: {
+          logger.info(
+            `[TODO] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+              user.email
+            })...`
+          );
+          previous ? stats.resent++ : stats.sent++;
+          break;
+        }
       }
     });
+
+  if (!proceed) {
+    logger.warn(`TO PROCEED USE --proceed OPTION`);
+  }
 
   return stats;
 }

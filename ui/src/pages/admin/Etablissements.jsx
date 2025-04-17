@@ -53,11 +53,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
               {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret : {relation.formateur?.siret ?? "Inconnu"}{" "}
               - UAI : {relation.formateur?.uai ?? "Inconnu"}
             </Text>
-            {/* <Text>
-              <Text as="i" color="gray.500">
-                Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
-              </Text>
-            </Text> */}
+
             {!!relation.nombre_voeux_restant && (
               <Text>
                 {relation.nombre_voeux_restant} candidature
@@ -93,13 +89,10 @@ export const ListRelations = ({ relations, delegation, limit }) => {
               <ListItem mt={2} key={index}>
                 <Text display="inline">
                   <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
-                  {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+                  {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret :{" "}
+                  {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
                 </Text>
-                <Text>
-                  <Text as="i" color="gray.500">
-                    Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
-                  </Text>
-                </Text>
+
                 {!!relation.nombre_voeux_restant && (
                   <Text>
                     {relation.nombre_voeux_restant} candidature
@@ -125,13 +118,10 @@ export const ListRelations = ({ relations, delegation, limit }) => {
           <ListItem mt={2} key={index}>
             <Text display="inline">
               <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
-              {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+              {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret : {relation.formateur?.siret ?? "Inconnu"}{" "}
+              - UAI : {relation.formateur?.uai ?? "Inconnu"}
             </Text>
-            <Text>
-              <Text as="i" color="gray.500">
-                Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
-              </Text>
-            </Text>
+
             <Text>
               Délégué : <Text as="b">{relation?.delegue?.email}</Text>{" "}
               {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
@@ -173,13 +163,10 @@ export const ListRelations = ({ relations, delegation, limit }) => {
               <ListItem mt={2} key={index}>
                 <Text display="inline">
                   <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
-                  {relation.formateur?.libelle_ville ?? "Ville inconnue"}{" "}
+                  {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret :{" "}
+                  {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
                 </Text>
-                <Text>
-                  <Text as="i" color="gray.500">
-                    Siret : {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
-                  </Text>
-                </Text>
+
                 <Text>
                   Délégué : <Text as="b">{relation?.delegue?.email}</Text>{" "}
                   {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
@@ -239,7 +226,7 @@ export const Etablissements = () => {
         const params = queryString.stringify(
           {
             ...values,
-            sort: JSON.stringify({ /*type: -1,*/ nombre_voeux_restant: -1 }),
+            sort: JSON.stringify({ nombre_voeux_restant: -1, relations_count: -1 }),
             ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
           },
           { skipNull: true, skipEmptyString: true }

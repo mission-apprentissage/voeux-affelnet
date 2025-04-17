@@ -80,7 +80,7 @@ export const RelationStatut = ({ relation }) => {
 
 // import { useDownloadVoeux } from "../../../hooks/delegueHooks";
 // // import { StatutBadge, statuses } from "../../StatutBadge";
-// import { DOWNLOAD_TYPE } from "../../../constants/DownloadType";
+// import { CONTACT_TYPE } from "../../../constants/ContactType";
 
 // export const RelationStatut = ({ relation, callback, showDownloadButton }) => {
 //   const responsable = relation.responsable ?? relation.etablissements_responsable;
@@ -101,7 +101,7 @@ export const RelationStatut = ({ relation }) => {
 
 //   const voeuxTelechargementsDelegue =
 //     relation.voeux_telechargements?.filter(
-//       (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+//       (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
 //     ) ?? [];
 
 //   switch (true) {

@@ -83,7 +83,7 @@ export const RelationStatut = ({ relation }) => {
 // import { StatutBadge, statuses } from "../../StatutBadge";
 // import { SuccessFill fontSize="18px" } from "../../../../theme/components/icons/SuccessFill fontSize="18px"";
 // import { WarningFill fontSize="18px" } from "../../../../theme/components/icons/WarningFill fontSize="18px"";
-// import { DOWNLOAD_TYPE } from "../../../constants/DownloadType";
+// import { CONTACT_TYPE } from "../../../constants/ContactType";
 // import { USER_STATUS } from "../../../constants/UserStatus";
 
 // export const RelationStatut = ({ relation, callback, showDownloadButton }) => {
@@ -110,12 +110,12 @@ export const RelationStatut = ({ relation }) => {
 
 //   // const voeuxTelechargementsDelegue =
 //   //   relation.voeux_telechargements?.filter(
-//   //     (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.DELEGUE
+//   //     (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
 //   //   ) ?? [];
 
 //   // const voeuxTelechargementsResponsable =
 //   //   relation.voeux_telechargements?.filter(
-//   //     (telechargement) => telechargement.DOWNLOAD_TYPE === DOWNLOAD_TYPE.RESPONSABLE
+//   //     (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
 //   //   ) ?? [];
 
 //   // switch (isDiffusionAutorisee) {

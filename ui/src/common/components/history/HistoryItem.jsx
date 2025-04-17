@@ -9,7 +9,7 @@ export const HistoryItem = ({ history }) => {
 
   return (
     <Flex alignItems={"center"}>
-      <Text color="gray.500" minW={"168px"} align={"right"}>
+      <Text color="gray.500" minW={"174px"} align={"right"}>
         {date.toLocaleDateString()} à {date.toLocaleTimeString()}
       </Text>
       <Text borderLeft="2px solid black" ml={4} pl={4}>

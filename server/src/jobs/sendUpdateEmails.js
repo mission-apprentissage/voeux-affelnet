@@ -1,4 +1,4 @@
-const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
+const { CONTACT_TYPE } = require("../common/constants/ContactType");
 const logger = require("../common/logger");
 const { Relation, Etablissement, Delegue } = require("../common/model");
 // const { RelationActions } = require("../common/constants/History");
@@ -20,6 +20,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
   const skip = options.skip || 0;
   const type = options.type;
   const username = options.username;
+  const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
 
   let query;
 
@@ -55,6 +56,12 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
       const responsable = await Etablissement.findOne({ siret: relation.etablissement_responsable.siret });
       const formateur = await Etablissement.findOne({ siret: relation.etablissement_formateur.siret });
 
+      if (!responsable || !formateur) {
+        stats.skiped++;
+        logger.error("Responsable ou formateur manquant");
+        return stats;
+      }
+
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
@@ -81,17 +88,15 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
         logger.error("Utilisateur introuvable pour la relation " + relation._id);
         stats.skiped++;
         return stats;
-        // throw Error("Utilisateur introuvable pour la relation " + relation._id);
       }
 
       if (!user.email) {
         logger.error("Absence d'adresse courriel pour l'utilisateur " + user._id);
         stats.skiped++;
         return stats;
-        // throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
       }
 
-      const templateType = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
+      const templateType = (delegue ? CONTACT_TYPE.DELEGUE : CONTACT_TYPE.RESPONSABLE).toLowerCase();
 
       const templateName = `update_${templateType}`;
       const previous = user.emails.find(
@@ -102,96 +107,117 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
       );
       stats.total++;
 
-      try {
-        logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
-        );
-
-        switch (templateType) {
-          case DOWNLOAD_TYPE.RESPONSABLE.toLowerCase():
-            switch (!!previous) {
-              case false:
-                await sendEmail(user, templateName, {
-                  relation,
-                  responsable,
-                  formateur,
-                });
-                options.sender
-                  ? await saveUpdatedListAvailableEmailManualSentToResponsable(
-                      { relation, responsable, formateur },
-                      options.sender
-                    )
-                  : await saveUpdatedListAvailableEmailAutomaticSentToResponsable({
+      switch (true) {
+        case proceed: {
+          try {
+            switch (templateType) {
+              case CONTACT_TYPE.RESPONSABLE.toLowerCase():
+                switch (!!previous) {
+                  case false:
+                    await sendEmail(user, templateName, {
                       relation,
                       responsable,
                       formateur,
                     });
+                    options.sender
+                      ? await saveUpdatedListAvailableEmailManualSentToResponsable(
+                          { relation, responsable, formateur },
+                          options.sender
+                        )
+                      : await saveUpdatedListAvailableEmailAutomaticSentToResponsable({
+                          relation,
+                          responsable,
+                          formateur,
+                        });
+                    break;
+                  case true:
+                    await resendEmail(previous.token);
+                    options.sender
+                      ? await saveUpdatedListAvailableEmailManualResentToResponsable(
+                          { relation, responsable, formateur },
+                          options.sender
+                        )
+                      : await saveUpdatedListAvailableEmailAutomaticResentToResponsable({
+                          relation,
+                          responsable,
+                          formateur,
+                        });
+                    break;
+                }
                 break;
-              case true:
-                await resendEmail(previous.token);
-                options.sender
-                  ? await saveUpdatedListAvailableEmailManualResentToResponsable(
-                      { relation, responsable, formateur },
-                      options.sender
-                    )
-                  : await saveUpdatedListAvailableEmailAutomaticResentToResponsable({
-                      relation,
-                      responsable,
-                      formateur,
-                    });
-                break;
-            }
-            break;
-          case DOWNLOAD_TYPE.DELEGUE.toLowerCase():
-            switch (!!previous) {
-              case false:
-                await sendEmail(user, templateName, {
-                  relation,
-                  responsable,
-                  formateur,
-                  delegue,
-                });
-                options.sender
-                  ? await saveUpdatedListAvailableEmailManualSentToDelegue(
-                      { relation, responsable, formateur, delegue },
-                      options.sender
-                    )
-                  : await saveUpdatedListAvailableEmailAutomaticSentToDelegue({
+              case CONTACT_TYPE.DELEGUE.toLowerCase():
+                switch (!!previous) {
+                  case false:
+                    await sendEmail(user, templateName, {
                       relation,
                       responsable,
                       formateur,
                       delegue,
                     });
-                break;
+                    options.sender
+                      ? await saveUpdatedListAvailableEmailManualSentToDelegue(
+                          { relation, responsable, formateur, delegue },
+                          options.sender
+                        )
+                      : await saveUpdatedListAvailableEmailAutomaticSentToDelegue({
+                          relation,
+                          responsable,
+                          formateur,
+                          delegue,
+                        });
+                    break;
 
-              case true:
-                await resendEmail(previous.token);
-                options.sender
-                  ? await saveUpdatedListAvailableEmailManualResentToDelegue(
-                      { relation, responsable, formateur, delegue },
-                      options.sender
-                    )
-                  : await saveUpdatedListAvailableEmailAutomaticResentToDelegue({
-                      relation,
-                      responsable,
-                      formateur,
-                      delegue,
-                    });
+                  case true:
+                    await resendEmail(previous.token);
+                    options.sender
+                      ? await saveUpdatedListAvailableEmailManualResentToDelegue(
+                          { relation, responsable, formateur, delegue },
+                          options.sender
+                        )
+                      : await saveUpdatedListAvailableEmailAutomaticResentToDelegue({
+                          relation,
+                          responsable,
+                          formateur,
+                          delegue,
+                        });
 
+                    break;
+                }
                 break;
             }
-            break;
+
+            logger.info(
+              `[DONE] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+                user.email
+              })...`
+            );
+
+            previous ? stats.resent++ : stats.sent++;
+          } catch (e) {
+            logger.error(
+              `[ERROR] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username}`,
+              e
+            );
+            stats.failed++;
+          }
+          break;
         }
 
-        previous ? stats.resent++ : stats.sent++;
-      } catch (e) {
-        logger.error(
-          `Unable to ${previous ? "re" : ""}sent ${templateName} email to ${templateType} ${user.username}`,
-          e
-        );
-        stats.failed++;
+        default: {
+          logger.info(
+            `[TODO] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+              user.email
+            })...`
+          );
+          previous ? stats.resent++ : stats.sent++;
+          break;
+        }
       }
     });
+
+  if (!proceed) {
+    logger.warn(`TO PROCEED USE --proceed OPTION`);
+  }
 
   return stats;
 }

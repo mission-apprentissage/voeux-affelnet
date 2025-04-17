@@ -233,6 +233,8 @@ cli
   .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
+  .option("--force", "Ignore les règles d'envoi habituelles", false)
+  .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
     runScript(({ sendEmail, resendEmail }) => {
       return sendConfirmationEmails({ sendEmail, resendEmail }, options);
@@ -257,6 +259,8 @@ cli
   .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
+  .option("--force", "Ignore les règles d'envoi habituelles", false)
+  .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
     runScript(({ sendEmail, resendEmail }) => {
       return sendActivationEmails({ sendEmail, resendEmail }, options);
@@ -281,7 +285,8 @@ cli
   .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
-  .option("--force", "Ignore les règles d'envoi habituelles")
+  .option("--force", "Ignore les règles d'envoi habituelles", false)
+  .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
     runScript(({ sendEmail, resendEmail }) => {
       return sendNotificationEmails({ sendEmail, resendEmail }, options);
@@ -308,6 +313,8 @@ cli
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .option("--force", "Ignore les règles d'envoi habituelles")
+  .option("--force", "Ignore les règles d'envoi habituelles", false)
+  .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
     runScript(({ sendEmail, resendEmail }) => {
       return sendUpdateEmails({ sendEmail, resendEmail }, options);

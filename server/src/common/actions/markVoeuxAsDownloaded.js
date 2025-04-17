@@ -1,4 +1,4 @@
-const { DOWNLOAD_TYPE } = require("../constants/DownloadType");
+const { CONTACT_TYPE } = require("../constants/ContactType");
 const { Etablissement, Delegue, Voeu, Relation } = require("../model");
 const {
   saveListDownloadedByResponsable,
@@ -15,7 +15,7 @@ const markVoeuxAsDownloadedByResponsable = async ({ siret_responsable, siret_for
     {
       $push: {
         voeux_telechargements: {
-          $each: [{ user: responsable._id, DOWNLOAD_TYPE: DOWNLOAD_TYPE.RESPONSABLE, date: new Date() }],
+          $each: [{ user: responsable._id, CONTACT_TYPE: CONTACT_TYPE.RESPONSABLE, date: new Date() }],
           $slice: 500,
         },
       },
@@ -54,7 +54,7 @@ const markVoeuxAsDownloadedByDelegue = async ({ siret_responsable, siret_formate
     {
       $push: {
         voeux_telechargements: {
-          $each: [{ user: delegue._id, DOWNLOAD_TYPE: DOWNLOAD_TYPE.DELEGUE, date: new Date() }],
+          $each: [{ user: delegue._id, CONTACT_TYPE: CONTACT_TYPE.DELEGUE, date: new Date() }],
           $slice: 500,
         },
       },

@@ -14,6 +14,48 @@
             bouton ci-dessous.
           </mj-text>
 
+
+<% switch(true) {
+
+  // [Si responsable-formateur seulement et avec délégation confirmée, ou responsable mono formateur avec délégation confirmée]
+  case data.responsable.relations?.length === 1 && !!data.responsable.relations[0].delegue: %>
+          <mj-text>
+            Vous aviez l'an dernier délégué les droits de réception à une autre personne. Vous serez invité à confirmer, modifier ou supprimer cette délégation.
+          </mj-text>
+  <% break;
+
+  // [Si responsable multi-formateurs ou responsable-formateur multi-formateurs, sans délégations]
+  case data.responsable.relations?.length > 1 && !data.responsable.relations.filter(relation => !!relation.delegue)?.length: %>
+          <mj-text>
+            Votre organisme est responsable des offres de <%= data.responsable.relations?.length %> organismes. En vous connectant dès maintenant au service, vous aurez la possibilité de déléguer les droits de réception des listes de candidats à d'autres personnes au sein de chaque organisme.
+          </mj-text>
+          <mj-text>
+            En l'absence de délégation, lorsque les listes de candidats seront disponibles, vous recevrez autant de notifications courriel que d'organismes formateurs auxquels vous êtes rattaché.
+          </mj-text>
+    <% break;
+
+  // [Si responsable multi-formateurs ou responsable-formateur multi-formateurs, délégations sur chaque formateur, toutes confirmées]
+  case data.responsable.relations?.length > 1 && data.responsable.relations.filter(relation => !!relation.delegue)?.length !== data.responsable.relations?.length : %>
+          <mj-text>
+            Votre organisme est responsable des offres de <%= data.responsable.relations?.length %> organismes. Vous aviez l'an dernier délégué les droits de réception à d'autres personnes au sein de ces organismes formateurs. En vous connectant dès maintenant au service, vous aurez la possibilité de confirmer, modifier ou supprimer ces délégations.
+          </mj-text>
+    <% break;
+
+  // [Si responsable multi-formateurs ou responsable-formateur multi-formateurs, avec délégations sur une partie des formateurs, toutes confirmées]
+  case data.responsable.relations?.length > 1 && data.responsable.relations.filter(relation => !!relation.delegue)?.length === data.responsable.relations?.length: %>
+          <mj-text>
+            Votre organisme est responsable des offres de <%= data.responsable.relations?.length %> organismes. Vous aviez l'an dernier délégué les droits de réception à d'autres personnes pour une partie des organismes formateurs. En vous connectant dès maintenant au service, vous aurez la possibilité de confirmer, modifier ou supprimer ces délégations.
+          </mj-text>
+          <mj-text>
+            En l'absence de délégation, lorsque les listes de candidats seront disponibles, vous recevrez autant de notifications courriel que d'organismes formateurs auxquels vous êtes rattaché.
+          </mj-text>
+    <% break;
+
+  default:
+    break;
+}
+%>
+
           <mj-button
             href="<%= utils.getPublicUrl(`/confirmation?actionToken=${data.actionToken}`) %>"
             background-color="#0e4194"
@@ -28,13 +70,24 @@
             Les listes des candidats aux formations que vous proposez vous seront communiquées à partir de la première semaine de juin.
           </mj-text>
 
-
-          <mj-text>
+          <!-- <mj-text>
             Si vous êtes responsable de plusieurs organismes formateurs :
-            Vous avez la possibilité de déléguer les droits d’accès aux candidatures si vous ne l’avez pas déjà fait l’an dernier.
-            Si des délégations de droit d’accès ont été autorisées l’an dernier, vous pouvez les confirmer ou les modifier pour cette année. En l’absence de confirmation, les délégués définis l’an dernier conserveront leurs habilitations pour cette année.
-            En l’absence de délégations de droits d’accès accordées aux organismes formateurs, vous recevrez autant de courriel de notifications de candidatures disponibles que d’organismes formateurs auxquels vous êtes associés.
-          </mj-text>
+            <ul>
+              <li>
+                Vous avez la possibilité de déléguer les droits d’accès aux candidatures si vous ne l’avez pas déjà fait l’an dernier.
+              </li>
+              <li>
+                Si des délégations de droit d’accès ont été autorisées l’an dernier, vous pouvez les confirmer ou les modifier pour cette année. En l’absence de confirmation, les délégués définis l’an dernier conserveront leurs habilitations pour cette année.
+              </li>
+              <li>
+                En l’absence de délégations de droits d’accès accordées aux organismes formateurs, vous recevrez autant de courriel de notifications de candidatures disponibles que d’organismes formateurs auxquels vous êtes associés.
+              </li>
+            </ul>
+          </mj-text> -->
+
+
+
+
 
           <%- include('./common/procedure.ejs'); %> <%- include('./common/signature.ejs'); %>
         </mj-column>

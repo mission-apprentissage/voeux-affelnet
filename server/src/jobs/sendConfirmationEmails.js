@@ -1,8 +1,8 @@
 const { USER_STATUS } = require("../common/constants/UserStatus");
 const { USER_TYPE } = require("../common/constants/UserType");
-const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
+const { CONTACT_TYPE } = require("../common/constants/ContactType");
 const logger = require("../common/logger");
-const { User, Relation } = require("../common/model");
+const { User, Relation, Etablissement, Delegue } = require("../common/model");
 
 const {
   saveAccountConfirmationEmailAutomaticSent: saveAccountConfirmationEmailAutomaticSentToResponsable,
@@ -20,11 +20,154 @@ const {
   saveAccountConfirmationEmailAutomaticResent: saveAccountConfirmationEmailAutomaticResentToDelegue,
 } = require("../common/actions/history/delegue");
 
+const relationPipelines = [
+  {
+    $lookup: {
+      from: Etablissement.collection.name,
+      localField: "etablissement_formateur.siret",
+      foreignField: "siret",
+      as: "formateur",
+      pipeline: [
+        {
+          $project: {
+            _id: 0,
+            siret: 1,
+            uai: 1,
+            academie: 1,
+            raison_sociale: 1,
+            libelle_ville: 1,
+            enseigne: 1,
+            statut: 1,
+          },
+        },
+      ],
+    },
+  },
+  {
+    $lookup: {
+      from: Etablissement.collection.name,
+      localField: "etablissement_responsable.siret",
+      foreignField: "siret",
+      as: "responsable",
+      pipeline: [
+        {
+          $project: {
+            _id: 0,
+            siret: 1,
+            uai: 1,
+            academie: 1,
+            raison_sociale: 1,
+            libelle_ville: 1,
+            enseigne: 1,
+            statut: 1,
+          },
+        },
+      ],
+    },
+  },
+  {
+    $lookup: {
+      from: Etablissement.collection.name,
+      localField: "etablissement_responsable.siret",
+      foreignField: "siret",
+      as: "responsable",
+      pipeline: [
+        {
+          $project: {
+            _id: 0,
+            siret: 1,
+            uai: 1,
+            academie: 1,
+            raison_sociale: 1,
+            libelle_ville: 1,
+            enseigne: 1,
+            statut: 1,
+          },
+        },
+      ],
+    },
+  },
+
+  {
+    $lookup: {
+      from: Delegue.collection.name,
+      let: {
+        siret_responsable: "$etablissement_responsable.siret",
+        siret_formateur: "$etablissement_formateur.siret",
+      },
+      pipeline: [
+        {
+          $match: {
+            type: USER_TYPE.DELEGUE,
+          },
+        },
+
+        {
+          $unwind: {
+            path: "$relations",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                // { $eq: ["$relations.active", true] },
+              ],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: "$_id",
+            root: {
+              $first: "$$ROOT",
+            },
+          },
+        },
+        {
+          $replaceRoot: {
+            newRoot: "$root",
+          },
+        },
+        {
+          $project: { _id: 0, email: 1, statut: 1 },
+        },
+      ],
+      as: "delegue",
+    },
+  },
+
+  {
+    $unwind: {
+      path: "$responsable",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $unwind: {
+      path: "$formateur",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $unwind: {
+      path: "$delegue",
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+
+  { $project: { _id: 0, academie: 1, responsable: 1, formateur: 1, delegue: 1 } },
+];
+
 async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) {
   const stats = { total: 0, sent: 0, resent: 0, failed: 0 };
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
   const type = options.type;
+  const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
 
   const query = {
     ...(options.username ? { username: options.username } : {}),
@@ -38,7 +181,7 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
           statut: USER_STATUS.EN_ATTENTE,
 
           $and: [
-            // { type: { $in: [USER_TYPE.ETABLISSEMENT, USER_TYPE.DELEGUE] } },
+            { type: { $in: [USER_TYPE.ETABLISSEMENT, USER_TYPE.DELEGUE] } },
             ...(type ? [{ type }] : []),
 
             {
@@ -73,10 +216,10 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
     .limit(limit)
     .cursor()
     .eachAsync(async (user) => {
-      const templateType = user.type === USER_TYPE.ETABLISSEMENT ? DOWNLOAD_TYPE.RESPONSABLE : user.type;
+      const templateType = user.type === USER_TYPE.ETABLISSEMENT ? CONTACT_TYPE.RESPONSABLE : user.type;
 
       if (
-        templateType === DOWNLOAD_TYPE.RESPONSABLE &&
+        templateType === CONTACT_TYPE.RESPONSABLE &&
         (await Relation.countDocuments({ "etablissement_responsable.siret": user.siret })) === 0
       ) {
         return;
@@ -86,52 +229,103 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
       const previous = user.emails.find((email) => email.templateName === templateName);
       stats.total++;
 
-      try {
-        logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
-        );
-        previous
-          ? await resendEmail(previous.token, { retry: !!previous?.error })
-          : await sendEmail(user, templateName);
+      switch (true) {
+        case proceed: {
+          try {
+            let relations;
 
-        switch (templateType) {
-          case DOWNLOAD_TYPE.RESPONSABLE:
-            switch (!!previous) {
-              case false:
-                await saveAccountConfirmationEmailAutomaticSentToResponsable(user);
+            if (templateType === CONTACT_TYPE.DELEGUE) {
+              relations = await Promise.all(
+                user.relations.map(
+                  async (relation) =>
+                    (
+                      await Relation.aggregate([
+                        {
+                          $match: {
+                            "etablissement_responsable.siret": relation.etablissement_responsable.siret,
+                            "etablissement_formateur.siret": relation.etablissement_formateur.siret,
+                          },
+                        },
+                        ...relationPipelines,
+                      ])
+                    )[0]
+                )
+              );
+            } else if (templateType === CONTACT_TYPE.RESPONSABLE) {
+              relations = await Relation.aggregate([
+                {
+                  $match: {
+                    "etablissement_responsable.siret": user.siret,
+                  },
+                },
+                ...relationPipelines,
+              ]);
+            }
+
+            previous
+              ? await resendEmail(previous.token, { retry: !!previous?.error })
+              : await sendEmail({ ...user, relations }, templateName);
+
+            switch (templateType) {
+              case CONTACT_TYPE.RESPONSABLE:
+                switch (!!previous) {
+                  case false:
+                    await saveAccountConfirmationEmailAutomaticSentToResponsable(user);
+                    break;
+                  case true:
+                    options.sender
+                      ? await saveAccountConfirmationEmailManualResentToResponsable(user, options.sender)
+                      : await saveAccountConfirmationEmailAutomaticResentToResponsable(user);
+                    break;
+                }
                 break;
-              case true:
-                options.sender
-                  ? await saveAccountConfirmationEmailManualResentToResponsable(user, options.sender)
-                  : await saveAccountConfirmationEmailAutomaticResentToResponsable(user);
+              case CONTACT_TYPE.DELEGUE:
+                switch (!!previous) {
+                  case false:
+                    await saveAccountConfirmationEmailAutomaticSentToDelegue(user);
+                    break;
+                  case true:
+                    options.sender
+                      ? await saveAccountConfirmationEmailManualResentToDelegue(user, options.sender)
+                      : await saveAccountConfirmationEmailAutomaticResentToDelegue(user);
+                    break;
+                }
+                break;
+              default:
                 break;
             }
-            break;
-          case DOWNLOAD_TYPE.DELEGUE:
-            switch (!!previous) {
-              case false:
-                await saveAccountConfirmationEmailAutomaticSentToDelegue(user);
-                break;
-              case true:
-                options.sender
-                  ? await saveAccountConfirmationEmailManualResentToDelegue(user, options.sender)
-                  : await saveAccountConfirmationEmailAutomaticResentToDelegue(user);
-                break;
-            }
-            break;
-          default:
-            break;
+
+            logger.info(
+              `[DONE] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+                user.email
+              })...`
+            );
+
+            previous ? stats.resent++ : stats.sent++;
+          } catch (e) {
+            logger.error(
+              `[ERROR] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username}`,
+              e
+            );
+            stats.failed++;
+          }
+          break;
         }
-
-        previous ? stats.resent++ : stats.sent++;
-      } catch (e) {
-        logger.error(
-          `Unable to ${previous ? "re" : ""}sent ${templateName} email to ${templateType} ${user.username}`,
-          e
-        );
-        stats.failed++;
+        default: {
+          logger.info(
+            `[TODO] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+              user.email
+            })...`
+          );
+          previous ? stats.resent++ : stats.sent++;
+          break;
+        }
       }
     });
+
+  if (!proceed) {
+    logger.warn(`TO PROCEED USE --proceed OPTION`);
+  }
 
   return stats;
 }

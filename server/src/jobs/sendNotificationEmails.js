@@ -1,4 +1,4 @@
-const { DOWNLOAD_TYPE } = require("../common/constants/DownloadType");
+const { CONTACT_TYPE } = require("../common/constants/ContactType");
 const logger = require("../common/logger");
 const { Relation, Etablissement, Delegue } = require("../common/model");
 // const { RelationActions } = require("../common/constants/History");
@@ -18,6 +18,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
   const skip = options.skip || 0;
   const type = options.type;
   const username = options.username;
+  const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
 
   let query;
 
@@ -85,17 +86,15 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
         logger.error("Utilisateur introuvable pour la relation " + relation._id);
         stats.skiped++;
         return stats;
-        // throw Error("Utilisateur introuvable pour la relation " + relation._id);
       }
 
       if (!user.email) {
         logger.error("Absence d'adresse courriel pour l'utilisateur " + user._id);
         stats.skiped++;
         return stats;
-        // throw Error("Absence d'adresse courriel pour l'utilisateur " + user._id);
       }
 
-      const templateType = (delegue ? DOWNLOAD_TYPE.DELEGUE : DOWNLOAD_TYPE.RESPONSABLE).toLowerCase();
+      const templateType = (delegue ? CONTACT_TYPE.DELEGUE : CONTACT_TYPE.RESPONSABLE).toLowerCase();
 
       const templateName = `notification_relation_${templateType}`;
       const previous = user.emails.find(
@@ -107,59 +106,80 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
 
       stats.total++;
 
-      try {
-        logger.info(
-          `${previous ? "Res" : "S"}ending ${templateName} email to ${templateType} ${user.username} (${user.email})...`
-        );
+      switch (true) {
+        case proceed: {
+          try {
+            switch (templateType) {
+              case CONTACT_TYPE.RESPONSABLE.toLowerCase():
+                console.log("responsable template type");
+                previous
+                  ? await resendEmail(previous.token, { retry: !!previous?.error })
+                  : await sendEmail(user, templateName, {
+                      relation,
+                      responsable,
+                      formateur,
+                    });
+                options.sender
+                  ? await saveListAvailableEmailManualSentToResponsable({ relation, responsable }, options.sender)
+                  : previous
+                  ? await saveListAvailableEmailAutomaticResentToResponsable({ relation, responsable })
+                  : await saveListAvailableEmailAutomaticSentToResponsable({ relation, responsable });
+                break;
 
-        switch (templateType) {
-          case DOWNLOAD_TYPE.RESPONSABLE.toLowerCase():
-            console.log("responsable template type");
-            previous
-              ? await resendEmail(previous.token, { retry: !!previous?.error })
-              : await sendEmail(user, templateName, {
-                  relation,
-                  responsable,
-                  formateur,
-                });
-            options.sender
-              ? await saveListAvailableEmailManualSentToResponsable({ relation, responsable }, options.sender)
-              : previous
-              ? await saveListAvailableEmailAutomaticResentToResponsable({ relation, responsable })
-              : await saveListAvailableEmailAutomaticSentToResponsable({ relation, responsable });
-            break;
+              case CONTACT_TYPE.DELEGUE.toLowerCase():
+                console.log("delegue template type");
+                previous
+                  ? await resendEmail(previous.token, { retry: !!previous?.error })
+                  : await sendEmail(user, templateName, {
+                      relation,
+                      responsable,
+                      formateur,
+                      delegue,
+                    });
+                options.sender
+                  ? await saveListAvailableEmailManualSentToDelegue({ relation, delegue }, options.sender)
+                  : previous
+                  ? await saveListAvailableEmailAutomaticResentToDelegue({ relation, delegue })
+                  : await saveListAvailableEmailAutomaticSentToDelegue({ relation, delegue });
+                break;
 
-          case DOWNLOAD_TYPE.DELEGUE.toLowerCase():
-            console.log("delegue template type");
-            previous
-              ? await resendEmail(previous.token, { retry: !!previous?.error })
-              : await sendEmail(user, templateName, {
-                  relation,
-                  responsable,
-                  formateur,
-                  delegue,
-                });
-            options.sender
-              ? await saveListAvailableEmailManualSentToDelegue({ relation, delegue }, options.sender)
-              : previous
-              ? await saveListAvailableEmailAutomaticResentToDelegue({ relation, delegue })
-              : await saveListAvailableEmailAutomaticSentToDelegue({ relation, delegue });
-            break;
+              default:
+                console.log("Unknown template type", templateType);
+                break;
+            }
 
-          default:
-            console.log("Unknown template type", templateType);
-            break;
+            logger.info(
+              `[DONE] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+                user.email
+              })...`
+            );
+
+            previous ? stats.resent++ : stats.sent++;
+          } catch (e) {
+            logger.error(
+              `[ERROR] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username}`,
+              e
+            );
+            stats.failed++;
+          }
+          break;
         }
 
-        previous ? stats.resent++ : stats.sent++;
-      } catch (e) {
-        logger.error(
-          `Unable to ${previous ? "re" : ""}sent ${templateName} email to ${templateType} ${user.username}`,
-          e
-        );
-        stats.failed++;
+        default: {
+          logger.info(
+            `[TODO] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
+              user.email
+            })...`
+          );
+          previous ? stats.resent++ : stats.sent++;
+          break;
+        }
       }
     });
+
+  if (!proceed) {
+    logger.warn(`TO PROCEED USE --proceed OPTION`);
+  }
 
   return stats;
 }

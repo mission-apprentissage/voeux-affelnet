@@ -422,13 +422,16 @@ module.exports = ({ sendEmail, resendEmail }) => {
         //   : []),
 
         { $addFields: addCountFields },
+        {
+          $addFields: { relations_count: { $size: { $ifNull: ["$relations", []] } } },
+        },
       ];
 
       const { results, pagination } = await aggregate(User, pipeline, {
         page,
         items_par_page,
         select: { _id: 0, password: 0 },
-        sort: JSON.parse(sort ?? JSON.stringify({ type: -1 })),
+        sort: JSON.parse(sort ?? JSON.stringify({ nombre_voeux_restant: -1, relations_count: 1 })),
       });
 
       res.json({
