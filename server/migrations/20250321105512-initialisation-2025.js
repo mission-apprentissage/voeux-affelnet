@@ -37,6 +37,16 @@ module.exports = {
     // Suppression des formateurs
     await db.collection("users").deleteMany({ type: "Formateur" });
 
+    // Suppression des délégations désactivées.
+    await db.collection("users").updateMany(
+      { type: USER_TYPE.DELEGUE, relations: { $elemMatch: { active: false } } },
+      {
+        $pull: {
+          relations: { active: false },
+        },
+      }
+    );
+
     // Désactivation des délégations de la campagne précédente.
     await db.collection("users").updateMany(
       { type: USER_TYPE.DELEGUE, "relations.0": { $exists: true } },
