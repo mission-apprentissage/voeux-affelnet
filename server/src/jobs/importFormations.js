@@ -5,7 +5,6 @@ const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
 const { Formation } = require("../common/model");
 const { parseCsv } = require("../common/utils/csvUtils");
-const { getFromStorage } = require("../common/utils/ovhUtils.js");
 
 const schema = Joi.object({
   uai: Joi.string().required(),
@@ -13,6 +12,9 @@ const schema = Joi.object({
 
 const transformFormateurStream = (data) => {
   return {
+    id: `${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`,
+    academie: data["ACADEMIE"],
+    code_offre: data["CODE_OFFRE"],
     cle_ministere_educatif: data["CLE_MINISTERE_EDUCATIF"],
     uai: data["UAI"],
     libelle_type_etablissement: data["LIBELLE_TYPE_ETABLISSEMENT"],
@@ -20,7 +22,6 @@ const transformFormateurStream = (data) => {
     adresse: data["ADRESSE"],
     cp: data["CP"],
     commune: data["COMMUNE"],
-    academie: data["ACADEMIE"],
     ministere: data["MINISTERE"],
     public_prive: data["PUBLIC_PRIVE"],
     type_contrat: data["TYPE_CONTRAT"],
@@ -50,27 +51,20 @@ const transformFormateurStream = (data) => {
     coordonnees_gps_latitude: data["COORDONNEES_GPS_LATITUDE"],
     coordonnees_gps_longitude: data["COORDONNEES_GPS_LONGITUDE"],
     siret_uai_gestionnaire: data["SIRET_UAI_GESTIONNAIRE"],
+    integree_catalogue: data["INTEGREE_CATALOGUE"],
+    uai_formateur: data["UAI_FORMATEUR"],
+    uai_responsable: data["UAI_RESPONSABLE"],
   };
 };
 
-async function getDefaultFormateurStream() {
-  const stream = await getFromStorage("AFFELNET-LYCEE-2022-OF_apprentissage-07-06-2022.csv");
-
-  return compose(stream, parseCsv(), transformData(transformFormateurStream));
-}
-
 async function importFormations(formationsCsv) {
-  console.log("stream", formationsCsv);
-
-  const stream = formationsCsv
-    ? compose(
-        formationsCsv,
-        parseCsv({
-          on_record: (record) => omitEmpty(record),
-        }),
-        transformData(transformFormateurStream)
-      )
-    : await getDefaultFormateurStream();
+  const stream = compose(
+    formationsCsv,
+    parseCsv({
+      on_record: (record) => omitEmpty(record),
+    }),
+    transformData(transformFormateurStream)
+  );
 
   const stats = {
     total: 0,
@@ -79,8 +73,6 @@ async function importFormations(formationsCsv) {
     invalid: 0,
     failed: 0,
   };
-
-  console.log("reading stream");
 
   await Formation.deleteMany({});
 
@@ -94,7 +86,7 @@ async function importFormations(formationsCsv) {
       }
 
       stats.invalid++;
-      logger.warn(`La formation ${json.cle_ministere_educatif} est invalide`, error);
+      logger.warn(`La formation ${json.id} est invalide`, error);
       return false;
     }),
     writeData(
@@ -102,10 +94,10 @@ async function importFormations(formationsCsv) {
         try {
           await Formation.create(data);
           stats.created++;
-          logger.info(`Formation ${data.cle_ministere_educatif} created`);
+          logger.info(`Formation ${data.id} created`);
         } catch (error) {
           stats.failed++;
-          logger.error(`Impossible de traiter la formation ${data.cle_ministere_educatif}`, error);
+          logger.error(`Impossible de traiter la formation ${data.id}`, error);
         }
       },
       { parallel: 10 }

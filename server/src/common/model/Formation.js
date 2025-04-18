@@ -1,6 +1,9 @@
 const { Schema, model } = require("mongoose");
 
 const schema = new Schema({
+  id: {
+    type: String,
+  },
   cle_ministere_educatif: {
     type: String,
   },
@@ -120,6 +123,18 @@ const schema = new Schema({
   },
 
   siret_uai_gestionnaire: {
+    type: String,
+  },
+
+  uai_formateur: {
+    type: String,
+  },
+
+  uai_responsable: {
+    type: String,
+  },
+
+  integree_catalogue: {
     type: String,
   },
 });

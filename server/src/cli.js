@@ -32,6 +32,7 @@ const { getLatestImportDate } = require("./common/actions/getLatestImportDate");
 // const { findAcademieByCode } = require("./common/academies");
 const { createActionToken } = require("./common/utils/jwtUtils");
 const config = require("./config");
+const { activateDelegues } = require("./jobs/activateDelegues");
 
 process.on("unhandledRejection", (e) => console.log(e));
 process.on("uncaughtException", (e) => console.log(e));
@@ -221,13 +222,23 @@ cli
   });
 
 cli
-  .command("importFormations [<formationCsv>]")
+  .command("importFormations <formationCsv>")
   .description("Importe les formations depuis le fichier transmis par Affelnet")
   .action((formationCsv) => {
     runScript(() => {
       const input = formationCsv ? createReadStream(formationCsv) : null;
 
       return importFormations(input);
+    });
+  });
+
+cli
+  .command("activateDelegues")
+  .description("Active les relations non confirmées et non supprimées pour les délégués")
+  .option("--proceed", "Permet d'appliquer l'activation", false)
+  .action((options) => {
+    runScript(() => {
+      return activateDelegues(options);
     });
   });
 
