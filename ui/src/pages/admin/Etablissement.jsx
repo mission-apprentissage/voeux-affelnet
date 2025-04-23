@@ -23,9 +23,6 @@ import { Page } from "../../common/components/layout/Page";
 import { _get } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
-import { OrganismeResponsableTag } from "../../common/components/tags/OrganismeResponsable";
-import { OrganismeFormateurTag } from "../../common/components/tags/OrganismeFormateur";
-import { OrganismeResponsableFormateurTag } from "../../common/components/tags/OrganismeResponsableFormateur";
 import { UpdateResponsableEmailModal } from "../../common/components/admin/modals/UpdateResponsableEmailModal";
 import { DelegationModal } from "../../common/components/admin/modals/DelegationModal";
 import { UpdateDelegationModal } from "../../common/components/admin/modals/UpdateDelegationModal";
@@ -34,7 +31,7 @@ import { RelationStatut } from "../../common/components/admin/fields/RelationSta
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/adminHooks";
 import { ConfirmDelegationModal } from "../../common/components/admin/modals/ConfirmDelegationModal";
-import { CheckIcon, EditIcon } from "@chakra-ui/icons";
+import { CheckIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -67,38 +64,34 @@ const RelationContact = ({ relation, callback }) => {
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
                 </Text>
                 <Box mt={3}>
-                  <Link
-                    mr={3}
-                    variant="action"
-                    display="inline"
-                    color="greenmedium.500"
-                    onClick={onOpenConfirmDelegationModal}
-                  >
-                    <CheckIcon mx={2} />
+                  <Button mr={3} variant="green" display="inline" onClick={onOpenConfirmDelegationModal}>
+                    <CheckIcon mr={2} />
                     Confirmer la délégation
-                  </Link>
-                  <Link
-                    mr={3}
-                    variant="action"
-                    display="inline"
-                    color="redmarianne"
-                    onClick={onOpenUpdateDelegationModal}
-                  >
-                    <EditIcon mx={2} />
+                  </Button>
+                  <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+                    <EditIcon mr={2} />
                     Modifier ou annuler la délégation
-                  </Link>
+                  </Button>
                 </Box>
                 <Box mt={3}>
                   <Text as="i">
-                    En l'absence de confirmation ou modification, le délégué définit sur la précédente campagne recevra
-                    les listes de candidats.
+                    En l'absence de confirmation ou modification, le délégué renseigné sur la précédente campagne
+                    recevra les listes de candidats.
                   </Text>
                 </Box>
               </>
             ) : (
-              <Text>
-                Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
-              </Text>
+              <>
+                <Text>
+                  Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+                </Text>
+                <Box mt={3}>
+                  <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+                    <EditIcon mr={2} />
+                    Modifier ou annuler la délégation
+                  </Button>
+                </Box>
+              </>
             )}
 
             <ConfirmDelegationModal
@@ -116,10 +109,10 @@ const RelationContact = ({ relation, callback }) => {
           </>
         ) : (
           <>
-            <Link variant="action" color="bluefrance" onClick={onOpenDelegationModal}>
-              <EditIcon mx={2} />
+            <Button variant="blue" onClick={onOpenDelegationModal}>
+              <EditIcon mr={2} />
               Déléguer le droit de réception des listes de candidats.
-            </Link>
+            </Button>
             <Box mt={4}>
               <Text as="i">
                 En l'absence de délégation, le responsable sera seul destinataire des listes de candidats.
@@ -157,17 +150,18 @@ const RelationFormateur = ({ relation, callback }) => {
         {relation.formateur?.uai ?? "Inconnu"}
       </Text>
 
-      <Box mt={2}>
+      <Box mt={8}>
         <RelationContact relation={relation} callback={callback} />
       </Box>
 
-      <Text mt={6}>
+      <Text mt={8}>
         {/* Statut de diffusion des listes : */}
         <RelationStatut relation={relation} />{" "}
       </Text>
 
       {!!relation?.nombre_voeux && (
-        <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
+        <Button mt={4} variant="primary" onClick={async () => await downloadVoeux()}>
+          <DownloadIcon mr={2} />
           Télécharger la liste
         </Button>
       )}
@@ -177,7 +171,7 @@ const RelationFormateur = ({ relation, callback }) => {
         ...(relation.responsable?.histories ?? []),
         ...(relation.delegue?.histories ?? []),
       ].length && (
-        <Box mt={6}>
+        <Box mt={8}>
           <HistoryBlock relation={relation} formateur={relation.formateur} delegue={relation.delegue} />
         </Box>
       )}
@@ -351,14 +345,6 @@ export const Etablissement = () => {
       <Page title={title}>
         <Box my={6}>
           <Box>
-            <Box>
-              {etablissement.is_responsable && <OrganismeResponsableTag verticalAlign="baseline" ml={2} />}
-              {etablissement.is_responsable_formateur && (
-                <OrganismeResponsableFormateurTag verticalAlign="baseline" ml={2} />
-              )}
-              {etablissement.is_formateur && <OrganismeFormateurTag verticalAlign="baseline" ml={2} />}
-            </Box>
-
             <Text mt={6}>
               Adresse : {etablissement?.adresse} - SIRET : {etablissement?.siret ?? "Inconnu"} - UAI :{" "}
               {etablissement?.uai ?? "Inconnu"}
@@ -422,6 +408,7 @@ export const Etablissement = () => {
 
                   {!!etablissement?.nombre_voeux && (
                     <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
+                      <DownloadIcon mr={2} />
                       Télécharger la liste
                     </Button>
                   )}

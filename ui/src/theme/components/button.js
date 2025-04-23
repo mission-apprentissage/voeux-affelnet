@@ -23,7 +23,7 @@ const Button = {
       ...commonButtonStyle,
       bg: "bluefrance",
       color: "white",
-      _hover: { bg: "#0000dd", _disabled: { bg: "bluefrance" } },
+      _hover: { bg: "#1212ff", _disabled: { bg: "bluefrance" } },
     },
     pill: {
       ...commonButtonStyle,
@@ -50,6 +50,24 @@ const Button = {
     danger: {
       ...commonButtonStyle,
       color: "redmarianne",
+    },
+    blue: {
+      ...commonButtonStyle,
+      backgroundColor: "bluefrance",
+      color: "white",
+      _hover: { bg: "#1212ff", _disabled: { bg: "bluefrance" } },
+    },
+    green: {
+      ...commonButtonStyle,
+      backgroundColor: "greenemeraude",
+      color: "white",
+      _hover: { bg: "#00e180", _disabled: { bg: "greenemeraude" } },
+    },
+    red: {
+      ...commonButtonStyle,
+      backgroundColor: "#c9191e",
+      color: "white",
+      _hover: { bg: "#f93f42", _disabled: { bg: "redmarianne" } },
     },
   },
 };

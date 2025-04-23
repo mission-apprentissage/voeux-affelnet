@@ -1,4 +1,4 @@
-import { Box, Text, Heading, Button, useDisclosure } from "@chakra-ui/react";
+import { Box, Text, Heading, Button, useDisclosure, Table, Thead, Tr, Th, Tbody, Td, Alert } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
 
@@ -10,6 +10,7 @@ import { useDownloadVoeux } from "../../common/hooks/delegueHooks";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { DownloadVoeuxModal } from "../../common/components/delegue/modals/DownloadVoeuxModal";
+import { DownloadIcon } from "@chakra-ui/icons";
 
 export const Delegue = ({ delegue, callback }) => {
   const downloadVoeux = useDownloadVoeux({ callback });
@@ -75,61 +76,73 @@ export const Delegue = ({ delegue, callback }) => {
           const responsable = relations?.find((relation) => relation.responsable?.siret === siret)?.responsable;
 
           return (
-            <Box key={siret} mt={12}>
-              <Heading as="h4" size="md" style={{ textDecoration: "underline" }}>
-                Organisme responsable : <EtablisssementRaisonSociale etablissement={responsable} />
-              </Heading>
+            <Box key={siret} my={12}>
+              <Alert status="info" display={"block"}>
+                <Heading as="h4" size="sm">
+                  Organisme responsable : <EtablisssementRaisonSociale etablissement={responsable} />
+                </Heading>
 
-              <Text mt={4}>
-                Adresse : {responsable?.adresse} - SIRET : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
-                {responsable?.uai ?? "Inconnu"}
-              </Text>
-              <Text mt={4}>
-                Contact au sein de l'organisme responsable : <Text as="b">{responsable?.email ?? "Inconnu"}</Text>
-              </Text>
-
-              <Box mt={12}>
+                <Text mt={4}>
+                  Adresse : {responsable?.adresse} - SIRET : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
+                  {responsable?.uai ?? "Inconnu"}
+                </Text>
+                <Text mt={4}>
+                  Contact au sein de l'organisme responsable : <Text as="b">{responsable?.email ?? "Inconnu"}</Text>
+                </Text>
+              </Alert>
+              <Box mt={8}>
                 <Box>
-                  <Heading as="h3" size="md" mb={8} style={{ textDecoration: "underline" }}>
-                    Organismes formateurs associés
-                  </Heading>
+                  <Table>
+                    <Thead>
+                      <Tr borderBottom="2px solid" borderColor="gray.200">
+                        <Th> Organismes formateurs associés</Th>
+                      </Tr>
+                    </Thead>
 
-                  {relations.map((relation) => (
-                    <Box mt={12} key={relation?.formateur?.siret}>
-                      <Box mt={8} key={relation.etablissement_formateur.siret}>
-                        <Heading as="h4" size="md">
-                          <EtablisssementRaisonSociale etablissement={relation.formateur} />
-                        </Heading>
-                        <Text mt={4}>
-                          Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} -
-                          UAI : {relation.formateur?.uai ?? "Inconnu"}
-                        </Text>
-                        <Text mt={6}>
-                          {/* Statut de diffusion des listes : */}
-                          <RelationStatut relation={relation} />
-                        </Text>
+                    <Tbody>
+                      {relations.map((relation, index) => (
+                        <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
+                          <Td py={8}>
+                            {/* <RelationFormateur relation={relation} callback={reload} /> */}
+                            <Box>
+                              <Heading as="h4" size="md">
+                                <EtablisssementRaisonSociale etablissement={relation.formateur} />
+                              </Heading>
+                              <Text mt={4}>
+                                Adresse : {relation.formateur?.adresse} - SIRET :{" "}
+                                {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
+                              </Text>
 
-                        {!!relation?.nombre_voeux && (
-                          <Button
-                            mt={6}
-                            variant="primary"
-                            onClick={async () =>
-                              await downloadVoeux({
-                                responsable: relation.responsable,
-                                formateur: relation.formateur,
-                              })
-                            }
-                          >
-                            Télécharger la liste
-                          </Button>
-                        )}
+                              <Text mt={8}>
+                                {/* Statut de diffusion des listes : */}
+                                <RelationStatut relation={relation} />
+                              </Text>
 
-                        <Box mt={6}>
-                          <HistoryBlock relation={relation} />
-                        </Box>
-                      </Box>
-                    </Box>
-                  ))}
+                              {!!relation?.nombre_voeux && (
+                                <Button
+                                  mt={4}
+                                  variant="primary"
+                                  onClick={async () =>
+                                    await downloadVoeux({
+                                      responsable: relation.responsable,
+                                      formateur: relation.formateur,
+                                    })
+                                  }
+                                >
+                                  <DownloadIcon mr={2} />
+                                  Télécharger la liste
+                                </Button>
+                              )}
+
+                              <Box mt={8}>
+                                <HistoryBlock relation={relation} />
+                              </Box>
+                            </Box>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
                 </Box>
               </Box>
             </Box>

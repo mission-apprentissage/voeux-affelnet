@@ -44,7 +44,9 @@ export const ListRelations = ({ relations, delegation, limit }) => {
 
   return !delegation ? (
     <>
-      <Text mt={4}>Accès exclusif aux candidatures :</Text>
+      <Text mt={4} fontWeight={600}>
+        Accès exclusif aux candidatures :
+      </Text>
       <UnorderedList>
         {relations.slice(0, limit).map((relation, index) => (
           <ListItem mt={2} key={index}>
@@ -112,7 +114,9 @@ export const ListRelations = ({ relations, delegation, limit }) => {
     </>
   ) : (
     <>
-      <Text mt={4}>Délégation{relations?.length > 1 && "s"} de droit d'accès :</Text>
+      <Text mt={4} fontWeight={600}>
+        Délégation{relations?.length > 1 && "s"} de droit d'accès :
+      </Text>
       <UnorderedList>
         {relations.slice(0, limit).map((relation, index) => (
           <ListItem mt={2} key={index}>
@@ -433,38 +437,8 @@ export const Etablissements = () => {
                       -b.formateur?.raison_sociale.localeCompare(a.formateur.raison_sociale)
                   );
 
-                // const isOnlyResponsableFormateur =
-                //   etablissement.is_responsable_formateur && etablissement.relations.length === 1;
-
-                // const relationsResponsable = etablissement.relations.filter(
-                //   (relation) => relation.responsable?.siret === etablissement.siret
-                // );
-
-                // const relationsFormateur = etablissement.relations.filter(
-                //   (relation) => relation.formateur?.siret === etablissement.siret
-                // );
-
-                // const relationsOnlyResponsable = relationsResponsable.filter(
-                //   (relation) => relation.formateur?.siret !== etablissement.siret
-                // );
-
-                // const relationsOnlyFormateur = relationsFormateur.filter(
-                //   (relation) => relation.responsable?.siret !== etablissement.siret
-                // );
-
-                // const relationResponsableFormateur = etablissement.relations.find(
-                //   (relation) =>
-                //     relation.formateur?.siret === etablissement.siret &&
-                //     relation.responsable?.siret === etablissement.siret
-                // );
-
                 return (
                   <Tr key={index} borderBottom="2px solid" borderColor="gray.200">
-                    {/* <Td>
-                      <Link variant="primary" href={`/admin/etablissement/${etablissement.siret}`}>
-                        Détail
-                      </Link>
-                    </Td> */}
                     <Td verticalAlign={"top"}>
                       <Box lineHeight={6}>
                         <Text as="b">
@@ -472,20 +446,8 @@ export const Etablissements = () => {
                           {etablissement.libelle_ville ?? "Ville inconnue"} - Siret : {etablissement.siret ?? "Inconnu"}{" "}
                           - UAI : {etablissement.uai ?? "Inconnu"}
                         </Text>
-                        {/* <Text>
-                          <Text as="i" color="gray.500">
-                            Siret : {etablissement.siret ?? "Inconnu"} - UAI : {etablissement.uai ?? "Inconnu"}
-                          </Text>
-                        </Text> */}
-
-                        {/* {etablissement.is_responsable && <OrganismeResponsableTag verticalAlign="baseline" ml={2} />}
-                        {etablissement.is_responsable_formateur && (
-                          <OrganismeResponsableFormateurTag verticalAlign="baseline" ml={2} />
-                        )}
-                        {etablissement.is_formateur && <OrganismeFormateurTag verticalAlign="baseline" ml={2} />} */}
                       </Box>
-                      {/* </Td>
-                    <Td> */}
+
                       <Box lineHeight={6}>
                         <Text>
                           Contact responsable : {/*<Text as="b">*/}

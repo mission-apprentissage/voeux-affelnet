@@ -15,7 +15,7 @@ import {
   Tbody,
   Td,
 } from "@chakra-ui/react";
-import { CheckIcon, EditIcon } from "@chakra-ui/icons";
+import { CheckIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
 
 import { Page } from "../../common/components/layout/Page";
 import { _get } from "../../common/httpClient";
@@ -64,26 +64,14 @@ const RelationContact = ({ relation, callback }) => {
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
                 </Text>
                 <Box mt={3}>
-                  <Link
-                    mr={3}
-                    variant="action"
-                    display="inline"
-                    color="greenmedium.500"
-                    onClick={onOpenConfirmDelegationModal}
-                  >
-                    <CheckIcon mx={2} />
+                  <Button mr={3} variant="green" display="inline" onClick={onOpenConfirmDelegationModal}>
+                    <CheckIcon mr={2} />
                     Confirmer la délégation
-                  </Link>
-                  <Link
-                    mr={3}
-                    variant="action"
-                    display="inline"
-                    color="redmarianne"
-                    onClick={onOpenUpdateDelegationModal}
-                  >
-                    <EditIcon mx={2} />
+                  </Button>
+                  <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+                    <EditIcon mr={2} />
                     Modifier ou annuler la délégation
-                  </Link>
+                  </Button>
                 </Box>
                 <Box mt={3}>
                   <Text as="i">
@@ -93,9 +81,17 @@ const RelationContact = ({ relation, callback }) => {
                 </Box>
               </>
             ) : (
-              <Text>
-                Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
-              </Text>
+              <>
+                <Text>
+                  Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+                </Text>
+                <Box mt={3}>
+                  <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+                    <EditIcon mr={2} />
+                    Modifier ou annuler la délégation
+                  </Button>
+                </Box>
+              </>
             )}
 
             <ConfirmDelegationModal
@@ -113,10 +109,10 @@ const RelationContact = ({ relation, callback }) => {
           </>
         ) : (
           <>
-            <Link variant="action" color="bluefrance" onClick={onOpenDelegationModal}>
-              <EditIcon mx={2} />
+            <Button variant="blue" onClick={onOpenDelegationModal}>
+              <EditIcon mr={2} />
               Déléguer le droit de réception des listes de candidats.
-            </Link>
+            </Button>
             <Box mt={4}>
               <Text as="i">
                 En l'absence de délégation, le responsable sera seul destinataire des listes de candidats.
@@ -165,6 +161,7 @@ const RelationFormateur = ({ relation, callback }) => {
 
       {!!relation?.nombre_voeux && (
         <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
+          <DownloadIcon mr={2} />
           Télécharger la liste
         </Button>
       )}
@@ -424,6 +421,7 @@ export const Responsable = () => {
 
                   {!!relationResponsableFormateur?.nombre_voeux && (
                     <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
+                      <DownloadIcon mr={2} />
                       Télécharger la liste
                     </Button>
                   )}
