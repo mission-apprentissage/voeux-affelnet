@@ -1,4 +1,4 @@
-const { Responsable, Voeu, Relation, Delegue, Etablissement } = require("../common/model");
+const { Voeu, Relation, Delegue, Etablissement } = require("../common/model");
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
 const { USER_TYPE } = require("../common/constants/UserType");
