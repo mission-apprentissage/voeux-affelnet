@@ -1,4 +1,4 @@
-const { Responsable, Formateur, Voeu, Relation, Delegue } = require("../common/model");
+const { Responsable, Voeu, Relation, Delegue, Etablissement } = require("../common/model");
 const { promiseAllProps } = require("../common/utils/asyncUtils");
 const { getAcademies } = require("../common/academies");
 const { USER_TYPE } = require("../common/constants/UserType");
@@ -36,8 +36,8 @@ const computeOrganismesStats = async (filter = {}) => {
   };
 
   const relationEtablissementsFilter = {
-    "etablissement_responsable.uai": { $nin: UAIS_RECENSEMENT },
-    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
+    "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
+    "etablissement_formateur.siret": { $ne: SIRET_RECENSEMENT },
   };
 
   const relationAcademieFilter = {
@@ -83,7 +83,7 @@ const computeOrganismesStats = async (filter = {}) => {
       },
       {
         $lookup: {
-          from: Responsable.collection.name,
+          from: Etablissement.collection.name,
           let: {
             siret_responsable: "$siret",
           },
@@ -91,7 +91,7 @@ const computeOrganismesStats = async (filter = {}) => {
             {
               $match: {
                 $expr: {
-                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", USER_TYPE.RESPONSABLE] }],
+                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", USER_TYPE.ETABLISSEMENT] }],
                 },
               },
             },
@@ -130,7 +130,7 @@ const computeOrganismesStats = async (filter = {}) => {
       },
       {
         $lookup: {
-          from: Responsable.collection.name,
+          from: Etablissement.collection.name,
           let: {
             siret_responsable: "$siret",
           },
@@ -138,7 +138,7 @@ const computeOrganismesStats = async (filter = {}) => {
             {
               $match: {
                 $expr: {
-                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", USER_TYPE.RESPONSABLE] }],
+                  $and: [{ $eq: ["$siret", "$$siret_responsable"] }, { $eq: ["$type", USER_TYPE.ETABLISSEMENT] }],
                 },
               },
             },
@@ -193,7 +193,7 @@ const computeOrganismesStats = async (filter = {}) => {
                 $expr: {
                   $and: [
                     { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
-                    { $eq: ["$relations.active", true] },
+                    //{ $eq: ["$relations.active", true] },
                   ],
                 },
               },
@@ -251,11 +251,11 @@ const computeOrganismesStats = async (filter = {}) => {
       {
         $group: {
           _id: "$etablissement_responsable.siret",
-          siret: { $first: "$etablissement_responsable.siret" },
-          uais: { $addToSet: "$etablissement_formateur.uai" },
+          siret_responsable: { $first: "$etablissement_responsable.siret" },
+          sirets_formateurs: { $addToSet: "$etablissement_formateur.siret" },
         },
       },
-      { $match: { "uais.1": { $exists: true } } },
+      { $match: { "sirets_formateurs.1": { $exists: true } } },
       {
         $group: {
           _id: null,
@@ -278,7 +278,7 @@ const computeOrganismesStats = async (filter = {}) => {
           from: Delegue.collection.name,
           let: {
             siret_responsable: "$etablissement_responsable.siret",
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -298,8 +298,8 @@ const computeOrganismesStats = async (filter = {}) => {
                 $expr: {
                   $and: [
                     { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-                    { $eq: ["$relations.active", true] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                    //{ $eq: ["$relations.active", true] },
                   ],
                 },
               },
@@ -353,7 +353,7 @@ const computeOrganismesStats = async (filter = {}) => {
           from: Delegue.collection.name,
           let: {
             siret_responsable: "$etablissement_responsable.siret",
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -373,8 +373,8 @@ const computeOrganismesStats = async (filter = {}) => {
                 $expr: {
                   $and: [
                     { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-                    { $eq: ["$relations.active", true] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                    //{ $eq: ["$relations.active", true] },
                   ],
                 },
               },
@@ -430,8 +430,8 @@ const computeOrganismesStats = async (filter = {}) => {
       },
       {
         $group: {
-          _id: "$etablissement_formateur.uai",
-          uai: { $first: "$etablissement_formateur.uai" },
+          _id: "$etablissement_formateur.siret",
+          siret: { $first: "$etablissement_formateur.siret" },
         },
       },
       {
@@ -455,7 +455,7 @@ const computeOrganismesStats = async (filter = {}) => {
         $lookup: {
           from: Delegue.collection.name,
           let: {
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -474,8 +474,8 @@ const computeOrganismesStats = async (filter = {}) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-                    { $eq: ["$relations.active", true] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                    //{ $eq: ["$relations.active", true] },
                   ],
                 },
               },
@@ -508,8 +508,8 @@ const computeOrganismesStats = async (filter = {}) => {
       },
       {
         $group: {
-          _id: "$etablissement_formateur.uai",
-          uai: { $first: "$etablissement_formateur.uai" },
+          _id: "$etablissement_formateur.siret",
+          siret: { $first: "$etablissement_formateur.siret" },
         },
       },
       {
@@ -534,7 +534,7 @@ const computeOrganismesStats = async (filter = {}) => {
           from: Voeu.collection.name,
           let: {
             siret_responsable: "$etablissement_responsable.siret",
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -543,7 +543,7 @@ const computeOrganismesStats = async (filter = {}) => {
                 $expr: {
                   $and: [
                     { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-                    { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
+                    { $eq: ["$etablissement_formateur.siret", "$$siret_formateur"] },
                   ],
                 },
               },
@@ -581,18 +581,18 @@ const computeVoeuxStats = async (filter = {}) => {
   //   .map((formateur) => formateur?.uai)
   //   .filter((uai) => !UAIS_RECENSEMENT.includes(uai));
 
-  const responsables = await Responsable.aggregate([{ $project: { siret: "$siret" } }]);
-  const formateurs = await Formateur.aggregate([{ $project: { uai: "$uai" } }]);
+  const responsables = await Etablissement.aggregate([{ $project: { siret: "$siret" } }]);
+  const formateurs = await Etablissement.aggregate([{ $project: { siret: "$siret" } }]);
 
   const voeuxFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
-    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
+    "etablissement_formateur.siret": { $ne: SIRET_RECENSEMENT },
     "etablissement_accueil.uai": { $nin: UAIS_RECENSEMENT },
   };
 
   const relationEtablissementsFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT, $in: responsables.map(({ siret }) => siret) },
-    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT, $in: formateurs.map(({ uai }) => uai) },
+    "etablissement_formateur.siret": { $ne: SIRET_RECENSEMENT, $in: formateurs.map(({ siret }) => siret) },
   };
 
   const relationAcademieFilter = {
@@ -638,7 +638,7 @@ const computeVoeuxStats = async (filter = {}) => {
           from: Voeu.collection.name,
           let: {
             siret_responsable: "$etablissement_responsable.siret",
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -649,7 +649,7 @@ const computeVoeuxStats = async (filter = {}) => {
                     $expr: {
                       $and: [
                         { $eq: ["$etablissement_responsable.siret", "$$siret_responsable"] },
-                        { $eq: ["$etablissement_formateur.uai", "$$uai_formateur"] },
+                        { $eq: ["$etablissement_formateur.siret", "$$siret_formateur"] },
                       ],
                     },
                   },
@@ -762,9 +762,9 @@ const computeVoeuxStats = async (filter = {}) => {
             { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
             { ...voeuxFilter },
             {
-              "etablissement_formateur.uai": {
+              "etablissement_formateur.siret": {
                 $exists: true,
-                $nin: formateurs.map((formateur) => formateur?.uai),
+                $nin: formateurs.map((formateur) => formateur?.siret),
               },
             },
           ],
@@ -772,7 +772,7 @@ const computeVoeuxStats = async (filter = {}) => {
       },
       {
         $group: {
-          _id: "$etablissement_formateur.uai",
+          _id: "$etablissement_formateur.siret",
         },
       },
       {
@@ -787,9 +787,9 @@ const computeVoeuxStats = async (filter = {}) => {
             { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
             { ...voeuxFilter },
             {
-              "etablissement_formateur.uai": {
+              "etablissement_formateur.siret": {
                 $exists: true,
-                $nin: formateurs.map((formateur) => formateur?.uai),
+                $nin: formateurs.map((formateur) => formateur?.siret),
               },
             },
           ],
@@ -797,7 +797,7 @@ const computeVoeuxStats = async (filter = {}) => {
       },
       {
         $group: {
-          _id: "$etablissement_formateur.uai",
+          _id: "$etablissement_formateur.siret",
           nbVoeux: { $sum: 1 },
         },
       },
@@ -816,7 +816,7 @@ const computeVoeuxStats = async (filter = {}) => {
             { ...(filter?.["academie.code"] ? { "academie.code": filter["academie.code"] } : {}) },
             { ...voeuxFilter },
             {
-              "etablissement_formateur.uai": {
+              "etablissement_formateur.siret": {
                 $exists: false,
               },
             },
@@ -835,7 +835,7 @@ const computeVoeuxStats = async (filter = {}) => {
             {
               $or: [
                 { "etablissement_responsable.siret": { $eq: SIRET_RECENSEMENT } },
-                { "etablissement_formateur.uai": { $in: UAIS_RECENSEMENT } },
+                { "etablissement_formateur.siret": { $eq: SIRET_RECENSEMENT } },
                 { "etablissement_accueil.uai": { $in: UAIS_RECENSEMENT } },
               ],
             },
@@ -863,10 +863,10 @@ const computeVoeuxStats = async (filter = {}) => {
                 $in: responsables.map((responsable) => responsable.siret),
               },
             },
-            { "etablissement_formateur.uai": { $exists: true } },
+            { "etablissement_formateur.siret": { $exists: true } },
             {
-              "etablissement_formateur.uai": {
-                $in: formateurs.map((formateur) => formateur?.uai),
+              "etablissement_formateur.siret": {
+                $in: formateurs.map((formateur) => formateur?.siret),
               },
             },
           ],
@@ -891,10 +891,10 @@ const computeVoeuxStats = async (filter = {}) => {
                     $nin: responsables.map((responsable) => responsable.siret),
                   },
                 },
-                { "etablissement_formateur.uai": { $exists: false } },
+                { "etablissement_formateur.siret": { $exists: false } },
                 {
-                  "etablissement_formateur.uai": {
-                    $nin: formateurs.map((formateur) => formateur?.uai),
+                  "etablissement_formateur.siret": {
+                    $nin: formateurs.map((formateur) => formateur?.siret),
                   },
                 },
               ],
@@ -956,7 +956,7 @@ const computeVoeuxStats = async (filter = {}) => {
         $lookup: {
           from: Delegue.collection.name,
           let: {
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -975,8 +975,8 @@ const computeVoeuxStats = async (filter = {}) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-                    { $eq: ["$relations.active", true] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                    //{ $eq: ["$relations.active", true] },
                   ],
                 },
               },
@@ -1035,7 +1035,7 @@ const computeVoeuxStats = async (filter = {}) => {
         $lookup: {
           from: Delegue.collection.name,
           let: {
-            uai_formateur: "$etablissement_formateur.uai",
+            siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
             {
@@ -1054,8 +1054,8 @@ const computeVoeuxStats = async (filter = {}) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$relations.etablissement_formateur.uai", "$$uai_formateur"] },
-                    { $eq: ["$relations.active", true] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                    //{ $eq: ["$relations.active", true] },
                   ],
                 },
               },
@@ -1108,7 +1108,7 @@ const computeVoeuxStats = async (filter = {}) => {
 const computeProgressesStats = async (filter = {}) => {
   const relationEtablissementsFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
-    "etablissement_formateur.uai": { $nin: UAIS_RECENSEMENT },
+    "etablissement_formateur.siret": { $nin: UAIS_RECENSEMENT },
   };
 
   const relationAcademieFilter = {
@@ -1561,7 +1561,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.uai",
+            _id: "$etablissement_formateur.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1597,7 +1597,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.uai",
+            _id: "$etablissement_formateur.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1674,7 +1674,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.uai",
+            _id: "$etablissement_formateur.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1713,7 +1713,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.uai",
+            _id: "$etablissement_formateur.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1793,7 +1793,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.uai",
+            _id: "$etablissement_formateur.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1832,7 +1832,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.uai",
+            _id: "$etablissement_formateur.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1906,7 +1906,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.uai",
+            _id: "$etablissement_formateur.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },

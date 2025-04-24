@@ -18,7 +18,6 @@ import { AccountFill, LockFill } from "../../../theme/components/icons";
 import { AlertMessage } from "./AlertMessage";
 
 import useAuth from "../../hooks/useAuth";
-import { USER_TYPE } from "../../constants/UserType";
 import { isAdmin } from "../../utils/aclUtils";
 
 const Header = () => {
@@ -72,15 +71,6 @@ const Header = () => {
                   </Flex>
                 </MenuButton>
                 <MenuList>
-                  {/* {[USER_TYPE.ETABLISSEMENT, USER_TYPE.DELEGUE].includes(auth.type) && (
-                    <>
-                      <MenuItem as="a" href="/profil">
-                        Profil
-                      </MenuItem>
-                      <MenuDivider />
-                    </>
-                  )} */}
-
                   {isAdmin(auth) && (
                     <>
                       <MenuItem as={NavLink} to="/admin/alert">
