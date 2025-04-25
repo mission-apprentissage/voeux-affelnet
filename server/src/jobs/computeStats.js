@@ -581,8 +581,15 @@ const computeVoeuxStats = async (filter = {}) => {
   //   .map((formateur) => formateur?.uai)
   //   .filter((uai) => !UAIS_RECENSEMENT.includes(uai));
 
-  const responsables = await Etablissement.aggregate([{ $project: { siret: "$siret" } }]);
-  const formateurs = await Etablissement.aggregate([{ $project: { siret: "$siret" } }]);
+  const etablissements = await Etablissement.distinct("siret");
+  const responsables = (await Relation.distinct("etablissement_responsable.siret")).filter((siret) =>
+    etablissements.includes(siret)
+  );
+  const formateurs = (await Relation.distinct("etablissement_formateur.siret")).filter((siret) =>
+    etablissements.includes(siret)
+  );
+
+  console.log({ responsables, formateurs });
 
   const voeuxFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
@@ -591,8 +598,8 @@ const computeVoeuxStats = async (filter = {}) => {
   };
 
   const relationEtablissementsFilter = {
-    "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT, $in: responsables.map(({ siret }) => siret) },
-    "etablissement_formateur.siret": { $ne: SIRET_RECENSEMENT, $in: formateurs.map(({ siret }) => siret) },
+    "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT, $in: responsables },
+    "etablissement_formateur.siret": { $ne: SIRET_RECENSEMENT, $in: formateurs },
   };
 
   const relationAcademieFilter = {
@@ -691,7 +698,7 @@ const computeVoeuxStats = async (filter = {}) => {
             {
               "etablissement_responsable.siret": {
                 $exists: true,
-                $nin: responsables.map((responsable) => responsable.siret),
+                $nin: responsables,
               },
             },
           ],
@@ -716,7 +723,7 @@ const computeVoeuxStats = async (filter = {}) => {
             {
               "etablissement_responsable.siret": {
                 $exists: true,
-                $nin: responsables.map((responsable) => responsable.siret),
+                $nin: responsables,
               },
             },
           ],
@@ -764,7 +771,7 @@ const computeVoeuxStats = async (filter = {}) => {
             {
               "etablissement_formateur.siret": {
                 $exists: true,
-                $nin: formateurs.map((formateur) => formateur?.siret),
+                $nin: formateurs,
               },
             },
           ],
@@ -789,7 +796,7 @@ const computeVoeuxStats = async (filter = {}) => {
             {
               "etablissement_formateur.siret": {
                 $exists: true,
-                $nin: formateurs.map((formateur) => formateur?.siret),
+                $nin: formateurs,
               },
             },
           ],
@@ -827,6 +834,7 @@ const computeVoeuxStats = async (filter = {}) => {
         $count: "total",
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
     totalRecensement: Voeu.aggregate([
       {
         $match: {
@@ -860,13 +868,13 @@ const computeVoeuxStats = async (filter = {}) => {
             { "etablissement_responsable.siret": { $exists: true } },
             {
               "etablissement_responsable.siret": {
-                $in: responsables.map((responsable) => responsable.siret),
+                $in: responsables,
               },
             },
             { "etablissement_formateur.siret": { $exists: true } },
             {
               "etablissement_formateur.siret": {
-                $in: formateurs.map((formateur) => formateur?.siret),
+                $in: formateurs,
               },
             },
           ],
@@ -888,13 +896,13 @@ const computeVoeuxStats = async (filter = {}) => {
                 { "etablissement_responsable.siret": { $exists: false } },
                 {
                   "etablissement_responsable.siret": {
-                    $nin: responsables.map((responsable) => responsable.siret),
+                    $nin: responsables,
                   },
                 },
                 { "etablissement_formateur.siret": { $exists: false } },
                 {
                   "etablissement_formateur.siret": {
-                    $nin: formateurs.map((formateur) => formateur?.siret),
+                    $nin: formateurs,
                   },
                 },
               ],
