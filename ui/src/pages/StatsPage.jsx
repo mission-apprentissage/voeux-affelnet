@@ -255,7 +255,7 @@ function StatsPage() {
               </Heading>
               <StatGroup mb={4}>
                 <Stat mr={2}>
-                  <StatLabel>Nombre de candidatures (hors voeux générique)</StatLabel>
+                  <StatLabel>Nombre de candidatures (hors vœux générique)</StatLabel>
                   <StatNumber>{(voeux?.totalDiffusable + voeux?.totalNonDiffusable)?.toLocaleString()}</StatNumber>
                 </Stat>
 
