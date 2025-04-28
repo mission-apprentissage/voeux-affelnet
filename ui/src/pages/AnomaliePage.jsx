@@ -112,7 +112,7 @@ export const AnomaliePage = () => {
                       Rapprochez-vous de votre Carif-Oref
                     </Link>{" "}
                     pour faire corriger les relations responsables-formateurs incorrectes au niveau des enregistrements
-                    Carif-Oref, afin d’anticiper la diffusion des listes de candidats en 2024.
+                    Carif-Oref, afin d’anticiper la diffusion des listes de candidats en {new Date().getFullYear()}.
                   </ListItem>
                 </UnorderedList>
               </Text>
@@ -147,7 +147,7 @@ export const AnomaliePage = () => {
                   rapprochez-vous de votre Carif-Oref
                 </Link>{" "}
                 pour faire corriger les enregistrements des offres de formation, afin d’anticiper la diffusion des
-                listes de candidats en 2024.
+                listes de candidats en {new Date().getFullYear()}.
               </Text>
               <Text mb={4}>
                 Si vous pensez que les erreurs d'UAI impactent la diffusion des listes de candidats, veuillez en{" "}
