@@ -59,15 +59,15 @@ const Button = {
     },
     green: {
       ...commonButtonStyle,
-      backgroundColor: "greenemeraude",
+      backgroundColor: "#1f8d49",
       color: "white",
-      _hover: { bg: "#00e180", _disabled: { bg: "greenemeraude" } },
+      _hover: { bg: "#2ec166", _disabled: { bg: "#1f8d49" } },
     },
     red: {
       ...commonButtonStyle,
-      backgroundColor: "#c9191e",
+      backgroundColor: "#d64d00",
       color: "white",
-      _hover: { bg: "#f93f42", _disabled: { bg: "redmarianne" } },
+      _hover: { bg: "#ff754e", _disabled: { bg: "#d64d00" } },
     },
   },
 };
