@@ -22,8 +22,8 @@ export const HistoryBlock = ({ relation, responsable, delegue }) => {
           <Text fontWeight={"bold"}>Historique d'activité</Text>
 
           {(showMore ? histories : histories.slice(0, limit)).map((history, index) => (
-            <Box mt="2">
-              <HistoryItem mt="2" key={index} history={history} />
+            <Box mt="2" key={index}>
+              <HistoryItem mt="2" history={history} />
             </Box>
           ))}
 

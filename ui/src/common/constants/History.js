@@ -13,6 +13,29 @@ export const RelationActions = {
   UPDATED_LIST_AVAILABLE: "UPDATED_LIST_AVAILABLE",
   UPDATED_LIST_DOWNLOADED_BY_DELEGUE: "UPDATED_LIST_DOWNLOADED_BY_DELEGUE",
   UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE: "UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE",
+
+  LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE: "LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE",
+  LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE: "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE",
+  LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE: "LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE",
+  LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE: "LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE",
+
+  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE",
+  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE",
+  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE",
+  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE",
+
+  LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE: "LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE",
+  LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE: "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE",
+  LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE: "LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE",
+  LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE: "LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE",
+
+  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE:
+    "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE",
+  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE:
+    "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE",
+  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE:
+    "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE",
+  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE",
 };
 
 export const RelationHistoryItems = new Map([
@@ -106,6 +129,124 @@ export const RelationHistoryItems = new Map([
         `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par l'organisme responsable (${responsable.email}).`,
     },
   ],
+
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
+    },
+  ],
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
+    },
+  ],
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE,
+    {
+      component: ({ email, admin }) =>
+        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats.`,
+    },
+  ],
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
+    {
+      component: ({ email, admin }) =>
+        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats.`,
+    },
+  ],
+
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE,
+    {
+      component: ({ email, admin }) =>
+        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
+    {
+      component: ({ email, admin }) =>
+        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+    },
+  ],
+
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+      // component: ({ email }) =>
+      // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+    },
+  ],
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+    },
+  ],
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE,
+    {
+      component: ({ email, admin }) =>
+        `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats.`,
+    },
+  ],
+  [
+    RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
+    {
+      component: ({ email, admin }) =>
+        `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+      // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
+    {
+      component: ({ email }) =>
+        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE,
+    {
+      component: ({ email, admin }) =>
+        `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats mise à jour.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
+    {
+      component: ({ email, admin }) =>
+        `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+    },
+  ],
 ]);
 
 export const DelegueActions = {
@@ -124,15 +265,15 @@ export const DelegueActions = {
   ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT: "DELEGUE_ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT",
   ACCOUNT_EMAIL_UPDATED_BY_ADMIN: "DELEGUE_ACCOUNT_EMAIL_UPDATED_BY_ADMIN",
 
-  LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
-  LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
-  LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
-  LIST_AVAILABLE_EMAIL_MANUAL_SENT: "LIST_AVAILABLE_EMAIL_MANUAL_SENT",
+  // LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
+  // LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
+  // LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
+  // LIST_AVAILABLE_EMAIL_MANUAL_SENT: "LIST_AVAILABLE_EMAIL_MANUAL_SENT",
 
-  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
-  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
-  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
-  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT",
 };
 
 export const DelegueHistoryItems = new Map([
@@ -214,63 +355,63 @@ export const DelegueHistoryItems = new Map([
   ],
   [DelegueActions.ACCOUNT_EMAIL_UPDATED_BY_ADMIN, { component: () => `` }],
 
-  [
-    DelegueActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
-    },
-  ],
-  [
-    DelegueActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
-    },
-  ],
-  [
-    DelegueActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
-    {
-      component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats.`,
-    },
-  ],
-  [
-    DelegueActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT,
-    {
-      component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats.`,
-    },
-  ],
+  // [
+  //   DelegueActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
+  //   },
+  // ],
+  // [
+  //   DelegueActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
+  //   },
+  // ],
+  // [
+  //   DelegueActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats.`,
+  //   },
+  // ],
+  // [
+  //   DelegueActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats.`,
+  //   },
+  // ],
 
-  [
-    DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
-    },
-  ],
-  [
-    DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
-    },
-  ],
-  [
-    DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
-    {
-      component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`,
-    },
-  ],
-  [
-    DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT,
-    {
-      component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
-    },
-  ],
+  // [
+  //   DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+  //   },
+  // ],
+  // [
+  //   DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+  //   },
+  // ],
+  // [
+  //   DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`,
+  //   },
+  // ],
+  // [
+  //   DelegueActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+  //   },
+  // ],
 ]);
 
 export const ResponsableActions = {
@@ -291,15 +432,15 @@ export const ResponsableActions = {
   ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT: "RESPONSABLE_ACCOUNT_EMAIL_UPDATED_BY_ACCOUNT",
   ACCOUNT_EMAIL_UPDATED_BY_ADMIN: "RESPONSABLE_ACCOUNT_EMAIL_UPDATED_BY_ADMIN",
 
-  LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
-  LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
-  LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
-  LIST_AVAILABLE_EMAIL_MANUAL_SENT: "LIST_AVAILABLE_EMAIL_MANUAL_SENT",
+  // LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
+  // LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
+  // LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
+  // LIST_AVAILABLE_EMAIL_MANUAL_SENT: "LIST_AVAILABLE_EMAIL_MANUAL_SENT",
 
-  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
-  UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
-  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
-  UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT",
+  // UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT: "UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT",
 };
 
 export const ResponsableHistoryItems = new Map([
@@ -385,63 +526,63 @@ export const ResponsableHistoryItems = new Map([
         `${admin} a modifié le courriel du directeur de l'organisme. Nouvelle adresse ${new_email} (adresse précédente : ${old_email}).`,
     },
   ],
-  [
-    ResponsableActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
-      // component: ({ email }) =>
-      // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
-    },
-  ],
-  [
-    ResponsableActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
-    },
-  ],
-  [
-    ResponsableActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
-    {
-      component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats.`,
-    },
-  ],
-  [
-    ResponsableActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT,
-    {
-      component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats.`,
-    },
-  ],
-  [
-    ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
-      // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
-    },
-  ],
-  [
-    ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
-    {
-      component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
-    },
-  ],
-  [
-    ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
-    {
-      component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats mise à jour.`,
-    },
-  ],
-  [
-    ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT,
-    {
-      component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
-    },
-  ],
+  // [
+  //   ResponsableActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+  //     // component: ({ email }) =>
+  //     // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+  //   },
+  // ],
+  // [
+  //   ResponsableActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+  //   },
+  // ],
+  // [
+  //   ResponsableActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats.`,
+  //   },
+  // ],
+  // [
+  //   ResponsableActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats.`,
+  //   },
+  // ],
+  // [
+  //   ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+  //     // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+  //   },
+  // ],
+  // [
+  //   ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT,
+  //   {
+  //     component: ({ email }) =>
+  //       `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+  //   },
+  // ],
+  // [
+  //   ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats mise à jour.`,
+  //   },
+  // ],
+  // [
+  //   ResponsableActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT,
+  //   {
+  //     component: ({ email, admin }) =>
+  //       `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+  //   },
+  // ],
 ]);

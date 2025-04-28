@@ -132,7 +132,7 @@ const RelationContact = ({ relation, callback }) => {
   );
 };
 
-const RelationFormateur = ({ relation, callback }) => {
+const RelationBlock = ({ relation, callback }) => {
   const downloadVoeux = useDownloadVoeux({
     responsable: relation.responsable,
     formateur: relation.formateur,
@@ -387,7 +387,7 @@ export const Etablissement = () => {
                         {relationsResponsable.map((relation, index) => (
                           <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
                             <Td py={8}>
-                              <RelationFormateur relation={relation} callback={reload} />
+                              <RelationBlock relation={relation} callback={reload} />
                             </Td>
                           </Tr>
                         ))}

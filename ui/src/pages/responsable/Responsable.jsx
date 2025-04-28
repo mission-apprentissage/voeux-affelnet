@@ -14,11 +14,24 @@ import {
   Th,
   Tbody,
   Td,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  Stack,
 } from "@chakra-ui/react";
 import { CheckIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
 
 import { Page } from "../../common/components/layout/Page";
-import { _get } from "../../common/httpClient";
+import { _delete, _get, _put } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import {
   EtablissementLibelle,
@@ -32,6 +45,7 @@ import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/responsableHooks";
 import { ConfirmDelegationModal } from "../../common/components/responsable/modals/ConfirmDelegationModal";
 import { DownloadVoeuxModal } from "../../common/components/responsable/modals/DownloadVoeuxModal";
+import { USER_STATUS } from "../../common/constants/UserStatus";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -132,43 +146,446 @@ const RelationContact = ({ relation, callback }) => {
   );
 };
 
-const RelationFormateur = ({ relation, callback }) => {
+const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, callback }) => {
+  const responsable = relation.responsable;
+  const formateur = relation.formateur;
+  const delegue = relation.delegue;
+  const toast = useToast();
+
   const downloadVoeux = useDownloadVoeux({
-    responsable: relation.responsable,
-    formateur: relation.formateur,
+    responsable,
+    formateur,
     callback,
   });
 
+  const cancelDelegation = useCallback(async () => {
+    await _delete(`/api/responsable/delegation`, {
+      siret: formateur?.siret,
+    });
+  }, [formateur]);
+
+  const resendActivationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/responsable/formateurs/${formateur?.siret}/resendActivationEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel d'activation du compte a été renvoyé à l'adresse ${delegue.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await callback();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel d'activation. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [formateur, delegue, toast, callback]);
+
+  const resendNotificationEmail = useCallback(async () => {
+    try {
+      await _put(`/api/responsable/formateurs/${formateur?.siret}/resendNotificationEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de liste de candidats disponible a été renvoyé à l'adresse ${delegue?.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await callback();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [formateur, delegue, toast, callback]);
+
+  const resendUpdateEmail = useCallback(async () => {
+    try {
+      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendUpdateEmail`);
+
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de misa à jour des listes de candidats disponible a été renvoyé à l'adresse ${delegue?.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      await callback();
+    } catch (error) {
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de mise à jour. Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [formateur, delegue, toast, callback]);
+
+  const cancelDelegationAndDownloadVoeux = useCallback(async () => {
+    await cancelDelegation();
+    await downloadVoeux();
+    await callback?.();
+  }, [cancelDelegation, downloadVoeux, callback]);
+
+  const downloadVoeuxAndReload = useCallback(async () => {
+    await downloadVoeux();
+    await callback?.();
+  }, [downloadVoeux, callback]);
+
+  // const {
+  //   onOpen: onOpenDelegationModal,
+  //   isOpen: isOpenDelegationModal,
+  //   onClose: onCloseDelegationModal,
+  // } = useDisclosure();
+
+  const {
+    onOpen: onOpenUpdateDelegationModal,
+    isOpen: isOpenUpdateDelegationModal,
+    onClose: onCloseUpdateDelegationModal,
+  } = useDisclosure();
+
+  // const {
+  //   onOpen: onOpenUpdateResponsableEmailModal,
+  //   isOpen: isOpenUpdateResponsableEmailModal,
+  //   onClose: onCloseUpdateResponsableEmailModal,
+  // } = useDisclosure();
+
+  const lastEmailDate =
+    delegue?.emails && typeof delegue.emails.findLast === "function"
+      ? new Date(delegue.emails?.findLast(() => true)?.sendDates?.findLast(() => true))
+      : null;
+
+  if (!responsable || !formateur) {
+    return;
+  }
+
   return (
-    <Box mt={8}>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="3xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <Heading as="h2" size="lg">
+              La personne déléguée n'a pas encore téléchargé la liste de candidatures.
+            </Heading>
+          </ModalHeader>
+
+          <ModalCloseButton />
+
+          <ModalBody>
+            {!!delegue && !!relation.nombre_voeux && !!relation.nombre_voeux_restant && (
+              <Box mt={12}>
+                <Heading as="h3" size="md">
+                  Que souhaitez-vous faire ?
+                </Heading>
+
+                <Accordion defaultIndex={[]} allowToggle mt={4}>
+                  <AccordionItem mb={0}>
+                    <h2>
+                      <AccordionButton>
+                        <Box as="span" flex="1" textAlign="left">
+                          Je souhaite que l'organisme formateur télécharge la liste
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel py={4}>
+                      <Text mb={4}>
+                        Prenez contact avec la personne destinataire pour l'inviter à télécharger la liste. Si la
+                        personne n'a pas reçu d'email de notification invitez-la à consulter ses spam, en lui
+                        communiquant la date à laquelle la dernière notification lui a été envoyée (
+                        {lastEmailDate?.toLocaleDateString()}) et l'expéditeur des notifications (
+                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
+                      </Text>
+                      <Text mb={4}>
+                        Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
+                        {(() => {
+                          switch (true) {
+                            case USER_STATUS.CONFIRME === relation.delegue.statut:
+                              return (
+                                <Link variant="action" onClick={resendActivationEmail}>
+                                  générer un nouvel envoi de notification courriel
+                                </Link>
+                              );
+                            case USER_STATUS.ACTIVE === relation.delegue.statut:
+                              return (
+                                <Link variant="action" onClick={resendNotificationEmail}>
+                                  générer un nouvel envoi de notification courriel
+                                </Link>
+                              );
+                            default:
+                              return <></>;
+                          }
+                        })()}
+                        .
+                      </Text>
+                      <Text mb={4}>
+                        Vous pouvez également{" "}
+                        <Link variant="action" onClick={onOpenUpdateDelegationModal}>
+                          modifier l'email de la personne habilitée
+                        </Link>
+                        .
+                      </Text>
+                      <Text mb={4}>
+                        En cas de problème,{" "}
+                        <Link href="/support" variant="action">
+                          vous pouvez signaler une anomalie à l'équipe technique
+                        </Link>
+                        .
+                      </Text>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  <AccordionItem mb={0}>
+                    <h2>
+                      <AccordionButton>
+                        <Box as="span" flex="1" textAlign="left">
+                          Je télécharge la liste et je la transférerai par mes propres moyens à l'organisme responsable
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel py={4}>
+                      <Text mb={4}>
+                        En procédant à ce téléchargement, vous annulez la délégation de droits précédemment accordée à{" "}
+                        {delegue.email}. Vous devrez vous assurer par vos propres moyens que les jeunes ayant exprimé
+                        leurs vœux fassent l'objet d'une réponse rapide.
+                      </Text>
+
+                      <Button variant="primary" mb={4} onClick={cancelDelegationAndDownloadVoeux}>
+                        Télécharger la liste
+                      </Button>
+                    </AccordionPanel>
+                  </AccordionItem>
+
+                  <AccordionItem mb={0}>
+                    <h2>
+                      <AccordionButton>
+                        <Box as="span" flex="1" textAlign="left">
+                          Je télécharge la liste mais je souhaite que {delegue.email} la télécharge également
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    </h2>
+                    <AccordionPanel py={4}>
+                      <Text mb={4}>
+                        En procédant à ce téléchargement, la délégation accordée à {delegue.email} reste en vigueur.
+                      </Text>
+                      <Text mb={4}>
+                        La liste restera considérée comme non téléchargée jusqu'à ce que {delegue.email} procède au
+                        téléchargement : prenez contact avec la personne destinataire pour l'inviter à télécharger la
+                        liste. Si la personne n'a pas reçu d'email de notification invitez-la à consulter ses spam, en
+                        lui communiquant la date à laquelle la dernière notification lui a été envoyée (
+                        {lastEmailDate?.toLocaleDateString()}) et l'expéditeur des notifications (
+                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
+                      </Text>
+                      <Text mb={4}>
+                        Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
+                        {(() => {
+                          switch (true) {
+                            case USER_STATUS.CONFIRME === delegue.statut:
+                              return (
+                                <Link variant="action" onClick={resendActivationEmail}>
+                                  générer un nouvel envoi de notification courriel
+                                </Link>
+                              );
+                            case USER_STATUS.ACTIVE === delegue.statut:
+                              return (
+                                <Link variant="action" onClick={resendNotificationEmail}>
+                                  générer un nouvel envoi de notification courriel
+                                </Link>
+                              );
+                            default:
+                              return <></>;
+                          }
+                        })()}
+                        .
+                      </Text>
+                      <Text mb={4}>
+                        Vous pouvez également{" "}
+                        <Link variant="action" onClick={onOpenUpdateDelegationModal}>
+                          modifier l'email de la personne habilitée
+                        </Link>
+                        .
+                      </Text>
+                      <Button variant="primary" mb={4} onClick={downloadVoeuxAndReload}>
+                        Télécharger la liste
+                      </Button>
+                      <Text mb={4}>
+                        En cas de problème,{" "}
+                        <Link href="/support" variant="action">
+                          vous pouvez signaler une anomalie à l'équipe technique
+                        </Link>
+                        .
+                      </Text>
+                    </AccordionPanel>
+                  </AccordionItem>
+                </Accordion>
+              </Box>
+            )}
+
+            <Stack>
+              <Button variant="ghost" onClick={onClose}>
+                Fermer
+              </Button>
+            </Stack>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <UpdateDelegationModal
+        onClose={onCloseUpdateDelegationModal}
+        isOpen={isOpenUpdateDelegationModal}
+        relation={relation}
+        callback={callback}
+      />
+    </>
+  );
+};
+
+const RelationBlock = ({ relation, callback }) => {
+  const responsable = relation.responsable;
+  const formateur = relation.formateur;
+  const delegue = relation.delegue;
+
+  const downloadVoeux = useDownloadVoeux({
+    responsable,
+    formateur,
+    callback,
+  });
+
+  const {
+    onOpen: onOpenDelegationAvecCandidaturesRestantesModal,
+    isOpen: isOpenDelegationAvecCandidaturesRestantesModal,
+    onClose: onCloseDelegationAvecCandidaturesRestantesModal,
+  } = useDisclosure();
+
+  return (
+    <Box>
       <Heading as="h4" size="md">
         <EtablissementLibelle etablissement={relation.formateur} />
       </Heading>
 
       <Text mt={4}>
-        Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+        Adresse : {formateur?.adresse} - SIRET : {formateur?.siret ?? "Inconnu"} - UAI :{" "}
         {relation.formateur?.uai ?? "Inconnu"}
       </Text>
 
-      <Box mt={2}>
+      <Box mt={8}>
         <RelationContact relation={relation} callback={callback} />
       </Box>
 
-      <Text mt={6}>
+      <Text mt={8}>
         {/* Statut de diffusion des listes : */}
         <RelationStatut relation={relation} />{" "}
       </Text>
 
-      {!!relation?.nombre_voeux && (
-        <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
-          <DownloadIcon mr={2} />
-          Télécharger la liste
-        </Button>
+      {!!relation.nombre_voeux ? (
+        <Box>
+          {/* <Text mb={4}>
+              Date de mise à disposition : {new Date(relation.first_date_voeux).toLocaleDateString()}{" "}
+              {relation.last_date_voeux !== relation.first_date_voeux && (
+                <>| Dernière mise à jour : {new Date(relation.last_date_voeux).toLocaleDateString()}</>
+              )}
+            </Text> */}
+          {/* {hasUpdatedVoeux && (
+              <Text mb={4}>
+                Cette mise à jour peut comporter de nouveaux candidats, des suppressions, ou des mises à jour.
+              </Text>
+            )} */}
+          {!!delegue ? (
+            <Box mt={4}>
+              {!!relation.nombre_voeux && !relation.nombre_voeux_restant ? (
+                <>
+                  <Text display={"flex"} alignItems="center" mb={4}>
+                    Le destinataire ({delegue.email}) a bien téléchargé la liste de candidats.{" "}
+                  </Text>
+                  <Text mt={2}>
+                    Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par courriel.
+                  </Text>
+                </>
+              ) : (
+                <Text>
+                  Vous avez autorisé les droits de diffusion directe à {delegue.email}, mais cette personne n'a pas
+                  encore téléchargé la liste.{" "}
+                  <Link variant="action" onClick={onOpenDelegationAvecCandidaturesRestantesModal}>
+                    Que faire ?
+                  </Link>
+                </Text>
+              )}
+            </Box>
+          ) : (
+            <Box mt={4}>
+              {!!relation.nombre_voeux && !relation.nombre_voeux_restant ? (
+                <Box display={"inline-flex"} alignItems={"center"}>
+                  <Button variant="primary" onClick={async () => await downloadVoeux()}>
+                    <DownloadIcon mr={2} />
+                    Télécharger à nouveau
+                  </Button>
+                  <Text ml={8} alignItems="center">
+                    Liste téléchargée par vous ({responsable?.email}
+                    ). &nbsp;
+                  </Text>
+                </Box>
+              ) : (
+                <Button variant="primary" onClick={async () => await downloadVoeux()}>
+                  <DownloadIcon mr={2} />
+                  Télécharger la liste
+                </Button>
+              )}
+            </Box>
+          )}
+        </Box>
+      ) : new Date().getTime() <= new Date("2025/06/07").getTime() ? (
+        <Box mt={8}>
+          <Text>
+            Les vœux exprimés en mai seront rendus disponibles dans la première semaine de juin. Un courriel vous
+            préviendra de la mise à disposition de la liste.
+          </Text>
+        </Box>
+      ) : (
+        <Box mt={8}>
+          <Text>Aucune candidature n’a été enregistrée pour cet organisme.</Text>
+          <Text mt={2}>
+            Si vous pensez qu’il s’agit d’une anomalie, vous pouvez{" "}
+            <Link href="/support" variant="action">
+              transmettre un signalement
+            </Link>
+            .
+          </Text>
+          <Text mt={2}>
+            Une mise à jour pourra être communiquée la troisième semaine de juin, pour prendre les éventuels ajouts. Une
+            notification courriel sera alors envoyée.
+          </Text>
+        </Box>
       )}
 
       <Box mt={6}>
         <HistoryBlock relation={relation} delegue={relation.delegue} />
       </Box>
+
+      <DelegationAvecCandidaturesRestantesModal
+        onOpen={onOpenDelegationAvecCandidaturesRestantesModal}
+        onClose={onCloseDelegationAvecCandidaturesRestantesModal}
+        isOpen={isOpenDelegationAvecCandidaturesRestantesModal}
+        relation={relation}
+        callback={callback}
+      />
     </Box>
   );
 };
@@ -185,7 +602,7 @@ export const Responsable = () => {
   } = useDisclosure();
 
   const {
-    onOpen: onOpenUDownloadVoeuxModal,
+    onOpen: onOpenDownloadVoeuxModal,
     isOpen: isOpenDownloadVoeuxModal,
     onClose: onCloseDownloadVoeuxModal,
   } = useDisclosure();
@@ -216,9 +633,9 @@ export const Responsable = () => {
 
   useEffect(() => {
     if (siret_formateur) {
-      onOpenUDownloadVoeuxModal();
+      onOpenDownloadVoeuxModal();
     }
-  }, [onOpenUDownloadVoeuxModal, siret_formateur]);
+  }, [onOpenDownloadVoeuxModal, siret_formateur]);
 
   // const resendActivationEmail = useCallback(async () => {
   //   try {
@@ -385,7 +802,7 @@ export const Responsable = () => {
 
                     {relationsResponsable.map((relation, index) => (
                       <Box mt={index && 16} key={relation?.formateur?.siret}>
-                        <RelationFormateur relation={relation} callback={reload} />
+                        <RelationBlock relation={relation} callback={reload} />
                       </Box>
                     ))}
                   </Box> */}
@@ -401,7 +818,7 @@ export const Responsable = () => {
                       {relationsResponsable.map((relation, index) => (
                         <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
                           <Td py={8}>
-                            <RelationFormateur relation={relation} callback={reload} />
+                            <RelationBlock relation={relation} callback={reload} />
                           </Td>
                         </Tr>
                       ))}
@@ -439,7 +856,13 @@ export const Responsable = () => {
           )}
 
           <Box mt={12}>
-            <Link href="/support" variant="action">
+            <Link variant="action" href="/ymag-ou-igesti">
+              Utilisateur Ymag ou IGesti ?
+            </Link>
+          </Box>
+
+          <Box mt={12}>
+            <Link variant="action" href="/support">
               Signaler une anomalie
             </Link>
           </Box>

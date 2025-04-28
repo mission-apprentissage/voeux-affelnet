@@ -20,16 +20,16 @@ export const Delegue = ({ delegue, callback }) => {
   const siret_formateur = searchParams.get("siret_formateur");
 
   const {
-    onOpen: onOpenUDownloadVoeuxModal,
+    onOpen: onOpenDownloadVoeuxModal,
     isOpen: isOpenDownloadVoeuxModal,
     onClose: onCloseDownloadVoeuxModal,
   } = useDisclosure();
 
   useEffect(() => {
     if (siret_responsable && siret_formateur) {
-      onOpenUDownloadVoeuxModal();
+      onOpenDownloadVoeuxModal();
     }
-  }, [onOpenUDownloadVoeuxModal, siret_responsable, siret_formateur]);
+  }, [onOpenDownloadVoeuxModal, siret_responsable, siret_formateur]);
 
   if (!delegue) {
     return;
