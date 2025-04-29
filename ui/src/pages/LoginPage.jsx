@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Formik, Field, Form } from "formik";
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Alert,
   Box,
   Button,
@@ -258,7 +263,7 @@ function LoginPage() {
                   </Link>
                 </Text> */}
 
-                <Text mb={4}>
+                {/* <Text mb={4}>
                   Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, puis ont été mises à
                   jour, selon les organismes, le 20 juin, le 24 juin ou le 27 juin. Des courriels ont été diffusés aux
                   contacts habilités : directeur·trices au sein des organismes responsables, ou personnes ayant reçu une
@@ -286,14 +291,14 @@ function LoginPage() {
                       en indiquant vos numéros Siret et UAI.
                     </ListItem>
                   </UnorderedList>
-                </Text>
+                </Text> */}
 
-                {/* <Text mb={4}>
+                <Text mb={4}>
                   <strong>
-                    Les mots de passe utilisés en 2022 ne sont plus valables, de nouveaux comptes doivent être créés.
-                    Des courriels ont été diffusés aux organismes de formation en apprentissage les 12 et 15 mai, pour
-                    permettre de créer leur compte et définir leur mot de passe de connexion. Seuls les organismes
-                    responsables des offres sont destinataires de ces premières correspondances.
+                    Les mots de passe utilisés en 2024 ne sont plus valables, de nouveaux comptes doivent être créés.
+                    Des courriels vont être diffusés aux organismes de formation en apprentissage la dernière semaine de
+                    mai, pour permettre de créer leur compte et définir leur mot de passe de connexion. Seuls les
+                    organismes responsables des offres sont destinataires de ces premières correspondances.
                   </strong>
                 </Text>
 
@@ -320,7 +325,7 @@ function LoginPage() {
                         </AccordionButton>
                       </h2>
                       <AccordionPanel pb={4}>
-                        <Text mb={4}>En 2024 , la transmission des listes s’effectuera en trois temps :</Text>
+                        <Text mb={4}>La transmission des listes s’effectuera en trois temps :</Text>
                         <Text mb={4}>
                           <UnorderedList>
                             <ListItem>
@@ -329,7 +334,8 @@ function LoginPage() {
                               de connexion (les mots de passe créés en 2024 ne seront pas utilisables).
                             </ListItem>
                             <ListItem>
-                              Première semaine de juin: diffusion des listes de candidats sur l’adresse courriel confirmée.
+                              Première semaine de juin: diffusion des listes de candidats sur l’adresse courriel
+                              confirmée.
                             </ListItem>
                             <ListItem>Troisième semaine de juin: diffusion des listes mises à jour.</ListItem>
                           </UnorderedList>
@@ -337,7 +343,7 @@ function LoginPage() {
                       </AccordionPanel>
                     </AccordionItem>
                   </Accordion>
-                </Box> */}
+                </Box>
               </Alert>
             )}
           </Box>
