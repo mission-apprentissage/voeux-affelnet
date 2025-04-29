@@ -54,15 +54,20 @@ export const ListRelations = ({ relations, delegation, limit }) => {
               <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
               {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret : {relation.formateur?.siret ?? "Inconnu"}{" "}
               - UAI : {relation.formateur?.uai ?? "Inconnu"}
-            </Text>
-
+            </Text>{" "}
+            {!!relation.nombre_voeux && (
+              <>
+                - <RelationStatut relation={relation} />
+              </>
+            )}
+            {/*
             {!!relation.nombre_voeux_restant && (
               <Text>
                 {relation.nombre_voeux_restant} candidature
                 {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
                 {relation.nombre_voeux_restant > 1 && "s"}
               </Text>
-            )}
+            )} */}
           </ListItem>
         ))}
 
@@ -93,15 +98,19 @@ export const ListRelations = ({ relations, delegation, limit }) => {
                   <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
                   {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret :{" "}
                   {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
-                </Text>
-
-                {!!relation.nombre_voeux_restant && (
+                  {!!relation.nombre_voeux && (
+                    <>
+                      - <RelationStatut relation={relation} />
+                    </>
+                  )}
+                  {/* {!!relation.nombre_voeux_restant && (
                   <Text>
                     {relation.nombre_voeux_restant} candidature
                     {relation.nombre_voeux_restant > 1 && "s"} non téléchargée
                     {relation.nombre_voeux_restant > 1 && "s"}
-                  </Text>
-                )}
+                    </Text>
+                    )} */}
+                </Text>
               </ListItem>
             ))}
 
