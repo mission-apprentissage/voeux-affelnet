@@ -12,35 +12,35 @@ export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) 
     [
       partialDownload,
       {
-        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill color="#fcc63a" />,
         long: partialDownload,
       },
     ],
     [
       noDownload,
       {
-        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill color="#fcc63a" />,
         long: noDownload,
       },
     ],
     [
       fullDownload,
       {
-        icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
+        icon: <SuccessFill />,
         long: fullDownload,
       },
     ],
     [
       noCandidature,
       {
-        icon: <SuccessFill fontSize="18px" verticalAlign="middle" />,
+        icon: <SuccessFill />,
         long: noCandidature,
       },
     ],
     [
       unknown,
       {
-        icon: <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="middle" />,
+        icon: <WarningFill color="#fcc63a" />,
         long: unknown,
       },
     ],
@@ -81,8 +81,8 @@ export const RelationStatut = ({ relation }) => {
 // import { useDownloadVoeux } from "../../../hooks/responsableHooks";
 // import { DelegationModal } from "../modals/DelegationModal";
 // import { StatutBadge, statuses } from "../../StatutBadge";
-// import { SuccessFill fontSize="18px" } from "../../../../theme/components/icons/SuccessFill fontSize="18px"";
-// import { WarningFill fontSize="18px" } from "../../../../theme/components/icons/WarningFill fontSize="18px"";
+// import { SuccessFill  } from "../../../../theme/components/icons/SuccessFill ";
+// import { WarningFill  } from "../../../../theme/components/icons/WarningFill ";
 // import { CONTACT_TYPE } from "../../../constants/ContactType";
 // import { USER_STATUS } from "../../../constants/UserStatus";
 
@@ -164,7 +164,7 @@ export const RelationStatut = ({ relation }) => {
 //   //             as="span"
 //   //             title="Une délégation de droit a été activée pour cet organisme, mais le destinataire n'a pas encore créé son compte."
 //   //           >
-//   //             <WarningFill fontSize="18px" color="#fcc63a" verticalAlign="text-bottom" /> Délégation activée, compte non créé
+//   //             <WarningFill  color="#fcc63a" verticalAlign="text-bottom" /> Délégation activée, compte non créé
 //   //           </Text>
 //   //         );
 //   //       }
@@ -235,7 +235,7 @@ export const RelationStatut = ({ relation }) => {
 //   //       case !voeuxDisponible: {
 //   //         return (
 //   //           <Text as="span">
-//   //             <SuccessFill fontSize="18px" verticalAlign="text-bottom" /> Pas de vœux disponibles
+//   //             <SuccessFill  verticalAlign="text-bottom" /> Pas de vœux disponibles
 //   //           </Text>
 //   //         );
 //   //       }
