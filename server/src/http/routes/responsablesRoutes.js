@@ -278,6 +278,13 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       await saveAccountEmailUpdatedByAccount(req.user, email, old_email);
 
+      await Etablissement.updateOne(
+        { siret },
+        { $set: { email, statut: USER_STATUS.CONFIRME }, $unset: { password: 1 } }
+      );
+
+      await sendActivationEmails({ sendEmail, resendEmail }, { username: siret, force: true, sender: req.user });
+
       const updatedResponsable = await Etablissement.findOne({ siret });
 
       res.json(updatedResponsable);

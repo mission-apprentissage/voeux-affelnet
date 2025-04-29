@@ -87,7 +87,7 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
       }
 
       const templateName = `activation_${(templateType?.toLowerCase() || "user").toLowerCase()}`;
-      const previous = user.emails.find((email) => email.templateName === templateName);
+      const previous = user.emails.find((e) => e.templateName === templateName && e.data?.email === user.email);
       stats.total++;
 
       switch (true) {
@@ -95,7 +95,9 @@ async function sendActivationEmails({ sendEmail, resendEmail }, options = {}) {
           try {
             previous
               ? await resendEmail(previous.token, { retry: !!previous?.error })
-              : await sendEmail(user, templateName);
+              : await sendEmail(user, templateName, {
+                  email: user.email,
+                });
 
             switch (templateType) {
               case CONTACT_TYPE.RESPONSABLE:

@@ -14,15 +14,18 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { Formik, Form, Field } from "formik";
 
 import { _put } from "../../../httpClient";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
+import useAuth from "../../../hooks/useAuth";
 
 export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onClose }) => {
   const toast = useToast();
+  const [, setAuth] = useAuth();
 
   const updateEmail = useCallback(
     async ({ form }) => {
@@ -38,6 +41,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
         });
         onClose();
         await callback?.();
+        setAuth();
       } catch (error) {
         console.error(error);
         toast({
@@ -48,7 +52,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
         });
       }
     },
-    [callback, onClose, toast]
+    [callback, onClose, toast, setAuth]
   );
 
   return (
@@ -64,6 +68,12 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
         <ModalCloseButton />
 
         <ModalBody>
+          <Text>
+            Vous vous apprêtez à modifier votre adresse courriel en tant que contact responsable. La session actuelle
+            sera déconnectée. Un courriel va être immédiatement envoyé sur la nouvelle adresse courriel avec un lien de
+            connexion.
+          </Text>
+
           <Formik
             initialValues={{
               email: responsable.email,
@@ -72,7 +82,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
             onSubmit={(form) => updateEmail({ form })}
           >
             <Form style={{ width: "100%" }} id="update-email-form">
-              <Box mb={8}>
+              <Box mt={8}>
                 <Field name="email" required>
                   {({ field, meta }) => {
                     return (

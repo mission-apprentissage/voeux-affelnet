@@ -226,7 +226,8 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
       }
 
       const templateName = `confirmation_${(templateType?.toLowerCase() || "user").toLowerCase()}`;
-      const previous = user.emails.find((email) => email.templateName === templateName);
+      const previous = user.emails.find((e) => e.templateName === templateName && e.data?.email === user.email);
+
       stats.total++;
 
       switch (true) {
@@ -264,7 +265,9 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
 
             previous
               ? await resendEmail(previous.token, { retry: !!previous?.error })
-              : await sendEmail({ ...user, relations }, templateName);
+              : await sendEmail({ ...user, relations }, templateName, {
+                  email: user.email,
+                });
 
             switch (templateType) {
               case CONTACT_TYPE.RESPONSABLE:

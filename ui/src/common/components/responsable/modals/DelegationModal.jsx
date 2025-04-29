@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import {
-  Alert,
   Box,
   Button,
   FormControl,
@@ -121,17 +120,7 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
                   </>
                 )}
               </Text>
-              <Alert mb={4}>
-                <Text fontStyle="italic">
-                  Attention : si vous souhaitez modifier votre email en tant que directeur d'organisme responsable,
-                  habilité à accéder aux listes de tous les organismes formateurs, n'utilisez cette fonctionnalité, et
-                  accédez à votre{" "}
-                  <Link variant="action" href="/profil">
-                    page profil
-                  </Link>
-                  .
-                </Text>
-              </Alert>
+
               <Text mb={4}>
                 Après validation de cette délégation, le destinataire sera automatiquement informé par courriel, et
                 devra procéder à la création de son mot de passe pour accéder à son espace de téléchargement. Si la
