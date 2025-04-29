@@ -22,8 +22,8 @@ const Footer = () => {
                 Mission interministérielle pour l'apprentissage
               </Link>
               , le service a été pérennisé et repris en 2023 par la Direction du numérique pour l'éducation. Il est
-              alimenté par les candidatures exprimées sur le service en ligne affectation ainsi que par les données
-              issues du catalogue national des formations en apprentissage.
+              alimenté par les candidatures exprimées sur le service en ligne "Choisir son orientation" ainsi que par
+              les données issues du catalogue national des formations en apprentissage.
             </Text>
             <br />
             <List textStyle="sm" fontWeight="700" flexDirection={"row"} flexWrap={"wrap"} mb={[3, 3, 0]} display="flex">
@@ -35,7 +35,7 @@ const Footer = () => {
 
               <ListItem>
                 <Link href="https://affectation3e.phm.education.gouv.fr/pna-public/" mr={4} isExternal>
-                  service en ligne affectation
+                  service en ligne "Choisir son orientation"
                 </Link>
               </ListItem>
 

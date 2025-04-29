@@ -35,7 +35,9 @@ export const Delegue = ({ delegue, callback }) => {
     return;
   }
 
-  const title = <>Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne affectation</>;
+  const title = (
+    <>Accès aux listes de candidats ayant exprimé des vœux sur le service en ligne "Choisir son orientation"</>
+  );
   const activeRelations = delegue?.relations?.filter((relation) => relation.active) ?? [];
 
   const responsables = [...new Set(activeRelations?.map((relation) => relation.responsable?.siret))];
