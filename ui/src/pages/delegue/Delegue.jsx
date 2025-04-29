@@ -78,15 +78,15 @@ export const Delegue = ({ delegue, callback }) => {
           return (
             <Box key={siret} my={12}>
               <Alert status="info" display={"block"}>
-                <Heading as="h4" size="sm">
+                <Text>
                   Organisme responsable : <EtablisssementRaisonSociale etablissement={responsable} />
-                </Heading>
+                </Text>
 
-                <Text mt={4}>
+                <Text mt={2}>
                   Adresse : {responsable?.adresse} - SIRET : {responsable?.siret ?? "Inconnu"} - UAI :{" "}
                   {responsable?.uai ?? "Inconnu"}
                 </Text>
-                <Text mt={4}>
+                <Text mt={2}>
                   Contact au sein de l'organisme responsable : <Text as="b">{responsable?.email ?? "Inconnu"}</Text>
                 </Text>
               </Alert>
@@ -135,7 +135,7 @@ export const Delegue = ({ delegue, callback }) => {
                               )}
 
                               <Box mt={8}>
-                                <HistoryBlock relation={relation} />
+                                <HistoryBlock relation={relation} delegue={delegue} />
                               </Box>
                             </Box>
                           </Td>

@@ -147,9 +147,9 @@ const RelationContact = ({ relation, callback }) => {
 };
 
 const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, callback }) => {
-  const responsable = relation.responsable;
-  const formateur = relation.formateur;
-  const delegue = relation.delegue;
+  const responsable = relation?.responsable;
+  const formateur = relation?.formateur;
+  const delegue = relation?.delegue;
   const toast = useToast();
 
   const downloadVoeux = useDownloadVoeux({
@@ -520,7 +520,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
                     Le destinataire ({delegue.email}) a bien téléchargé la liste de candidats.{" "}
                   </Text>
                   <Text mt={2}>
-                    Si une mise à jour de cette liste est disponible, l'utilisateur en sera notifié par courriel.
+                    Si une mise à jour de cette liste est disponible, le contact habilité en sera notifié par courriel.
                   </Text>
                 </>
               ) : (
@@ -558,8 +558,8 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
       ) : new Date().getTime() <= new Date("2025/06/07").getTime() ? (
         <Box mt={8}>
           <Text>
-            Les vœux exprimés en mai seront rendus disponibles dans la première semaine de juin. Un courriel vous
-            préviendra de la mise à disposition de la liste.
+            Les candidatures exprimées en mai seront rendues disponibles dans la première semaine de juin. Un courriel
+            vous préviendra de la mise à disposition de la liste.
           </Text>
         </Box>
       ) : (

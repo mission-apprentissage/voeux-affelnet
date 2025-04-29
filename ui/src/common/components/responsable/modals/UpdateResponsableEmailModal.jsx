@@ -31,7 +31,7 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
         toast({
           title: "Votre adresse courriel a été modifiée",
           description:
-            "C'est à cette adresse que vous recevrez les mises à jour des listes de candidats pour les établissements dont vous être responsables.",
+            "C'est à cette adresse que vous recevrez les mises à jour des listes de candidats pour les établissements dont vous êtes responsable.",
           status: "success",
           duration: 9000,
           isClosable: true,

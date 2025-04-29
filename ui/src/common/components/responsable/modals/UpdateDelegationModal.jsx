@@ -11,7 +11,6 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
-  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -120,16 +119,6 @@ export const UpdateDelegationModal = ({ relation, callback, isOpen, onClose }) =
                 </AccordionButton>
               </h2>
               <AccordionPanel pb={4}>
-                <Text mb={4}>
-                  Si vous souhaitez modifier votre email en tant que directeur d'organisme responsable, habilité à
-                  accéder aux listes de tous les organismes formateurs, n'utilisez pas cette fonctionnalité, et accédez
-                  à votre{" "}
-                  <Link variant="action" href="/profil">
-                    page profil
-                  </Link>
-                  .
-                </Text>
-
                 <Stack>
                   <Button variant="primary" onClick={cancelDelegation}>
                     Récupérer les droits exclusifs pour cet organisme formateur
