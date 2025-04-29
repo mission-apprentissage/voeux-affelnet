@@ -164,7 +164,7 @@ function ReceptionVoeuxPage() {
                 Organisme responsable trouvé : <EtablissementLibelle etablissement={responsableData.responsable} />
                 <br />
                 <br />
-                Cet organisme recevra les vœux exprimés pour les établissements d'accueil suivants :
+                Cet organisme recevra les candidatures exprimés pour les établissements d'accueil suivants :
                 <Table>
                   <Thead>
                     <Tr>

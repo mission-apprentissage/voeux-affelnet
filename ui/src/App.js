@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Navigate, Route, Routes, useSearchParams } from "react-router-dom";
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
 import { getUserType } from "./common/utils/getUserType";
@@ -31,12 +31,17 @@ const Accessibilite = lazy(() => import("./pages/legal/Accessibilite"));
 const RequireAuth = ({ children, allowed }) => {
   const [auth] = useAuth();
   const type = getUserType(auth);
+  const [searchParams] = useSearchParams();
   const isNotAllowed = allowed && !allowed.map((v) => v.toLowerCase()).includes(type);
 
   if (!auth || auth.sub === "anonymous" || isNotAllowed) {
     const previousPath = window.location.pathname + window.location.search;
 
-    return <Navigate to={`/login?redirect=${encodeURIComponent(previousPath)}`} />;
+    return (
+      <Navigate
+        to={`/login?actionToken=${searchParams.get("actionToken")}&redirect=${encodeURIComponent(previousPath)}`}
+      />
+    );
   }
 
   return <Layout>{children}</Layout>;

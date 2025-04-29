@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import queryString from "query-string";
 
 import { Field, Form, Formik } from "formik";
@@ -43,7 +43,9 @@ function ServerErrorMessage() {
   );
 }
 
-function StatusErrorMessage({ error, username, actionToken }) {
+const StatusErrorMessage = ({ error, username, actionToken }) => {
+  const [searchParams] = useSearchParams();
+
   if (error) {
     if (error.statusCode === 401) {
       return (
@@ -76,7 +78,10 @@ function StatusErrorMessage({ error, username, actionToken }) {
             </Text>
             <Text mb={4}>
               Vous pouvez désormais définir votre mot de passe en suivant ce lien si ce n'est déjà fait :{" "}
-              <Link variant="action" href={`/activation?username=${username}&actionToken=${actionToken}`}>
+              <Link
+                variant="action"
+                href={`/activation?username=${username}&actionToken=${actionToken}&redirect=${searchParams.get("redirect") ?? "/"}`}
+              >
                 Définir mon mot de passe
               </Link>
             </Text>
@@ -94,10 +99,11 @@ function StatusErrorMessage({ error, username, actionToken }) {
   }
 
   return <div />;
-}
+};
 
 const ConfirmationPage = () => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { actionToken } = queryString.parse(location.search);
   const username = decodeJWT(actionToken).sub;
@@ -124,7 +130,7 @@ const ConfirmationPage = () => {
       //   </Alert>
       // );
 
-      navigate("/activation?actionToken=" + actionToken);
+      navigate(`/activation?actionToken=${actionToken}&redirect=${searchParams.get("redirect") ?? "/"}`);
     } catch (e) {
       console.error(e);
       setMessage(<ServerErrorMessage />);

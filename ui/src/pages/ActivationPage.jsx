@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import queryString from "query-string";
 import { Field, Form, Formik } from "formik";
 import {
@@ -24,12 +24,13 @@ import { passwordConfirmationSchema } from "../common/utils/validationUtils";
 
 function StatusErrorMessage({ error, username }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     if (error.statusCode === 400) {
-      navigate(`/login?alreadyActivated=true&username=${username}`);
+      navigate(`/login?alreadyActivated=true&username=${username}&redirect=${searchParams.get("redirect") ?? "/"}`);
     }
-  }, [error?.statusCode, username, navigate]);
+  }, [error?.statusCode, username, navigate, searchParams]);
 
   if (error.statusCode === 401) {
     return (
@@ -51,8 +52,9 @@ function StatusErrorMessage({ error, username }) {
 function ActivationPage() {
   const [, setAuth] = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { actionToken } = queryString.parse(location.search);
+  const [searchParams] = useSearchParams();
+
+  const actionToken = searchParams.get("actionToken");
   const [message, setMessage] = useState();
   const username = decodeJWT(actionToken).sub;
   const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
@@ -62,14 +64,15 @@ function ActivationPage() {
       try {
         const { token } = await _post("/api/activation", { password: values.password, actionToken });
         setAuth(token);
-        navigate("/");
+
+        navigate(searchParams.get("redirect") ?? "/");
       } catch (e) {
         console.error(e);
 
         setMessage(<StatusErrorMessage error={e} username={username} />);
       }
     },
-    [actionToken, navigate, setAuth, username]
+    [actionToken, navigate, setAuth, username, searchParams]
   );
 
   const showForm = !loading && !message && !error;
