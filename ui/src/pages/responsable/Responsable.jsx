@@ -74,7 +74,7 @@ const RelationContact = ({ relation, callback }) => {
             {!relation.delegue.relations.active ? (
               <>
                 <Text>
-                  Contact habilité en 2024 à réceptionner les listes de candidats :
+                  Contact délégué habilité en 2024 à réceptionner les listes de candidats :
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
                 </Text>
                 <Box mt={3}>
@@ -97,7 +97,7 @@ const RelationContact = ({ relation, callback }) => {
             ) : (
               <>
                 <Text>
-                  Contact habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+                  Contact délégué habilité :<Text as="b"> {relation.delegue?.email}</Text>.
                 </Text>
                 <Box mt={3}>
                   <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
@@ -129,7 +129,7 @@ const RelationContact = ({ relation, callback }) => {
             </Button>
             <Box mt={4}>
               <Text as="i">
-                En l'absence de délégation, le responsable sera seul destinataire des listes de candidats.
+                En l'absence de délégation, le contact responsable sera seul destinataire des listes de candidats.
               </Text>
             </Box>
 
@@ -289,7 +289,7 @@ const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, c
 
           <ModalBody>
             {!!delegue && !!relation.nombre_voeux && !!relation.nombre_voeux_restant && (
-              <Box mt={12}>
+              <Box>
                 <Heading as="h3" size="md">
                   Que souhaitez-vous faire ?
                 </Heading>
@@ -458,7 +458,7 @@ const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, c
   );
 };
 
-const RelationBlock = ({ relation, callback }) => {
+const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
   const responsable = relation.responsable;
   const formateur = relation.formateur;
   const delegue = relation.delegue;
@@ -477,14 +477,18 @@ const RelationBlock = ({ relation, callback }) => {
 
   return (
     <Box>
-      <Heading as="h4" size="md">
-        <EtablissementLibelle etablissement={relation.formateur} />
-      </Heading>
+      {!isResponsableFormateur && (
+        <>
+          <Heading as="h4" size="md">
+            <EtablissementLibelle etablissement={relation.formateur} />
+          </Heading>
 
-      <Text mt={4}>
-        Adresse : {formateur?.adresse} - SIRET : {formateur?.siret ?? "Inconnu"} - UAI :{" "}
-        {relation.formateur?.uai ?? "Inconnu"}
-      </Text>
+          <Text mt={4}>
+            Adresse : {formateur?.adresse} - SIRET : {formateur?.siret ?? "Inconnu"} - UAI :{" "}
+            {relation.formateur?.uai ?? "Inconnu"}
+          </Text>
+        </>
+      )}
 
       <Box mt={8}>
         <RelationContact relation={relation} callback={callback} />
@@ -576,7 +580,11 @@ const RelationBlock = ({ relation, callback }) => {
       )}
 
       <Box mt={6}>
-        <HistoryBlock relation={relation} delegue={relation.delegue} />
+        <HistoryBlock
+          relation={relation}
+          responsable={isResponsableFormateur ? relation.responsable : null}
+          delegue={relation.delegue}
+        />
       </Box>
 
       <DelegationAvecCandidaturesRestantesModal
@@ -629,7 +637,7 @@ export const Responsable = () => {
     await getEtablissement();
   }, [getEtablissement]);
 
-  const downloadVoeux = useDownloadVoeux({ responsable: etablissement, formateur: etablissement, callback: reload });
+  // const downloadVoeux = useDownloadVoeux({ responsable: etablissement, formateur: etablissement, callback: reload });
 
   useEffect(() => {
     if (siret_formateur) {
@@ -709,6 +717,12 @@ export const Responsable = () => {
   //   }
   // }, [identifiant, etablissement, toast, reload]);
 
+  const {
+    onOpen: onOpenDelegationAvecCandidaturesRestantesModal,
+    isOpen: isOpenDelegationAvecCandidaturesRestantesModal,
+    onClose: onCloseDelegationAvecCandidaturesRestantesModal,
+  } = useDisclosure();
+
   useEffect(() => {
     const run = async () => {
       if (!mounted.current) {
@@ -745,9 +759,9 @@ export const Responsable = () => {
   //   (relation) => relation.formateur?.siret === etablissement.siret
   // );
 
-  // const relationsOnlyResponsable = relationsResponsable.filter(
-  //   (relation) => relation.formateur?.siret !== etablissement.siret
-  // );
+  const relationsOnlyResponsable = relationsResponsable.filter(
+    (relation) => relation.formateur?.siret !== etablissement.siret
+  );
 
   // const relationsOnlyFormateur = relationsFormateur.filter(
   //   (relation) => relation.responsable?.siret !== etablissement.siret
@@ -784,7 +798,12 @@ export const Responsable = () => {
 
           <Box mt={2}>
             <Text>
-              Contact habilité à réceptionner les listes de candidats : <Text as="b">{etablissement.email}</Text>{" "}
+              Contact responsable
+              {(!!relationsOnlyResponsable.length ||
+                (!relationsOnlyResponsable.length && !relationResponsableFormateur?.delegue)) && (
+                <> habilité à réceptionner les listes de candidats</>
+              )}{" "}
+              : <Text as="b">{etablissement.email}</Text>{" "}
               <Link variant={"action"} onClick={onOpenUpdateResponsableEmailModal}>
                 {etablissement?.email?.length ? "Modifier" : "Renseigner l'adresse courriel"}
               </Link>
@@ -831,25 +850,7 @@ export const Responsable = () => {
             <>
               {etablissement.is_responsable_formateur && (
                 <Box mt={6} id="responsable-formateur">
-                  <Text>
-                    {/* Statut de diffusion des listes : */}
-                    <RelationStatut relation={relationResponsableFormateur} />{" "}
-                  </Text>
-
-                  {!!relationResponsableFormateur?.nombre_voeux && (
-                    <Button mt={6} variant="primary" onClick={async () => await downloadVoeux()}>
-                      <DownloadIcon mr={2} />
-                      Télécharger la liste
-                    </Button>
-                  )}
-
-                  <Box mt={6}>
-                    <HistoryBlock
-                      relation={relationResponsableFormateur}
-                      responsable={etablissement}
-                      delegue={relationResponsableFormateur?.delegue}
-                    />
-                  </Box>
+                  <RelationBlock relation={relationResponsableFormateur} callback={reload} isResponsableFormateur />
                 </Box>
               )}
             </>
@@ -873,6 +874,14 @@ export const Responsable = () => {
           callback={reload}
           isOpen={isOpenUpdateResponsableEmailModal}
           onClose={onCloseUpdateResponsableEmailModal}
+        />
+
+        <DelegationAvecCandidaturesRestantesModal
+          onOpen={onOpenDelegationAvecCandidaturesRestantesModal}
+          onClose={onCloseDelegationAvecCandidaturesRestantesModal}
+          isOpen={isOpenDelegationAvecCandidaturesRestantesModal}
+          relation={relationResponsableFormateur}
+          callback={reload}
         />
       </Page>
     </>

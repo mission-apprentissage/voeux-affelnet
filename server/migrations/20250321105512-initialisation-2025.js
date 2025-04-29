@@ -8,11 +8,10 @@ module.exports = {
    * @returns {Promise<void>}
    */
   async up(db) {
-    // Suppression des candidatures de la campagne précédente.
+    // Suppression des données de la campagne précédente
+    await db.collection("formations").deleteMany({});
     await db.collection("logs").deleteMany({});
     await db.collection("voeux").deleteMany({});
-
-    // Suppression des relations de la campagne précédente.
     await db.collection("relations").deleteMany({});
 
     // Mise à jour des utilisateurs admin vers le nouveau modèle.
