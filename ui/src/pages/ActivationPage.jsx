@@ -14,6 +14,8 @@ import {
   Text,
   Link,
   Alert,
+  InputRightElement,
+  InputGroup,
 } from "@chakra-ui/react";
 
 import { _post } from "../common/httpClient";
@@ -21,6 +23,7 @@ import useAuth from "../common/hooks/useAuth";
 import decodeJWT from "../common/utils/decodeJWT";
 import { useFetch } from "../common/hooks/useFetch";
 import { passwordConfirmationSchema } from "../common/utils/validationUtils";
+import { EyeFill, EyeOffFill } from "../theme/components/icons";
 
 function StatusErrorMessage({ error, username }) {
   const navigate = useNavigate();
@@ -58,6 +61,12 @@ function ActivationPage() {
   const [message, setMessage] = useState();
   const username = decodeJWT(actionToken).sub;
   const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const toggleShowPasswordConfirm = () => setShowPasswordConfirm(!showPasswordConfirm);
 
   const activation = useCallback(
     async (values) => {
@@ -107,7 +116,23 @@ function ActivationPage() {
                             return (
                               <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                                 <FormLabel name={field.name}>Mot de passe</FormLabel>
-                                <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." />
+                                {/* <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." /> */}
+
+                                <InputGroup size="md">
+                                  <Input
+                                    {...field}
+                                    id={field.name}
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Votre mot de passe..."
+                                  />
+
+                                  <InputRightElement width="4.5rem">
+                                    <Box onClick={toggleShowPassword}>
+                                      {showPassword ? <EyeOffFill /> : <EyeFill />}
+                                    </Box>
+                                  </InputRightElement>
+                                </InputGroup>
+
                                 <FormErrorMessage>{meta.error || "Mot de passe invalide"}</FormErrorMessage>
                               </FormControl>
                             );
@@ -118,12 +143,28 @@ function ActivationPage() {
                             return (
                               <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                                 <FormLabel name={field.name}>Confirmation du mot de passe</FormLabel>
-                                <Input
+                                {/* <Input
                                   {...field}
                                   id={field.name}
                                   type="password"
                                   placeholder="Confirmation de votre mot de passe..."
-                                />
+                                /> */}
+
+                                <InputGroup size="md">
+                                  <Input
+                                    {...field}
+                                    id={field.name}
+                                    type={showPasswordConfirm ? "text" : "password"}
+                                    placeholder="Confirmation de votre mot de passe..."
+                                  />
+
+                                  <InputRightElement width="4.5rem">
+                                    <Box onClick={toggleShowPasswordConfirm}>
+                                      {showPasswordConfirm ? <EyeOffFill /> : <EyeFill />}
+                                    </Box>
+                                  </InputRightElement>
+                                </InputGroup>
+
                                 <FormErrorMessage>{meta.error || "Mot de passe invalide"}</FormErrorMessage>
                               </FormControl>
                             );
