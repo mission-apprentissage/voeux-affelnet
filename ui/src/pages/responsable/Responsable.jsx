@@ -753,9 +753,15 @@ export const Responsable = () => {
     </>
   );
 
-  const relationsResponsable = etablissement.relations.filter(
-    (relation) => relation.responsable?.siret === etablissement.siret
-  );
+  const relationsResponsable = etablissement.relations
+    .filter((relation) => relation.responsable?.siret === etablissement.siret)
+    .sort(
+      (a, b) =>
+        b.nombre_voeux_restant - a.nombre_voeux_restant ||
+        b.nombre_voeux - a.nombre_voeux ||
+        -b.formateur?.raison_sociale.localeCompare(a.formateur.raison_sociale) ||
+        -b.formateur?.libelle_ville.localeCompare(a.formateur.libelle_ville)
+    );
 
   // const relationsFormateur = etablissement.relations.filter(
   //   (relation) => relation.formateur?.siret === etablissement.siret

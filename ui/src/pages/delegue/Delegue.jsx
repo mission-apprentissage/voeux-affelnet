@@ -75,6 +75,7 @@ export const Delegue = ({ delegue, callback }) => {
 
         {responsables?.map((siret) => {
           const relations = activeRelations?.filter((relation) => relation.responsable?.siret === siret);
+
           const responsable = relations?.find((relation) => relation.responsable?.siret === siret)?.responsable;
 
           return (
@@ -102,47 +103,56 @@ export const Delegue = ({ delegue, callback }) => {
                     </Thead>
 
                     <Tbody>
-                      {relations.map((relation, index) => (
-                        <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
-                          <Td py={8}>
-                            {/* <RelationFormateur relation={relation} callback={reload} /> */}
-                            <Box>
-                              <Heading as="h4" size="md">
-                                <EtablisssementRaisonSociale etablissement={relation.formateur} />
-                              </Heading>
-                              <Text mt={4}>
-                                Adresse : {relation.formateur?.adresse} - SIRET :{" "}
-                                {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
-                              </Text>
+                      {relations
+                        .sort(
+                          (a, b) =>
+                            b.nombre_voeux_restant - a.nombre_voeux_restant ||
+                            b.nombre_voeux - a.nombre_voeux ||
+                            -b.formateur?.raison_sociale.localeCompare(a.formateur.raison_sociale) ||
+                            -b.formateur?.libelle_ville.localeCompare(a.formateur.libelle_ville)
+                        )
+                        .map((relation, index) => (
+                          <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
+                            <Td py={8}>
+                              {/* <RelationFormateur relation={relation} callback={reload} /> */}
+                              <Box>
+                                <Heading as="h4" size="md">
+                                  <EtablisssementRaisonSociale etablissement={relation.formateur} />
+                                </Heading>
+                                <Text mt={4}>
+                                  Adresse : {relation.formateur?.adresse} - SIRET :{" "}
+                                  {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+                                  {relation.formateur?.uai ?? "Inconnu"}
+                                </Text>
 
-                              <Text mt={8}>
-                                {/* Statut de diffusion des listes : */}
-                                <RelationStatut relation={relation} />
-                              </Text>
+                                <Text mt={8}>
+                                  {/* Statut de diffusion des listes : */}
+                                  <RelationStatut relation={relation} />
+                                </Text>
 
-                              {!!relation?.nombre_voeux && (
-                                <Button
-                                  mt={4}
-                                  variant="primary"
-                                  onClick={async () =>
-                                    await downloadVoeux({
-                                      responsable: relation.responsable,
-                                      formateur: relation.formateur,
-                                    })
-                                  }
-                                >
-                                  <DownloadIcon mr={2} />
-                                  Télécharger la liste
-                                </Button>
-                              )}
+                                {!!relation?.nombre_voeux && (
+                                  <Button
+                                    mt={4}
+                                    variant="primary"
+                                    onClick={async () =>
+                                      await downloadVoeux({
+                                        responsable: relation.responsable,
+                                        formateur: relation.formateur,
+                                      })
+                                    }
+                                  >
+                                    <DownloadIcon mr={2} />
+                                    Télécharger la liste
+                                  </Button>
+                                )}
 
-                              <Box mt={8}>
-                                <HistoryBlock relation={relation} delegue={delegue} />
+                                <Box mt={8}>
+                                  <HistoryBlock relation={relation} delegue={delegue} />
+                                </Box>
                               </Box>
-                            </Box>
-                          </Td>
-                        </Tr>
-                      ))}
+                            </Td>
+                          </Tr>
+                        ))}
                     </Tbody>
                   </Table>
                 </Box>
