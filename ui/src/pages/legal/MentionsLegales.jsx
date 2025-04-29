@@ -30,7 +30,7 @@ export const MentionsLegales = () => {
               <br />
               Direction générale de l'enseignement scolaire - Secrétariat général,
               <br />
-              Ministères Éducation Jeunesse Sports Enseignement Supérieur Recherche
+              Ministère de l’Éducation nationale, de l’Enseignement supérieur et de la Recherche
               <br />
               61-65 rue Dutot, 75357 Paris Cedex 15
             </Text>
