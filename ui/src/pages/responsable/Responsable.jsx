@@ -99,12 +99,14 @@ const RelationContact = ({ relation, callback }) => {
                 <Text>
                   Contact délégué habilité :<Text as="b"> {relation.delegue?.email}</Text>.
                 </Text>
-                <Box mt={3}>
-                  <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
-                    <EditIcon mr={2} />
-                    Modifier ou annuler la délégation
-                  </Button>
-                </Box>
+                {!relation.nombre_voeux && (
+                  <Box mt={3}>
+                    <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+                      <EditIcon mr={2} />
+                      Modifier ou annuler la délégation
+                    </Button>
+                  </Box>
+                )}
               </>
             )}
 
@@ -812,6 +814,10 @@ export const Responsable = () => {
 
           {etablissement.is_responsable ? (
             <>
+              <Box mt={8}>
+                <HistoryBlock responsable={etablissement} />
+              </Box>
+
               {!!relationsResponsable.length && (
                 <Box mt={12} id="responsable">
                   {/* <Box>
@@ -829,7 +835,7 @@ export const Responsable = () => {
                   <Table>
                     <Thead>
                       <Tr borderBottom="2px solid" borderColor="gray.200">
-                        <Th> Organismes formateurs associés</Th>
+                        <Th>Organismes formateurs associés</Th>
                       </Tr>
                     </Thead>
 

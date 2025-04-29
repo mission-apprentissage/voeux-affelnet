@@ -382,28 +382,34 @@ export const Etablissement = () => {
 
           {etablissement.is_responsable ? (
             <>
-              {!!relationsResponsable.length && (
-                <Box mt={12} id="responsable">
-                  <Box>
-                    <Table>
-                      <Thead>
-                        <Tr borderBottom="2px solid" borderColor="gray.200">
-                          <Th> Organismes formateurs associés</Th>
-                        </Tr>
-                      </Thead>
+              <Box mt={8}>
+                <HistoryBlock responsable={etablissement} />
+              </Box>
 
-                      <Tbody>
-                        {relationsResponsable.map((relation, index) => (
-                          <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
-                            <Td py={8}>
-                              <RelationBlock relation={relation} callback={reload} />
-                            </Td>
+              {!!relationsResponsable.length && (
+                <>
+                  <Box mt={12} id="responsable">
+                    <Box>
+                      <Table>
+                        <Thead>
+                          <Tr borderBottom="2px solid" borderColor="gray.200">
+                            <Th>Organismes formateurs associés</Th>
                           </Tr>
-                        ))}
-                      </Tbody>
-                    </Table>
+                        </Thead>
+
+                        <Tbody>
+                          {relationsResponsable.map((relation, index) => (
+                            <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
+                              <Td py={8}>
+                                <RelationBlock relation={relation} callback={reload} />
+                              </Td>
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    </Box>
                   </Box>
-                </Box>
+                </>
               )}
             </>
           ) : (

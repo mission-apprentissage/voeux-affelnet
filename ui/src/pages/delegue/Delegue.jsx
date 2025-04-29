@@ -97,7 +97,7 @@ export const Delegue = ({ delegue, callback }) => {
                   <Table>
                     <Thead>
                       <Tr borderBottom="2px solid" borderColor="gray.200">
-                        <Th> Organismes formateurs associés</Th>
+                        <Th>Organismes formateurs associés</Th>
                       </Tr>
                     </Thead>
 
