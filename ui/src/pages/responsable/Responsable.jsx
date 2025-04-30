@@ -536,25 +536,27 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
               )}
             </Box>
           ) : (
-            <Box mt={4}>
-              {!!relation.nombre_voeux && !relation.nombre_voeux_restant ? (
-                <Box display={"inline-flex"} alignItems={"center"}>
+            !!relation.nombre_voeux && (
+              <Box mt={4}>
+                {!relation.nombre_voeux_restant ? (
+                  <Box display={"inline-flex"} alignItems={"center"}>
+                    <Link variant="primary" onClick={async () => await downloadVoeux()}>
+                      <DownloadIcon mr={2} />
+                      Télécharger à nouveau
+                    </Link>
+                    <Text ml={8} alignItems="center">
+                      Liste téléchargée par vous ({responsable?.email}
+                      ). &nbsp;
+                    </Text>
+                  </Box>
+                ) : (
                   <Button variant="primary" onClick={async () => await downloadVoeux()}>
                     <DownloadIcon mr={2} />
-                    Télécharger à nouveau
+                    Télécharger la liste
                   </Button>
-                  <Text ml={8} alignItems="center">
-                    Liste téléchargée par vous ({responsable?.email}
-                    ). &nbsp;
-                  </Text>
-                </Box>
-              ) : (
-                <Button variant="primary" onClick={async () => await downloadVoeux()}>
-                  <DownloadIcon mr={2} />
-                  Télécharger la liste
-                </Button>
-              )}
-            </Box>
+                )}
+              </Box>
+            )
           )}
         </Box>
       ) : new Date().getTime() <= new Date("2025/06/07").getTime() ? (

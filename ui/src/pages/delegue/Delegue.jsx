@@ -1,4 +1,18 @@
-import { Box, Text, Heading, Button, useDisclosure, Table, Thead, Tr, Th, Tbody, Td, Alert } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Heading,
+  Button,
+  useDisclosure,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+  Alert,
+  Link,
+} from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
 
@@ -131,19 +145,41 @@ export const Delegue = ({ delegue, callback }) => {
                                 </Text>
 
                                 {!!relation?.nombre_voeux && (
-                                  <Button
-                                    mt={4}
-                                    variant="primary"
-                                    onClick={async () =>
-                                      await downloadVoeux({
-                                        responsable: relation.responsable,
-                                        formateur: relation.formateur,
-                                      })
-                                    }
-                                  >
-                                    <DownloadIcon mr={2} />
-                                    Télécharger la liste
-                                  </Button>
+                                  <Box mt={4}>
+                                    {!relation.nombre_voeux_restant ? (
+                                      <Box display={"inline-flex"} alignItems={"center"}>
+                                        <Link
+                                          variant="primary"
+                                          onClick={async () =>
+                                            await downloadVoeux({
+                                              responsable: relation.responsable,
+                                              formateur: relation.formateur,
+                                            })
+                                          }
+                                        >
+                                          <DownloadIcon mr={2} />
+                                          Télécharger à nouveau
+                                        </Link>
+                                        <Text ml={8} alignItems="center">
+                                          Liste téléchargée par vous ({delegue?.email}
+                                          ). &nbsp;
+                                        </Text>
+                                      </Box>
+                                    ) : (
+                                      <Button
+                                        variant="primary"
+                                        onClick={async () =>
+                                          await downloadVoeux({
+                                            responsable: relation.responsable,
+                                            formateur: relation.formateur,
+                                          })
+                                        }
+                                      >
+                                        <DownloadIcon mr={2} />
+                                        Télécharger la liste
+                                      </Button>
+                                    )}
+                                  </Box>
                                 )}
 
                                 <Box mt={8}>
