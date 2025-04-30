@@ -45,7 +45,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
   return !delegation ? (
     <>
       <Text mt={4} fontWeight={600}>
-        Accès exclusif aux candidatures :
+        Le contact responsable a un accès exclusif aux candidatures pour le ou les organisme(s) suivant(s) :
       </Text>
       <UnorderedList>
         {relations.slice(0, limit).map((relation, index) => (
@@ -136,7 +136,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
             </Text>
 
             <Text>
-              Délégué : <Text as="b">{relation?.delegue?.email}</Text>{" "}
+              Délégué : {relation?.delegue?.email}{" "}
               {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
                 <>
                   - <ContactStatut user={relation?.delegue} short />
@@ -181,7 +181,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
                 </Text>
 
                 <Text>
-                  Délégué : <Text as="b">{relation?.delegue?.email}</Text>{" "}
+                  Délégué : {relation?.delegue?.email}{" "}
                   {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
                     <>
                       - <ContactStatut user={relation?.delegue} short />
