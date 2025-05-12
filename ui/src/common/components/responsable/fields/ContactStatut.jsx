@@ -15,7 +15,7 @@ export const descriptions = new Map([
   [
     CONTACT_STATUS.EN_ATTENTE_DE_CONFIRMATION,
     {
-      icon: <WarningFill f color="#fcc63a" />,
+      icon: <WarningFill f color="red" />,
       long: `Le destinataire a reçu un courriel l'invitant à confirmer son adresse courriel, mais n'a pas cliqué sur le lien de confirmation d'adresse.`,
       short: "Adresse courriel en attente de confirmation",
     },
@@ -23,7 +23,7 @@ export const descriptions = new Map([
   [
     CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_NON_CREE,
     {
-      icon: <WarningFill f color="#fcc63a" />,
+      icon: <WarningFill f color="red" />,
       long: `Le destinataire a confirmé son adresse courriel mais n'a pas encore créé son mot de passe de connexion au service de téléchargement des listes de candidats.`,
       short: "Compte utilisateur non finalisé",
     },
@@ -39,7 +39,7 @@ export const descriptions = new Map([
   [
     CONTACT_STATUS.INCONNU,
     {
-      icon: <WarningFill f color="#fcc63a" />,
+      icon: <WarningFill f color="red" />,
       long: `État inconnu`,
     },
   ],

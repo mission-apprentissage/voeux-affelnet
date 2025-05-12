@@ -12,14 +12,14 @@ export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) 
     [
       partialDownload,
       {
-        icon: <WarningFill color="#fcc63a" />,
+        icon: <WarningFill color="red" />,
         long: partialDownload,
       },
     ],
     [
       noDownload,
       {
-        icon: <WarningFill color="#fcc63a" />,
+        icon: <WarningFill color="red" />,
         long: noDownload,
       },
     ],
@@ -40,7 +40,7 @@ export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) 
     [
       unknown,
       {
-        icon: <WarningFill color="#fcc63a" />,
+        icon: <WarningFill color="red" />,
         long: unknown,
       },
     ],
@@ -164,7 +164,7 @@ export const RelationStatut = ({ relation }) => {
 //   //             as="span"
 //   //             title="Une délégation de droit a été activée pour cet organisme, mais le destinataire n'a pas encore créé son compte."
 //   //           >
-//   //             <WarningFill  color="#fcc63a" verticalAlign="text-bottom" /> Délégation activée, compte non créé
+//   //             <WarningFill  color="red" verticalAlign="text-bottom" /> Délégation activée, compte non créé
 //   //           </Text>
 //   //         );
 //   //       }

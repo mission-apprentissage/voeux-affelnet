@@ -12,14 +12,14 @@ export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) 
     [
       partialDownload,
       {
-        icon: <WarningFill color="#fcc63a" />,
+        icon: <WarningFill color="red" />,
         long: partialDownload,
       },
     ],
     [
       noDownload,
       {
-        icon: <WarningFill color="#fcc63a" />,
+        icon: <WarningFill color="red" />,
         long: noDownload,
       },
     ],
@@ -40,7 +40,7 @@ export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) 
     [
       unknown,
       {
-        icon: <WarningFill color="#fcc63a" />,
+        icon: <WarningFill color="red" />,
         long: unknown,
       },
     ],
