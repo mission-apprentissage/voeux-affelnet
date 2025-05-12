@@ -110,27 +110,19 @@ const ConfirmationPage = () => {
   const [data, loading, error] = useFetch(`/api/confirmation/status?username=${username}&token=${actionToken}`);
   const [message, setMessage] = useState();
   const [inputDisabled, setInputDisabled] = useState(true);
+  const redirect = decodeURIComponent(searchParams.get("redirect")) ?? "/";
 
   const [title, setTitle] = useState(
     <>{`Veuillez confirmer ou modifier l’adresse courriel du directeur d’établissement`}</>
   );
 
+  console.log("ConfirmationPage", { actionToken, redirect, data, loading, error });
+
   const accept = async (values) => {
     try {
       await _post("/api/confirmation/accept", { email: values.email, actionToken });
-      // setTitle(<>Dernière étape : veuillez définir votre mot de passe de connexion.</>);
-      // setMessage(
-      //   <Alert status="warning" variant="left-accent">
-      //     <AlertIcon />
-      //     <Box>
-      //       <Text>
-      //         Un nouveau message vient de vous être envoyé, avec un lien vous permettant de définir votre mot de passe.
-      //       </Text>
-      //     </Box>
-      //   </Alert>
-      // );
 
-      navigate(`/activation?actionToken=${actionToken}&redirect=${searchParams.get("redirect") ?? "/"}`);
+      navigate(`/activation?actionToken=${actionToken}&redirect=${encodeURIComponent(redirect)}`);
     } catch (e) {
       console.error(e);
       setMessage(<ServerErrorMessage />);

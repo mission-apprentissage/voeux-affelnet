@@ -13,13 +13,13 @@ module.exports = (options = {}) => {
   const mailer = options.mailer || createMailer();
 
   return {
-    async sendEmail(user, templateName, variables = {}) {
+    async sendEmail(user, templateName, data = {}) {
       const token = uuid.v4();
-      const template = templates[templateName](user, token, variables);
+      const template = templates[templateName](user, token, data);
 
       try {
-        await addEmail(user, token, templateName, variables);
-        const messageId = await mailer.sendEmailMessage(user.email, template, variables);
+        await addEmail(user, token, templateName, data);
+        const messageId = await mailer.sendEmailMessage(user.email, template, data);
         await addEmailMessageId(token, messageId);
       } catch (e) {
         logger.error(e);
@@ -29,16 +29,16 @@ module.exports = (options = {}) => {
       return token;
     },
 
-    async resendEmail(token, variables, options = {}) {
+    async resendEmail(token, options = {}) {
       const user = options.user ?? (await User.findOne({ "emails.token": token }).lean());
       const previous = user.emails.find((e) => e.token === token);
 
       const nextTemplateName = options.newTemplateName || previous.templateName;
-      const template = templates[nextTemplateName](user, token, variables, { resend: !options.retry });
+      const template = templates[nextTemplateName](user, token, previous.data, { resend: !options.retry });
 
       try {
         await addEmailSendDate(token, nextTemplateName);
-        const messageId = await mailer.sendEmailMessage(user.email, template, variables);
+        const messageId = await mailer.sendEmailMessage(user.email, template, previous.data);
         await addEmailMessageId(token, messageId);
       } catch (e) {
         logger.error(e);

@@ -43,7 +43,7 @@ const Header = () => {
 
             <Box p={[1, 1, 6]} flex="1">
               <Heading as="h6" textStyle="h6" fontSize="20px">
-                Transmission des listes de candidats 2024
+                Transmission des listes de candidats 2025
               </Heading>
             </Box>
 

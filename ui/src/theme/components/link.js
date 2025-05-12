@@ -52,6 +52,34 @@ const Link = {
       color: "grey.800",
       textDecoration: "underline",
     },
+
+    // blue: {
+    //   ...commonButtonStyle,
+    //   bg: "white",
+    //   textDecoration: "none",
+    //   border: "1px solid",
+    //   borderColor: "bluefrance",
+    //   color: "bluefrance",
+    //   _hover: { bg: "#1212ff", color: "white", textDecoration: "none" },
+    // },
+    // green: {
+    //   ...commonButtonStyle,
+    //   bg: "white",
+    //   textDecoration: "none",
+    //   border: "1px solid",
+    //   borderColor: "#1f8d49",
+    //   color: "#1f8d49",
+    //   _hover: { bg: "#2ec166", color: "white", textDecoration: "none" },
+    // },
+    // red: {
+    //   ...commonButtonStyle,
+    //   bg: "white",
+    //   textDecoration: "none",
+    //   border: "1px solid",
+    //   borderColor: "#d64d00",
+    //   color: "#d64d00",
+    //   _hover: { bg: "#ff754e", color: "white", textDecoration: "none" },
+    // },
   },
 };
 

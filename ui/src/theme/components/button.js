@@ -1,6 +1,7 @@
 export const commonButtonStyle = {
   borderRadius: 0,
   textTransform: "none",
+  display: "inline-block",
   fontWeight: 400,
   _focus: { boxShadow: "none", outlineColor: "none" },
   _focusVisible: { boxShadow: "0 0 0 3px #2A7FFE", outlineColor: "#2A7FFE" },
@@ -55,19 +56,41 @@ const Button = {
       ...commonButtonStyle,
       backgroundColor: "bluefrance",
       color: "white",
-      _hover: { bg: "#1212ff", _disabled: { bg: "bluefrance" } },
+      _hover: { bg: "#1212ff" },
     },
     green: {
       ...commonButtonStyle,
       backgroundColor: "#1f8d49",
       color: "white",
-      _hover: { bg: "#2ec166", _disabled: { bg: "#1f8d49" } },
+      _hover: { bg: "#2ec166" },
     },
     red: {
       ...commonButtonStyle,
       backgroundColor: "#d64d00",
       color: "white",
-      _hover: { bg: "#ff754e", _disabled: { bg: "#d64d00" } },
+      _hover: { bg: "#ff754e" },
+    },
+
+    "blue-light": {
+      ...commonButtonStyle,
+      border: "1px solid",
+      borderColor: "bluefrance",
+      color: "bluefrance",
+      _hover: { bg: "#1212ff", color: "white" },
+    },
+    "green-light": {
+      ...commonButtonStyle,
+      border: "1px solid",
+      borderColor: "#1f8d49",
+      color: "#1f8d49",
+      _hover: { bg: "#2ec166", color: "white" },
+    },
+    "red-light": {
+      ...commonButtonStyle,
+      border: "1px solid",
+      borderColor: "#d64d00",
+      color: "#d64d00",
+      _hover: { bg: "#ff754e", color: "white" },
     },
   },
 };

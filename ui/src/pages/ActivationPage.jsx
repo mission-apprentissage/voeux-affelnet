@@ -59,14 +59,18 @@ function ActivationPage() {
 
   const actionToken = searchParams.get("actionToken");
   const [message, setMessage] = useState();
-  const username = decodeJWT(actionToken).sub;
-  const [, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
+  const username = decodeJWT(actionToken)?.sub;
+  const [data, loading, error] = useFetch(`/api/activation/status?username=${username}&token=${actionToken}`);
 
   const [showPassword, setShowPassword] = useState(false);
   const toggleShowPassword = () => setShowPassword(!showPassword);
 
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const toggleShowPasswordConfirm = () => setShowPasswordConfirm(!showPasswordConfirm);
+
+  const redirect = decodeURIComponent(searchParams.get("redirect")) ?? "/";
+
+  console.log("ActivationPage", { actionToken, redirect, data, loading, error });
 
   const activation = useCallback(
     async (values) => {

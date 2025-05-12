@@ -197,12 +197,46 @@ module.exports = {
     };
   },
 
-  update_responsable: (user, token, { relation, responsable, formateur }, options = {}) => {
+  // update_responsable: (user, token, { relation, responsable, formateur }, options = {}) => {
+  //   const prefix = options.resend ? "[Rappel] " : "";
+
+  //   return {
+  //     subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
+  //     templateFile: getTemplateFile("update_responsable"),
+  //     data: {
+  //       token,
+  //       actionToken: createActionToken(user.username),
+  //       voeux_email,
+  //       relation,
+  //       responsable,
+  //       formateur,
+  //     },
+  //   };
+  // },
+  // update_delegue: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
+  //   const prefix = options.resend ? "[Rappel] " : "";
+
+  //   return {
+  //     subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
+  //     templateFile: getTemplateFile("update_delegue"),
+  //     data: {
+  //       token,
+  //       actionToken: createActionToken(user.username),
+  //       voeux_email,
+  //       relation,
+  //       responsable,
+  //       formateur,
+  //       delegue,
+  //     },
+  //   };
+  // },
+
+  update_relation_responsable: (user, token, { relation, responsable, formateur }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
       subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
-      templateFile: getTemplateFile("update_responsable"),
+      templateFile: getTemplateFile("update_relation_responsable"),
       data: {
         token,
         actionToken: createActionToken(user.username),
@@ -213,12 +247,12 @@ module.exports = {
       },
     };
   },
-  update_delegue: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
+  update_relation_delegue: (user, token, { relation, responsable, formateur, delegue }, options = {}) => {
     const prefix = options.resend ? "[Rappel] " : "";
 
     return {
       subject: `${prefix}Affelnet 2025 – Les listes de candidats à l’apprentissage pour l'établissement ${formateur.uai} ont été mises à jour`,
-      templateFile: getTemplateFile("update_delegue"),
+      templateFile: getTemplateFile("update_relation_delegue"),
       data: {
         token,
         actionToken: createActionToken(user.username),
@@ -230,6 +264,7 @@ module.exports = {
       },
     };
   },
+
   reset_password: (user, token) => {
     return {
       subject: "Réinitialisation du mot de passe (lien valable 2 heures)",

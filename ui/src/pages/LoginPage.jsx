@@ -85,20 +85,22 @@ function LoginPage() {
   const username = decodeJWT(actionToken)?.sub || query.get("username");
   const [data, loading, error] = useFetch(`/api/login/status?username=${username}&token=${actionToken}`);
 
-  console.log({ data, loading, error });
+  console.log("LoginPage", { actionToken, redirect, data, loading, error });
 
   useEffect(() => {
     switch (data?.statut) {
       case USER_STATUS.EN_ATTENTE:
-        navigate(`/confirmation?actionToken=${actionToken}`, { replace: true });
+        navigate(`/confirmation?actionToken=${actionToken}&redirect=${encodeURIComponent(redirect)}`, {
+          replace: true,
+        });
         break;
       case USER_STATUS.CONFIRME:
-        navigate(`/activation?actionToken=${actionToken}`, { replace: true });
+        navigate(`/activation?actionToken=${actionToken}&redirect=${encodeURIComponent(redirect)}`, { replace: true });
         break;
       default:
         break;
     }
-  }, [data?.statut, actionToken, navigate]);
+  }, [data?.statut, actionToken, navigate, redirect]);
 
   const login = async (values, { setStatus }) => {
     try {

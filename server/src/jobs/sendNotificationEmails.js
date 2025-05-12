@@ -2,7 +2,6 @@ const { CONTACT_TYPE } = require("../common/constants/ContactType");
 const logger = require("../common/logger");
 const { Relation, Etablissement, Delegue } = require("../common/model");
 // const { RelationActions } = require("../common/constants/History");
-
 const {
   saveListAvailableEmailAutomaticSentToResponsable,
   saveListAvailableEmailAutomaticResentToResponsable,
@@ -11,6 +10,7 @@ const {
   saveListAvailableEmailAutomaticResentToDelegue,
   saveListAvailableEmailManualSentToDelegue,
 } = require("../common/actions/history/relation");
+const { pick } = require("lodash");
 
 async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) {
   const stats = { total: 0, sent: 0, resent: 0, failed: 0, skiped: 0 };
@@ -45,12 +45,18 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
     // },
   };
 
-  await Relation.find(query)
+  await Relation.find(query, { _id: 0, histories: 0 })
     .lean()
     .skip(skip)
     .limit(limit)
     .cursor()
     .eachAsync(async (relation) => {
+      if (!relation.etablissement_responsable.siret || !relation.etablissement_formateur.siret) {
+        stats.skiped++;
+        logger.error("Relation incomplète");
+        return stats;
+      }
+
       const responsable = await Etablissement.findOne({ siret: relation.etablissement_responsable.siret });
       const formateur = await Etablissement.findOne({ siret: relation.etablissement_formateur.siret });
 
@@ -97,12 +103,15 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
       const templateType = (delegue ? CONTACT_TYPE.DELEGUE : CONTACT_TYPE.RESPONSABLE).toLowerCase();
 
       const templateName = `notification_relation_${templateType}`;
-      const previous = user.emails.find(
-        (e) =>
+      const previous = user.emails?.find((e) => {
+        return (
           e.templateName === templateName &&
-          e.data?.relation?._id === relation._id &&
-          e.data?.relation.last_date_voeux === relation.last_date_voeux
-      );
+          e.data?.relation?.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+          e.data?.relation?.etablissement_formateur.siret === relation.etablissement_formateur.siret &&
+          e.data?.relation?.nombre_voeux === relation.nombre_voeux &&
+          new Date(e.data?.relation?.last_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime()
+        );
+      });
 
       stats.total++;
 
@@ -111,36 +120,74 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
           try {
             switch (templateType) {
               case CONTACT_TYPE.RESPONSABLE.toLowerCase():
-                console.log("responsable template type");
-                previous
-                  ? await resendEmail(previous.token, { retry: !!previous?.error })
-                  : await sendEmail(user, templateName, {
-                      relation,
-                      responsable,
-                      formateur,
-                    });
-                options.sender
-                  ? await saveListAvailableEmailManualSentToResponsable({ relation, responsable }, options.sender)
-                  : previous
-                  ? await saveListAvailableEmailAutomaticResentToResponsable({ relation, responsable })
-                  : await saveListAvailableEmailAutomaticSentToResponsable({ relation, responsable });
+                {
+                  const data = {
+                    relation,
+                    responsable: pick(responsable, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                    formateur: pick(formateur, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                  };
+
+                  previous
+                    ? await resendEmail(previous.token, { retry: !!previous?.error })
+                    : await sendEmail(user, templateName, data);
+                  options.sender
+                    ? await saveListAvailableEmailManualSentToResponsable(data, options.sender)
+                    : previous
+                    ? await saveListAvailableEmailAutomaticResentToResponsable(data)
+                    : await saveListAvailableEmailAutomaticSentToResponsable(data);
+                }
                 break;
 
               case CONTACT_TYPE.DELEGUE.toLowerCase():
-                console.log("delegue template type");
-                previous
-                  ? await resendEmail(previous.token, { retry: !!previous?.error })
-                  : await sendEmail(user, templateName, {
-                      relation,
-                      responsable,
-                      formateur,
-                      delegue,
-                    });
-                options.sender
-                  ? await saveListAvailableEmailManualSentToDelegue({ relation, delegue }, options.sender)
-                  : previous
-                  ? await saveListAvailableEmailAutomaticResentToDelegue({ relation, delegue })
-                  : await saveListAvailableEmailAutomaticSentToDelegue({ relation, delegue });
+                {
+                  const data = {
+                    relation,
+                    responsable: pick(responsable, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                    formateur: pick(formateur, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                    delegue: pick(delegue, ["_id", "username", "email"]),
+                  };
+
+                  previous
+                    ? await resendEmail(previous.token, { retry: !!previous?.error })
+                    : await sendEmail(user, templateName, data);
+                  options.sender
+                    ? await saveListAvailableEmailManualSentToDelegue(data, options.sender)
+                    : previous
+                    ? await saveListAvailableEmailAutomaticResentToDelegue(data)
+                    : await saveListAvailableEmailAutomaticSentToDelegue(data);
+                }
                 break;
 
               default:

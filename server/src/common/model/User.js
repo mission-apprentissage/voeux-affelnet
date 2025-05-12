@@ -86,6 +86,9 @@ const User = model(
                 },
               }),
             },
+            data: {
+              type: Schema.Types.Mixed,
+            },
           }),
         ],
       },

@@ -1,18 +1,4 @@
-import {
-  Box,
-  Text,
-  Heading,
-  Button,
-  useDisclosure,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
-  Alert,
-  Link,
-} from "@chakra-ui/react";
+import { Box, Text, Heading, Button, useDisclosure, Table, Thead, Tr, Th, Tbody, Td, Alert } from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
 
@@ -148,8 +134,8 @@ export const Delegue = ({ delegue, callback }) => {
                                   <Box mt={4}>
                                     {!relation.nombre_voeux_restant ? (
                                       <Box display={"inline-flex"} alignItems={"center"}>
-                                        <Link
-                                          variant="primary"
+                                        <Button
+                                          variant="blue-light"
                                           onClick={async () =>
                                             await downloadVoeux({
                                               responsable: relation.responsable,
@@ -159,15 +145,11 @@ export const Delegue = ({ delegue, callback }) => {
                                         >
                                           <DownloadIcon mr={2} />
                                           Télécharger à nouveau
-                                        </Link>
-                                        <Text ml={8} alignItems="center">
-                                          Liste téléchargée par vous ({delegue?.email}
-                                          ). &nbsp;
-                                        </Text>
+                                        </Button>
                                       </Box>
                                     ) : (
                                       <Button
-                                        variant="primary"
+                                        variant="blue"
                                         onClick={async () =>
                                           await downloadVoeux({
                                             responsable: relation.responsable,

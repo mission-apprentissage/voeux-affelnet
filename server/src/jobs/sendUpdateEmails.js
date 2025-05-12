@@ -13,6 +13,7 @@ const {
   saveUpdatedListAvailableEmailAutomaticResentToDelegue,
   saveUpdatedListAvailableEmailManualResentToDelegue,
 } = require("../common/actions/history/relation");
+const { pick } = require("lodash");
 
 async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
   const stats = { total: 0, sent: 0, resent: 0, failed: 0 };
@@ -98,13 +99,18 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
 
       const templateType = (delegue ? CONTACT_TYPE.DELEGUE : CONTACT_TYPE.RESPONSABLE).toLowerCase();
 
-      const templateName = `update_${templateType}`;
-      const previous = user.emails.find(
-        (e) =>
+      const templateName = `update_relation_${templateType}`;
+
+      const previous = user.emails?.find((e) => {
+        return (
           e.templateName === templateName &&
-          e.data.relation?._id === relation._id &&
-          e.data.relation?.last_date_voeux === relation.last_date_voeux
-      );
+          e.data?.relation?.etablissement_responsable.siret === relation.etablissement_responsable.siret &&
+          e.data?.relation?.etablissement_formateur.siret === relation.etablissement_formateur.siret &&
+          e.data?.relation?.nombre_voeux === relation.nombre_voeux &&
+          new Date(e.data?.relation?.last_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime()
+        );
+      });
+
       stats.total++;
 
       switch (true) {
@@ -112,76 +118,89 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
           try {
             switch (templateType) {
               case CONTACT_TYPE.RESPONSABLE.toLowerCase():
-                switch (!!previous) {
-                  case false:
-                    await sendEmail(user, templateName, {
-                      relation,
-                      responsable,
-                      formateur,
-                    });
-                    options.sender
-                      ? await saveUpdatedListAvailableEmailManualSentToResponsable(
-                          { relation, responsable, formateur },
-                          options.sender
-                        )
-                      : await saveUpdatedListAvailableEmailAutomaticSentToResponsable({
-                          relation,
-                          responsable,
-                          formateur,
-                        });
-                    break;
-                  case true:
-                    await resendEmail(previous.token);
-                    options.sender
-                      ? await saveUpdatedListAvailableEmailManualResentToResponsable(
-                          { relation, responsable, formateur },
-                          options.sender
-                        )
-                      : await saveUpdatedListAvailableEmailAutomaticResentToResponsable({
-                          relation,
-                          responsable,
-                          formateur,
-                        });
-                    break;
+                {
+                  const data = {
+                    relation,
+                    responsable: pick(responsable, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                    formateur: pick(formateur, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                  };
+                  switch (!!previous) {
+                    case false:
+                      await sendEmail(user, templateName, data);
+                      options.sender
+                        ? await saveUpdatedListAvailableEmailManualSentToResponsable(data, options.sender)
+                        : await saveUpdatedListAvailableEmailAutomaticSentToResponsable({
+                            relation,
+                            responsable,
+                            formateur,
+                          });
+                      break;
+                    case true:
+                      await resendEmail(previous.token);
+                      options.sender
+                        ? await saveUpdatedListAvailableEmailManualResentToResponsable(data, options.sender)
+                        : await saveUpdatedListAvailableEmailAutomaticResentToResponsable(data);
+                      break;
+                  }
                 }
+
                 break;
               case CONTACT_TYPE.DELEGUE.toLowerCase():
-                switch (!!previous) {
-                  case false:
-                    await sendEmail(user, templateName, {
-                      relation,
-                      responsable,
-                      formateur,
-                      delegue,
-                    });
-                    options.sender
-                      ? await saveUpdatedListAvailableEmailManualSentToDelegue(
-                          { relation, responsable, formateur, delegue },
-                          options.sender
-                        )
-                      : await saveUpdatedListAvailableEmailAutomaticSentToDelegue({
-                          relation,
-                          responsable,
-                          formateur,
-                          delegue,
-                        });
-                    break;
+                {
+                  const data = {
+                    relation,
+                    responsable: pick(responsable, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                    formateur: pick(formateur, [
+                      "_id",
+                      "siret",
+                      "username",
+                      "libelle_ville",
+                      "uai",
+                      "raison_sociale",
+                      "enseigne",
+                    ]),
+                    delegue: pick(delegue, ["_id", "username", "email"]),
+                  };
+                  switch (!!previous) {
+                    case false:
+                      await sendEmail(user, templateName, data);
+                      options.sender
+                        ? await saveUpdatedListAvailableEmailManualSentToDelegue(data, options.sender)
+                        : await saveUpdatedListAvailableEmailAutomaticSentToDelegue(data);
+                      break;
 
-                  case true:
-                    await resendEmail(previous.token);
-                    options.sender
-                      ? await saveUpdatedListAvailableEmailManualResentToDelegue(
-                          { relation, responsable, formateur, delegue },
-                          options.sender
-                        )
-                      : await saveUpdatedListAvailableEmailAutomaticResentToDelegue({
-                          relation,
-                          responsable,
-                          formateur,
-                          delegue,
-                        });
+                    case true:
+                      await resendEmail(previous.token);
+                      options.sender
+                        ? await saveUpdatedListAvailableEmailManualResentToDelegue(data, options.sender)
+                        : await saveUpdatedListAvailableEmailAutomaticResentToDelegue(data);
 
-                    break;
+                      break;
+                  }
                 }
                 break;
             }

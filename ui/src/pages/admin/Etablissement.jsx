@@ -86,7 +86,12 @@ const RelationContact = ({ relation, callback }) => {
                   Contact délégué habilité :<Text as="b"> {relation.delegue?.email}</Text>.
                 </Text>
                 <Box mt={3}>
-                  <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+                  <Button
+                    mr={3}
+                    variant={relation.nombre_voeux && !relation.nombre_voeux_restant ? "red-light" : "red"}
+                    display="inline"
+                    onClick={onOpenUpdateDelegationModal}
+                  >
                     <EditIcon mr={2} />
                     Modifier ou annuler la délégation
                   </Button>
@@ -109,7 +114,10 @@ const RelationContact = ({ relation, callback }) => {
           </>
         ) : (
           <>
-            <Button variant="blue" onClick={onOpenDelegationModal}>
+            <Button
+              variant={relation.nombre_voeux && !relation.nombre_voeux_restant ? "blue-light" : "blue"}
+              onClick={onOpenDelegationModal}
+            >
               <EditIcon mr={2} />
               Déléguer le droit de réception des listes de candidats.
             </Button>
@@ -163,12 +171,18 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
         <RelationStatut relation={relation} />{" "}
       </Text>
 
-      {!!relation?.nombre_voeux && (
-        <Button mt={4} variant="primary" onClick={async () => await downloadVoeux()}>
-          <DownloadIcon mr={2} />
-          Télécharger la liste
-        </Button>
-      )}
+      {!!relation?.nombre_voeux &&
+        (!!relation.nombre_voeux_restant ? (
+          <Button mt={4} variant="blue" onClick={async () => await downloadVoeux()}>
+            <DownloadIcon mr={2} />
+            Télécharger la liste
+          </Button>
+        ) : (
+          <Button mt={4} variant="blue-light" onClick={async () => await downloadVoeux()}>
+            <DownloadIcon mr={2} />
+            Télécharger la liste
+          </Button>
+        ))}
 
       {!![
         ...(relation?.histories ?? []),

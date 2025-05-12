@@ -101,7 +101,12 @@ const RelationContact = ({ relation, callback }) => {
                 </Text>
                 {!relation.nombre_voeux && (
                   <Box mt={3}>
-                    <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+                    <Button
+                      mr={3}
+                      variant={relation.nombre_voeux && !relation.nombre_voeux_restant ? "red-light" : "red"}
+                      display="inline"
+                      onClick={onOpenUpdateDelegationModal}
+                    >
                       <EditIcon mr={2} />
                       Modifier ou annuler la délégation
                     </Button>
@@ -125,7 +130,10 @@ const RelationContact = ({ relation, callback }) => {
           </>
         ) : (
           <>
-            <Button variant="blue" onClick={onOpenDelegationModal}>
+            <Button
+              variant={relation.nombre_voeux && !relation.nombre_voeux_restant ? "blue-light" : "blue"}
+              onClick={onOpenDelegationModal}
+            >
               <EditIcon mr={2} />
               Déléguer le droit de réception des listes de candidats.
             </Button>
@@ -540,17 +548,13 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
               <Box mt={4}>
                 {!relation.nombre_voeux_restant ? (
                   <Box display={"inline-flex"} alignItems={"center"}>
-                    <Link variant="primary" onClick={async () => await downloadVoeux()}>
+                    <Button variant="blue-light" onClick={async () => await downloadVoeux()}>
                       <DownloadIcon mr={2} />
                       Télécharger à nouveau
-                    </Link>
-                    <Text ml={8} alignItems="center">
-                      Liste téléchargée par vous ({responsable?.email}
-                      ). &nbsp;
-                    </Text>
+                    </Button>
                   </Box>
                 ) : (
-                  <Button variant="primary" onClick={async () => await downloadVoeux()}>
+                  <Button variant="blue" onClick={async () => await downloadVoeux()}>
                     <DownloadIcon mr={2} />
                     Télécharger la liste
                   </Button>

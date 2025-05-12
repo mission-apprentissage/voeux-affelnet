@@ -13,10 +13,12 @@ import {
 } from "@chakra-ui/react";
 import { useDownloadVoeux } from "../../../hooks/delegueHooks";
 import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
+import { useSearchParams } from "react-router-dom";
 
 export const DownloadVoeuxModal = ({ relation, callback, isOpen, onClose }) => {
   const responsable = relation?.responsable ?? relation?.etablissements_responsable;
   const formateur = relation?.formateur ?? relation?.etablissements_formateur;
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const downloadVoeux = useDownloadVoeux({
     responsable,
@@ -26,8 +28,15 @@ export const DownloadVoeuxModal = ({ relation, callback, isOpen, onClose }) => {
   const download = useCallback(async () => {
     await downloadVoeux();
     await callback?.();
+
+    if (searchParams.has("siret_responsable") && searchParams.has("siret_formateur")) {
+      searchParams.delete("siret_responsable");
+      searchParams.delete("siret_formateur");
+      setSearchParams(searchParams);
+    }
+
     await onClose();
-  }, [downloadVoeux, callback, onClose]);
+  }, [downloadVoeux, callback, onClose, searchParams, setSearchParams]);
 
   if (!responsable || !formateur) {
     return;

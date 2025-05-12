@@ -29,12 +29,18 @@ module.exports = {
     await db.collection("users").updateMany({ type: "Responsable" }, { $set: { type: USER_TYPE.ETABLISSEMENT } });
     await db
       .collection("users")
-      .updateMany({ type: USER_TYPE.ETABLISSEMENT }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
-
-    await db.collection("users").updateMany({ type: USER_TYPE.DELEGUE }, { $set: { statut: USER_STATUS.CONFIRME } });
+      .updateMany(
+        { type: USER_TYPE.ETABLISSEMENT },
+        { $set: { statut: USER_STATUS.EN_ATTENTE }, $unset: { password: 1 } }
+      );
 
     // Suppression des formateurs
     await db.collection("users").deleteMany({ type: "Formateur" });
+
+    // Réinitialisation de l'activation des comptes délégués
+    await db
+      .collection("users")
+      .updateMany({ type: USER_TYPE.DELEGUE }, { $set: { statut: USER_STATUS.CONFIRME }, $unset: { password: 1 } });
 
     // Suppression des délégations désactivées.
     await db.collection("users").updateMany(
