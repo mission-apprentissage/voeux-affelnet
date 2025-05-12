@@ -28,12 +28,13 @@ import { EyeFill, EyeOffFill } from "../theme/components/icons";
 function StatusErrorMessage({ error, username }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect") ? decodeURIComponent(searchParams.get("redirect")) : "/";
 
   useEffect(() => {
     if (error.statusCode === 400) {
-      navigate(`/login?alreadyActivated=true&username=${username}&redirect=${searchParams.get("redirect") ?? "/"}`);
+      navigate(`/login?alreadyActivated=true&username=${username}&redirect=${encodeURIComponent(redirect)}`);
     }
-  }, [error?.statusCode, username, navigate, searchParams]);
+  }, [error?.statusCode, username, navigate, redirect]);
 
   if (error.statusCode === 401) {
     return (
@@ -68,7 +69,7 @@ function ActivationPage() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const toggleShowPasswordConfirm = () => setShowPasswordConfirm(!showPasswordConfirm);
 
-  const redirect = decodeURIComponent(searchParams.get("redirect")) ?? "/";
+  const redirect = searchParams.get("redirect") ? decodeURIComponent(searchParams.get("redirect")) : "/";
 
   console.log("ActivationPage", { actionToken, redirect, data, loading, error });
 
@@ -78,14 +79,14 @@ function ActivationPage() {
         const { token } = await _post("/api/activation", { password: values.password, actionToken });
         setAuth(token);
 
-        navigate(searchParams.get("redirect") ?? "/");
+        navigate(redirect);
       } catch (e) {
         console.error(e);
 
         setMessage(<StatusErrorMessage error={e} username={username} />);
       }
     },
-    [actionToken, navigate, setAuth, username, searchParams]
+    [actionToken, navigate, setAuth, username, redirect]
   );
 
   const showForm = !loading && !message && !error;

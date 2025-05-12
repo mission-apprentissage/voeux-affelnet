@@ -21,7 +21,7 @@ const lastSentEmail = (data) => {
       lastSentDate: email.sendDates[email.sendDates.length - 1],
     }))
     .sort((a, b) => a.lastSentDate - b.lastSentDate);
-  return emails[data.emails.length - 1];
+  return emails[data.emails?.length - 1];
 };
 
 async function exportResponsables(output, options = {}) {

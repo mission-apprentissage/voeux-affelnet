@@ -85,7 +85,7 @@ const App = () => {
             path="/admin/*"
             element={
               <Suspense>
-                <RequireAuth allowed={["admin"]}>
+                <RequireAuth allowed={[USER_TYPE.ADMIN, USER_TYPE.ACADEMIE]}>
                   <AdminRoutes />
                 </RequireAuth>
               </Suspense>

@@ -63,13 +63,13 @@ export const ContactStatut = ({ user, short = false }) => {
       );
     }
 
-    case USER_STATUS.EN_ATTENTE === user.statut && !!user.emails.length: {
+    case USER_STATUS.EN_ATTENTE === user.statut && !!user.emails?.length: {
       return (
         <StatutBadge descriptions={descriptions} statut={CONTACT_STATUS.EN_ATTENTE_DE_CONFIRMATION} short={short} />
       );
     }
 
-    case USER_STATUS.EN_ATTENTE === user.statut && !user.emails.length: {
+    case USER_STATUS.EN_ATTENTE === user.statut && !user.emails?.length: {
       return <StatutBadge descriptions={descriptions} statut={CONTACT_STATUS.EN_ATTENTE_DE_DIFFUSION} short={short} />;
     }
 

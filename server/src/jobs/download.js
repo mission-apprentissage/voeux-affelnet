@@ -186,11 +186,11 @@ async function download(output, options = {}) {
                   return `⚠️ ${CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_NON_CREE}`;
                 }
 
-                case USER_STATUS.EN_ATTENTE === delegue.statut && !!delegue.emails.length: {
+                case USER_STATUS.EN_ATTENTE === delegue.statut && !!delegue.emails?.length: {
                   return `⚠️ ${CONTACT_STATUS.EN_ATTENTE_DE_CONFIRMATION}`;
                 }
 
-                case USER_STATUS.EN_ATTENTE === delegue.statut && !delegue.emails.length: {
+                case USER_STATUS.EN_ATTENTE === delegue.statut && !delegue.emails?.length: {
                   return `✅ ${CONTACT_STATUS.EN_ATTENTE_DE_DIFFUSION}`;
                 }
                 default: {
@@ -212,11 +212,11 @@ async function download(output, options = {}) {
                   return `⚠️ ${CONTACT_STATUS.EMAIL_CONFIRME_COMPTE_NON_CREE}`;
                 }
 
-                case USER_STATUS.EN_ATTENTE === responsable.statut && !!responsable.emails.length: {
+                case USER_STATUS.EN_ATTENTE === responsable.statut && !!responsable.emails?.length: {
                   return `⚠️ ${CONTACT_STATUS.EN_ATTENTE_DE_CONFIRMATION}`;
                 }
 
-                case USER_STATUS.EN_ATTENTE === responsable.statut && !responsable.emails.length: {
+                case USER_STATUS.EN_ATTENTE === responsable.statut && !responsable.emails?.length: {
                   return `✅ ${CONTACT_STATUS.EN_ATTENTE_DE_DIFFUSION}`;
                 }
                 default: {
