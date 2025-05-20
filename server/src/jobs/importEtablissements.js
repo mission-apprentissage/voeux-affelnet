@@ -105,7 +105,15 @@ async function importEtablissements(csv, options = {}) {
           const found = await Etablissement.findOne({ siret: siret }).lean();
           let organisme;
 
-          if (!found) {
+          if (
+            !found ||
+            !found.email ||
+            !found.enseigne ||
+            !found.raison_sociale ||
+            !found.libelle_ville ||
+            !found.adresse ||
+            !found.academie
+          ) {
             const organismes = (
               await catalogueApi.getEtablissements({ siret: siret, published: true }).catch(() => {
                 return null;
@@ -118,12 +126,12 @@ async function importEtablissements(csv, options = {}) {
               return;
             }
 
-            organisme = await catalogueApi.getEtablissement({ siret: siret, published: true }).catch(() => {
+            organisme = await catalogueApi.getEtablissement({ siret, published: true }).catch(() => {
               return null;
             });
 
             if (!organisme) {
-              organisme = await catalogueApi.getEtablissement({ siret: siret }).catch(() => {
+              organisme = await catalogueApi.getEtablissement({ siret }).catch(() => {
                 return null;
               });
             }

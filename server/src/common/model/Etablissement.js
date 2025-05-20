@@ -56,6 +56,7 @@ schema.index(
     siret: "text",
     uai: "text",
     raison_sociale: "text",
+    enseigne: "text",
     email: "text",
   },
   { default_language: "french" }
