@@ -305,7 +305,7 @@ export const AnomaliePage = () => {
 
                 <ListItem>
                   <Text mb={4}>
-                    Phase 3 : la troisième semaine de juin, diffusion par courriel des notifications de mise à jour des
+                    Phase 3 : la dernière semaine de juin, diffusion par courriel des notifications de mise à jour des
                     listes de candidats (le cas échéant). Les mises à jour peuvent correspondre à des suppressions,
                     ajouts ou modifications de candidatures.
                   </Text>

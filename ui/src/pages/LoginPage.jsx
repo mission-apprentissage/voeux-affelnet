@@ -234,7 +234,7 @@ function LoginPage() {
                 </Text>
 
                 <Text mb={4}>
-                  En cas de mise à jour de ces listes, une deuxième et dernière version sera diffusée la troisième semaine de juin.
+                  En cas de mise à jour de ces listes, une deuxième et dernière version sera diffusée la dernière semaine de juin.
                 </Text>
 
                 <Text mb={4}>
@@ -339,7 +339,7 @@ function LoginPage() {
                               Première semaine de juin: diffusion des listes de candidats sur l’adresse courriel
                               confirmée.
                             </ListItem>
-                            <ListItem>Troisième semaine de juin: diffusion des listes mises à jour.</ListItem>
+                            <ListItem>dernière semaine de juin: diffusion des listes mises à jour.</ListItem>
                           </UnorderedList>
                         </Text>
                       </AccordionPanel>
