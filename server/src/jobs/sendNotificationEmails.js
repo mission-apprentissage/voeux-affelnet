@@ -17,6 +17,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
   const type = options.type;
+  const resend = options.resend || false;
   const username = options.username;
   const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
 
@@ -112,6 +113,10 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
           new Date(e.data?.relation?.last_date_voeux).getTime() === new Date(relation.last_date_voeux).getTime()
         );
       });
+
+      if (previous && !previous.error && !resend) {
+        return;
+      }
 
       stats.total++;
 

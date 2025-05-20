@@ -248,6 +248,7 @@ cli
   .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
+  .option("--resend", "Permet le renvoi d'un rappel", false)
   .option("--force", "Ignore les règles d'envoi habituelles", false)
   .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
@@ -274,6 +275,7 @@ cli
   .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
+  .option("--resend", "Permet le renvoi d'un rappel", false)
   .option("--force", "Ignore les règles d'envoi habituelles", false)
   .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
@@ -300,6 +302,7 @@ cli
   .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
+  .option("--resend", "Permet le renvoi d'un rappel", false)
   .option("--force", "Ignore les règles d'envoi habituelles", false)
   .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
@@ -327,7 +330,7 @@ cli
   .option("--type <type>", "Permet de n'envoyer les emails qu'à un seul type d'utilisateur")
   .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
-  .option("--force", "Ignore les règles d'envoi habituelles")
+  .option("--resend", "Permet le renvoi d'un rappel", false)
   .option("--force", "Ignore les règles d'envoi habituelles", false)
   .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {

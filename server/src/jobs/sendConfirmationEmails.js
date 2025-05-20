@@ -167,6 +167,7 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
   const limit = options.limit || Number.MAX_SAFE_INTEGER;
   const skip = options.skip || 0;
   const type = options.type;
+  const resend = options.resend || false;
   const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
 
   const query = {
@@ -227,6 +228,10 @@ async function sendConfirmationEmails({ sendEmail, resendEmail }, options = {}) 
 
       const templateName = `confirmation_${(templateType?.toLowerCase() || "user").toLowerCase()}`;
       const previous = user.emails.find((e) => e.templateName === templateName && e.data?.email === user.email);
+
+      if (previous && !previous.error && !resend) {
+        return;
+      }
 
       stats.total++;
 
