@@ -14,12 +14,10 @@ export const RelationEmail = ({ relation }) => {
       {isDiffusionAutorisee ? (
         <Text display={"inline"} as="b">
           {relation?.delegue?.email ?? "Information manquante"}
-          {/* <ContactDelegueTag /> */}
         </Text>
       ) : (
         <Text display={"inline"} as="b">
           {relation?.responsable?.email ?? "Information manquante"}
-          {/* <ContactResponsableTag /> */}
         </Text>
       )}
     </>

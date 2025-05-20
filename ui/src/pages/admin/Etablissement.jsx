@@ -22,7 +22,7 @@ import {
 import { Page } from "../../common/components/layout/Page";
 import { _get } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
-import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
+import { EtablissementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { UpdateResponsableEmailModal } from "../../common/components/admin/modals/UpdateResponsableEmailModal";
 import { DelegationModal } from "../../common/components/admin/modals/DelegationModal";
 import { UpdateDelegationModal } from "../../common/components/admin/modals/UpdateDelegationModal";
@@ -152,7 +152,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
       {!isResponsableFormateur && (
         <>
           <Heading as="h4" size="md">
-            <EtablisssementRaisonSociale etablissement={relation.formateur} />
+            <EtablissementRaisonSociale etablissement={relation.formateur} />
           </Heading>
 
           <Text mt={4}>
@@ -335,7 +335,7 @@ export const Etablissement = () => {
 
   const title = (
     <>
-      <EtablisssementRaisonSociale etablissement={etablissement} />
+      <EtablissementRaisonSociale etablissement={etablissement} />
     </>
   );
 

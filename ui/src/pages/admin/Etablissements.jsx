@@ -33,7 +33,12 @@ import { ContactStatut } from "../../common/components/admin/fields/ContactStatu
 import { RelationStatut } from "../../common/components/admin/fields/RelationStatut";
 import { RelationsStatut } from "../../common/components/admin/fields/RelationsStatut";
 import { FileDownloadLine } from "../../theme/components/icons/FileDownloadLine";
-import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
+import {
+  EtablissementRaisonSociale,
+  EtablissementLibelle,
+} from "../../common/components/etablissement/fields/EtablissementLibelle";
+import { StatutBadge } from "../../common/components/StatutBadge";
+import { WarningFill } from "../../theme/components/icons";
 
 export const ListRelations = ({ relations, delegation, limit }) => {
   const [showMore, setShowMore] = useState(false);
@@ -51,7 +56,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
         {relations.slice(0, limit).map((relation, index) => (
           <ListItem mt={2} key={index}>
             <Text display="inline">
-              <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+              <EtablissementRaisonSociale etablissement={relation.formateur} />,{" "}
               {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret : {relation.formateur?.siret ?? "Inconnu"}{" "}
               - UAI : {relation.formateur?.uai ?? "Inconnu"}
             </Text>{" "}
@@ -95,7 +100,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
             {relations.slice(limit, relations.length).map((relation, index) => (
               <ListItem mt={2} key={index}>
                 <Text display="inline">
-                  <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+                  <EtablissementRaisonSociale etablissement={relation.formateur} />,{" "}
                   {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret :{" "}
                   {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
                   {!!relation.nombre_voeux && (
@@ -130,16 +135,40 @@ export const ListRelations = ({ relations, delegation, limit }) => {
         {relations.slice(0, limit).map((relation, index) => (
           <ListItem mt={2} key={index}>
             <Text display="inline">
-              <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+              <EtablissementRaisonSociale etablissement={relation.formateur} />,{" "}
               {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret : {relation.formateur?.siret ?? "Inconnu"}{" "}
               - UAI : {relation.formateur?.uai ?? "Inconnu"}
             </Text>
 
             <Text>
               Délégué : {relation?.delegue?.email}{" "}
-              {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
+              {relation?.delegue?.relations?.active ? (
                 <>
-                  - <ContactStatut user={relation?.delegue} short />
+                  {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
+                    <>
+                      - <ContactStatut user={relation?.delegue} short />
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  -{" "}
+                  <StatutBadge
+                    statut="default"
+                    short
+                    descriptions={
+                      new Map([
+                        [
+                          "default",
+                          {
+                            icon: <WarningFill mr="2" color="red" />,
+                            long: `Délégué en attente de confirmation`,
+                            short: "Délégué en attente de confirmation",
+                          },
+                        ],
+                      ])
+                    }
+                  />
                 </>
               )}{" "}
               {!!relation.nombre_voeux && (
@@ -175,16 +204,40 @@ export const ListRelations = ({ relations, delegation, limit }) => {
             {relations.slice(limit, relations.length).map((relation, index) => (
               <ListItem mt={2} key={index}>
                 <Text display="inline">
-                  <EtablisssementRaisonSociale etablissement={relation.formateur} />,{" "}
+                  <EtablissementRaisonSociale etablissement={relation.formateur} />,{" "}
                   {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret :{" "}
                   {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
                 </Text>
 
                 <Text>
                   Délégué : {relation?.delegue?.email}{" "}
-                  {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
+                  {relation?.delegue?.relations?.active ? (
                     <>
-                      - <ContactStatut user={relation?.delegue} short />
+                      {USER_STATUS.ACTIVE !== relation?.delegue?.statut && (
+                        <>
+                          - <ContactStatut user={relation?.delegue} short />
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      -{" "}
+                      <StatutBadge
+                        statut="default"
+                        short
+                        descriptions={
+                          new Map([
+                            [
+                              "default",
+                              {
+                                icon: <WarningFill mr="2" color="red" />,
+                                long: `Délégué en attente de confirmation`,
+                                short: "Délégué en attente de confirmation",
+                              },
+                            ],
+                          ])
+                        }
+                      />
                     </>
                   )}{" "}
                   {!!relation.nombre_voeux && (
@@ -453,7 +506,7 @@ export const Etablissements = () => {
                     <Td verticalAlign={"top"}>
                       <Box lineHeight={6}>
                         <Text as="b">
-                          <EtablisssementRaisonSociale etablissement={etablissement} />,{" "}
+                          <EtablissementRaisonSociale etablissement={etablissement} />,{" "}
                           {etablissement.libelle_ville ?? "Ville inconnue"} - Siret : {etablissement.siret ?? "Inconnu"}{" "}
                           - UAI : {etablissement.uai ?? "Inconnu"}
                         </Text>

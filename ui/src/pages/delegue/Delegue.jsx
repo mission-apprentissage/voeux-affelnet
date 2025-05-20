@@ -3,7 +3,7 @@ import { Box, Text, Heading, Button, useDisclosure, Table, Thead, Tr, Th, Tbody,
 import { Page } from "../../common/components/layout/Page";
 
 import { Breadcrumb } from "../../common/components/Breadcrumb";
-import { EtablisssementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
+import { EtablissementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { RelationStatut } from "../../common/components/delegue/fields/RelationStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/delegueHooks";
@@ -82,7 +82,7 @@ export const Delegue = ({ delegue, callback }) => {
             <Box key={siret} my={12}>
               <Alert status="info" display={"block"}>
                 <Text>
-                  Organisme responsable : <EtablisssementRaisonSociale etablissement={responsable} />
+                  Organisme responsable : <EtablissementRaisonSociale etablissement={responsable} />
                 </Text>
 
                 <Text mt={2}>
@@ -117,7 +117,7 @@ export const Delegue = ({ delegue, callback }) => {
                               {/* <RelationFormateur relation={relation} callback={reload} /> */}
                               <Box>
                                 <Heading as="h4" size="md">
-                                  <EtablisssementRaisonSociale etablissement={relation.formateur} />
+                                  <EtablissementRaisonSociale etablissement={relation.formateur} />
                                 </Heading>
                                 <Text mt={4}>
                                   Adresse : {relation.formateur?.adresse} - SIRET :{" "}

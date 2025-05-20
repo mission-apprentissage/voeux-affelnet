@@ -35,7 +35,7 @@ import { _delete, _get, _put } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import {
   EtablissementLibelle,
-  EtablisssementRaisonSociale,
+  EtablissementRaisonSociale,
 } from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { UpdateResponsableEmailModal } from "../../common/components/responsable/modals/UpdateResponsableEmailModal";
 import { DelegationModal } from "../../common/components/responsable/modals/DelegationModal";
@@ -581,7 +581,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
             .
           </Text>
           <Text mt={2}>
-            Une mise à jour pourra être communiquée la troisième semaine de juin, pour prendre les éventuels ajouts. Une
+            Une mise à jour pourra être communiquée la dernière semaine de juin, pour prendre les éventuels ajouts. Une
             notification courriel sera alors envoyée.
           </Text>
         </Box>
@@ -755,7 +755,7 @@ export const Responsable = () => {
 
   const title = (
     <>
-      <EtablisssementRaisonSociale etablissement={etablissement} />
+      <EtablissementRaisonSociale etablissement={etablissement} />
     </>
   );
 

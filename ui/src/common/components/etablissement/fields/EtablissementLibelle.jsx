@@ -1,6 +1,6 @@
 import { Text } from "@chakra-ui/react";
 
-export const EtablisssementRaisonSociale = ({ etablissement }) => {
+export const EtablissementRaisonSociale = ({ etablissement }) => {
   if (!etablissement) return <></>;
   return (
     <Text display={"inline"}>
@@ -15,7 +15,7 @@ export const EtablissementLibelle = ({ etablissement }) => {
   if (!etablissement) return <></>;
   return (
     <Text display={"inline"}>
-      <EtablisssementRaisonSociale etablissement={etablissement} />, {etablissement.libelle_ville ?? "Ville inconnue"}{" "}
+      <EtablissementRaisonSociale etablissement={etablissement} />, {etablissement.libelle_ville ?? "Ville inconnue"}{" "}
       (Siret : {etablissement.siret ?? "Inconnu"} - UAI : {etablissement.uai ?? "Inconnu"})
     </Text>
   );
