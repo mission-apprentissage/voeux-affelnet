@@ -21,6 +21,7 @@ const exportResponsables = require("./jobs/exportResponsables");
 const buildRelationCsv = require("./jobs/buildRelationCsv");
 const { createAdmin } = require("./jobs/createAdmin");
 const { createAcademie } = require("./jobs/createAcademie");
+const { removeAcademie } = require("./jobs/removeAcademie");
 const { injectDataset } = require("../tests/dataset/injectDataset");
 const { Etablissement } = require("./common/model");
 const CatalogueApi = require("./common/api/CatalogueApi");
@@ -390,6 +391,15 @@ cli
   .action((username, email, academie) => {
     runScript(() => {
       return createAcademie(username, email, academie);
+    });
+  });
+
+cli
+  .command("removeAcademie")
+  .argument("<username>", "Le nom de l'utilisateur")
+  .action((username) => {
+    runScript(() => {
+      return removeAcademie(username);
     });
   });
 
