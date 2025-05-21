@@ -24,7 +24,7 @@ describe("passwordRoutes", () => {
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "user1@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
+    assert.strictEqual(emailsSent[0].from, "candidats-apprentissage@education.gouv.fr");
     assert.strictEqual(emailsSent[0].subject, "Réinitialisation du mot de passe (lien valable 2 heures)");
   });
 

@@ -15,7 +15,7 @@ describe("emails", () => {
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
+    assert.strictEqual(emailsSent[0].from, "candidats-apprentissage@education.gouv.fr");
     assert.strictEqual(
       emailsSent[0].subject,
       "Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
@@ -50,7 +50,7 @@ describe("emails", () => {
     const emailsSent = getEmailsSent();
     assert.strictEqual(emailsSent.length, 1);
     assert.strictEqual(emailsSent[0].to, "test@apprentissage.beta.gouv.fr");
-    assert.strictEqual(emailsSent[0].from, "voeux-affelnet@apprentissage.beta.gouv.fr");
+    assert.strictEqual(emailsSent[0].from, "candidats-apprentissage@education.gouv.fr");
     assert.strictEqual(
       emailsSent[0].subject,
       "[Rappel] Diffusion des listes de candidats Affelnet : activation de votre compte administrateur"
