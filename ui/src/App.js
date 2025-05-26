@@ -17,6 +17,7 @@ const ResponsableRoutes = lazy(() => import("./pages/responsable/Routes"));
 const DelegueRoutes = lazy(() => import("./pages/delegue/Routes"));
 const AdminRoutes = lazy(() => import("./pages/admin/Routes"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
+const LogoutPage = lazy(() => import("./pages/LogoutPage"));
 const ResetPasswordPage = lazy(() => import("./pages/password/ResetPasswordPage"));
 const ConfirmationPage = lazy(() => import("./pages/ConfirmationPage"));
 const AnomaliePage = lazy(() => import("./pages/AnomaliePage"));
@@ -186,6 +187,16 @@ const App = () => {
             element={
               <Suspense>
                 <LoginPage />
+              </Suspense>
+            }
+          />
+
+          <Route
+            exact
+            path="/logout"
+            element={
+              <Suspense>
+                <LogoutPage />
               </Suspense>
             }
           />
