@@ -141,9 +141,6 @@ async function download(output, options = {}) {
 
         "Siret de l'établissement formateur": ({ formateur }) => formateur?.siret,
 
-        "Url du formateur": ({ formateur }) =>
-          `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/etablissement/${formateur?.siret}`,
-
         "Raison sociale de l’établissement formateur": ({ formateur }) => formateur?.raison_sociale,
 
         "Localité formateur": async ({ formateur }) => {
