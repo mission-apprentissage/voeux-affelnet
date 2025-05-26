@@ -266,7 +266,7 @@ const computeOrganismesStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    totalDelegue: Relation.aggregate([
+    totalDelegues: Relation.aggregate([
       {
         $match: {
           ...relationEtablissementsFilter,
@@ -341,7 +341,7 @@ const computeOrganismesStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-    totalDelegueActivated: Relation.aggregate([
+    totalDeleguesActivated: Relation.aggregate([
       {
         $match: {
           ...relationEtablissementsFilter,
@@ -374,7 +374,7 @@ const computeOrganismesStats = async (filter = {}) => {
                   $and: [
                     { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
                     { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
-                    //{ $eq: ["$relations.active", true] },
+                    { $eq: ["$relations.active", true] },
                   ],
                 },
               },
@@ -421,6 +421,156 @@ const computeOrganismesStats = async (filter = {}) => {
       },
     ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
+    totalDelegations: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: Delegue.collection.name,
+          let: {
+            siret_responsable: "$etablissement_responsable.siret",
+            siret_formateur: "$etablissement_formateur.siret",
+          },
+          pipeline: [
+            {
+              $match: {
+                type: USER_TYPE.DELEGUE,
+              },
+            },
+
+            {
+              $unwind: {
+                path: "$relations",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                    // { $eq: ["$relations.active", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                root: {
+                  $first: "$$ROOT",
+                },
+              },
+            },
+            {
+              $replaceRoot: {
+                newRoot: "$root",
+              },
+            },
+            {
+              $project: { password: 0 },
+            },
+          ],
+          as: "delegue",
+        },
+      },
+      {
+        $unwind: {
+          path: "$delegue",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+    totalDelegationsActivated: Relation.aggregate([
+      {
+        $match: {
+          ...relationEtablissementsFilter,
+          ...relationAcademieFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: Delegue.collection.name,
+          let: {
+            siret_responsable: "$etablissement_responsable.siret",
+            siret_formateur: "$etablissement_formateur.siret",
+          },
+          pipeline: [
+            {
+              $match: {
+                type: USER_TYPE.DELEGUE,
+              },
+            },
+
+            {
+              $unwind: {
+                path: "$relations",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
+                    { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
+                    { $eq: ["$relations.active", true] },
+                  ],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id",
+                root: {
+                  $first: "$$ROOT",
+                },
+              },
+            },
+            {
+              $replaceRoot: {
+                newRoot: "$root",
+              },
+            },
+            {
+              $project: { password: 0 },
+            },
+          ],
+          as: "delegue",
+        },
+      },
+      {
+        $unwind: {
+          path: "$delegue",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: 1,
+          },
+        },
+      },
+    ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
     totalFormateur: Relation.aggregate([
       {
         $match: {
@@ -455,6 +605,7 @@ const computeOrganismesStats = async (filter = {}) => {
         $lookup: {
           from: Delegue.collection.name,
           let: {
+            siret_responsable: "$etablissement_responsable.siret",
             siret_formateur: "$etablissement_formateur.siret",
           },
           pipeline: [
@@ -474,6 +625,7 @@ const computeOrganismesStats = async (filter = {}) => {
               $match: {
                 $expr: {
                   $and: [
+                    { $eq: ["$relations.etablissement_responsable.siret", "$$siret_responsable"] },
                     { $eq: ["$relations.etablissement_formateur.siret", "$$siret_formateur"] },
                     //{ $eq: ["$relations.active", true] },
                   ],

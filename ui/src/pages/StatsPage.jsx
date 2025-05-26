@@ -25,7 +25,7 @@ import { Breadcrumb } from "../common/components/Breadcrumb";
 function StatsPage() {
   const [academies] = useGet("/api/constant/academies", []);
 
-  const [globalStats, globalStatsLoading, , setGlobalStats] = useFetch(`/api/stats/computeStats/now`, null);
+  const [globalStats, globalStatsLoading] = useFetch(`/api/stats/computeStats/now`, null);
   const [organismes, setOrganismes] = useState(undefined);
   const [voeux, setVoeux] = useState(undefined);
   const [progresses, setProgresses] = useState(undefined);
@@ -188,7 +188,7 @@ function StatsPage() {
               <StatGroup mb={4}>
                 <Stat mr={2}>
                   <StatLabel>Nombre de personne ayant reçu une délégation</StatLabel>
-                  <StatNumber>{organismes?.totalDelegue?.toLocaleString()}</StatNumber>
+                  <StatNumber>{organismes?.totalDelegues?.toLocaleString()}</StatNumber>
                 </Stat>
 
                 <Stat mr={2}>
@@ -197,14 +197,14 @@ function StatsPage() {
                     Nombre de personne ayant reçu une délégation mais n'ayant pas encore créé leur mot de passe
                   </StatLabel>
                   <StatNumber>
-                    {organismes?.totalDelegue - organismes?.totalDelegueActivated?.toLocaleString()}
+                    {organismes?.totalDelegues - organismes?.totalDelegueActivated?.toLocaleString()}
                   </StatNumber>
                   <StatHelpText>
                     (soit{" "}
                     {
                       +(
-                        ((organismes?.totalDelegue - organismes?.totalDelegueActivated) * 100) /
-                        organismes?.totalDelegue
+                        ((organismes?.totalDelegues - organismes?.totalDeleguesActivated) * 100) /
+                        organismes?.totalDelegues
                       ).toFixed(2)
                     }
                     % des personnes déléguées)
@@ -245,7 +245,17 @@ function StatsPage() {
                   <StatNumber>{organismes?.totalFormateurAvecDelegation?.toLocaleString()}</StatNumber>
                 </Stat>
 
-                <Stat mr={2}></Stat>
+                <Stat mr={2}>
+                  <StatLabel>Nombre de délégations</StatLabel>
+                  <StatNumber>{organismes?.totalDelegations}</StatNumber>
+
+                  <StatHelpText>
+                    Dont {organismes?.totalDelegues} délégués uniques
+                    <br />
+                    {+((organismes?.totalDelegationsActivated * 100) / organismes?.totalDelegations).toFixed(2)}% de
+                    délégations confirmées
+                  </StatHelpText>
+                </Stat>
               </StatGroup>
             </Box>
             <Divider m={8} />
