@@ -331,15 +331,15 @@ function LoginPage() {
                         <Text mb={4}>
                           <UnorderedList>
                             <ListItem>
-                              Mi-mai: une première campagne sera diffusée par courriel pour identifier les directeurs
-                              d’organismes responsables, confirmer l’adresse email de réception, créer le mot de passe
-                              de connexion (les mots de passe créés en 2024 ne seront pas utilisables).
+                              Dernière semaine de mai: une première campagne sera diffusée par courriel pour identifier
+                              les directeurs d’organismes responsables, confirmer l’adresse email de réception, créer le
+                              mot de passe de connexion (les mots de passe créés en 2024 ne seront pas utilisables).
                             </ListItem>
                             <ListItem>
                               Première semaine de juin: diffusion des listes de candidats sur l’adresse courriel
                               confirmée.
                             </ListItem>
-                            <ListItem>dernière semaine de juin: diffusion des listes mises à jour.</ListItem>
+                            <ListItem>Dernière semaine de juin: diffusion des listes mises à jour.</ListItem>
                           </UnorderedList>
                         </Text>
                       </AccordionPanel>
