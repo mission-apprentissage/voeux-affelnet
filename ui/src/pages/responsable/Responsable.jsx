@@ -82,10 +82,15 @@ const RelationContact = ({ relation, callback }) => {
                     <CheckIcon mr={2} />
                     Confirmer la délégation
                   </Button>
-                  <Button mr={3} variant="red" display="inline" onClick={onOpenUpdateDelegationModal}>
+
+                  <Link mr={3} variant={"action"} display="inline" onClick={onOpenUpdateDelegationModal}>
                     <EditIcon mr={2} />
                     Modifier ou annuler la délégation
-                  </Button>
+                  </Link>
+                  {/* <Button mr={3} variant="red-light" display="inline" onClick={onOpenUpdateDelegationModal}>
+                    <EditIcon mr={2} />
+                    Modifier ou annuler la délégation
+                  </Button> */}
                 </Box>
                 <Box mt={3}>
                   <Text as="i">
@@ -101,15 +106,17 @@ const RelationContact = ({ relation, callback }) => {
                 </Text>
                 {!relation.nombre_voeux && (
                   <Box mt={3}>
-                    <Button
-                      mr={3}
-                      variant={relation.nombre_voeux && !relation.nombre_voeux_restant ? "red-light" : "red"}
-                      display="inline"
-                      onClick={onOpenUpdateDelegationModal}
-                    >
+                    {/* {relation.nombre_voeux && !relation.nombre_voeux_restant ? (
+                    <Button mr={3} variant={"red-light"} display="inline" onClick={onOpenUpdateDelegationModal}>
                       <EditIcon mr={2} />
                       Modifier ou annuler la délégation
                     </Button>
+                  ) : ( */}
+                    <Link mr={3} variant={"action"} display="inline" onClick={onOpenUpdateDelegationModal}>
+                      <EditIcon mr={2} />
+                      Modifier ou annuler la délégation
+                    </Link>
+                    {/* )} */}
                   </Box>
                 )}
               </>
