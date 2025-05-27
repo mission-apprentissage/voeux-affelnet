@@ -774,7 +774,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       await changeEmail(siret_responsable, email, { auteur: req.user.username });
 
-      await saveAccountEmailUpdatedByAdmin({ siret_responsable, email }, responsable.email, req.user);
+      await saveAccountEmailUpdatedByAdmin({ siret: siret_responsable, email }, responsable.email, req.user);
 
       await Etablissement.updateOne({ siret: siret_responsable }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
 
