@@ -8,11 +8,12 @@ const { sanitize } = require("../utils/sanitizeUtils");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
-  const { checkUsernameAndPassword, checkActionToken } = authMiddleware();
+  const { checkUsernameAndPassword, checkIsActive, checkActionToken } = authMiddleware();
 
   router.post(
     "/api/login",
     checkUsernameAndPassword(),
+    checkIsActive(),
     tryCatch(async (req, res) => {
       const user = req.user;
 

@@ -6,11 +6,12 @@ const { Strategy: LocalStrategy } = require("passport-local");
 const sha512Utils = require("../../common/utils/passwordUtils");
 const { getUser } = require("../../common/actions/getUser");
 const { isAdmin, isAcademie } = require("../../common/utils/aclUtils");
+const { USER_STATUS } = require("../../common/constants/UserStatus");
 
 const UAI_LOWERCASE_PATTERN = /([0-9]{7}[a-z]{1})/;
 
 module.exports = () => {
-  function checkUsernameAndPassword() {
+  const checkUsernameAndPassword = () => {
     passport.use(
       new LocalStrategy(
         {
@@ -36,9 +37,9 @@ module.exports = () => {
     );
 
     return passport.authenticate("local", { session: false, failWithError: true });
-  }
+  };
 
-  function jwtStrategy(strategyName, jwtStrategyOptions) {
+  const jwtStrategy = (strategyName, jwtStrategyOptions) => {
     passport.use(
       strategyName,
       new JwtStrategy({ ...jwtStrategyOptions, passReqToCallback: true }, (req, jwt_payload, done) => {
@@ -56,10 +57,21 @@ module.exports = () => {
     );
 
     return passport.authenticate(strategyName, { session: false, failWithError: true });
-  }
+  };
 
   return {
     checkUsernameAndPassword,
+    checkIsActive: () => {
+      return (req, res, next) => {
+        console.log("checkIsActive", req.user);
+        if (req.user.statut !== USER_STATUS.ACTIVE) {
+          req.errorMessage = `L'utilisateur ${req.user.username} n'a pas activé son compte ou a été désactivé`;
+          next(Boom.forbidden(req.errorMessage));
+        } else {
+          next();
+        }
+      };
+    },
     checkApiToken: () => {
       return jwtStrategy("passeport-jwt-api", {
         secretOrKey: config.auth.apiToken.jwtSecret,
