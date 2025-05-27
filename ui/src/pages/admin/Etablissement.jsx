@@ -87,7 +87,10 @@ const RelationContact = ({ relation, callback }) => {
             ) : (
               <>
                 <Text>
-                  Contact délégué habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+                  Contact délégué habilité :<Text as="b"> {relation.delegue?.email}</Text>.{" "}
+                </Text>
+                <Text mt={3}>
+                  <ContactStatut user={relation.delegue} />
                 </Text>
                 <Box mt={3}>
                   {/* {relation.nombre_voeux && !relation.nombre_voeux_restant ? (
@@ -379,7 +382,7 @@ export const Etablissement = () => {
             </Text>
           </Box>
 
-          <Box mt={2}>
+          <Box mt={3}>
             <Text>
               Contact responsable{" "}
               {(!!relationsOnlyResponsable.length ||
@@ -394,7 +397,7 @@ export const Etablissement = () => {
           </Box>
 
           {(etablissement.is_responsable || etablissement.is_responsable_formateur) && (
-            <Box mt={2}>
+            <Box mt={3}>
               {/* Statut de création de compte : */}
               <ContactStatut user={etablissement} />
             </Box>

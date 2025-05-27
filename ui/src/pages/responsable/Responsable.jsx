@@ -41,6 +41,7 @@ import { UpdateResponsableEmailModal } from "../../common/components/responsable
 import { DelegationModal } from "../../common/components/responsable/modals/DelegationModal";
 import { UpdateDelegationModal } from "../../common/components/responsable/modals/UpdateDelegationModal";
 import { RelationStatut } from "../../common/components/responsable/fields/RelationStatut";
+import { ContactStatut } from "../../common/components/responsable/fields/ContactStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/responsableHooks";
 import { ConfirmDelegationModal } from "../../common/components/responsable/modals/ConfirmDelegationModal";
@@ -103,6 +104,9 @@ const RelationContact = ({ relation, callback }) => {
               <>
                 <Text>
                   Contact délégué habilité :<Text as="b"> {relation.delegue?.email}</Text>.
+                </Text>
+                <Text mt={3}>
+                  <ContactStatut user={relation.delegue} />
                 </Text>
                 {!relation.nombre_voeux && (
                   <Box mt={3}>
