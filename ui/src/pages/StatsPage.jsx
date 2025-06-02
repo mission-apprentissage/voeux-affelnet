@@ -197,7 +197,7 @@ function StatsPage() {
                     Nombre de personne ayant reçu une délégation mais n'ayant pas encore créé leur mot de passe
                   </StatLabel>
                   <StatNumber>
-                    {organismes?.totalDelegues - organismes?.totalDelegueActivated?.toLocaleString()}
+                    {organismes?.totalDelegues - organismes?.totalDeleguesActivated?.toLocaleString()}
                   </StatNumber>
                   <StatHelpText>
                     (soit{" "}
