@@ -126,6 +126,8 @@ async function download(output, options = {}) {
 
         "Siret de l'établissement responsable": ({ responsable }) => responsable?.siret,
 
+        "UAI de l'établissement responsable": ({ responsable }) => responsable?.uai,
+
         "Url du responsable": ({ responsable }) =>
           `${process.env.VOEUX_AFFELNET_PUBLIC_URL}/admin/etablissement/${responsable?.siret}`,
 
@@ -140,6 +142,8 @@ async function download(output, options = {}) {
         "Académie de l’organisme formateur": ({ formateur }) => formateur?.academie?.nom,
 
         "Siret de l'établissement formateur": ({ formateur }) => formateur?.siret,
+
+        "UAI de l'établissement formateur": ({ formateur }) => formateur?.uai,
 
         "Raison sociale de l’établissement formateur": ({ formateur }) => formateur?.raison_sociale,
 
