@@ -4,6 +4,7 @@ const { academieSchema } = require("./schemas/academieSchema.js");
 
 const schema = new Schema({
   __v: { type: Number, select: false },
+
   academie: {
     required: true,
     type: academieSchema,
@@ -49,6 +50,10 @@ const schema = new Schema({
   formation: {
     required: true,
     type: nested({
+      affelnet_id: {
+        type: String,
+        index: true,
+      },
       code_affelnet: {
         type: String,
         index: true,

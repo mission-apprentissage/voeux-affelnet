@@ -229,6 +229,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
           email_2: line["Mail responsable 2"],
         },
         formation: {
+          affelnet_id,
           code_affelnet: code_offre,
           mef,
           code_formation_diplome,
@@ -286,8 +287,10 @@ const hasAnomaliesOnMandatoryFields = (anomalies) => {
         "formation.code_affelnet",
         "formation.code_formation_diplome",
         "etablissement_accueil.uai",
-        "etablissement_formateur.uai",
-        "etablissement_responsable.uai",
+        // "etablissement_formateur.uai",
+        // "etablissement_responsable.uai",
+        "etablissement_formateur.siret",
+        "etablissement_responsable.siret",
       ]
     ).length > 0
   );
