@@ -43,8 +43,8 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
           logger.warn(`Données écrasées pour la formation ${affelnet_id}`, {
             SIRET_UAI_GESTIONNAIRE: overwriteItem?.["Siret responsable"] ?? data["SIRET_UAI_GESTIONNAIRE"],
             SIRET_UAI_FORMATEUR: overwriteItem?.["Siret formateur"] ?? data["SIRET_UAI_FORMATEUR"],
-            UAI_RESPONSABLE: overwriteItem["UAI responsable"]?.toUpperCase(),
-            UAI_FORMATEUR: overwriteItem["UAI formateur"]?.toUpperCase(),
+            UAI_RESPONSABLE: overwriteItem?.["UAI responsable"]?.toUpperCase(),
+            UAI_FORMATEUR: overwriteItem?.["UAI formateur"]?.toUpperCase(),
           });
         }
       }
@@ -89,12 +89,21 @@ async function streamOffreDeFormation(options = {}) {
 
   // console.log({ affelnet, overwrite });
 
+  logger.error(`Affelnet_id;UAI accueil;UAI formateur;Siret formateur;UAI responsable;Siret responsable`);
+
   return compose(
     await fixOffreDeFormation(affelnet, overwrite),
 
     // Permet de n'avoir qu'une ligne pour une unique ensemble {uai_accueil / siret_responsable / cle_ministere_educatif}
     accumulateData(
       async (accumulator, data) => {
+        // logger.debug(data);
+        // const capacite = data["CAPACITE_AFFECTATION"];
+
+        // if (capacite === "0") {
+        //   return accumulator;
+        // }
+
         const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
 
         const cle_ministere_educatif = data["CLE_MINISTERE_EDUCATIF"]?.toUpperCase();
