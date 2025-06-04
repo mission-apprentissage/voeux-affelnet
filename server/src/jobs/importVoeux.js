@@ -308,6 +308,7 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
     created: 0,
     invalid: 0,
     failed: 0,
+    ignored: 0,
     deleted: 0,
     updated: 0,
   };
@@ -329,6 +330,8 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
           siret_formateur: data.etablissement_formateur.siret,
         });
 
+        console.log(stats.total, data.formation.affelnet_id);
+
         stats.total++;
         const anomalies = await validate(data);
         const query = {
@@ -337,11 +340,11 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
           "formation.code_affelnet": data.formation.code_affelnet,
         };
 
-        if ((await Formation.findOne({ id: data.formation.affelnet_id }).lean().capacite) === "0") {
+        if ((await Formation.findOne({ id: data.formation.affelnet_id }))?.capacite === "0") {
           logger.warn(`La candidature est affectée à une formation sans capacité d'affectation, on l'ignore`, {
             query,
           });
-          stats.invalid++;
+          stats.ignored++;
           return;
         }
 
@@ -409,7 +412,7 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
           stats.failed++;
         }
       },
-      { parallel: 10 }
+      { parallel: 50 }
     )
   );
 

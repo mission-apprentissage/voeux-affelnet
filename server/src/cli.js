@@ -224,7 +224,7 @@ cli
     runScript(async () => {
       if (!options.proceed) {
         logger.warn(
-          "ATTENTION : Les scripts importMefs et importFormations doivent être exécutés avant d'importer les candidatures."
+          "/!\\ ATTENTION /!\\ : Les scripts importMefs et importFormations doivent être exécutés avant d'importer les candidatures."
         );
         logger.warn(
           "Une fois fait, vous pouvez lancer cette commande avec l'option --proceed pour procéder à l'import des candidatures."
