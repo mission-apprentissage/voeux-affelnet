@@ -137,6 +137,10 @@ const schema = new Schema({
   integree_catalogue: {
     type: String,
   },
+
+  capacite: {
+    type: String,
+  },
 });
 
 const Formation = model("Formation", schema, "formations");

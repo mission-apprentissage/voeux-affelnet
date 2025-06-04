@@ -3,7 +3,7 @@ const Joi = require("@hapi/joi");
 const { isEmpty, uniqBy, pick } = require("lodash");
 const { intersection, sortedUniq, omit } = require("lodash");
 const { diff } = require("deep-object-diff");
-const { Voeu, Mef, Etablissement } = require("../common/model");
+const { Voeu, Mef, Etablissement, Formation } = require("../common/model");
 const logger = require("../common/logger");
 const { findAcademieByName } = require("../common/academies");
 const { deepOmitEmpty, flattenObject } = require("../common/utils/objectUtils");
@@ -53,6 +53,7 @@ const schema = Joi.object({
     email_2: Joi.string().email(),
   }),
   formation: Joi.object({
+    affelnet_id: Joi.string(),
     code_affelnet: Joi.string().required(),
     code_formation_diplome: Joi.string().pattern(cfdFormat),
     mef: Joi.string().pattern(mef10Format),
@@ -132,6 +133,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
     //   },
     // }),
     await fixExtractionVoeux(sourceCsv, overwriteCsv),
+
     transformData(async (line) => {
       // logger.info({ line });
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
@@ -276,6 +278,9 @@ const validate = async (data) => {
 };
 
 const hasAnomaliesOnMandatoryFields = (anomalies) => {
+  // if (anomalies.length !== 0) {
+  //   console.log("Anomalies detected:", anomalies);
+  // }
   return (
     intersection(
       anomalies.flatMap((d) => d.path),
@@ -326,12 +331,19 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
 
         stats.total++;
         const anomalies = await validate(data);
-
         const query = {
           "academie.code": data.academie?.code,
           "apprenant.ine": data.apprenant.ine,
           "formation.code_affelnet": data.formation.code_affelnet,
         };
+
+        if ((await Formation.findOne({ id: data.formation.affelnet_id }).lean().capacite) === "0") {
+          logger.warn(`La candidature est affectée à une formation sans capacité d'affectation, on l'ignore`, {
+            query,
+          });
+          stats.invalid++;
+          return;
+        }
 
         if (hasAnomaliesOnMandatoryFields(anomalies)) {
           logger.warn(`Voeu invalide`, {

@@ -127,13 +127,19 @@ cli
   });
 
 cli
-  .command("importFormations <formationCsv>")
-  .description("Importe les formations depuis le fichier transmis par Affelnet")
-  .action((formationCsv) => {
-    runScript(() => {
-      const input = formationCsv ? createReadStream(formationCsv) : null;
+  .command("importFormations")
+  .argument("<file>", "Le fichier CSV contentant les voeux ")
+  .argument("[overwriteFile]", "Le fichier CSV écrasant les offres de formation")
 
-      return importFormations(input);
+  .description("Importe les formations depuis le fichier transmis par Affelnet")
+  .action((file, overwriteFile) => {
+    runScript(() => {
+      // const input = file ? createReadStream(file) : null;
+
+      const inputFile = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
+      const inputOverwriteFile = overwriteFile ? createReadStream(overwriteFile, { encoding: "UTF-8" }) : null;
+
+      return importFormations(inputFile, inputOverwriteFile);
     });
   });
 
@@ -215,6 +221,15 @@ cli
   .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
   .action((file, overwriteFile, options) => {
     runScript(async () => {
+      if (!options.proceed) {
+        logger.warn(
+          "ATTENTION : Les scripts importMefs et importFormations doivent être exécutés avant d'importer les candidatures."
+        );
+        logger.warn(
+          "Une fois fait, vous pouvez lancer cette commande avec l'option --proceed pour procéder à l'import des candidatures."
+        );
+        return;
+      }
       const inputFile = file ? createReadStream(file, { encoding: "UTF-8" }) : null;
       const inputOverwriteFile = overwriteFile ? createReadStream(overwriteFile, { encoding: "UTF-8" }) : null;
 

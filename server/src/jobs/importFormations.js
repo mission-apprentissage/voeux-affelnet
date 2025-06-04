@@ -1,16 +1,14 @@
-const { oleoduc, filterData, writeData, transformData, compose } = require("oleoduc");
+const { oleoduc, filterData, writeData, transformData } = require("oleoduc");
 const Joi = require("@hapi/joi");
-
-const { omitEmpty } = require("../common/utils/objectUtils");
 const logger = require("../common/logger");
 const { Formation } = require("../common/model");
-const { parseCsv } = require("../common/utils/csvUtils");
+const { fixOffreDeFormation } = require("./utils/offreDeFormation");
 
 const schema = Joi.object({
   uai: Joi.string().required(),
 }).unknown();
 
-const transformFormateurStream = (data) => {
+const transformFormationStream = (data) => {
   return {
     id: `${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`,
     academie: data["ACADEMIE"],
@@ -54,18 +52,20 @@ const transformFormateurStream = (data) => {
     integree_catalogue: data["INTEGREE_CATALOGUE"],
     uai_formateur: data["UAI_FORMATEUR"],
     uai_responsable: data["UAI_RESPONSABLE"],
+    capacite: data["CAPACITE_AFFECTATION"],
   };
 };
 
-async function importFormations(formationsCsv) {
-  const stream = compose(
-    formationsCsv,
-    parseCsv({
-      on_record: (record) => omitEmpty(record),
-    }),
-    transformData(transformFormateurStream)
-  );
+const parseFormationsCsv = async (formationsCsv, overwriteCsv) => {
+  return oleoduc(
+    await fixOffreDeFormation(formationsCsv, overwriteCsv),
 
+    transformData(transformFormationStream),
+    { promisify: false }
+  );
+};
+
+async function importFormations(formationsCsv, overwriteCsv) {
   const stats = {
     total: 0,
     created: 0,
@@ -77,7 +77,8 @@ async function importFormations(formationsCsv) {
   await Formation.deleteMany({});
 
   await oleoduc(
-    stream,
+    await (async () => await parseFormationsCsv(formationsCsv, overwriteCsv))(),
+
     filterData(async (json) => {
       stats.total++;
       const { error } = schema.validate(json, { abortEarly: false });

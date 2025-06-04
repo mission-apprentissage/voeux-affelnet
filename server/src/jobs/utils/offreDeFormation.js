@@ -275,4 +275,4 @@ async function streamOffreDeFormation(options = {}) {
   );
 }
 
-module.exports = { streamOffreDeFormation };
+module.exports = { streamOffreDeFormation, fixOffreDeFormation };
