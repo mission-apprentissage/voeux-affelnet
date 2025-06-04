@@ -6,6 +6,8 @@ const { fixOffreDeFormation } = require("./utils/offreDeFormation");
 
 const schema = Joi.object({
   uai: Joi.string().required(),
+  academie: Joi.string().required(),
+  code_offre: Joi.string().required(),
 }).unknown();
 
 const transformFormationStream = (data) => {

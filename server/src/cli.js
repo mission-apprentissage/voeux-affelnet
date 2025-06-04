@@ -219,6 +219,7 @@ cli
   .argument("<file>", "Le fichier CSV contentant les voeux ")
   .argument("[overwriteFile]", "Le fichier CSV écrasant les offres de formation")
   .option("--refresh", "Permet de réimporter le fichier sans ajouter de date d'import", false)
+  .option("--proceed", "Procède à l'import des candidatures", false)
   .action((file, overwriteFile, options) => {
     runScript(async () => {
       if (!options.proceed) {
