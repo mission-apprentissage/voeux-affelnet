@@ -134,28 +134,36 @@ export const RelationHistoryItems = new Map([
     RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
+        email
+          ? `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité d'une liste de candidats.`
+          : `Action automatique – Une notification courriel a été renvoyée au contact délégué signifiant la disponibilité d'une liste de candidats.`,
     },
   ],
   [
     RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats.`,
+        email
+          ? `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats.`
+          : `Action automatique – Une notification courriel a été envoyée au contact délégué signifiant la disponibilité d'une liste de candidats.`,
     },
   ],
   [
     RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats.`,
+        email
+          ? ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats.`
+          : `${admin} a généré l'envoi d'un rappel au contact délégué d'une notification courriel signifiant la disponibilité d'une liste de candidats.`,
     },
   ],
   [
     RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats.`,
+        email
+          ? ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats.`
+          : `${admin} a généré l'envoi d'une notification courriel au contact délégué signifiant la disponibilité d'une liste de candidats.`,
     },
   ],
 
@@ -163,28 +171,36 @@ export const RelationHistoryItems = new Map([
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+        email
+          ? `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`
+          : `Action automatique – Une notification courriel a été envoyée au contact délégué signifiant la disponibilité d'une liste de candidats mise à jour.`,
     },
   ],
   [
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+        email
+          ? `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`
+          : `Action automatique – Une notification courriel a été envoyée au contact délégué signifiant la disponibilité d'une liste de candidats mise à jour.`,
     },
   ],
   [
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_DELEGUE,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`,
+        email
+          ? ` ${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`
+          : `${admin} a généré l'envoi d'un rappel au contact délégué d'une notification courriel signifiant la disponibilité d'une liste de candidats mise à jour.`,
     },
   ],
   [
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
     {
       component: ({ email, admin }) =>
-        ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`,
+        email
+          ? ` ${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité d'une liste de candidats mise à jour.`
+          : `${admin} a généré l'envoi d'une notification courriel au contact délégué signifiant la disponibilité d'une liste de candidats mise à jour.`,
     },
   ],
 
@@ -192,7 +208,9 @@ export const RelationHistoryItems = new Map([
     RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+        email
+          ? `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`
+          : `Action automatique – Une notification courriel a été envoyée au contact responsable signifiant la disponibilité de listes de candidats.`,
       // component: ({ email }) =>
       // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
     },
@@ -201,28 +219,36 @@ export const RelationHistoryItems = new Map([
     RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`,
+        email
+          ? `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats.`
+          : `Action automatique – Une notification courriel a été envoyée au contact responsable signifiant la disponibilité de listes de candidats.`,
     },
   ],
   [
     RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats.`,
+        email
+          ? `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats.`
+          : `${admin} a généré l'envoi d'un rappel au contact responsable d'une notification courriel signifiant la disponibilité de listes de candidats.`,
     },
   ],
   [
     RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats.`,
+        email
+          ? `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats.`
+          : `${admin} a généré l'envoi d'une notification courriel au contact responsable signifiant la disponibilité de listes de candidats.`,
     },
   ],
   [
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_RESPONSABLE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+        email
+          ? `Action automatique – Une notification courriel a été renvoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`
+          : `Action automatique – Une notification courriel a été renvoyée au contact responsable signifiant la disponibilité de listes de candidats mise à jour.`,
       // `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
     },
   ],
@@ -230,21 +256,27 @@ export const RelationHistoryItems = new Map([
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
     {
       component: ({ email }) =>
-        `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+        email
+          ? `Action automatique – Une notification courriel a été envoyée à ${email} signifiant la disponibilité de listes de candidats mise à jour.`
+          : `Action automatique – Une notification courriel a été envoyée au contact responsable signifiant la disponibilité de listes de candidats mise à jour.`,
     },
   ],
   [
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_RESENT_TO_RESPONSABLE,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats mise à jour.`,
+        email
+          ? `${admin} a généré l'envoi d'un rappel à ${email} d'une notification courriel signifiant la disponibilité de listes de candidats mise à jour.`
+          : `${admin} a généré l'envoi d'un rappel au contact responsable signifiant la disponibilité de listes de candidats mise à jour.`,
     },
   ],
   [
     RelationActions.UPDATED_LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats mise à jour.`,
+        email
+          ? `${admin} a généré l'envoi d'une notification courriel à ${email} signifiant la disponibilité de listes de candidats mise à jour.`
+          : `${admin} a généré l'envoi d'une notification courriel au contact responsable signifiant la disponibilité de listes de candidats mise à jour.`,
     },
   ],
 ]);
@@ -368,69 +400,93 @@ export const ResponsableActions = {
 export const ResponsableHistoryItems = new Map([
   [
     ResponsableActions.ACCOUNT_ACTIVATED,
-    { component: ({ email }) => `${email} a créé son mot de passe de connexion au service.` },
+    {
+      component: ({ email }) =>
+        email
+          ? `${email} a créé son mot de passe de connexion au service.`
+          : `Le contact responsable a créé son mot de passe de connexion au service.`,
+    },
   ],
   [
     ResponsableActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_RESENT,
     {
       component: ({ email }) =>
-        `Action automatique – ${email} a reçu un rappel de demande de création de mot de passe.`,
+        email
+          ? `Action automatique – ${email} a reçu un rappel de demande de création de mot de passe.`
+          : `Action automatique – Le contact responsable a reçu un rappel de demande de création de mot de passe.`,
       // component: ({ email }) => `Action automatique – ${email} a reçu une demande de création de mot de passe.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_ACTIVATION_EMAIL_AUTOMATIC_SENT,
     {
-      component: ({ email }) => `Action automatique – ${email} a reçu une demande de création de mot de passe.`,
+      component: ({ email }) =>
+        email
+          ? `Action automatique – ${email} a reçu une demande de création de mot de passe.`
+          : `Action automatique – Le contact responsable a reçu une demande de création de mot de passe.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_ACTIVATION_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} pour création de son mot de passe.`,
+        email
+          ? `${admin} a généré l'envoi d'un rappel à ${email} pour création de son mot de passe.`
+          : `${admin} a généré l'envoi d'un rappel au contact responsable pour création de son mot de passe.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_ACTIVATION_EMAIL_MANUAL_SENT,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un courriel à ${email} pour création de son mot de passe.`,
+        email
+          ? `${admin} a généré l'envoi d'un courriel à ${email} pour création de son mot de passe.`
+          : `${admin} a généré l'envoi d'un courriel au contact responsable pour création de son mot de passe.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_RESENT,
     {
       component: ({ email }) =>
-        `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
+        email
+          ? `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée à ${email}.`
+          : `Action automatique – Un rappel de demande de confirmation d'adresse courriel a été envoyée au contact responsable.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_CONFIRMATION_EMAIL_AUTOMATIC_SENT,
     {
       component: ({ email }) =>
-        `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à ${email}.`,
+        email
+          ? `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée à ${email}.`
+          : `Action automatique – Une demande de confirmation d'adresse courriel a été envoyée au contact responsable.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_CONFIRMATION_EMAIL_MANUAL_RESENT,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un rappel à ${email} pour confirmation de son adresse courriel.`,
+        email
+          ? `${admin} a généré l'envoi d'un rappel à ${email} pour confirmation de son adresse courriel.`
+          : `${admin} a généré l'envoi d'un rappel au contact responsable pour confirmation de son adresse courriel.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_CONFIRMATION_EMAIL_MANUAL_SENT,
     {
       component: ({ email, admin }) =>
-        `${admin} a généré l'envoi d'un courriel à ${email} pour confirmation de son adresse courriel.`,
+        email
+          ? `${admin} a généré l'envoi d'un courriel à ${email} pour confirmation de son adresse courriel.`
+          : `${admin} a généré l'envoi d'un courriel au contact responsable pour confirmation de son adresse courriel.`,
     },
   ],
   [
     ResponsableActions.ACCOUNT_CONFIRMED,
     {
       component: ({ email }) =>
-        `${email} a confirmé son adresse courriel. La personne est invitée à créer son mot de passe de connexion.`,
+        email
+          ? `${email} a confirmé son adresse courriel. La personne est invitée à créer son mot de passe de connexion.`
+          : `Le contact responsable a confirmé son adresse courriel. La personne est invitée à créer son mot de passe de connexion.`,
     },
   ],
   // [ResponsableActions.ACCOUNT_CREATED, { component: ({}) => `` }],

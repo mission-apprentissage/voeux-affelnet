@@ -40,7 +40,7 @@ function LogoutPage() {
           </Box>
 
           <Box mb={8}>
-            Si la redirection ne se fait pas automatiquement, cliquez sur le lien ci-dessous :
+            Si la redirection ne se fait pas automatiquement, veuillez suivre sur le lien ci-dessous :
             <br />
             <Link as={NavLink} variant="action" to={`/login`}>
               Page de connexion

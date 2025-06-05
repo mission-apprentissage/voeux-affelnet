@@ -97,12 +97,12 @@ async function streamOffreDeFormation(options = {}) {
     // Permet de n'avoir qu'une ligne pour une unique ensemble {uai_accueil / siret_responsable / cle_ministere_educatif}
     accumulateData(
       async (accumulator, data) => {
-        // logger.debug(data);
-        // const capacite = data["CAPACITE_AFFECTATION"];
+        logger.debug(data);
+        const capacite = data["CAPACITE_AFFECTATION"];
 
-        // if (capacite === "0") {
-        //   return accumulator;
-        // }
+        if (capacite === "0") {
+          return accumulator;
+        }
 
         const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
 

@@ -12,7 +12,6 @@ const saveUpdatedListAvailableEmailManualResentToResponsable = async ({ relation
             nombre_voeux: relation.nombre_voeux,
             nombre_voeux_restant: relation.nombre_voeux_restant,
             email: responsable.email,
-
             admin: admin.email,
           },
         },

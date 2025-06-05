@@ -46,7 +46,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
     // },
   };
 
-  await Relation.find(query, { _id: 0, histories: 0 })
+  await Relation.find(query, { histories: 0 })
     .lean()
     .skip(skip)
     .limit(limit)
@@ -132,6 +132,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
                       "_id",
                       "siret",
                       "username",
+                      "email",
                       "libelle_ville",
                       "uai",
                       "raison_sociale",
@@ -167,6 +168,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
                       "_id",
                       "siret",
                       "username",
+                      "email",
                       "libelle_ville",
                       "uai",
                       "raison_sociale",

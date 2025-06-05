@@ -1,6 +1,6 @@
 import { Flex, Icon, Text, Tooltip } from "@chakra-ui/react";
 import useAuth from "../../hooks/useAuth";
-import { isAcademie, isAdmin } from "../../utils/aclUtils";
+import { isAdmin } from "../../utils/aclUtils";
 
 export const HistoryItem = ({ history }) => {
   const [auth] = useAuth();

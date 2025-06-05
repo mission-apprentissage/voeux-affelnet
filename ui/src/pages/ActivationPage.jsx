@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import queryString from "query-string";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Field, Form, Formik } from "formik";
 import {
   Center,
@@ -121,7 +120,6 @@ function ActivationPage() {
                             return (
                               <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                                 <FormLabel name={field.name}>Mot de passe</FormLabel>
-                                {/* <Input {...field} id={field.name} type="password" placeholder="Votre mot de passe..." /> */}
 
                                 <InputGroup size="md">
                                   <Input
@@ -148,12 +146,6 @@ function ActivationPage() {
                             return (
                               <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                                 <FormLabel name={field.name}>Confirmation du mot de passe</FormLabel>
-                                {/* <Input
-                                  {...field}
-                                  id={field.name}
-                                  type="password"
-                                  placeholder="Confirmation de votre mot de passe..."
-                                /> */}
 
                                 <InputGroup size="md">
                                   <Input

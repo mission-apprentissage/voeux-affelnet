@@ -49,7 +49,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
     // },
   };
 
-  await Relation.find(query)
+  await Relation.find(query, { histories: 0 })
     .lean()
     .skip(skip)
     .limit(limit)
@@ -130,6 +130,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
                       "_id",
                       "siret",
                       "username",
+                      "email",
                       "libelle_ville",
                       "uai",
                       "raison_sociale",
@@ -150,14 +151,10 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
                       await sendEmail(user, templateName, data);
                       options.sender
                         ? await saveUpdatedListAvailableEmailManualSentToResponsable(data, options.sender)
-                        : await saveUpdatedListAvailableEmailAutomaticSentToResponsable({
-                            relation,
-                            responsable,
-                            formateur,
-                          });
+                        : await saveUpdatedListAvailableEmailAutomaticSentToResponsable(data);
                       break;
                     case true:
-                      await resendEmail(previous.token);
+                      await resendEmail(previous.token, { retry: !!previous?.error });
                       options.sender
                         ? await saveUpdatedListAvailableEmailManualResentToResponsable(data, options.sender)
                         : await saveUpdatedListAvailableEmailAutomaticResentToResponsable(data);
@@ -174,6 +171,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
                       "_id",
                       "siret",
                       "username",
+                      "email",
                       "libelle_ville",
                       "uai",
                       "raison_sociale",
@@ -199,7 +197,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
                       break;
 
                     case true:
-                      await resendEmail(previous.token);
+                      await resendEmail(previous.token, { retry: !!previous?.error });
                       options.sender
                         ? await saveUpdatedListAvailableEmailManualResentToDelegue(data, options.sender)
                         : await saveUpdatedListAvailableEmailAutomaticResentToDelegue(data);
