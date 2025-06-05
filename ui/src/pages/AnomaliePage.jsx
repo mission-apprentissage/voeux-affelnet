@@ -94,7 +94,10 @@ export const AnomaliePage = () => {
                 Si des relations sont manquantes :
                 <UnorderedList>
                   <ListItem>
-                    Faites un signalement à l’équipe en charge de la diffusion des listes de candidats , en indiquant :
+                    <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                      Faites un signalement à l’équipe en charge de la diffusion des listes de candidats
+                    </Link>
+                    , en indiquant :
                     <UnorderedList>
                       <ListItem>
                         Le code UAI figurant dans nos correspondances (code UAI qui vous sert d’identifiant de connexion
