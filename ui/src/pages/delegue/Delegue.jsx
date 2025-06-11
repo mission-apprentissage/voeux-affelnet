@@ -1,4 +1,18 @@
-import { Box, Text, Heading, Button, useDisclosure, Table, Thead, Tr, Th, Tbody, Td, Alert } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Heading,
+  Button,
+  useDisclosure,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+  Alert,
+  Spinner,
+} from "@chakra-ui/react";
 
 import { Page } from "../../common/components/layout/Page";
 
@@ -12,8 +26,50 @@ import { useEffect } from "react";
 import { DownloadVoeuxModal } from "../../common/components/delegue/modals/DownloadVoeuxModal";
 import { DownloadIcon } from "@chakra-ui/icons";
 
+const RelationBlock = ({ relation, delegue, callback }) => {
+  const { downloadVoeux, isDownloadingVoeux } = useDownloadVoeux({
+    responsable: relation.responsable,
+    formateur: relation.formateur,
+    callback,
+  });
+
+  return (
+    <Box>
+      <Heading as="h4" size="md">
+        <EtablissementRaisonSociale etablissement={relation.formateur} />
+      </Heading>
+      <Text mt={4}>
+        Adresse : {relation.formateur?.adresse} - SIRET : {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
+        {relation.formateur?.uai ?? "Inconnu"}
+      </Text>
+
+      <Text mt={8}>
+        {/* Statut de diffusion des listes : */}
+        <RelationStatut relation={relation} />
+      </Text>
+
+      {!!relation?.nombre_voeux && (
+        <Box mt={4}>
+          <Box display={"inline-flex"} alignItems={"center"}>
+            <Button
+              variant={!!relation.nombre_voeux_restant ? "blue" : "blue-light"}
+              disabled={isDownloadingVoeux}
+              onClick={async () => await downloadVoeux()}
+            >
+              {isDownloadingVoeux ? <Spinner size="sm" mr={2} /> : <DownloadIcon mr={2} />}
+              {!!relation.nombre_voeux_restant ? "Télécharger la liste" : "Télécharger à nouveau"}
+            </Button>
+          </Box>
+        </Box>
+      )}
+
+      <Box mt={8}>
+        <HistoryBlock relation={relation} delegue={delegue} />
+      </Box>
+    </Box>
+  );
+};
 export const Delegue = ({ delegue, callback }) => {
-  const downloadVoeux = useDownloadVoeux({ callback });
   const [searchParams] = useSearchParams();
 
   const siret_responsable = searchParams.get("siret_responsable");
@@ -114,60 +170,7 @@ export const Delegue = ({ delegue, callback }) => {
                         .map((relation, index) => (
                           <Tr key={relation?.formateur?.siret} borderBottom="2px solid" borderColor="gray.200">
                             <Td py={8}>
-                              {/* <RelationFormateur relation={relation} callback={reload} /> */}
-                              <Box>
-                                <Heading as="h4" size="md">
-                                  <EtablissementRaisonSociale etablissement={relation.formateur} />
-                                </Heading>
-                                <Text mt={4}>
-                                  Adresse : {relation.formateur?.adresse} - SIRET :{" "}
-                                  {relation.formateur?.siret ?? "Inconnu"} - UAI :{" "}
-                                  {relation.formateur?.uai ?? "Inconnu"}
-                                </Text>
-
-                                <Text mt={8}>
-                                  {/* Statut de diffusion des listes : */}
-                                  <RelationStatut relation={relation} />
-                                </Text>
-
-                                {!!relation?.nombre_voeux && (
-                                  <Box mt={4}>
-                                    {!relation.nombre_voeux_restant ? (
-                                      <Box display={"inline-flex"} alignItems={"center"}>
-                                        <Button
-                                          variant="blue-light"
-                                          onClick={async () =>
-                                            await downloadVoeux({
-                                              responsable: relation.responsable,
-                                              formateur: relation.formateur,
-                                            })
-                                          }
-                                        >
-                                          <DownloadIcon mr={2} />
-                                          Télécharger à nouveau
-                                        </Button>
-                                      </Box>
-                                    ) : (
-                                      <Button
-                                        variant="blue"
-                                        onClick={async () =>
-                                          await downloadVoeux({
-                                            responsable: relation.responsable,
-                                            formateur: relation.formateur,
-                                          })
-                                        }
-                                      >
-                                        <DownloadIcon mr={2} />
-                                        Télécharger la liste
-                                      </Button>
-                                    )}
-                                  </Box>
-                                )}
-
-                                <Box mt={8}>
-                                  <HistoryBlock relation={relation} delegue={delegue} />
-                                </Box>
-                              </Box>
+                              <RelationBlock relation={relation} delegue={delegue} callback={callback} />
                             </Td>
                           </Tr>
                         ))}

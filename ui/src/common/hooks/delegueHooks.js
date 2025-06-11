@@ -1,23 +1,31 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useToast } from "@chakra-ui/react";
 import { getHeaders } from "../httpClient";
 import { downloadCSV } from "../utils/downloadUtils";
 
 export const useDownloadVoeux = ({ responsable: initialResponsable, formateur: initialFormateur, callback }) => {
   const toast = useToast();
+  const [isDownloadingVoeux, setIsDownloadingVoeux] = useState(false);
 
-  return useCallback(
+  const downloadVoeux = useCallback(
     async ({ responsable, formateur } = { responsable: initialResponsable, formateur: initialFormateur }) => {
-      const filename = `${responsable?.siret}-${formateur?.siret}.csv`;
-
-      let content;
-
       try {
-        content = await fetch(`/api/delegue/${responsable?.siret}/${formateur?.siret}/voeux`, {
+        setIsDownloadingVoeux(true);
+
+        const filename = `${responsable?.siret}-${formateur?.siret}.csv`;
+
+        const content = await fetch(`/api/delegue/${responsable?.siret}/${formateur?.siret}/voeux`, {
           method: "GET",
           headers: getHeaders(),
         });
+
+        downloadCSV(filename, await content.blob());
+
+        setIsDownloadingVoeux(false);
+
+        await callback?.();
       } catch (error) {
+        setIsDownloadingVoeux(false);
         toast({
           title: "Erreur",
           description: "Une erreur est survenue lors du téléchargement du fichier.",
@@ -27,11 +35,13 @@ export const useDownloadVoeux = ({ responsable: initialResponsable, formateur: i
         });
         return;
       }
-
-      downloadCSV(filename, await content.blob());
-
-      await callback?.();
     },
     [initialResponsable, initialFormateur, callback, toast]
   );
+
+  return {
+    isDownloadingVoeux,
+    // setIsDownloadingVoeux,
+    downloadVoeux,
+  };
 };

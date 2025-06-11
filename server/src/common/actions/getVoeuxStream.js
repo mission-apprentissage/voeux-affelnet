@@ -1,8 +1,8 @@
 const { Voeu } = require("../model");
-const { compose, transformData } = require("oleoduc");
+const { pipeStreams, transformData } = require("oleoduc");
 
 function getVoeuxStream({ siret_responsable, siret_formateur }) {
-  return compose(
+  return pipeStreams(
     Voeu.find({
       "etablissement_responsable.siret": siret_responsable,
       "etablissement_formateur.siret": siret_formateur,
@@ -40,6 +40,10 @@ function getVoeuxStream({ siret_responsable, siret_formateur }) {
         VILLE_ETAB_ACCUEIL: voeu.etablissement_accueil?.ville,
       };
     })
-  );
+  ).on("error", (err) => {
+    throw new Error(
+      `Impossible de générer le flux de candidatures pour la relation ${siret_responsable} - ${siret_formateur}: ${err.message}`
+    );
+  });
 }
 module.exports = { getVoeuxStream };

@@ -20,31 +20,39 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
   const resend = options.resend || false;
   const username = options.username;
   const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
+  const force = options.force || false;
+  const siret_responsable = options.siret_responsable;
+  const siret_formateur = options.siret_formateur;
 
   let query;
 
-  query = {
-    $and: [
-      { $expr: { $gt: ["$nombre_voeux", 0] } },
-      { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
-      { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
-      { $expr: { $eq: ["$first_date_voeux", "$last_date_voeux"] } },
-    ],
-    // histories: {
-    //   $not: {
-    //     $elemMatch: {
-    //       action: {
-    //         $in: [
-    //           RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
-    //           RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
-    //           RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
-    //           RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
-    //         ],
-    //       },
-    //     },
-    //   },
-    // },
-  };
+  force
+    ? (query = {
+        ...(siret_responsable ? { "etablissement_responsable.siret": options.siret_responsable } : {}),
+        ...(siret_formateur ? { "etablissement_formateur.siret": options.siret_formateur } : {}),
+      })
+    : (query = {
+        $and: [
+          { $expr: { $gt: ["$nombre_voeux", 0] } },
+          { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
+          { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+          { $expr: { $eq: ["$first_date_voeux", "$last_date_voeux"] } },
+        ],
+        // histories: {
+        //   $not: {
+        //     $elemMatch: {
+        //       action: {
+        //         $in: [
+        //           RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_RESPONSABLE,
+        //           RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_RESPONSABLE,
+        //           RelationActions.LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE,
+        //           RelationActions.LIST_AVAILABLE_EMAIL_MANUAL_SENT_TO_DELEGUE,
+        //         ],
+        //       },
+        //     },
+        //   },
+        // },
+      });
 
   await Relation.find(query, { histories: 0 })
     .lean()
@@ -114,7 +122,7 @@ async function sendNotificationEmails({ sendEmail, resendEmail }, options = {}) 
         );
       });
 
-      if (previous && !previous.error && !resend) {
+      if (previous && !previous.error && !resend && !force) {
         return;
       }
 

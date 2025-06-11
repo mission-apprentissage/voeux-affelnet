@@ -86,7 +86,7 @@ export const RelationStatut = ({ relation }) => {
 //   const responsable = relation.responsable ?? relation.etablissements_responsable;
 //   const formateur = relation.formateur ?? relation.etablissements_formateur;
 
-//   const downloadVoeux = useDownloadVoeux();
+//   const {downloadVoeux} = useDownloadVoeux();
 
 //   const downloadVoeuxAndReload = useCallback(async () => {
 //     await downloadVoeux({ responsable, formateur });

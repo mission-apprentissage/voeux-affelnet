@@ -1,5 +1,5 @@
 const express = require("express");
-const { compose, transformIntoCSV } = require("oleoduc");
+const { pipeStreams, transformIntoCSV } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { User, Etablissement, Delegue, Relation } = require("../../common/model");
@@ -746,11 +746,21 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-      return compose(
-        getVoeuxStream({ siret_responsable, siret_formateur }),
-        transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
-        res
-      );
+
+      try {
+        return pipeStreams(
+          getVoeuxStream({ siret_responsable, siret_formateur }),
+          transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
+          res
+        ).on("error", (err) => {
+          throw Boom.internal("Une erreur est survenue lors de la génération du CSV", err.message);
+        });
+      } catch (err) {
+        logger.error(
+          `Impossible de générer le flux de candidatures pour la relation ${siret_responsable} - ${siret_formateur}: ${err.message}`
+        );
+        throw Boom.internal("Une erreur est survenue lors de la génération du CSV", err.messages);
+      }
     })
   );
 
@@ -836,48 +846,48 @@ module.exports = ({ sendEmail, resendEmail }) => {
   /**
    * Permet de renvoyer un mail de notification à un responsable
    */
-  router.put(
-    "/api/admin/responsables/:siret_responsable/resendNotificationEmail",
-    checkApiToken(),
-    checkIsAdminOrAcademie(),
-    tryCatch(async (req, res) => {
-      const { siret_responsable } = await Joi.object({
-        siret_responsable: Joi.string().pattern(siretFormat).required(),
-      }).validateAsync(req.params, { abortEarly: false });
+  // router.put(
+  //   "/api/admin/responsables/:siret_responsable/resendNotificationEmail",
+  //   checkApiToken(),
+  //   checkIsAdminOrAcademie(),
+  //   tryCatch(async (req, res) => {
+  //     const { siret_responsable } = await Joi.object({
+  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
+  //     }).validateAsync(req.params, { abortEarly: false });
 
-      await cancelUnsubscription(siret_responsable);
+  //     await cancelUnsubscription(siret_responsable);
 
-      const stats = await sendNotificationEmails(
-        { sendEmail, resendEmail },
-        { username: siret_responsable, force: true, sender: req.user }
-      );
+  //     const stats = await sendNotificationEmails(
+  //       { sendEmail, resendEmail },
+  //       { username: siret_responsable, force: true, sender: req.user }
+  //     );
 
-      res.json(stats);
-    })
-  );
+  //     res.json(stats);
+  //   })
+  // );
 
   /**
    * Permet de renvoyer un mail de mise à jour à un responsable
    */
-  router.put(
-    "/api/admin/responsables/:siret_responsable/resendUpdateEmail",
-    checkApiToken(),
-    checkIsAdminOrAcademie(),
-    tryCatch(async (req, res) => {
-      const { siret_responsable } = await Joi.object({
-        siret_responsable: Joi.string().pattern(siretFormat).required(),
-      }).validateAsync(req.params, { abortEarly: false });
+  // router.put(
+  //   "/api/admin/responsables/:siret_responsable/resendUpdateEmail",
+  //   checkApiToken(),
+  //   checkIsAdminOrAcademie(),
+  //   tryCatch(async (req, res) => {
+  //     const { siret_responsable } = await Joi.object({
+  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
+  //     }).validateAsync(req.params, { abortEarly: false });
 
-      await cancelUnsubscription(siret_responsable);
+  //     await cancelUnsubscription(siret_responsable);
 
-      const stats = await sendUpdateEmails(
-        { sendEmail, resendEmail },
-        { username: siret_responsable, force: true, sender: req.user }
-      );
+  //     const stats = await sendUpdateEmails(
+  //       { sendEmail, resendEmail },
+  //       { username: siret_responsable, force: true, sender: req.user }
+  //     );
 
-      res.json(stats);
-    })
-  );
+  //     res.json(stats);
+  //   })
+  // );
 
   // /**
   //  * @deprecated
@@ -944,8 +954,86 @@ module.exports = ({ sendEmail, resendEmail }) => {
   /**
    * Permet de renvoyer un mail de notification à un délégué
    */
+  // router.put(
+  //   "/api/admin/delegues/:siret_responsable/:siret_formateur/resendNotificationEmail",
+  //   checkApiToken(),
+  //   checkIsAdminOrAcademie(),
+  //   tryCatch(async (req, res) => {
+  //     const { siret_responsable, siret_formateur } = await Joi.object({
+  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
+  //       siret_formateur: Joi.string().pattern(siretFormat).required(),
+  //     }).validateAsync(req.params, { abortEarly: false });
+
+  //     const delegue = await Delegue.findOne({
+  //       relations: {
+  //         $elemMatch: {
+  //           "etablissement_responsable.siret": siret_responsable,
+  //           "etablissement_formateur.siret": siret_formateur,
+  //           active: true,
+  //         },
+  //       },
+  //     });
+
+  //     if (!delegue) {
+  //       throw Boom.notFound();
+  //     }
+
+  //     await cancelUnsubscription(delegue.username);
+
+  //     const stats = await sendNotificationEmails(
+  //       { sendEmail, resendEmail },
+  //       { username: delegue.username, force: true, sender: req.user }
+  //     );
+
+  //     res.json(stats);
+  //   })
+  // );
+
+  /**
+   * Permet de renvoyer un mail de mise à jour à un délégué
+   */
+  // router.put(
+  //   "/api/admin/delegues/:siret_responsable/:siret_formateur/resendUpdateEmail",
+  //   checkApiToken(),
+  //   checkIsAdminOrAcademie(),
+  //   tryCatch(async (req, res) => {
+  //     const { siret_responsable, siret_formateur } = await Joi.object({
+  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
+  //       siret_formateur: Joi.string().pattern(siretFormat).required(),
+  //     }).validateAsync(req.params, { abortEarly: false });
+
+  //     const delegue = await Delegue.findOne({
+  //       relations: {
+  //         $elemMatch: {
+  //           "etablissement_responsable.siret": siret_responsable,
+  //           "etablissement_formateur.siret": siret_formateur,
+  //           active: true,
+  //         },
+  //       },
+  //     });
+
+  //     if (!delegue) {
+  //       throw Boom.notFound();
+  //     }
+
+  //     await cancelUnsubscription(delegue.username);
+
+  //     const stats = await sendUpdateEmails(
+  //       { sendEmail, resendEmail },
+  //       { username: delegue.username, force: true, sender: req.user }
+  //     );
+
+  //     res.json(stats);
+  //   })
+  // );
+
+  // RELATIONS
+
+  /**
+   * Permet de renvoyer un mail de notification à un délégué
+   */
   router.put(
-    "/api/admin/delegues/:siret_responsable/:siret_formateur/resendNotificationEmail",
+    "/api/admin/relations/:siret_responsable/:siret_formateur/resendNotificationEmail",
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
@@ -953,6 +1041,17 @@ module.exports = ({ sendEmail, resendEmail }) => {
         siret_responsable: Joi.string().pattern(siretFormat).required(),
         siret_formateur: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
+
+      const relation = await Relation.findOne({
+        etablissement_responsable: { siret: siret_responsable },
+        etablissement_formateur: { siret: siret_formateur },
+      });
+
+      if (!relation) {
+        throw Boom.notFound("Relation introuvable");
+      }
+
+      const responsable = await Etablissement.findOne({ siret: siret_responsable });
 
       const delegue = await Delegue.findOne({
         relations: {
@@ -964,17 +1063,18 @@ module.exports = ({ sendEmail, resendEmail }) => {
         },
       });
 
-      if (!delegue) {
-        throw Boom.notFound();
-      }
-
-      await cancelUnsubscription(delegue.username);
+      await cancelUnsubscription(delegue ? delegue.username : responsable.username);
 
       const stats = await sendNotificationEmails(
         { sendEmail, resendEmail },
-        { username: delegue.username, force: true, sender: req.user }
+        {
+          username: delegue ? delegue.username : responsable.username,
+          siret_responsable,
+          siret_formateur,
+          force: true,
+          sender: req.user,
+        }
       );
-
       res.json(stats);
     })
   );
@@ -983,7 +1083,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * Permet de renvoyer un mail de mise à jour à un délégué
    */
   router.put(
-    "/api/admin/delegues/:siret_responsable/:siret_formateur/resendUpdateEmail",
+    "/api/admin/relations/:siret_responsable/:siret_formateur/resendUpdateEmail",
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
@@ -991,6 +1091,17 @@ module.exports = ({ sendEmail, resendEmail }) => {
         siret_responsable: Joi.string().pattern(siretFormat).required(),
         siret_formateur: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
+
+      const relation = await Relation.findOne({
+        etablissement_responsable: { siret: siret_responsable },
+        etablissement_formateur: { siret: siret_formateur },
+      });
+
+      if (!relation) {
+        throw Boom.notFound("Relation introuvable");
+      }
+
+      const responsable = await Etablissement.findOne({ siret: siret_responsable });
 
       const delegue = await Delegue.findOne({
         relations: {
@@ -1002,15 +1113,17 @@ module.exports = ({ sendEmail, resendEmail }) => {
         },
       });
 
-      if (!delegue) {
-        throw Boom.notFound();
-      }
-
-      await cancelUnsubscription(delegue.username);
+      await cancelUnsubscription(delegue ? delegue.username : responsable.username);
 
       const stats = await sendUpdateEmails(
         { sendEmail, resendEmail },
-        { username: delegue.username, force: true, sender: req.user }
+        {
+          username: delegue ? delegue.username : responsable.username,
+          siret_responsable,
+          siret_formateur,
+          force: true,
+          sender: req.user,
+        }
       );
 
       res.json(stats);

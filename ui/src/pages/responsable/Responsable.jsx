@@ -173,7 +173,7 @@ const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, c
   const delegue = relation?.delegue;
   const toast = useToast();
 
-  const downloadVoeux = useDownloadVoeux({
+  const { downloadVoeux, isDownloadingVoeux } = useDownloadVoeux({
     responsable,
     formateur,
     callback,
@@ -235,7 +235,7 @@ const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, c
 
   const resendUpdateEmail = useCallback(async () => {
     try {
-      await _put(`/api/responsable/formateurs/${formateur?.uai}/resendUpdateEmail`);
+      await _put(`/api/responsable/formateurs/${formateur?.siret}/resendUpdateEmail`);
 
       toast({
         title: "Courriel envoyé",
@@ -343,9 +343,19 @@ const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, c
                                   générer un nouvel envoi de notification courriel
                                 </Link>
                               );
-                            case USER_STATUS.ACTIVE === relation.delegue.statut:
+                            case USER_STATUS.ACTIVE === relation.delegue.statut &&
+                              new Date(relation.first_date_voeux).getTime() ===
+                                new Date(relation.last_date_voeux).getTime():
                               return (
                                 <Link variant="action" onClick={resendNotificationEmail}>
+                                  générer un nouvel envoi de notification courriel
+                                </Link>
+                              );
+                            case USER_STATUS.ACTIVE === relation.delegue.statut &&
+                              new Date(relation.first_date_voeux).getTime() !==
+                                new Date(relation.last_date_voeux).getTime():
+                              return (
+                                <Link variant="action" onClick={resendUpdateEmail}>
                                   générer un nouvel envoi de notification courriel
                                 </Link>
                               );
@@ -484,7 +494,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
   const formateur = relation.formateur;
   const delegue = relation.delegue;
 
-  const downloadVoeux = useDownloadVoeux({
+  const { downloadVoeux, isDownloadingVoeux } = useDownloadVoeux({
     responsable,
     formateur,
     callback,
@@ -495,6 +505,74 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
     isOpen: isOpenDelegationAvecCandidaturesRestantesModal,
     onClose: onCloseDelegationAvecCandidaturesRestantesModal,
   } = useDisclosure();
+
+  const toast = useToast();
+  const [sendingNotificationEmail, setSendingNotificationEmail] = useState(false);
+  const [sendingUpdateEmail, setSendingUpdateEmail] = useState(false);
+
+  const resendNotificationEmail = useCallback(async () => {
+    if (sendingNotificationEmail) {
+      return;
+    }
+    try {
+      setSendingNotificationEmail(true);
+
+      await _put(`/api/responsable/formateurs/${relation?.etablissement_formateur?.siret}/resendNotificationEmail`);
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de mise à disposition de listes téléchargeables a été renvoyé à l'adresse ${relation?.delegue?.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+
+      setSendingNotificationEmail(false);
+
+      await callback?.();
+    } catch (error) {
+      setSendingNotificationEmail(false);
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de mise à disposition de listes téléchargeables . Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [relation, toast, callback, sendingNotificationEmail]);
+
+  const resendUpdateEmail = useCallback(async () => {
+    if (sendingUpdateEmail) {
+      return;
+    }
+    try {
+      setSendingUpdateEmail(true);
+
+      await _put(`/api/responsable/formateurs/${relation?.etablissement_formateur?.siret}/resendUpdateEmail`);
+      toast({
+        title: "Courriel envoyé",
+        description: `Le courriel de notification de mise à jour de listes téléchargeables a été renvoyé à l'adresse ${relation?.delegue?.email}`,
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+
+      setSendingUpdateEmail(false);
+
+      await callback?.();
+    } catch (error) {
+      setSendingUpdateEmail(false);
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de mise à jour de listes téléchargeables . Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [relation, toast, callback, sendingUpdateEmail]);
 
   return (
     <Box>
@@ -518,6 +596,27 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
       <Text mt={8}>
         {/* Statut de diffusion des listes : */}
         <RelationStatut relation={relation} />{" "}
+        {!!relation?.nombre_voeux && !!relation.delegue /*&& !!relation?.nombre_voeux_restant*/ && (
+          <>
+            {new Date(relation?.first_date_voeux)?.getTime() === new Date(relation?.last_date_voeux)?.getTime() ? (
+              <Link
+                ml={2}
+                mt={4}
+                variant="action"
+                onClick={resendNotificationEmail}
+                disabled={sendingNotificationEmail}
+              >
+                {sendingNotificationEmail && <Spinner size="sm" mr={2} />}
+                Procéder à l'envoi d'un courriel de mise à disposition de la liste
+              </Link>
+            ) : (
+              <Link ml={2} mt={4} variant="action" onClick={resendUpdateEmail} disabled={sendingUpdateEmail}>
+                {sendingUpdateEmail && <Spinner size="sm" mr={2} />}
+                Procéder à l'envoi d'un courriel de mise à jour de la liste
+              </Link>
+            )}
+          </>
+        )}
       </Text>
 
       {!!relation.nombre_voeux ? (
@@ -557,19 +656,16 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
           ) : (
             !!relation.nombre_voeux && (
               <Box mt={4}>
-                {!relation.nombre_voeux_restant ? (
-                  <Box display={"inline-flex"} alignItems={"center"}>
-                    <Button variant="blue-light" onClick={async () => await downloadVoeux()}>
-                      <DownloadIcon mr={2} />
-                      Télécharger à nouveau
-                    </Button>
-                  </Box>
-                ) : (
-                  <Button variant="blue" onClick={async () => await downloadVoeux()}>
-                    <DownloadIcon mr={2} />
-                    Télécharger la liste
+                <Box display={"inline-flex"} alignItems={"center"}>
+                  <Button
+                    variant={!!relation.nombre_voeux_restant ? "blue" : "blue-light"}
+                    disabled={isDownloadingVoeux}
+                    onClick={async () => await downloadVoeux()}
+                  >
+                    {isDownloadingVoeux ? <Spinner size="sm" mr={2} /> : <DownloadIcon mr={2} />}
+                    {!!relation.nombre_voeux_restant ? "Télécharger la liste" : "Télécharger à nouveau"}
                   </Button>
-                )}
+                </Box>
               </Box>
             )
           )}
@@ -655,8 +751,6 @@ export const Responsable = () => {
   const reload = useCallback(async () => {
     await getEtablissement();
   }, [getEtablissement]);
-
-  // const downloadVoeux = useDownloadVoeux({ responsable: etablissement, formateur: etablissement, callback: reload });
 
   useEffect(() => {
     if (siret_formateur) {
@@ -829,7 +923,7 @@ export const Responsable = () => {
                 <> habilité à réceptionner les listes de candidats</>
               )}{" "}
               : <Text as="b">{etablissement.email}</Text>{" "}
-              <Link variant={"action"} onClick={onOpenUpdateResponsableEmailModal}>
+              <Link ml={2} variant={"action"} onClick={onOpenUpdateResponsableEmailModal}>
                 {etablissement?.email?.length ? "Modifier" : "Renseigner l'adresse courriel"}
               </Link>
             </Text>

@@ -18,9 +18,10 @@ import {
   Th,
   Thead,
 } from "@chakra-ui/react";
+import { CheckIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
 
 import { Page } from "../../common/components/layout/Page";
-import { _get } from "../../common/httpClient";
+import { _get, _put } from "../../common/httpClient";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { EtablissementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { UpdateResponsableEmailModal } from "../../common/components/admin/modals/UpdateResponsableEmailModal";
@@ -31,7 +32,6 @@ import { RelationStatut } from "../../common/components/admin/fields/RelationSta
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/adminHooks";
 import { ConfirmDelegationModal } from "../../common/components/admin/modals/ConfirmDelegationModal";
-import { CheckIcon, DownloadIcon, EditIcon } from "@chakra-ui/icons";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -150,11 +150,101 @@ const RelationContact = ({ relation, callback }) => {
 };
 
 const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
-  const downloadVoeux = useDownloadVoeux({
+  const { downloadVoeux, isDownloadingVoeux } = useDownloadVoeux({
     responsable: relation.responsable,
     formateur: relation.formateur,
     callback,
   });
+
+  const toast = useToast();
+  const [sendingNotificationEmail, setSendingNotificationEmail] = useState(false);
+  const [sendingUpdateEmail, setSendingUpdateEmail] = useState(false);
+
+  const resendNotificationEmail = useCallback(async () => {
+    if (sendingNotificationEmail) {
+      return;
+    }
+    try {
+      setSendingNotificationEmail(true);
+      await _put(
+        `/api/admin/relations/${relation?.etablissement_responsable?.siret}/${relation?.etablissement_formateur?.siret}/resendNotificationEmail`
+      );
+      if (relation.delegue) {
+        toast({
+          title: "Courriel envoyé",
+          description: `Le courriel de notification de mise à disposition de listes téléchargeables a été renvoyé à l'adresse ${relation?.delegue?.email}`,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Courriel envoyé",
+          description: `Le courriel de notification de mise à disposition de listes téléchargeables a été renvoyé à l'adresse ${relation?.responsable?.email}`,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+
+      setSendingNotificationEmail(false);
+
+      await callback?.();
+    } catch (error) {
+      setSendingNotificationEmail(false);
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de mise à disposition de listes téléchargeables . Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [relation, toast, callback, sendingNotificationEmail]);
+
+  const resendUpdateEmail = useCallback(async () => {
+    if (sendingUpdateEmail) {
+      return;
+    }
+    try {
+      setSendingUpdateEmail(true);
+      await _put(
+        `/api/admin/relations/${relation?.etablissement_responsable?.siret}/${relation?.etablissement_formateur?.siret}/resendUpdateEmail`
+      );
+      if (relation.delegue) {
+        toast({
+          title: "Courriel envoyé",
+          description: `Le courriel de notification de mise à jour de listes téléchargeables a été renvoyé à l'adresse ${relation?.delegue?.email}`,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: "Courriel envoyé",
+          description: `Le courriel de notification de mise à jour de listes téléchargeables a été renvoyé à l'adresse ${relation?.responsable?.email}`,
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        });
+      }
+
+      setSendingUpdateEmail(false);
+
+      await callback?.();
+    } catch (error) {
+      setSendingUpdateEmail(false);
+      toast({
+        title: "Impossible d'envoyer le courriel",
+        description:
+          "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de mise à jour de listes téléchargeables . Veuillez contacter le support.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [relation, toast, callback, sendingUpdateEmail]);
 
   return (
     <Box>
@@ -175,23 +265,45 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
         <RelationContact relation={relation} callback={callback} />
       </Box>
 
-      <Text mt={8}>
+      <Box mt={8}>
         {/* Statut de diffusion des listes : */}
-        <RelationStatut relation={relation} />{" "}
-      </Text>
+        <RelationStatut relation={relation} callback={callback} />{" "}
+        {!!relation?.nombre_voeux /*&& !!relation?.nombre_voeux_restant*/ && (
+          <>
+            {new Date(relation?.first_date_voeux)?.getTime() === new Date(relation?.last_date_voeux)?.getTime() ? (
+              <Link
+                ml={2}
+                mt={4}
+                variant="action"
+                onClick={resendNotificationEmail}
+                disabled={sendingNotificationEmail}
+              >
+                {sendingNotificationEmail && <Spinner size="sm" mr={2} />}
+                Procéder à l'envoi d'un courriel de mise à disposition de la liste
+              </Link>
+            ) : (
+              <Link ml={2} mt={4} variant="action" onClick={resendUpdateEmail} disabled={sendingUpdateEmail}>
+                {sendingUpdateEmail && <Spinner size="sm" mr={2} />}
+                Procéder à l'envoi d'un courriel de mise à jour de la liste
+              </Link>
+            )}
+          </>
+        )}
+      </Box>
 
-      {!!relation?.nombre_voeux &&
-        (!!relation.nombre_voeux_restant ? (
-          <Button mt={4} variant="blue" onClick={async () => await downloadVoeux()}>
-            <DownloadIcon mr={2} />
+      {!!relation?.nombre_voeux && (
+        <>
+          <Button
+            mt={4}
+            variant={!!relation.nombre_voeux_restant ? "blue" : "blue-light"}
+            disabled={isDownloadingVoeux}
+            onClick={async () => await downloadVoeux()}
+          >
+            {isDownloadingVoeux ? <Spinner size="sm" mr={2} /> : <DownloadIcon mr={2} />}
             Télécharger la liste
           </Button>
-        ) : (
-          <Button mt={4} variant="blue-light" onClick={async () => await downloadVoeux()}>
-            <DownloadIcon mr={2} />
-            Télécharger la liste
-          </Button>
-        ))}
+        </>
+      )}
 
       {!![
         ...(relation?.histories ?? []),
@@ -222,7 +334,6 @@ export const Etablissement = () => {
   const [etablissement, setEtablissement] = useState(undefined);
   const [loadingEtablissement, setLoadingEtablissement] = useState(false);
   const mounted = useRef(false);
-  const toast = useToast();
 
   const getEtablissement = useCallback(async () => {
     try {
@@ -240,13 +351,6 @@ export const Etablissement = () => {
   const reload = useCallback(async () => {
     await getEtablissement();
   }, [getEtablissement]);
-
-  const downloadVoeux = useDownloadVoeux({ responsable: etablissement, formateur: etablissement, callback: reload });
-
-  // const downloadVoeuxAndReload = useCallback(async () => {
-  //   await downloadVoeux();
-  //   await reload?.();
-  // }, [downloadVoeux, reload]);
 
   // const resendActivationEmail = useCallback(async () => {
   //   try {
@@ -289,30 +393,6 @@ export const Etablissement = () => {
   //       title: "Impossible d'envoyer le courriel",
   //       description:
   //         "Une erreur est survenue lors de la tentative de renvoie du courriel de confirmation. Veuillez contacter le support.",
-  //       status: "error",
-  //       duration: 9000,
-  //       isClosable: true,
-  //     });
-  //   }
-  // }, [identifiant, etablissement, toast, reload]);
-
-  // // const resendNotificationEmail = useCallback(async () => {
-  //   try {
-  //     await _put(`/api/admin/etablissements/${identifiant}/resendNotificationEmail`);
-
-  //     toast({
-  //       title: "Courriel envoyé",
-  //       description: `Le courriel de notification de listes téléchargeables a été renvoyé à l'adresse ${etablissement?.email}`,
-  //       status: "success",
-  //       duration: 9000,
-  //       isClosable: true,
-  //     });
-  //     await reload();
-  //   } catch (error) {
-  //     toast({
-  //       title: "Impossible d'envoyer le courriel",
-  //       description:
-  //         "Une erreur est survenue lors de la tentative de renvoie du courriel de notification de listes téléchargeables . Veuillez contacter le support.",
   //       status: "error",
   //       duration: 9000,
   //       isClosable: true,
@@ -390,7 +470,7 @@ export const Etablissement = () => {
                 <> habilité à réceptionner les listes de candidats</>
               )}{" "}
               : <Text as="b">{etablissement.email}</Text>{" "}
-              <Link variant={"action"} onClick={onOpenUpdateResponsableEmailModal}>
+              <Link ml={2} variant={"action"} onClick={onOpenUpdateResponsableEmailModal}>
                 {etablissement?.email?.length ? "Modifier" : "Renseigner l'adresse courriel"}
               </Link>
             </Text>

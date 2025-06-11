@@ -1,6 +1,6 @@
 const express = require("express");
 const Joi = require("@hapi/joi");
-const { compose, transformIntoCSV } = require("oleoduc");
+const { pipeStreams, transformIntoCSV } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware.js");
 const authMiddleware = require("../middlewares/authMiddleware.js");
 const { markVoeuxAsDownloadedByDelegue } = require("../../common/actions/markVoeuxAsDownloaded.js");
@@ -149,7 +149,7 @@ module.exports = ({ users }) => {
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-      return compose(
+      return pipeStreams(
         getVoeuxStream({ siret_responsable, siret_formateur }),
         transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
         res

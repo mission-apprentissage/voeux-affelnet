@@ -191,6 +191,8 @@ cli
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .option("--resend", "Permet le renvoi d'un rappel", false)
   .option("--force", "Ignore les règles d'envoi habituelles", false)
+  .option("--siret_responsable", "Si l'option --force est passée, permet de spécifier une relation spécifique")
+  .option("--siret_formateur", "Si l'option --force est passée, permet de spécifier une relation spécifique")
   .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
     runScript(({ sendEmail, resendEmail }) => {
@@ -206,6 +208,8 @@ cli
   .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
   .option("--resend", "Permet le renvoi d'un rappel", false)
   .option("--force", "Ignore les règles d'envoi habituelles", false)
+  .option("--siret_responsable", "Si l'option --force est passée, permet de spécifier une relation spécifique")
+  .option("--siret_formateur", "Si l'option --force est passée, permet de spécifier une relation spécifique")
   .option("--proceed", "Procède à l'envoi des courriers", false)
   .action((options) => {
     runScript(({ sendEmail, resendEmail }) => {

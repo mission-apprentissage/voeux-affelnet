@@ -10,17 +10,19 @@ import {
   Text,
   Stack,
   Heading,
+  Spinner,
 } from "@chakra-ui/react";
 import { useDownloadVoeux } from "../../../hooks/responsableHooks";
 import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
 import { useSearchParams } from "react-router-dom";
+import { DownloadIcon } from "@chakra-ui/icons";
 
 export const DownloadVoeuxModal = ({ relation, callback, isOpen, onClose }) => {
   const responsable = relation?.responsable ?? relation?.etablissements_responsable;
   const formateur = relation?.formateur ?? relation?.etablissements_formateur;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const downloadVoeux = useDownloadVoeux({
+  const { downloadVoeux, isDownloadingVoeux } = useDownloadVoeux({
     responsable,
     formateur,
   });
@@ -67,7 +69,8 @@ export const DownloadVoeuxModal = ({ relation, callback, isOpen, onClose }) => {
           </Text> */}
 
           <Stack>
-            <Button variant="primary" onClick={download}>
+            <Button variant="primary" isDisabled={isDownloadingVoeux} onClick={download}>
+              {isDownloadingVoeux ? <Spinner size="sm" mr={2} /> : <DownloadIcon mr={2} />}
               Télécharger
             </Button>
             <Button variant="ghost" onClick={onClose}>

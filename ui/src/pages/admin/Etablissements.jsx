@@ -267,7 +267,6 @@ export const Etablissements = () => {
   const [abortController, setAbortController] = useState(new AbortController());
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
-  const [downloading, setDownloading] = useState(false);
   const [query, setQuery] = useState();
   const [data, setData] = useState([]);
 
@@ -317,11 +316,10 @@ export const Etablissements = () => {
     [self, abortController, setAbortController]
   );
 
-  const downloadStatut = useDownloadStatut();
+  const { downloadStatut, isDownloadingStatut } = useDownloadStatut();
 
   const downloadStatutToCSV = useCallback(async () => {
     try {
-      setDownloading(true);
       const params = {
         ...(query?.academie ? { academie: query.academie } : {}),
         ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
@@ -330,7 +328,6 @@ export const Etablissements = () => {
     } catch (e) {
       console.error(e);
     }
-    setDownloading(false);
   }, [query, self?.academies, downloadStatut]);
 
   const callback = useCallback(
@@ -447,7 +444,7 @@ export const Etablissements = () => {
 
         <Box display="flex" justifyContent={"right"}>
           <Link onClick={downloadStatutToCSV}>
-            {downloading ? (
+            {isDownloadingStatut ? (
               <Spinner size="sm" verticalAlign={"middle"} />
             ) : (
               <FileDownloadLine verticalAlign={"middle"} />

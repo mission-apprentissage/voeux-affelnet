@@ -1,7 +1,7 @@
 const express = require("express");
 const Boom = require("boom");
 const Joi = require("@hapi/joi");
-const { compose, transformIntoCSV } = require("oleoduc");
+const { pipeStreams, transformIntoCSV } = require("oleoduc");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { markVoeuxAsDownloadedByResponsable } = require("../../common/actions/markVoeuxAsDownloaded");
@@ -515,7 +515,7 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       res.setHeader("Content-disposition", `attachment; filename=${filename}`);
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
-      return compose(
+      return pipeStreams(
         getVoeuxStream({ siret_responsable, siret_formateur }),
         transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
         res
@@ -532,6 +532,15 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
       const { siret: siret_formateur } = await Joi.object({
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
+
+      const relation = await Relation.findOne({
+        "etablissement_responsable.siret": siret_responsable,
+        "etablissement_formateur.siret": siret_formateur,
+      });
+
+      if (!relation) {
+        throw Boom.notFound();
+      }
 
       const delegue = await Delegue.findOne({
         relations: {
@@ -566,6 +575,15 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
+      const relation = await Relation.findOne({
+        "etablissement_responsable.siret": siret_responsable,
+        "etablissement_formateur.siret": siret_formateur,
+      });
+
+      if (!relation) {
+        throw Boom.notFound();
+      }
+
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
@@ -584,6 +602,8 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         { sendEmail, resendEmail },
         {
           username: delegue.username,
+          siret_responsable,
+          siret_formateur,
           force: true,
           sender: req.user,
         }
@@ -603,6 +623,15 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
         siret: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
+      const relation = await Relation.findOne({
+        "etablissement_responsable.siret": siret_responsable,
+        "etablissement_formateur.siret": siret_formateur,
+      });
+
+      if (!relation) {
+        throw Boom.notFound();
+      }
+
       const delegue = await Delegue.findOne({
         relations: {
           $elemMatch: {
@@ -619,7 +648,13 @@ module.exports = ({ users, sendEmail, resendEmail }) => {
 
       const stats = sendUpdateEmails(
         { sendEmail, resendEmail },
-        { username: delegue.username, force: true, sender: req.user }
+        {
+          username: delegue.username,
+          siret_responsable,
+          siret_formateur,
+          force: true,
+          sender: req.user,
+        }
       );
 
       res.json(stats);

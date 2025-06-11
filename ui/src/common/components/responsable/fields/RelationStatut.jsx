@@ -93,7 +93,7 @@ export const RelationStatut = ({ relation }) => {
 
 //   const { isOpen, onOpen, onClose } = useDisclosure();
 
-//   const downloadVoeux = useDownloadVoeux({ responsable, formateur });
+//   const {downloadVoeux} = useDownloadVoeux({ responsable, formateur });
 
 //   const downloadVoeuxAndReload = useCallback(async () => {
 //     await downloadVoeux();
