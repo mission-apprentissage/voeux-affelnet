@@ -529,29 +529,33 @@ export const Etablissement = () => {
             <Box mt={12} id="formateur">
               <Alert status="warning">
                 <AlertIcon />
-                Pour une partie de ses offres, cet organisme est formateur non responsable. Cette page permet le suivi
-                des candidatures uniquement sur les formations dont l’organisme est responsable.{" "}
+                <Box>
+                  <Text>
+                    Pour une partie de ses offres, cet organisme est formateur non responsable. Cette page permet le
+                    suivi des candidatures uniquement sur les formations dont l’organisme est responsable.{" "}
+                    {relationsOnlyFormateur.length === 1 ? (
+                      <Link
+                        variant="action"
+                        href={`/admin/etablissement/${relationsOnlyFormateur[0]?.responsable?.siret}`}
+                      >
+                        Accéder à la page de l’organisme responsable
+                      </Link>
+                    ) : (
+                      <>
+                        Accéder aux pages des organismes responsables :{" "}
+                        {relationsOnlyFormateur.map((relation, index) => (
+                          <Fragment key={relation?.responsable?.siret}>
+                            <Link href={`/admin/etablissement/${relation?.responsable?.siret}`} variant="action">
+                              {relation?.responsable?.raison_sociale}
+                            </Link>
+                            {index !== relationsOnlyFormateur.length - 1 && ", "}
+                          </Fragment>
+                        ))}
+                      </>
+                    )}
+                  </Text>
+                </Box>
               </Alert>
-
-              <Text mt={6}>
-                {relationsOnlyFormateur.length === 1 ? (
-                  <Link variant="action" href={`/admin/etablissement/${relationsOnlyFormateur[0]?.responsable?.siret}`}>
-                    Accéder à la page de l’organisme responsable
-                  </Link>
-                ) : (
-                  <>
-                    Accéder aux pages des organismes responsables :{" "}
-                    {relationsOnlyFormateur.map((relation, index) => (
-                      <Fragment key={relation?.responsable?.siret}>
-                        <Link href={`/admin/etablissement/${relation?.responsable?.siret}`} variant="action">
-                          {relation?.responsable?.raison_sociale}
-                        </Link>
-                        {index !== relationsOnlyFormateur.length - 1 && ", "}
-                      </Fragment>
-                    ))}
-                  </>
-                )}
-              </Text>
             </Box>
           )}
 
