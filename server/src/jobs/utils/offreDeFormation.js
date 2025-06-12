@@ -153,9 +153,9 @@ async function streamOffreDeFormation(options = {}) {
               (siret_formateur = formation?.etablissement_formateur_siret?.toUpperCase() ?? "");
             !uai_formateur?.length && (uai_formateur = formation?.etablissement_formateur_uai?.toUpperCase() ?? "");
             !siret_responsable?.length &&
-              (siret_responsable = formation?.etablissement_responsable_siret?.toUpperCase() ?? "");
+              (siret_responsable = formation?.etablissement_gestionnaire_siret?.toUpperCase() ?? "");
             !uai_responsable?.length &&
-              (uai_responsable = formation?.etablissement_responsable_uai?.toUpperCase() ?? "");
+              (uai_responsable = formation?.etablissement_gestionnaire_uai?.toUpperCase() ?? "");
           }
 
           if (!siret_formateur?.length || !siret_responsable?.length) {
