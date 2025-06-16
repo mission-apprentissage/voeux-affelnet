@@ -1,40 +1,49 @@
 const { Voeu, Relation } = require("../model");
 
-const getVoeuxDate = async ({ siret_responsable, siret_formateur }) => {
-  const voeuxDates = (
-    await Voeu.find({
-      "etablissement_formateur.siret": siret_formateur,
-      "etablissement_responsable.siret": siret_responsable,
-    })
-  ).map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1]);
+// const getVoeuxDate = async ({ siret_responsable, siret_formateur }) => {
+//   const voeuxDates = (
+//     await Voeu.find({
+//       "etablissement_formateur.siret": siret_formateur,
+//       "etablissement_responsable.siret": siret_responsable,
+//     })
+//   ).map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1]);
 
-  // TODO : Récupérer la plus grande date !
-  return voeuxDates[voeuxDates.length - 1];
-};
+//   return voeuxDates.sort((a, b) => new Date(a) - new Date(b))[voeuxDates.length - 1];
+// };
 
 const getFirstVoeuxDate = async ({ siret_responsable, siret_formateur }) => {
-  const voeuxDate = (
-    await Voeu.find({
-      "etablissement_formateur.siret": siret_formateur,
-      "etablissement_responsable.siret": siret_responsable,
-    })
-  )
-    .map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1])
-    .sort((a, b) => new Date(a) - new Date(b))[0];
+  const voeuxDate = [
+    ...new Set(
+      (
+        await Voeu.find({
+          "etablissement_formateur.siret": siret_formateur,
+          "etablissement_responsable.siret": siret_responsable,
+        })
+      )
+        .flatMap((voeu) => voeu._meta.import_dates)
+        .map((date) => new Date(date).toISOString())
+    ),
+  ].sort((a, b) => new Date(a).getTime() - new Date(b).getTime())[0];
 
+  // console.log("getFirstVoeuxDate", siret_responsable, siret_formateur, voeuxDate);
   return voeuxDate ? new Date(voeuxDate) : null;
 };
 
 const getLastVoeuxDate = async ({ siret_responsable, siret_formateur }) => {
-  const voeuxDate = (
-    await Voeu.find({
-      "etablissement_formateur.siret": siret_formateur,
-      "etablissement_responsable.siret": siret_responsable,
-    })
-  )
-    .map((voeu) => voeu._meta.import_dates[voeu._meta.import_dates.length - 1])
-    .sort((a, b) => new Date(b) - new Date(a))[0];
+  const voeuxDate = [
+    ...new Set(
+      (
+        await Voeu.find({
+          "etablissement_formateur.siret": siret_formateur,
+          "etablissement_responsable.siret": siret_responsable,
+        })
+      )
+        .flatMap((voeu) => voeu._meta.import_dates)
+        .map((date) => new Date(date).toISOString())
+    ),
+  ].sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
 
+  // console.log("getLastVoeuxDate", siret_responsable, siret_formateur, voeuxDate);
   return voeuxDate ? new Date(voeuxDate) : null;
 };
 
@@ -73,7 +82,7 @@ const getNombreVoeuxRestant = async ({ siret_responsable, siret_formateur }) => 
 module.exports = {
   getNombreVoeux,
   getNombreVoeuxRestant,
-  getVoeuxDate,
+  // getVoeuxDate,
   getFirstVoeuxDate,
   getLastVoeuxDate,
 };
