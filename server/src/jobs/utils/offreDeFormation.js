@@ -18,6 +18,8 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
 
   const overwriteArray = overwriteCsv && (await getCsvContent(overwriteCsv));
 
+  // console.log("overwriteArray", overwriteArray);
+
   return compose(
     originalCsv,
     parseCsv({
@@ -30,17 +32,19 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
     }),
 
     transformData(async (data) => {
+      const academie = data["ACADEMIE"];
+      const code_offre = data["CODE_OFFRE"];
+      const affelnet_id = `${academie}/${code_offre}`;
+
+      // console.log(affelnet_id);
+
       let overwriteItem;
 
       if (overwriteArray) {
-        const academie = data["ACADEMIE"];
-        const code_offre = data["CODE_OFFRE"];
-        const affelnet_id = `${academie}/${code_offre}`;
-
         overwriteItem = overwriteArray.find((item) => item["Affelnet_id"] === affelnet_id);
 
         if (overwriteItem) {
-          logger.warn(`Données écrasées pour la formation ${affelnet_id}`, {
+          logger.debug(`Données écrasées pour la formation ${affelnet_id}`, {
             SIRET_UAI_GESTIONNAIRE: overwriteItem?.["Siret responsable"] ?? data["SIRET_UAI_GESTIONNAIRE"],
             SIRET_UAI_FORMATEUR: overwriteItem?.["Siret formateur"] ?? data["SIRET_UAI_FORMATEUR"],
             UAI_RESPONSABLE: overwriteItem?.["UAI responsable"]?.toUpperCase(),

@@ -11,6 +11,7 @@ const schema = Joi.object({
 }).unknown();
 
 const transformFormationStream = (data) => {
+  // console.log(`${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`);
   return {
     id: `${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`,
     academie: data["ACADEMIE"],
@@ -76,10 +77,12 @@ async function importFormations(formationsCsv, overwriteCsv) {
     failed: 0,
   };
 
+  logger.debug(`Deleting existing formations...`);
   await Formation.deleteMany({});
+  logger.debug(`Existing formations deleted`);
 
   await oleoduc(
-    await (async () => await parseFormationsCsv(formationsCsv, overwriteCsv))(),
+    await parseFormationsCsv(formationsCsv, overwriteCsv),
 
     filterData(async (json) => {
       stats.total++;
@@ -95,6 +98,7 @@ async function importFormations(formationsCsv, overwriteCsv) {
     writeData(
       async (data) => {
         try {
+          // console.log(`Create ${data.id}`);
           await Formation.create(data);
           stats.created++;
           logger.info(`Formation ${data.id} created`);

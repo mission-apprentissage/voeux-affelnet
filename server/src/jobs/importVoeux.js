@@ -322,7 +322,7 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
   const ids = new Set();
 
   await oleoduc(
-    await (async () => await parseVoeuxCsv(voeuxCsvStream, overwriteFile))(),
+    await parseVoeuxCsv(voeuxCsvStream, overwriteFile),
     writeData(
       async (data) => {
         const key = JSON.stringify({

@@ -10,9 +10,21 @@
         <mj-column>
           <mj-text> Madame, monsieur, </mj-text>
 
-          <mj-text>
+           <!-- <mj-text>
             Vous pouvez dès à présent télécharger les candidatures exprimées sur le service en ligne "Choisir son orientation" pour
             l'établissement <%= data.formateur.raison_sociale %> (SIRET : <%= data.formateur.siret %> / UAI : <%= data.formateur.uai %>) pour lequel une délégation de droit vous a été accordée.
+          </mj-text>
+          -->
+
+          <mj-text>
+            Une nouvelle liste de candidatures à vos offres de formation en apprentissage est disponible pour l'établissement <%= data.formateur.raison_sociale %> (SIRET : <%= data.formateur.siret %> / UAI : <%= data.formateur.uai %>) pour lequel une délégation de droit vous a été accordée.
+          </mj-text>
+
+          <mj-text>
+            Cette mise à jour tient compte des ajouts ou suppressions de candidatures, ainsi que des modifications sur
+            des candidatures existantes (des modifications de coordonnées par exemple). Elle comporte l’intégralité des
+            candidatures, y compris celles qui existaient déjà dans la première version du fichier. <!-- Aucune autre mise à
+            jour ne sera diffusée.-->
           </mj-text>
 
           <mj-button
@@ -30,10 +42,10 @@
             création de mot de passe.
           </mj-text>
 
-          <mj-text>
+          <!-- <mj-text>
             Prochaine et dernière étape : dans la dernière semaine de juin, une mise à jour de cette liste pourra vous être
             transmise, pour tenir compte des ajouts, suppressions et/ou modifications de candidatures.
-          </mj-text>
+          </mj-text> -->
 
           <mj-text>
             La réception des candidatures vous engage à une réponse auprès des jeunes concernés. Ceci permettra

@@ -38,7 +38,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
         $and: [
           { $expr: { $gt: ["$nombre_voeux", 0] } },
           { $expr: { $gt: ["$nombre_voeux_restant", 0] } },
-          { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
+          // { $expr: { $eq: ["$nombre_voeux_restant", "$nombre_voeux"] } },
           { $expr: { $ne: ["$first_date_voeux", "$last_date_voeux"] } },
         ],
         // histories: {
