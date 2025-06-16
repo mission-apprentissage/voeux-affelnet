@@ -1,8 +1,8 @@
 const { Voeu } = require("../model");
-const { pipeStreams, transformData } = require("oleoduc");
+const { oleoduc, transformData } = require("oleoduc");
 
 function getVoeuxStream({ siret_responsable, siret_formateur }) {
-  return pipeStreams(
+  return oleoduc(
     Voeu.find({
       "etablissement_responsable.siret": siret_responsable,
       "etablissement_formateur.siret": siret_formateur,

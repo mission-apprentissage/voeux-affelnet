@@ -1,5 +1,5 @@
 const express = require("express");
-const { pipeStreams, transformIntoCSV } = require("oleoduc");
+const { oleoduc, transformIntoCSV } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { User, Etablissement, Delegue, Relation } = require("../../common/model");
@@ -748,7 +748,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
 
       try {
-        return pipeStreams(
+        return oleoduc(
           getVoeuxStream({ siret_responsable, siret_formateur }),
           transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),
           res
