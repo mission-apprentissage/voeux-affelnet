@@ -55,6 +55,7 @@ const fixExtractionVoeux = async (originalCsv, overwriteCsv) => {
             "UAI Établissement formateur": overwriteItem["UAI formateur"]?.length
               ? overwriteItem["UAI formateur"]
               : data["UAI Établissement formateur"],
+            OVERWRITE: !!overwriteItem,
           };
         }
       }

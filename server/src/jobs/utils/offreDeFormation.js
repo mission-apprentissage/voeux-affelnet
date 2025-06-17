@@ -47,8 +47,8 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
           logger.debug(`Données écrasées pour la formation ${affelnet_id}`, {
             SIRET_UAI_GESTIONNAIRE: overwriteItem?.["Siret responsable"] ?? data["SIRET_UAI_GESTIONNAIRE"],
             SIRET_UAI_FORMATEUR: overwriteItem?.["Siret formateur"] ?? data["SIRET_UAI_FORMATEUR"],
-            UAI_RESPONSABLE: overwriteItem?.["UAI responsable"]?.toUpperCase(),
-            UAI_FORMATEUR: overwriteItem?.["UAI formateur"]?.toUpperCase(),
+            UAI_RESPONSABLE: (overwriteItem?.["UAI responsable"] ?? data["UAI_RESPONSABLE"])?.toUpperCase(),
+            UAI_FORMATEUR: (overwriteItem?.["UAI formateur"] ?? data["UAI_FORMATEUR"])?.toUpperCase(),
           });
         }
       }
@@ -59,6 +59,7 @@ const fixOffreDeFormation = async (originalCsv, overwriteCsv) => {
         SIRET_UAI_FORMATEUR: overwriteItem?.["Siret formateur"] ?? data["SIRET_UAI_FORMATEUR"],
         UAI_RESPONSABLE: (overwriteItem?.["UAI responsable"] ?? data["UAI_RESPONSABLE"])?.toUpperCase(),
         UAI_FORMATEUR: (overwriteItem?.["UAI formateur"] ?? data["UAI_FORMATEUR"])?.toUpperCase(),
+        OVERWRITE: !!overwriteItem,
       };
     })
   );
@@ -109,6 +110,7 @@ async function streamOffreDeFormation(options = {}) {
         }
 
         const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
+        const overwrite = !!data["OVERWRITE"];
 
         const cle_ministere_educatif = data["CLE_MINISTERE_EDUCATIF"]?.toUpperCase();
         let siret_responsable = [
@@ -118,10 +120,23 @@ async function streamOffreDeFormation(options = {}) {
           "SERVICES DEPARTEMENTAUX DE L EN",
         ].includes(libelleTypeEtablissement)
           ? SIRET_RECENSEMENT
+          : overwrite
+          ? data["SIRET_UAI_GESTIONNAIRE"]
           : getSiretResponsableFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_GESTIONNAIRE"]) ?? "";
 
-        let siret_formateur =
-          getSiretFormateurFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_FORMATEUR"]) ?? "";
+        let siret_formateur = overwrite
+          ? data["SIRET_UAI_FORMATEUR"]
+          : getSiretFormateurFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_FORMATEUR"]) ?? "";
+
+        if (overwrite) {
+          console.log({
+            affelnet_id: `${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`,
+            overwrite,
+            cle_ministere_educatif,
+            siret_responsable,
+            siret_formateur,
+          });
+        }
 
         const uai_accueil = data["UAI"]?.toUpperCase();
         let uai_formateur = data["UAI_FORMATEUR"]?.toUpperCase();
@@ -200,6 +215,14 @@ async function streamOffreDeFormation(options = {}) {
             )
           ) {
             accumulator.push({ affelnet_id, siret_responsable, siret_formateur });
+          }
+
+          if (siret_formateur === "41884676200114") {
+            console.log({
+              affelnet_id,
+              siret_responsable,
+              siret_formateur,
+            });
           }
 
           return accumulator;

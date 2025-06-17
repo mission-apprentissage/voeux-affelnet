@@ -124,14 +124,6 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
   const { findFormation } = await catalogue();
 
   return oleoduc(
-    // sourceCsv,
-    // parseCsv({
-    //   quote: '"',
-    //   on_record: (record) => {
-    //     const filtered = pickBy(record, (v) => !isEmpty(v) && v !== "-");
-    //     return trimValues(filtered);
-    //   },
-    // }),
     await fixExtractionVoeux(sourceCsv, overwriteCsv),
 
     transformData(async (line) => {
@@ -144,14 +136,23 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
       const uaiEtablissementResponsable = line["UAI Établissement responsable"]?.toUpperCase();
       const uaiEtablissementFormateur = line["UAI Établissement formateur"]?.toUpperCase();
 
-      const siretEtablissementResponsable = getSiretResponsableFromCleMinistereEducatif(
-        cle_ministere_educatif,
-        line["SIRET UAI gestionnaire"]?.toUpperCase()
-      );
-      const siretEtablissementFormateur = getSiretFormateurFromCleMinistereEducatif(
-        cle_ministere_educatif,
-        line["SIRET UAI formateur"]?.toUpperCase()
-      );
+      const overwrite = line["OVERWRITE"];
+
+      const siretEtablissementResponsable =
+        overwrite && line["SIRET UAI gestionnaire"]
+          ? line["SIRET UAI gestionnaire"]?.toUpperCase()
+          : getSiretResponsableFromCleMinistereEducatif(
+              cle_ministere_educatif,
+              line["SIRET UAI gestionnaire"]?.toUpperCase()
+            );
+
+      const siretEtablissementFormateur =
+        overwrite && line["SIRET UAI formateur"]
+          ? line["SIRET UAI formateur"]?.toUpperCase()
+          : getSiretFormateurFromCleMinistereEducatif(
+              cle_ministere_educatif,
+              line["SIRET UAI formateur"]?.toUpperCase()
+            );
 
       const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase();
       const academieDuVoeu = pickAcademie(
@@ -180,11 +181,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
         }
 
         if (!formation) {
-          formation = await findFormation({ published: true, affelnet_id });
-        }
-
-        if (!formation) {
-          formation = await findFormation({ affelnet_id });
+          formation = await findFormation({ published: true, affelnet_statut: "publié", affelnet_id });
         }
 
         if (formation) {
@@ -205,6 +202,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
         uaiFormateur ??= formateur?.uai;
       }
 
+      // TODO : Retirer deepOmitEmpty to allo empty adress fields, without it being detected as an update on the field.
       return deepOmitEmpty({
         academie: academieDuVoeu,
         apprenant: {
