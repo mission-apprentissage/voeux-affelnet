@@ -137,9 +137,9 @@ async function importEtablissements(csv, options = {}) {
             }
 
             if (!organisme) {
-              stats.failed++;
-              logger.error(`L'établissement ${siret} n'est pas dans le catalogue`);
-              return;
+              // stats.failed++;
+              logger.warn(`L'établissement ${siret} n'est pas dans le catalogue`);
+              // return;
             }
           }
 
