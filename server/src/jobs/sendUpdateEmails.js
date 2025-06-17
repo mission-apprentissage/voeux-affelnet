@@ -68,7 +68,9 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
 
       if (!responsable || !formateur) {
         stats.skiped++;
-        logger.error("Responsable ou formateur manquant");
+        logger.error(
+          `[ERROR] Responsable ou formateur manquant pour la relation ${relation.etablissement_responsable.siret} / ${relation.etablissement_formateur.siret}`
+        );
         return stats;
       }
 
@@ -95,13 +97,17 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
       }
 
       if (!user) {
-        logger.error("Utilisateur introuvable pour la relation " + relation._id);
+        logger.error(
+          `[ERROR] Utilisateur introuvable pour la relation ${relation.etablissement_responsable.siret} / ${relation.etablissement_formateur.siret}`
+        );
         stats.skiped++;
         return stats;
       }
 
       if (!user.email) {
-        logger.error("Absence d'adresse courriel pour l'utilisateur " + user._id);
+        logger.error(
+          `[ERROR] Absence d'adresse courriel pour l'utilisateur ${user.username} pour la relation ${relation.etablissement_responsable.siret} / ${relation.etablissement_formateur.siret}`
+        );
         stats.skiped++;
         return stats;
       }
@@ -219,13 +225,15 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
             logger.info(
               `[DONE] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
                 user.email
-              })...`
+              }) for formateur ${formateur.siret}...`
             );
 
             previous ? stats.resent++ : stats.sent++;
           } catch (e) {
             logger.error(
-              `[ERROR] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username}`,
+              `[ERROR] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${
+                user.username
+              } for formateur ${formateur.siret}`,
               e
             );
             stats.failed++;
@@ -237,7 +245,7 @@ async function sendUpdateEmails({ sendEmail, resendEmail }, options = {}) {
           logger.info(
             `[TODO] ${previous ? "Res" : "S"}end ${templateName} email to ${templateType} ${user.username} (${
               user.email
-            })...`
+            }) for formateur ${formateur.siret}...`
           );
           previous ? stats.resent++ : stats.sent++;
           break;
