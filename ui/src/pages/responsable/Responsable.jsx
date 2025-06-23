@@ -870,8 +870,8 @@ export const Responsable = () => {
       (a, b) =>
         b.nombre_voeux_restant - a.nombre_voeux_restant ||
         b.nombre_voeux - a.nombre_voeux ||
-        -b.formateur?.raison_sociale.localeCompare(a.formateur.raison_sociale) ||
-        -b.formateur?.libelle_ville.localeCompare(a.formateur.libelle_ville)
+        -b.formateur?.raison_sociale?.localeCompare(a.formateur.raison_sociale) ||
+        -b.formateur?.libelle_ville?.localeCompare(a.formateur.libelle_ville)
     );
 
   // const relationsFormateur = etablissement.relations.filter(
