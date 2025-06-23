@@ -1268,7 +1268,7 @@ const computeVoeuxStats = async (filter = {}) => {
 const computeProgressesStats = async (filter = {}) => {
   const relationEtablissementsFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
-    "etablissement_formateur.siret": { $nin: UAIS_RECENSEMENT },
+    "etablissement_formateur.siret": { $ne: SIRET_RECENSEMENT },
   };
 
   const relationAcademieFilter = {

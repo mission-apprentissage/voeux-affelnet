@@ -128,15 +128,15 @@ async function streamOffreDeFormation(options = {}) {
           ? data["SIRET_UAI_FORMATEUR"]
           : getSiretFormateurFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_FORMATEUR"]) ?? "";
 
-        if (overwrite) {
-          console.log({
-            affelnet_id: `${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`,
-            overwrite,
-            cle_ministere_educatif,
-            siret_responsable,
-            siret_formateur,
-          });
-        }
+        // if (overwrite) {
+        //   console.log({
+        //     affelnet_id: `${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`,
+        //     overwrite,
+        //     cle_ministere_educatif,
+        //     siret_responsable,
+        //     siret_formateur,
+        //   });
+        // }
 
         const uai_accueil = data["UAI"]?.toUpperCase();
         let uai_formateur = data["UAI_FORMATEUR"]?.toUpperCase();
@@ -215,14 +215,6 @@ async function streamOffreDeFormation(options = {}) {
             )
           ) {
             accumulator.push({ affelnet_id, siret_responsable, siret_formateur });
-          }
-
-          if (siret_formateur === "41884676200114") {
-            console.log({
-              affelnet_id,
-              siret_responsable,
-              siret_formateur,
-            });
           }
 
           return accumulator;

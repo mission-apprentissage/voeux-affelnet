@@ -361,6 +361,15 @@ module.exports = ({ sendEmail, resendEmail }) => {
           : []),
 
         { $lookup: lookupRelations },
+
+        // ...(academie || !!defaultAcademies?.length
+        //   ? [
+        //       {
+        //         $match: { "relations.academie.code": { $in: academie ? [academie] : defaultAcademies } },
+        //       },
+        //     ]
+        //   : []),
+
         { $addFields: addTypeFields },
 
         { $match: { $or: [{ is_responsable_formateur: true }, { is_responsable: true }] } },
@@ -490,7 +499,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       )?.[0];
 
       if (!etablissement) {
-        throw Error("Etablissement introuvable");
+        throw Boom.notFound("Etablissement introuvable");
       }
 
       // Responsable.populate(responsable, { path: "relations.voeux_telechargements.user", select: "-password" });
@@ -530,7 +539,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
       )?.[0];
 
       if (!responsable) {
-        throw Error("Responsable introuvable");
+        throw Boom.notFound("Responsable introuvable");
       }
 
       res.json(responsable);
