@@ -60,11 +60,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
               {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret : {relation.formateur?.siret ?? "Inconnu"}{" "}
               - UAI : {relation.formateur?.uai ?? "Inconnu"}
             </Text>{" "}
-            {!!relation.nombre_voeux && (
-              <>
-                - <RelationStatut relation={relation} />
-              </>
-            )}
+            - <RelationStatut relation={relation} />
             {/*
             {!!relation.nombre_voeux_restant && (
               <Text>
@@ -103,11 +99,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
                   <EtablissementRaisonSociale etablissement={relation.formateur} />,{" "}
                   {relation.formateur?.libelle_ville ?? "Ville inconnue"} - Siret :{" "}
                   {relation.formateur?.siret ?? "Inconnu"} - UAI : {relation.formateur?.uai ?? "Inconnu"}
-                  {!!relation.nombre_voeux && (
-                    <>
-                      - <RelationStatut relation={relation} />
-                    </>
-                  )}
+                  - <RelationStatut relation={relation} />
                   {/* {!!relation.nombre_voeux_restant && (
                   <Text>
                     {relation.nombre_voeux_restant} candidature
@@ -171,11 +163,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
                   />
                 </>
               )}{" "}
-              {!!relation.nombre_voeux && (
-                <>
-                  - <RelationStatut relation={relation} />
-                </>
-              )}
+              - <RelationStatut relation={relation} />
             </Text>
           </ListItem>
         ))}
@@ -240,11 +228,7 @@ export const ListRelations = ({ relations, delegation, limit }) => {
                       />
                     </>
                   )}{" "}
-                  {!!relation.nombre_voeux && (
-                    <>
-                      - <RelationStatut relation={relation} />
-                    </>
-                  )}
+                  - <RelationStatut relation={relation} />
                 </Text>
               </ListItem>
             ))}

@@ -159,10 +159,10 @@ const ConfirmationPage = () => {
                       </>
                     )}
                   </Text>
-                  <Text mb={8}>
+                  {/* <Text mb={8}>
                     Cette étape est indispensable pour vous permettre de recevoir les listes de candidats qui seront
                     diffusées à partir de la première semaine de juin.
-                  </Text>
+                  </Text> */}
 
                   <Formik
                     initialValues={{

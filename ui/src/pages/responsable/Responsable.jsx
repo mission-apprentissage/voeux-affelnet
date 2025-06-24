@@ -645,8 +645,15 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
                 </>
               ) : (
                 <Text>
-                  Vous avez autorisé les droits de diffusion directe à {delegue.email}, mais cette personne n'a pas
-                  encore téléchargé la liste.{" "}
+                  Vous avez autorisé les droits de diffusion directe à {delegue.email}
+                  {relation.nombre_voeux === relation.nombre_voeux_restant ? (
+                    <>, mais cette personne n'a pas encore téléchargé la liste. </>
+                  ) : (
+                    <>
+                      . La mise à jour diffusée le {new Date(relation.last_date_voeux).toLocaleDateString()} n’a pas
+                      encore été téléchargée.{" "}
+                    </>
+                  )}
                   <Link variant="action" onClick={onOpenDelegationAvecCandidaturesRestantesModal}>
                     Que faire ?
                   </Link>
