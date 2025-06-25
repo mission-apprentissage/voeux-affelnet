@@ -61,7 +61,7 @@
     "test": "craco test",
     "test:coverage": "craco test --watchAll=false --coverage",
     "eject": "craco eject",
-    "lint": "prettier --write **/*.js **/*.jsx",
+    "lint": "prettier --write '**/*.js' '**/*.jsx'",
     "serve": "ws --port 3000 -d build --log.format dev --spa index.html"
   },
   "eslintConfig": {
