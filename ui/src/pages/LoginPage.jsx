@@ -194,7 +194,7 @@ function LoginPage() {
                       <Button variant="primary" type="submit">
                         Connexion
                       </Button>
-                      <Link to={`/forgotten-password?username=${values.username}`} as={NavLink} color="grey.500">
+                      <Link to={`/forgotten-password?username=${values.username}`} as={NavLink} variant="action">
                         Mot de passe oublié
                       </Link>
                     </HStack>
