@@ -33,10 +33,7 @@ import { ContactStatut } from "../../common/components/admin/fields/ContactStatu
 import { RelationStatut } from "../../common/components/admin/fields/RelationStatut";
 import { RelationsStatut } from "../../common/components/admin/fields/RelationsStatut";
 import { FileDownloadLine } from "../../theme/components/icons/FileDownloadLine";
-import {
-  EtablissementRaisonSociale,
-  EtablissementLibelle,
-} from "../../common/components/etablissement/fields/EtablissementLibelle";
+import { EtablissementRaisonSociale } from "../../common/components/etablissement/fields/EtablissementLibelle";
 import { StatutBadge } from "../../common/components/StatutBadge";
 import { WarningFill } from "../../theme/components/icons";
 
@@ -529,7 +526,7 @@ export const Etablissements = () => {
                         </Text>
 
                         <Text mt={6}>
-                          <RelationsStatut relations={etablissement.relations} />
+                          <RelationsStatut etablissement={etablissement} />
                         </Text>
                       </Box>
                     </Td>
