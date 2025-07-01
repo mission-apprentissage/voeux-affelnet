@@ -254,6 +254,32 @@ async function download(output, options = {}) {
           }
         },
 
+        "Statut générique": async ({ nombre_voeux, nombre_voeux_restant }) => {
+          const partialDownload = `⚠️ Mise à jour non téléchargée`;
+          const noDownload = `⚠️ Candidatures non téléchargées`;
+          const fullDownload = `✅ Candidatures toutes téléchargées`;
+          const noCandidature = `✅ Aucune candidature`;
+          const unknown = `⚠️ État inconnu`;
+
+          switch (true) {
+            case nombre_voeux && nombre_voeux_restant && nombre_voeux_restant !== nombre_voeux:
+              return partialDownload;
+
+            case nombre_voeux && nombre_voeux_restant === nombre_voeux:
+              return noDownload;
+
+            case nombre_voeux && !nombre_voeux_restant:
+              return fullDownload;
+
+            case !nombre_voeux:
+              return noCandidature;
+
+            default: {
+              return unknown;
+            }
+          }
+        },
+
         "Dernière action [libellé technique]": async ({ histories }) => {
           return histories?.[histories.length - 1]?.action;
         },
