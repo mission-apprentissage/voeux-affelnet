@@ -4,7 +4,7 @@ const { pick } = require("lodash");
 const { oleoduc, writeData, filterData, accumulateData, flattenArray } = require("oleoduc");
 
 const CatalogueApi = require("../common/api/CatalogueApi");
-const { findAcademieByUai } = require("../common/academies");
+const { findAcademieByUai, findAcademieByCode } = require("../common/academies");
 const { Etablissement } = require("../common/model");
 const logger = require("../common/logger");
 const { arrayOf } = require("../common/validators");
@@ -102,50 +102,51 @@ async function importEtablissements(csv, options = {}) {
         }
 
         try {
-          const found = await Etablissement.findOne({ siret: siret }).lean();
+          const existing = await Etablissement.findOne({ siret: siret }).lean();
+
           let organisme;
 
-          if (
-            !found ||
-            !found.email ||
-            !found.enseigne ||
-            !found.raison_sociale ||
-            !found.libelle_ville ||
-            !found.adresse ||
-            !found.academie
-          ) {
-            const organismes = (
-              await catalogueApi.getEtablissements({ siret: siret, published: true }).catch(() => {
-                return null;
-              })
-            )?.etablissements;
-
-            if (organismes?.length > 1) {
-              logger.error(`Multiples organismes trouvés dans le catalogue pour le SIRET ${siret}`);
-              stats.failed++;
-              return;
-            }
-
-            organisme = await catalogueApi.getEtablissement({ siret, published: true }).catch(() => {
+          // if (
+          //   !existing ||
+          //   !existing.email ||
+          //   !existing.enseigne ||
+          //   !existing.raison_sociale ||
+          //   !existing.libelle_ville ||
+          //   !existing.adresse ||
+          //   !existing.academie
+          // ) {
+          const organismes = (
+            await catalogueApi.getEtablissements({ siret: siret, published: true }).catch(() => {
               return null;
-            });
+            })
+          )?.etablissements;
 
-            if (!organisme) {
-              organisme = await catalogueApi.getEtablissement({ siret }).catch(() => {
-                return null;
-              });
-            }
-
-            if (!organisme) {
-              // stats.failed++;
-              logger.warn(`L'établissement ${siret} n'est pas dans le catalogue`);
-              // return;
-            }
+          if (organismes?.length > 1) {
+            logger.error(`Multiples organismes trouvés dans le catalogue pour le SIRET ${siret}`);
+            stats.failed++;
+            return;
           }
 
-          let foundEmail = email ?? found?.email;
+          organisme = await catalogueApi.getEtablissement({ siret, published: true }).catch(() => {
+            return null;
+          });
 
-          if (!foundEmail && types.includes("Responsable")) {
+          if (!organisme) {
+            organisme = await catalogueApi.getEtablissement({ siret }).catch(() => {
+              return null;
+            });
+          }
+
+          if (!organisme) {
+            // stats.failed++;
+            logger.warn(`L'établissement ${siret} n'est pas dans le catalogue`);
+            // return;
+          }
+          // }
+
+          let existingEmail = email ?? existing?.email;
+
+          if (!existingEmail && types.includes("Responsable")) {
             // logger.debug(`Email non trouvé pour l'établissement ${siret}, recherche dans les formations Catalogue`);
             const formations = (
               await catalogueApi.getFormations({
@@ -163,18 +164,25 @@ async function importEtablissements(csv, options = {}) {
             ]);
 
             if (emails.size === 1 && formations[0].etablissement_gestionnaire_courriel) {
-              foundEmail = formations[0].etablissement_gestionnaire_courriel;
-              logger.info(`Email trouvé pour l'établissement ${siret} : "${foundEmail}"`);
+              existingEmail = formations[0].etablissement_gestionnaire_courriel;
+              logger.info(`Email trouvé pour l'établissement ${siret} : "${existingEmail}"`);
             } else {
               logger.warn(`Email non trouvé pour l'établissement ${siret} `);
             }
           }
 
+          const academie =
+            organisme?.uai ?? existing?.uai
+              ? findAcademieByUai(organisme?.uai ?? existing?.uai)
+              : organisme?.num_academie
+              ? findAcademieByCode(`${organisme.num_academie}`.padStart(2, "0"))
+              : findAcademieByCode(`??`);
+
           const updates = omitEmpty({
-            email: foundEmail,
-            raison_sociale: organisme?.entreprise_raison_sociale ?? found?.raison_sociale,
-            enseigne: organisme?.enseigne ?? found?.enseigne,
-            uai: organisme?.uai ?? found?.uai,
+            email: existingEmail,
+            raison_sociale: organisme?.entreprise_raison_sociale ?? existing?.raison_sociale,
+            enseigne: organisme?.enseigne ?? existing?.enseigne,
+            uai: organisme?.uai ?? existing?.uai,
             adresse: organisme
               ? [
                   organisme?.numero_voie,
@@ -185,12 +193,9 @@ async function importEtablissements(csv, options = {}) {
                 ]
                   .filter((value) => !!value)
                   .join(" ")
-              : found?.adresse,
-            libelle_ville: organisme?.localite ?? found?.libelle_ville,
-            academie:
-              organisme?.uai ?? found?.uai
-                ? pick(findAcademieByUai(organisme?.uai ?? found?.uai), ["code", "nom"])
-                : { code: "??", nom: "N/A" },
+              : existing?.adresse,
+            libelle_ville: organisme?.localite ?? existing?.libelle_ville,
+            academie: pick(academie, ["code", "nom"]),
           });
 
           const res = await Etablissement.updateOne(
@@ -201,11 +206,11 @@ async function importEtablissements(csv, options = {}) {
                 username: siret,
               },
               $set: updates,
-              ...(found && found?.email !== foundEmail
+              ...(existing && existing?.email !== existingEmail
                 ? {
                     $push: {
                       anciens_emails: {
-                        email: found.email,
+                        email: existing.email,
                         modification_date: new Date(),
                         auteur: process.env.VOEUX_AFFELNET_EMAIL,
                       },
@@ -222,7 +227,7 @@ async function importEtablissements(csv, options = {}) {
           } else if (res.modifiedCount) {
             stats.updated++;
 
-            const previous = pick(found, [
+            const previous = pick(existing, [
               "raison_sociale",
               "enseigne",
               "uai",
