@@ -3,8 +3,8 @@ import { StatutBadge } from "../../StatutBadge";
 
 export const useRelationStatutValues = ({ nombre_voeux, nombre_voeux_restant }) => {
   const partialDownload = `${nombre_voeux} candidature${nombre_voeux > 1 ? "s" : ""}, dont ${nombre_voeux_restant} non téléchargée${nombre_voeux_restant > 1 ? "s" : ""}`;
-  const noDownload = `${nombre_voeux} candidatures, non téléchargée${nombre_voeux > 1 ? "s" : ""}`;
-  const fullDownload = `${nombre_voeux} candidatures, toutes téléchargée${nombre_voeux > 1 ? "s" : ""}`;
+  const noDownload = `${nombre_voeux} candidature${nombre_voeux > 1 ? "s" : ""}, non téléchargée${nombre_voeux > 1 ? "s" : ""}`;
+  const fullDownload = `${nombre_voeux} candidature${nombre_voeux > 1 ? "s" : ""}, ${nombre_voeux > 1 ? "toutes " : " "}téléchargée${nombre_voeux > 1 ? "s" : ""}`;
   const noCandidature = `Aucune candidature`;
   const unknown = `État inconnu`;
 
