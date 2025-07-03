@@ -37,7 +37,10 @@ import { EtablissementRaisonSociale } from "../../common/components/etablissemen
 import { StatutBadge } from "../../common/components/StatutBadge";
 import { WarningFill } from "../../theme/components/icons";
 
-export const ListRelations = ({ relations, delegation, limit }) => {
+import { useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
+
+const ListRelations = ({ relations, delegation, limit }) => {
   const [showMore, setShowMore] = useState(false);
 
   const toggleShowMore = () => {
@@ -241,9 +244,11 @@ export const ListRelations = ({ relations, delegation, limit }) => {
 };
 
 export const Etablissements = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mounted = useRef(false);
+
   const defaultLimit = 3;
   const [limit, setLimit] = useState(defaultLimit);
-  const mounted = useRef(true);
 
   const [abortController, setAbortController] = useState(new AbortController());
   const [error, setError] = useState();
@@ -261,8 +266,29 @@ export const Etablissements = () => {
   const [academies] = useGet("/api/constant/academies", []);
   const [self] = useGet("/api/admin", null);
 
+  const initialValues = useMemo(
+    () => ({
+      text: searchParams?.get("text") ?? "",
+      ...(self?.academies?.length === 1
+        ? { academie: self?.academies[0].code }
+        : { ...(searchParams?.get("academie") ? { academie: searchParams?.get("academie") } : {}) }),
+      ...(searchParams?.get("missing_email") === "true"
+        ? { missing_email: searchParams?.get("missing_email") === "true" }
+        : {}),
+      ...(searchParams?.get("page") ? { page: searchParams?.get("page") } : { page: 1 }),
+    }),
+    [searchParams, self?.academies]
+  );
+
   const search = useCallback(
     async (values) => {
+      values?.text?.length ? setLimit(100) : setLimit(defaultLimit);
+
+      const params = new URLSearchParams(values);
+      if (values) {
+        setSearchParams(params, { replace: true });
+      }
+
       abortController?.abort();
       try {
         const controller = new AbortController();
@@ -294,7 +320,7 @@ export const Etablissements = () => {
         }
       }
     },
-    [self, abortController, setAbortController]
+    [abortController, setSearchParams, self?.academies]
   );
 
   const { downloadStatut, isDownloadingStatut } = useDownloadStatut();
@@ -313,25 +339,24 @@ export const Etablissements = () => {
 
   const callback = useCallback(
     async (values) => {
-      values?.text?.length ? setLimit(100) : setLimit(defaultLimit);
-      await search({ page: 1, ...values });
+      await search({ ...values, page: 1 });
     },
-    [search, setLimit, defaultLimit]
+    [search]
   );
 
   useEffect(() => {
     const run = async () => {
-      await callback();
+      await search(initialValues);
     };
 
-    if (mounted.current) {
+    if (!mounted.current) {
       run();
     }
 
     return () => {
-      mounted.current = false;
+      mounted.current = true;
     };
-  }, [callback]);
+  }, [search, initialValues]);
 
   if (!self) {
     return;
@@ -343,10 +368,7 @@ export const Etablissements = () => {
       <Page title="Listes de candidats Affelnet : console de pilotage">
         <Formik
           enableReinitialize
-          initialValues={{
-            text: "",
-            ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
-          }}
+          initialValues={initialValues}
           validationSchema={Yup.object().shape({
             text: Yup.string(),
           })}
@@ -395,7 +417,10 @@ export const Etablissements = () => {
                           <Input
                             placeholder={"Chercher un SIRET, un UAI, une raison sociale, un email"}
                             style={{ margin: 0 }}
-                            onChange={handleSubmit}
+                            onChange={(value) => {
+                              handleChange(value);
+                              handleSubmit();
+                            }}
                             onInput={handleSubmit}
                             {...field}
                           />
@@ -409,7 +434,15 @@ export const Etablissements = () => {
                   <Field name="missing_email">
                     {({ field, meta }) => {
                       return (
-                        <Checkbox onChange={handleSubmit} onInput={handleSubmit} {...field}>
+                        <Checkbox
+                          onChange={(value) => {
+                            handleChange(value);
+                            handleSubmit();
+                          }}
+                          onInput={handleSubmit}
+                          isChecked={field.value}
+                          {...field}
+                        >
                           Limiter aux établissements sans adresse courriel
                         </Checkbox>
                       );
