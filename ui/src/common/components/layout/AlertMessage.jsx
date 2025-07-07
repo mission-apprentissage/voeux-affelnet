@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Box, Alert, AlertIcon, AlertDescription, Text, Flex } from "@chakra-ui/react";
 import { _get } from "../../httpClient";
+import { useDocumentVisibility } from "../../hooks/useDocumentVisibilty";
 
 export const AlertMessage = () => {
   const [messages, setMessages] = useState([]);
   const mounted = useRef(false);
+  const isDocumentVisible = useDocumentVisibility();
 
   const getMessages = useCallback(async () => {
     try {
@@ -16,14 +18,9 @@ export const AlertMessage = () => {
   }, []);
 
   useEffect(() => {
-    let interval;
-
     const run = async () => {
       mounted.current = true;
       await getMessages();
-      interval = setInterval(async () => {
-        await getMessages();
-      }, 60000);
     };
 
     if (!mounted.current) {
@@ -32,9 +29,24 @@ export const AlertMessage = () => {
 
     return () => {
       mounted.current = false;
-      interval && clearInterval(interval);
     };
   }, [getMessages]);
+
+  useEffect(() => {
+    let interval;
+
+    interval = setInterval(async () => {
+      if (isDocumentVisible) {
+        await getMessages();
+      } else {
+        console.log("Document is not visible, skipping message fetch");
+      }
+    }, 30000);
+
+    return () => {
+      interval && clearInterval(interval);
+    };
+  }, [getMessages, isDocumentVisible]);
 
   if (messages.length === 0) return null;
 
