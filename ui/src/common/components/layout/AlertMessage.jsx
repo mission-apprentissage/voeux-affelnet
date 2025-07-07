@@ -38,8 +38,6 @@ export const AlertMessage = () => {
     interval = setInterval(async () => {
       if (isDocumentVisible) {
         await getMessages();
-      } else {
-        console.log("Document is not visible, skipping message fetch");
       }
     }, 30000);
 
