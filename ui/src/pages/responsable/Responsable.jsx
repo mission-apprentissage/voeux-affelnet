@@ -47,6 +47,7 @@ import { useDownloadVoeux } from "../../common/hooks/responsableHooks";
 import { ConfirmDelegationModal } from "../../common/components/responsable/modals/ConfirmDelegationModal";
 import { DownloadVoeuxModal } from "../../common/components/responsable/modals/DownloadVoeuxModal";
 import { USER_STATUS } from "../../common/constants/UserStatus";
+import { RelationActions } from "../../common/constants/History";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -634,7 +635,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
             )} */}
           {!!delegue ? (
             <Box mt={4}>
-              {!!relation.nombre_voeux && !relation.nombre_voeux_restant ? (
+              {!!relation.histories.find((history) => history.action === RelationActions.LIST_DOWNLOADED_BY_DELEGUE) ? (
                 <>
                   <Text display={"flex"} alignItems="center" mb={4}>
                     Le destinataire ({delegue.email}) a bien téléchargé la liste de candidats.{" "}
