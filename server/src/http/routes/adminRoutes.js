@@ -326,7 +326,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
         missing_email: Joi.boolean(),
         page: Joi.number().default(1),
         items_par_page: Joi.number().default(10),
-        sort: Joi.string().default(JSON.stringify({ type: -1 })),
+        sort: Joi.string().default(JSON.stringify({ statut: -1 })),
       }).validateAsync(req.query, { abortEarly: false });
 
       const regex = "(.*" + text?.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*)+";

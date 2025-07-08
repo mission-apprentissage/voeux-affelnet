@@ -298,7 +298,7 @@ export const Etablissements = () => {
         const params = queryString.stringify(
           {
             ...values,
-            sort: JSON.stringify({ nombre_voeux_restant: -1, relations_count: -1 }),
+            sort: JSON.stringify({ statut: -1, nombre_voeux_restant: -1, relations_count: -1 }),
             ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
           },
           { skipNull: true, skipEmptyString: true }
