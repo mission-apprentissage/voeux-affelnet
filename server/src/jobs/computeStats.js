@@ -742,7 +742,7 @@ const computeVoeuxStats = async (filter = {}) => {
     etablissements.includes(siret)
   );
 
-  console.log({ responsables, formateurs });
+  // console.log({ responsables, formateurs });
 
   const voeuxFilter = {
     "etablissement_responsable.siret": { $ne: SIRET_RECENSEMENT },
@@ -1722,7 +1722,8 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.siret",
+            _id: "$etablissement_responsable.siret",
+            formateurs: { $addToSet: "$etablissement_formateur.siret" },
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1740,10 +1741,15 @@ const computeProgressesStats = async (filter = {}) => {
           },
         },
         {
+          $addFields: {
+            formateurs_count: { $size: "$formateurs" },
+          },
+        },
+        {
           $group: {
             _id: null,
             total: {
-              $sum: 1,
+              $sum: "$formateurs_count",
             },
           },
         },
@@ -1758,7 +1764,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.siret",
+            _id: "$etablissement_responsable.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1835,7 +1841,52 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.siret",
+            _id: "$etablissement_responsable.siret",
+            formateurs: { $addToSet: "$etablissement_formateur.siret" },
+            nombre_voeux: { $sum: "$nombre_voeux" },
+            nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
+          },
+        },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: { $ne: ["$nombre_voeux", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux_restant", 0] },
+              },
+              {
+                $expr: { $ne: ["$nombre_voeux", "$nombre_voeux_restant"] },
+              },
+            ],
+          },
+        },
+        {
+          $addFields: {
+            formateurs_count: { $size: "$formateurs" },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: {
+              $sum: "$formateurs_count",
+            },
+          },
+        },
+      ]).then((res) => (res.length > 0 ? res[0].total : 0)),
+
+      nbVoeux: Relation.aggregate([
+        {
+          $match: {
+            ...relationEtablissementsFilter,
+            ...relationAcademieFilter,
+          },
+        },
+        {
+          $group: {
+            _id: "$etablissement_responsable.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1859,13 +1910,13 @@ const computeProgressesStats = async (filter = {}) => {
           $group: {
             _id: null,
             total: {
-              $sum: 1,
+              $sum: "$nombre_voeux",
             },
           },
         },
       ]).then((res) => (res.length > 0 ? res[0].total : 0)),
 
-      nbVoeux: Relation.aggregate([
+      nbVoeuxRestant: Relation.aggregate([
         {
           $match: {
             ...relationEtablissementsFilter,
@@ -1874,7 +1925,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.siret",
+            _id: "$etablissement_responsable.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1954,7 +2005,8 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.siret",
+            _id: "$etablissement_responsable.siret",
+            formateurs: { $addToSet: "$etablissement_formateur.siret" },
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -1975,10 +2027,15 @@ const computeProgressesStats = async (filter = {}) => {
           },
         },
         {
+          $addFields: {
+            formateurs_count: { $size: "$formateurs" },
+          },
+        },
+        {
           $group: {
             _id: null,
             total: {
-              $sum: 1,
+              $sum: "$formateurs_count",
             },
           },
         },
@@ -1993,7 +2050,7 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.siret",
+            _id: "$etablissement_responsable.siret",
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -2067,7 +2124,8 @@ const computeProgressesStats = async (filter = {}) => {
         },
         {
           $group: {
-            _id: "$etablissement_formateur.siret",
+            _id: "$etablissement_responsable.siret",
+            formateurs: { $addToSet: "$etablissement_formateur.siret" },
             nombre_voeux: { $sum: "$nombre_voeux" },
             nombre_voeux_restant: { $sum: "$nombre_voeux_restant" },
           },
@@ -2082,10 +2140,15 @@ const computeProgressesStats = async (filter = {}) => {
           },
         },
         {
+          $addFields: {
+            formateurs_count: { $size: "$formateurs" },
+          },
+        },
+        {
           $group: {
             _id: null,
             total: {
-              $sum: 1,
+              $sum: "$formateurs_count",
             },
           },
         },
