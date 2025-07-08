@@ -53,7 +53,7 @@ export const descriptions = new Map([
   ],
 ]);
 
-export const ContactStatut = ({ user, short = false, responsable = false }) => {
+export const ResponsableStatut = ({ user, short = false }) => {
   if (!user) {
     return;
   }

@@ -30,6 +30,7 @@ import { useDownloadStatut } from "../../common/hooks/adminHooks";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { Page } from "../../common/components/layout/Page";
 import { ContactStatut } from "../../common/components/admin/fields/ContactStatut";
+import { ResponsableStatut } from "../../common/components/admin/fields/ResponsableStatut";
 import { RelationStatut } from "../../common/components/admin/fields/RelationStatut";
 import { RelationsStatut } from "../../common/components/admin/fields/RelationsStatut";
 import { FileDownloadLine } from "../../theme/components/icons/FileDownloadLine";
@@ -555,7 +556,7 @@ export const Etablissements = () => {
                         </Text>
 
                         <Text mt={6}>
-                          <ContactStatut user={etablissement} short />
+                          <ResponsableStatut user={etablissement} short />
                         </Text>
 
                         <Text mt={6}>
