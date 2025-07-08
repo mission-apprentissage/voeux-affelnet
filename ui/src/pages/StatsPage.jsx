@@ -107,6 +107,7 @@ function StatsPage() {
                 }}
               </Formik>
             </Box>
+
             <Box>
               <Heading as="h4" size="md" mb={8}>
                 Organismes
@@ -193,7 +194,6 @@ function StatsPage() {
 
                 <Stat mr={2}>
                   <StatLabel>
-                    {" "}
                     Nombre de personne ayant reçu une délégation mais n'ayant pas encore créé leur mot de passe
                   </StatLabel>
                   <StatNumber>
@@ -373,7 +373,7 @@ function StatsPage() {
                     {/*(
                   {+((progresses?.noDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
                   %)*/}{" "}
-                    et {progresses?.noDownload?.nbVoeux?.toLocaleString()} candidatures{" "}
+                    et {progresses?.noDownload?.nbVoeux?.toLocaleString()} candidatures à télécharger{" "}
                     {/*(
                   {+((progresses?.noDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
                   %)*/}
@@ -396,7 +396,8 @@ function StatsPage() {
                     {/*(
                  ({+((progresses?.partialDownload?.nbFormateur * 100) / organismes?.totalFormateur).toFixed(2)}
                   %)*/}{" "}
-                    et {progresses?.partialDownload?.nbVoeux?.toLocaleString()} candidatures
+                    et {progresses?.partialDownload?.nbVoeux?.toLocaleString()} candidatures (
+                    {progresses?.partialDownload?.nbVoeuxRestant?.toLocaleString()} à télécharger)
                     {/* (
                   {/*({+((progresses?.partialDownload?.nbVoeux * 100) / voeux?.total).toFixed(2)}
                   %)*/}
