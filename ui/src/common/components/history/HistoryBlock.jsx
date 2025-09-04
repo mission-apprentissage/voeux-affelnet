@@ -2,14 +2,17 @@ import { Text, Link, Box } from "@chakra-ui/react";
 import { getDelegueHistory, getRelationHistory, getResponsableHistory } from "./HistoryList";
 import { HistoryItem } from "./HistoryItem";
 import { useState } from "react";
+import useAuth from "../../hooks/useAuth";
 
 export const HistoryBlock = ({ relation, responsable, delegue }) => {
   const [showMore, setShowMore] = useState(false);
   const limit = 1;
 
-  const responsableHistories = responsable?.histories?.map((history) => getResponsableHistory(history));
-  const delegueHistories = delegue?.histories?.map((history) => getDelegueHistory(history));
-  const relationHistories = relation?.histories?.map((history) => getRelationHistory(history));
+  const [auth] = useAuth();
+
+  const responsableHistories = responsable?.histories?.map((history) => getResponsableHistory(history, auth));
+  const delegueHistories = delegue?.histories?.map((history) => getDelegueHistory(history, auth));
+  const relationHistories = relation?.histories?.map((history) => getRelationHistory(history, auth));
 
   const histories = [...(responsableHistories ?? []), ...(delegueHistories ?? []), ...(relationHistories ?? [])].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()

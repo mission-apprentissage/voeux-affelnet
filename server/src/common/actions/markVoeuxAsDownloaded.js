@@ -3,9 +3,67 @@ const { Etablissement, Delegue, Voeu, Relation } = require("../model");
 const {
   saveListDownloadedByResponsable,
   saveListDownloadedByDelegue,
+  saveListDownloadedByAcademie,
+  saveListDownloadedByAdmin,
   saveUpdatedListDownloadedByResponsable,
   saveUpdatedListDownloadedByDelegue,
+  saveUpdatedListDownloadedByAcademie,
+  saveUpdatedListDownloadedByAdmin,
 } = require("./history/relation");
+
+const markVoeuxAsDownloadedByAdmin = async ({ siret_responsable, siret_formateur, admin, comment }) => {
+  await Relation.updateOne(
+    { "etablissement_responsable.siret": siret_responsable, "etablissement_formateur.siret": siret_formateur },
+    {
+      $push: {
+        voeux_telechargements: {
+          $each: [{ user: admin._id, CONTACT_TYPE: CONTACT_TYPE.ADMIN, date: new Date() }],
+          $slice: 500,
+        },
+      },
+      $set: { nombre_voeux_restant: 0 },
+    }
+  );
+
+  if (
+    await Voeu.countDocuments({
+      "etablissement_responsable.siret": siret_responsable,
+      "etablissement_formateur.siret": siret_formateur,
+      "_meta.import_dates.1": { $exists: true },
+    })
+  ) {
+    await saveUpdatedListDownloadedByAdmin({ siret_responsable, siret_formateur, admin, comment });
+  } else {
+    await saveListDownloadedByAdmin({ siret_responsable, siret_formateur, admin, comment });
+  }
+};
+
+const markVoeuxAsDownloadedByAcademie = async ({ siret_responsable, siret_formateur, academie, comment }) => {
+  await Relation.updateOne(
+    { "etablissement_responsable.siret": siret_responsable, "etablissement_formateur.siret": siret_formateur },
+    {
+      $push: {
+        voeux_telechargements: {
+          $each: [{ user: academie._id, CONTACT_TYPE: CONTACT_TYPE.ACADEMIE, date: new Date() }],
+          $slice: 500,
+        },
+      },
+      $set: { nombre_voeux_restant: 0 },
+    }
+  );
+
+  if (
+    await Voeu.countDocuments({
+      "etablissement_responsable.siret": siret_responsable,
+      "etablissement_formateur.siret": siret_formateur,
+      "_meta.import_dates.1": { $exists: true },
+    })
+  ) {
+    await saveUpdatedListDownloadedByAcademie({ siret_responsable, siret_formateur, academie, comment });
+  } else {
+    await saveListDownloadedByAcademie({ siret_responsable, siret_formateur, academie, comment });
+  }
+};
 
 const markVoeuxAsDownloadedByResponsable = async ({ siret_responsable, siret_formateur }) => {
   const responsable = await Etablissement.findOne({ siret: siret_responsable }).lean();
@@ -76,6 +134,8 @@ const markVoeuxAsDownloadedByDelegue = async ({ siret_responsable, siret_formate
 };
 
 module.exports = {
+  markVoeuxAsDownloadedByAdmin,
+  markVoeuxAsDownloadedByAcademie,
   markVoeuxAsDownloadedByResponsable,
   markVoeuxAsDownloadedByDelegue,
 };

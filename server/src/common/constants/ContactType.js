@@ -1,4 +1,6 @@
 const CONTACT_TYPE = {
+  ADMIN: "Admin",
+  ACADEMIE: "Academie",
   RESPONSABLE: "Responsable",
   DELEGUE: "Delegue",
 };

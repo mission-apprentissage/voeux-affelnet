@@ -32,6 +32,7 @@ import { RelationStatut } from "../../common/components/admin/fields/RelationSta
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
 import { useDownloadVoeux } from "../../common/hooks/adminHooks";
 import { ConfirmDelegationModal } from "../../common/components/admin/modals/ConfirmDelegationModal";
+import { DownloadModal } from "../../common/components/admin/modals/DownloadModal";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -150,11 +151,7 @@ const RelationContact = ({ relation, callback }) => {
 };
 
 const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
-  const { downloadVoeux, isDownloadingVoeux } = useDownloadVoeux({
-    responsable: relation.responsable,
-    formateur: relation.formateur,
-    callback,
-  });
+  const { isOpen: isOpenDownloadModal, onOpen: onOpenDownloadModal, onClose: onCloseDownloadModal } = useDisclosure();
 
   const toast = useToast();
   const [sendingNotificationEmail, setSendingNotificationEmail] = useState(false);
@@ -296,10 +293,9 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
           <Button
             mt={4}
             variant={!!relation.nombre_voeux_restant ? "blue" : "blue-light"}
-            disabled={isDownloadingVoeux}
-            onClick={async () => await downloadVoeux()}
+            onClick={() => onOpenDownloadModal()}
           >
-            {isDownloadingVoeux ? <Spinner size="sm" mr={2} /> : <DownloadIcon mr={2} />}
+            <DownloadIcon mr={2} />
             Télécharger la liste
           </Button>
         </>
@@ -318,6 +314,13 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
           />
         </Box>
       )}
+
+      <DownloadModal
+        relation={relation}
+        callback={callback}
+        isOpen={isOpenDownloadModal}
+        onClose={onCloseDownloadModal}
+      />
     </Box>
   );
 };

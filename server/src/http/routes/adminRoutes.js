@@ -25,6 +25,10 @@ const { USER_TYPE } = require("../../common/constants/UserType");
 const { download } = require("../../jobs/download");
 const logger = require("../../common/logger");
 const Boom = require("boom");
+const {
+  markVoeuxAsDownloadedByAcademie,
+  markVoeuxAsDownloadedByAdmin,
+} = require("../../common/actions/markVoeuxAsDownloaded");
 
 const lookupRelations = {
   from: Relation.collection.name,
@@ -741,7 +745,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
   /**
    * Retourne la liste des voeux pour un formateur donné sous forme d'un CSV.
    */
-  router.get(
+  router.post(
     "/api/admin/responsables/:siret_responsable/formateurs/:siret_formateur/voeux",
     checkApiToken(),
     checkIsAdminOrAcademie(),
@@ -750,6 +754,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
         siret_formateur: Joi.string().pattern(siretFormat).required(),
         siret_responsable: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
+      const { mark_as_downloaded, comment } = await Joi.object()
+        .keys({
+          mark_as_downloaded: Joi.boolean().default(false),
+          comment: Joi.string().allow("").optional(),
+        })
+        .validateAsync(req.body, { abortEarly: false });
 
       const filename = `${siret_responsable}-${siret_formateur}.csv`;
 
@@ -757,6 +767,30 @@ module.exports = ({ sendEmail, resendEmail }) => {
       res.setHeader("Content-Type", `text/csv; charset=UTF-8`);
 
       try {
+        if (mark_as_downloaded) {
+          switch (req.user.type) {
+            case USER_TYPE.ADMIN:
+              await markVoeuxAsDownloadedByAdmin({
+                siret_responsable,
+                siret_formateur,
+                admin: req.user,
+                comment,
+              });
+              break;
+            case USER_TYPE.ACADEMIE:
+              await markVoeuxAsDownloadedByAcademie({
+                siret_responsable,
+                siret_formateur,
+                academie: req.user,
+                comment,
+              });
+              break;
+            default: {
+              break;
+            }
+          }
+        }
+
         return oleoduc(
           getVoeuxStream({ siret_responsable, siret_formateur }),
           transformIntoCSV({ mapper: (v) => `"${v || ""}"` }),

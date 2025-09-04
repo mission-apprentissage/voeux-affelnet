@@ -8,9 +8,13 @@ const { saveDelegationUpdatedByResponsable } = require("./delegationUpdatedByRes
 const { saveListAvailable } = require("./listAvailable");
 const { saveListDownloadedByDelegue } = require("./listDownloadedByDelegue");
 const { saveListDownloadedByResponsable } = require("./listDownloadedByResponsable");
+const { saveListDownloadedByAcademie } = require("./listDownloadedByAcademie");
+const { saveListDownloadedByAdmin } = require("./listDownloadedByAdmin");
 const { saveUpdatedListAvailable } = require("./updatedListAvailable");
 const { saveUpdatedListDownloadedByDelegue } = require("./updatedListDownloadedByDelegue");
 const { saveUpdatedListDownloadedByResponsable } = require("./updatedListDownloadedByResponsable");
+const { saveUpdatedListDownloadedByAcademie } = require("./updatedListDownloadedByAcademie");
+const { saveUpdatedListDownloadedByAdmin } = require("./updatedListDownloadedByAdmin");
 
 const {
   saveListAvailableEmailAutomaticResentToResponsable,
@@ -77,6 +81,10 @@ module.exports = {
   saveUpdatedListAvailableEmailManualSentToResponsable,
   saveListDownloadedByResponsable,
 
+  saveListDownloadedByAcademie,
+
+  saveListDownloadedByAdmin,
+
   saveListAvailableEmailAutomaticResentToDelegue,
   saveListAvailableEmailAutomaticSentToDelegue,
   saveListAvailableEmailManualResentToDelegue,
@@ -88,4 +96,8 @@ module.exports = {
   saveUpdatedListAvailableEmailManualResentToDelegue,
   saveUpdatedListAvailableEmailManualSentToDelegue,
   saveUpdatedListDownloadedByResponsable,
+
+  saveUpdatedListDownloadedByAcademie,
+
+  saveUpdatedListDownloadedByAdmin,
 };

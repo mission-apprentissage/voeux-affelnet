@@ -9,10 +9,14 @@ export const RelationActions = {
   LIST_AVAILABLE: "LIST_AVAILABLE",
   LIST_DOWNLOADED_BY_DELEGUE: "LIST_DOWNLOADED_BY_DELEGUE",
   LIST_DOWNLOADED_BY_RESPONSABLE: "LIST_DOWNLOADED_BY_RESPONSABLE",
+  LIST_DOWNLOADED_BY_ADMIN: "LIST_DOWNLOADED_BY_ADMIN",
+  LIST_DOWNLOADED_BY_ACADEMIE: "LIST_DOWNLOADED_BY_ACADEMIE",
 
   UPDATED_LIST_AVAILABLE: "UPDATED_LIST_AVAILABLE",
   UPDATED_LIST_DOWNLOADED_BY_DELEGUE: "UPDATED_LIST_DOWNLOADED_BY_DELEGUE",
   UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE: "UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE",
+  UPDATED_LIST_DOWNLOADED_BY_ADMIN: "UPDATED_LIST_DOWNLOADED_BY_ADMIN",
+  UPDATED_LIST_DOWNLOADED_BY_ACADEMIE: "UPDATED_LIST_DOWNLOADED_BY_ACADEMIE",
 
   LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE: "LIST_AVAILABLE_EMAIL_AUTOMATIC_RESENT_TO_DELEGUE",
   LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE: "LIST_AVAILABLE_EMAIL_AUTOMATIC_SENT_TO_DELEGUE",
@@ -95,14 +99,33 @@ export const RelationHistoryItems = new Map([
     RelationActions.LIST_DOWNLOADED_BY_DELEGUE,
     {
       component: ({ delegue }) =>
-        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact délégué (${delegue.email}).`,
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact délégué (${delegue?.email}).`,
     },
   ],
   [
     RelationActions.LIST_DOWNLOADED_BY_RESPONSABLE,
     {
       component: ({ responsable }) =>
-        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact responsable (${responsable.email}).`,
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact responsable (${responsable?.email}).`,
+    },
+  ],
+
+  [
+    RelationActions.LIST_DOWNLOADED_BY_ADMIN,
+    {
+      component: ({ admin }) =>
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte administrateur (${admin?.email}).`,
+      componentAdmin: ({ admin, comment }) =>
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte administrateur (${admin?.email}). Raison : ${comment || "non spécifiée"}.`,
+    },
+  ],
+  [
+    RelationActions.LIST_DOWNLOADED_BY_ACADEMIE,
+    {
+      component: ({ academie }) =>
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte académique (${academie?.email}).`,
+      componentAdmin: ({ academie, comment }) =>
+        `La liste des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte académique (${academie?.email}). Raison : ${comment || "non spécifiée"}.`,
     },
   ],
 
@@ -119,14 +142,33 @@ export const RelationHistoryItems = new Map([
     RelationActions.UPDATED_LIST_DOWNLOADED_BY_DELEGUE,
     {
       component: ({ delegue }) =>
-        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact délégué (${delegue.email}).`,
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact délégué (${delegue?.email}).`,
     },
   ],
   [
     RelationActions.UPDATED_LIST_DOWNLOADED_BY_RESPONSABLE,
     {
       component: ({ responsable }) =>
-        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact responsable (${responsable.email}).`,
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le contact responsable (${responsable?.email}).`,
+    },
+  ],
+
+  [
+    RelationActions.UPDATED_LIST_DOWNLOADED_BY_ADMIN,
+    {
+      component: ({ admin }) =>
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte admin (${admin?.email}).`,
+      componentAdmin: ({ admin, comment }) =>
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte admin (${admin?.email}). Raison : ${comment || "non spécifiée"}.`,
+    },
+  ],
+  [
+    RelationActions.UPDATED_LIST_DOWNLOADED_BY_ACADEMIE,
+    {
+      component: ({ academie }) =>
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte académique (${academie?.email}).`,
+      componentAdmin: ({ academie, comment }) =>
+        `La liste mise à jour des candidats aux formations proposées par l'établissement pour le compte de l'organisme responsable a été téléchargée par le compte académique (${academie?.email}). Raison : ${comment || "non spécifiée"}.`,
     },
   ],
 

@@ -9,7 +9,14 @@ export const useDownloadVoeux = ({ responsable: initialResponsable, formateur: i
   const [isDownloadingVoeux, setIsDownloadingVoeux] = useState(false);
 
   const downloadVoeux = useCallback(
-    async ({ responsable, formateur } = { responsable: initialResponsable, formateur: initialFormateur }) => {
+    async (
+      { responsable, formateur, mark_as_downloaded, comment } = {
+        responsable: initialResponsable,
+        formateur: initialFormateur,
+        mark_as_downloaded: false,
+        comment: null,
+      }
+    ) => {
       try {
         setIsDownloadingVoeux(true);
 
@@ -18,8 +25,9 @@ export const useDownloadVoeux = ({ responsable: initialResponsable, formateur: i
         const content = await fetch(
           `/api/admin/responsables/${responsable?.siret}/formateurs/${formateur?.siret}/voeux`,
           {
-            method: "GET",
+            method: "POST",
             headers: getHeaders(),
+            body: JSON.stringify({ mark_as_downloaded, comment }),
           }
         );
 
