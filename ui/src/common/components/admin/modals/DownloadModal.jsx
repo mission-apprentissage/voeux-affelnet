@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import {
   Box,
   Button,
+  Checkbox,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -13,7 +14,10 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Radio,
+  RadioGroup,
   Spinner,
+  Stack,
   Switch,
   Text,
   Textarea,
@@ -79,7 +83,7 @@ export const DownloadModal = ({ relation, callback, isOpen, onClose }) => {
 
         <Formik
           initialValues={{
-            mark_as_downloaded: false,
+            mark_as_downloaded: null,
             comment: "",
           }}
           validationSchema={Yup.object().shape({
@@ -109,6 +113,9 @@ export const DownloadModal = ({ relation, callback, isOpen, onClose }) => {
                 <Box mt={6}>
                   <Field name="mark_as_downloaded">
                     {({ field, meta }) => {
+                      const { onChange, ...rest } = field;
+                      console.log({ field, meta });
+
                       return (
                         <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">
                           <FormLabel name={field.name}>
@@ -116,7 +123,26 @@ export const DownloadModal = ({ relation, callback, isOpen, onClose }) => {
                             apprentissage ? Si oui, vous vous engagez à transmettre la liste à la personne habilitée au
                             sein de l’organisme, et ce de manière sécurisée.
                           </FormLabel>
-                          <Switch size="lg" {...field} isChecked={field.value} />
+                          <Stack direction="row">
+                            <RadioGroup {...rest} id={field.name}>
+                              <Radio
+                                value={false}
+                                isChecked={field.value === false}
+                                onChange={() => props.setFieldValue(field.name, false)}
+                                mr={4}
+                              >
+                                Non
+                              </Radio>
+                              <Radio
+                                value={true}
+                                isChecked={field.value === true}
+                                onChange={() => props.setFieldValue(field.name, true)}
+                                mr={4}
+                              >
+                                Oui
+                              </Radio>
+                            </RadioGroup>
+                          </Stack>
                         </FormControl>
                       );
                     }}
