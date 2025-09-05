@@ -383,8 +383,8 @@ function StatsPage() {
                 <Stat mr={2}>
                   {/* Nombre d’organismes responsables n’ayant pas téléchargé la dernière mise à jour de leur(s) liste(s) : 163 (16,5%), pour 283 organismes formateurs et 5682 candidatures (4,7%) */}
                   <StatLabel>
-                    Nombre d’organismes responsables n’ayant pas téléchargé l’intégralité des candidatures (tous
-                    formateurs et toutes mises à jour).
+                    Nombre d’organismes responsables n’ayant téléchargé qu’une partie des candidatures (tous formateurs
+                    et toutes mises à jour)
                   </StatLabel>
                   <StatNumber>
                     {progresses?.partialDownload?.nbResponsable} (
