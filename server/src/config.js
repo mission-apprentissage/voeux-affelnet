@@ -37,10 +37,6 @@ module.exports = {
     username: env.get("VOEUX_AFFELNET_CATALOGUE_USERNAME").asString(),
     password: env.get("VOEUX_AFFELNET_CATALOGUE_PASSWORD").asString(),
   },
-  tableauDeBord: {
-    username: env.get("VOEUX_AFFELNET_TDB_USERNAME").asString(),
-    password: env.get("VOEUX_AFFELNET_TDB_PASSWORD").asString(),
-  },
   slackWebhookUrl: env.get("VOEUX_AFFELNET_SLACK_WEBHOOK_URL").asString(),
   outputDir: env.get("VOEUX_AFFELNET_OUTPUT_DIR").default(".local/output").asString(),
   smtp: {
@@ -55,11 +51,5 @@ module.exports = {
   },
   sentry: {
     dsn: env.get("VOEUX_AFFELNET_SENTRY_DSN").asString(),
-  },
-  ovh: {
-    storage: {
-      uri: env.get("VOEUX_AFFELNET_OVH_STORAGE_URI").asString(),
-      storageName: env.get("VOEUX_AFFELNET_OVH_STORAGE_NAME").default("mna-voeux-affelnet").asString(),
-    },
   },
 };
