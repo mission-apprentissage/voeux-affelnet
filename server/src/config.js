@@ -38,7 +38,6 @@ module.exports = {
     password: env.get("VOEUX_AFFELNET_CATALOGUE_PASSWORD").asString(),
   },
   slackWebhookUrl: env.get("VOEUX_AFFELNET_SLACK_WEBHOOK_URL").asString(),
-  outputDir: env.get("VOEUX_AFFELNET_OUTPUT_DIR").default(".local/output").asString(),
   smtp: {
     host: env.get("VOEUX_AFFELNET_SMTP_HOST").default("localhost").asString(),
     port: env.get("VOEUX_AFFELNET_SMTP_PORT").default("1025").asString(),

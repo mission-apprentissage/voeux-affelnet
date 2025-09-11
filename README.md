@@ -1,7 +1,7 @@
 # Voeux Afflenet
 
-Ce repository contient l'application qui permet de transmettre aux CFA les voeux formulés en apprentissage sur Affelnet.
-A la réception des voeux, les CFA concernés sont notifiés par email et peuvent se connecter pour les télécharger.
+Ce repository contient l'application qui permet de transmettre aux CFA les candidatures formulées en apprentissage sur Affelnet.
+A la réception des candidatures, les CFA concernés sont notifiés par email et peuvent se connecter pour les télécharger.
 
 ![schema](./misc/doc/voeux-affelnet-fonctionnement.drawio.png)
 
@@ -14,8 +14,9 @@ A la réception des voeux, les CFA concernés sont notifiés par email et peuven
 
 ### Pré-requis
 
-- Docker 19+
-- Docker-compose 1.27+
+- NodeJs 20
+- Yarn 3+
+- Docker & Docker-compose
 
 ### Démarrage
 
@@ -36,6 +37,6 @@ Il est possible de créer un jeu de données afin de pouvoir tester l'applicatio
 make dataset --cfa --admin --csaio
 ```
 
-Une fois cette commande executée, des emails de création de compte seront disponibles à l'url [http://localhost/smtp](http://localhost/smtp)
+Une fois cette commande exécutée, des emails de création de compte seront disponibles à l'url [http://localhost/smtp](http://localhost/smtp)
 
 ![](https://avatars1.githubusercontent.com/u/63645182?s=200&v=4)
