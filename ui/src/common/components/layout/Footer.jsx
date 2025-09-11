@@ -19,7 +19,8 @@ const Footer = () => {
                 textDecoration={"underline"}
                 isExternal
               >
-                Mission interministérielle pour l'apprentissage
+                Mission interministérielle pour l'apprentissage&nbsp;
+                <ExternalLinkLine w={"0.75rem"} h={"0.75rem"} />
               </Link>
               , le service a été pérennisé et repris en 2023 par la Direction du numérique pour l'éducation. Il est
               alimenté par les candidatures exprimées sur le service en ligne "Choisir son orientation" ainsi que par
@@ -29,19 +30,22 @@ const Footer = () => {
             <List textStyle="sm" fontWeight="700" flexDirection={"row"} flexWrap={"wrap"} mb={[3, 3, 0]} display="flex">
               <ListItem>
                 <Link href="https://beta.gouv.fr/startups/?incubateur=mission-apprentissage" mr={4} isExternal>
-                  beta.gouv.fr
+                  beta.gouv.fr&nbsp;
+                  <ExternalLinkLine w={"0.75rem"} h={"0.75rem"} />
                 </Link>
               </ListItem>
 
               <ListItem>
                 <Link href="https://affectation3e.phm.education.gouv.fr/pna-public/" mr={4} isExternal>
-                  service en ligne "Choisir son orientation"
+                  service en ligne "Choisir son orientation"&nbsp;
+                  <ExternalLinkLine w={"0.75rem"} h={"0.75rem"} />
                 </Link>
               </ListItem>
 
               <ListItem>
                 <Link href="https://catalogue-apprentissage.intercariforef.org/" mr={4} isExternal>
-                  catalogue apprentissage
+                  catalogue apprentissage&nbsp;
+                  <ExternalLinkLine w={"0.75rem"} h={"0.75rem"} />
                 </Link>
               </ListItem>
             </List>
@@ -90,7 +94,8 @@ const Footer = () => {
               </ListItem> */}
               <ListItem>
                 <Link href="https://github.com/mission-apprentissage/voeux-affelnet" isExternal>
-                  Code source
+                  Code source&nbsp;
+                  <ExternalLinkLine w={"0.75rem"} h={"0.75rem"} />
                 </Link>
               </ListItem>
               <ListItem>
