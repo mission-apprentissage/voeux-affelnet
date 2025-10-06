@@ -25,6 +25,9 @@ const schema = new Schema({
   academie: {
     type: String,
   },
+  code_offre: {
+    type: String,
+  },
   ministere: {
     type: String,
   },
@@ -123,6 +126,10 @@ const schema = new Schema({
   },
 
   siret_uai_gestionnaire: {
+    type: String,
+  },
+
+  siret_uai_formateur: {
     type: String,
   },
 

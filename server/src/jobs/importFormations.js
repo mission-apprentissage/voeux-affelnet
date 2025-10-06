@@ -3,6 +3,10 @@ const Joi = require("@hapi/joi");
 const logger = require("../common/logger");
 const { Formation } = require("../common/model");
 const { fixOffreDeFormation } = require("./utils/offreDeFormation");
+const {
+  getSiretResponsableFromCleMinistereEducatif,
+  getSiretFormateurFromCleMinistereEducatif,
+} = require("../common/utils/cleMinistereEducatifUtils");
 
 const schema = Joi.object({
   uai: Joi.string().required(),
@@ -10,8 +14,30 @@ const schema = Joi.object({
   code_offre: Joi.string().required(),
 }).unknown();
 
+const SIRET_RECENSEMENT = "99999999999999";
+// const UAI_RECENSEMENT = "0000000A";
+
 const transformFormationStream = (data) => {
   // console.log(`${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`);
+  const libelleTypeEtablissement = data["LIBELLE_TYPE_ETABLISSEMENT"];
+  const overwrite = !!data["OVERWRITE"];
+
+  const cle_ministere_educatif = data["CLE_MINISTERE_EDUCATIF"]?.toUpperCase();
+  let siret_responsable = [
+    "SERVICE ACAD ET CENTRES INFO ET ORIENTAT",
+    "RECTORAT ET SERVICES RECTORAUX",
+    "SERVICES DEPARTEMENTAUX DE L'EN",
+    "SERVICES DEPARTEMENTAUX DE L EN",
+  ].includes(libelleTypeEtablissement)
+    ? SIRET_RECENSEMENT
+    : overwrite
+    ? data["SIRET_UAI_GESTIONNAIRE"]
+    : getSiretResponsableFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_GESTIONNAIRE"]) ?? "";
+
+  let siret_formateur = overwrite
+    ? data["SIRET_UAI_FORMATEUR"]
+    : getSiretFormateurFromCleMinistereEducatif(cle_ministere_educatif, data["SIRET_UAI_FORMATEUR"]) ?? "";
+
   return {
     id: `${data["ACADEMIE"]}/${data["CODE_OFFRE"]}`,
     academie: data["ACADEMIE"],
@@ -51,7 +77,8 @@ const transformFormationStream = (data) => {
     modalites_particulieres: data["MODALITES_PARTICULIERES"],
     coordonnees_gps_latitude: data["COORDONNEES_GPS_LATITUDE"],
     coordonnees_gps_longitude: data["COORDONNEES_GPS_LONGITUDE"],
-    siret_uai_gestionnaire: data["SIRET_UAI_GESTIONNAIRE"],
+    siret_uai_gestionnaire: siret_responsable,
+    siret_uai_formateur: siret_formateur,
     integree_catalogue: data["INTEGREE_CATALOGUE"],
     uai_formateur: data["UAI_FORMATEUR"],
     uai_responsable: data["UAI_RESPONSABLE"],

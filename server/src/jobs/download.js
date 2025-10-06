@@ -1,4 +1,4 @@
-const { Voeu, Relation, Delegue, Etablissement } = require("../common/model");
+const { Voeu, Relation, Delegue, Etablissement, Formation } = require("../common/model");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const { encodeStream } = require("iconv-lite");
 const { ouiNon, date, number, list } = require("../common/utils/csvUtils");
@@ -34,6 +34,29 @@ async function download(output, options = {}) {
           localField: "etablissement_responsable.siret",
           foreignField: "siret",
           as: "responsable",
+        },
+      },
+
+      {
+        $lookup: {
+          from: Formation.collection.name,
+          as: "formations",
+          let: {
+            siret_responsable: "$etablissement_responsable.siret",
+            siret_formateur: "$etablissement_formateur.siret",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$siret_uai_gestionnaire", "$$siret_responsable"] },
+                    { $eq: ["$siret_uai_formateur", "$$siret_formateur"] },
+                  ],
+                },
+              },
+            },
+          ],
         },
       },
 
@@ -151,20 +174,29 @@ async function download(output, options = {}) {
           return formateur?.libelle_ville;
         },
 
-        "Localité des établissements d'accueil": async ({ responsable, formateur }) => {
-          return list(
-            (
-              await Voeu.aggregate([
-                {
-                  $match: {
-                    "etablissement_formateur.siret": formateur?.siret,
-                    "etablissement_responsable.siret": responsable?.siret,
-                  },
-                },
-                { $group: { _id: "$etablissement_accueil.ville" } },
-              ])
-            ).map((result) => result._id)
-          );
+        "Localité des établissements d'accueil": async ({ formations }) => {
+          // return list(
+          //   (
+          //     await Voeu.aggregate([
+          //       {
+          //         $match: {
+          //           "etablissement_formateur.siret": formateur?.siret,
+          //           "etablissement_responsable.siret": responsable?.siret,
+          //         },
+          //       },
+          //       { $group: { _id: "$etablissement_accueil.ville" } },
+          //     ])
+          //   ).map((result) => result._id)
+          // );
+          return list([...new Set(formations?.map((formation) => formation.commune))]);
+        },
+
+        "UAI des établissements d'accueil": ({ formations }) => {
+          return list([...new Set(formations?.map((formation) => formation.uai))]);
+        },
+
+        "Offres associées": ({ formations }) => {
+          return list([...new Set(formations?.map((formation) => formation.code_offre))]);
         },
 
         "Délégation autorisée": ({ delegue }) => ouiNon(!!delegue),
