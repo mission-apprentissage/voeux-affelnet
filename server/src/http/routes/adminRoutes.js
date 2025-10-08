@@ -22,7 +22,8 @@ const { saveDelegationCancelledByAdmin } = require("../../common/actions/history
 const { USER_STATUS } = require("../../common/constants/UserStatus");
 const { USER_TYPE } = require("../../common/constants/UserType");
 // const { RELATION_TYPE } = require("../../common/constants/RelationType");
-const { download } = require("../../jobs/download");
+const { downloadByFormation } = require("../../jobs/downloadByFormation");
+const { downloadByRelation } = require("../../jobs/downloadByRelation");
 const logger = require("../../common/logger");
 const Boom = require("boom");
 const {
@@ -457,7 +458,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
    * Permet de récupérer la liste des établissements sous forme de CSV
    */
   router.get(
-    "/api/admin/etablissements/export.csv",
+    "/api/admin/etablissements/export-relations.csv",
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
@@ -471,7 +472,33 @@ module.exports = ({ sendEmail, resendEmail }) => {
         token: Joi.string(),
       }).validateAsync(req.query, { abortEarly: false });
 
-      return download(asCsvResponse("export", res), {
+      return downloadByRelation(asCsvResponse("export", res), {
+        academies: academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null,
+        text,
+        admin,
+      });
+    })
+  );
+
+  /**
+   * Permet de récupérer la liste des établissements sous forme de CSV
+   */
+  router.get(
+    "/api/admin/etablissements/export-formations.csv",
+    checkApiToken(),
+    checkIsAdminOrAcademie(),
+    tryCatch(async (req, res) => {
+      const { username } = req.user;
+      const admin = await User.findOne({ username }).lean();
+      const defaultAcademies = admin?.academies?.map((academie) => academie.code);
+
+      const { academie, text } = await Joi.object({
+        academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
+        text: Joi.string(),
+        token: Joi.string(),
+      }).validateAsync(req.query, { abortEarly: false });
+
+      return downloadByFormation(asCsvResponse("export", res), {
         academies: academie ? [academie] : defaultAcademies?.length ? defaultAcademies : null,
         text,
         admin,

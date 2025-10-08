@@ -58,15 +58,45 @@ export const useDownloadVoeux = ({ responsable: initialResponsable, formateur: i
   };
 };
 
-export const useDownloadStatut = () => {
+export const useDownloadByFormationStatut = () => {
   const [isDownloadingStatut, setIsDownloadingStatut] = useState(false);
 
   const downloadStatut = useCallback(async (query) => {
     setIsDownloadingStatut(true);
-    const filename = `export.csv`;
+    const filename = `export-formations.csv`;
 
     try {
-      const content = await fetch(`/api/admin/etablissements/export.csv?${queryString.stringify(query)}`, {
+      const content = await fetch(`/api/admin/etablissements/export-formations.csv?${queryString.stringify(query)}`, {
+        method: "GET",
+        headers: getHeaders(),
+        // body: JSON.stringify(query),
+      });
+
+      downloadCSV(filename, await content.blob());
+      setIsDownloadingStatut(false);
+    } catch (error) {
+      setIsDownloadingStatut(false);
+      console.error("Error downloading statut:", error);
+      throw error;
+    }
+  }, []);
+
+  return {
+    isDownloadingStatut,
+    // setIsDownloadingStatut,
+    downloadStatut,
+  };
+};
+
+export const useDownloadByRelationStatut = () => {
+  const [isDownloadingStatut, setIsDownloadingStatut] = useState(false);
+
+  const downloadStatut = useCallback(async (query) => {
+    setIsDownloadingStatut(true);
+    const filename = `export-relations.csv`;
+
+    try {
+      const content = await fetch(`/api/admin/etablissements/export-relations.csv?${queryString.stringify(query)}`, {
         method: "GET",
         headers: getHeaders(),
         // body: JSON.stringify(query),

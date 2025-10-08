@@ -8,7 +8,7 @@ const { CONTACT_TYPE } = require("../common/constants/ContactType");
 const { ResponsableActions, DelegueActions, RelationActions } = require("../common/constants/History");
 const { CONTACT_STATUS } = require("../common/constants/ContactStatus");
 
-async function download(output, options = {}) {
+async function downloadByRelation(output, options = {}) {
   const columns = options.columns || {};
 
   console.log(output, options);
@@ -643,4 +643,4 @@ async function download(output, options = {}) {
   );
 }
 
-module.exports = { download };
+module.exports = { downloadByRelation };

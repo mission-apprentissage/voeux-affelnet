@@ -26,7 +26,7 @@ import { USER_STATUS } from "../../common/constants/UserStatus";
 import { useGet } from "../../common/hooks/httpHooks";
 import { Pagination } from "../../common/components/Pagination";
 import ErrorMessage from "../../common/components/ErrorMessage";
-import { useDownloadStatut } from "../../common/hooks/adminHooks";
+import { useDownloadByRelationStatut, useDownloadByFormationStatut } from "../../common/hooks/adminHooks";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { Page } from "../../common/components/layout/Page";
 import { ContactStatut } from "../../common/components/admin/fields/ContactStatut";
@@ -324,19 +324,34 @@ export const Etablissements = () => {
     [abortController, setSearchParams, self?.academies]
   );
 
-  const { downloadStatut, isDownloadingStatut } = useDownloadStatut();
+  const { downloadStatut: downloadByRelationStatut, isDownloadingStatut: isDownloadingByRelationStatut } =
+    useDownloadByRelationStatut();
+  const { downloadStatut: downloadByFormationStatut, isDownloadingStatut: isDownloadingByFormationStatut } =
+    useDownloadByFormationStatut();
 
-  const downloadStatutToCSV = useCallback(async () => {
+  const downloadStatutByRelationToCSV = useCallback(async () => {
     try {
       const params = {
         ...(query?.academie ? { academie: query.academie } : {}),
         ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
       };
-      await downloadStatut(params);
+      await downloadByRelationStatut(params);
     } catch (e) {
       console.error(e);
     }
-  }, [query, self?.academies, downloadStatut]);
+  }, [query, self?.academies, downloadByRelationStatut]);
+
+  const downloadStatutByFormationToCSV = useCallback(async () => {
+    try {
+      const params = {
+        ...(query?.academie ? { academie: query.academie } : {}),
+        ...(self?.academies?.length === 1 ? { academie: self?.academies[0].code } : {}),
+      };
+      await downloadByFormationStatut(params);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [query, self?.academies, downloadByFormationStatut]);
 
   const callback = useCallback(
     async (values) => {
@@ -458,13 +473,22 @@ export const Etablissements = () => {
         </Formik>
 
         <Box display="flex" justifyContent={"right"}>
-          <Link onClick={downloadStatutToCSV}>
-            {isDownloadingStatut ? (
+          <Link onClick={downloadStatutByRelationToCSV}>
+            {isDownloadingByRelationStatut ? (
               <Spinner size="sm" verticalAlign={"middle"} />
             ) : (
               <FileDownloadLine verticalAlign={"middle"} />
             )}{" "}
-            Exporter (csv)
+            Exporter par relations (csv)
+          </Link>
+
+          <Link ml={4} onClick={downloadStatutByFormationToCSV}>
+            {isDownloadingByFormationStatut ? (
+              <Spinner size="sm" verticalAlign={"middle"} />
+            ) : (
+              <FileDownloadLine verticalAlign={"middle"} />
+            )}{" "}
+            Exporter par formations (csv)
           </Link>
         </Box>
 
