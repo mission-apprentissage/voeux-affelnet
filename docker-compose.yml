@@ -1,5 +1,4 @@
 services:
-
   reverse_proxy:
     image: voeux_affelnet_reverse_proxy
     container_name: voeux_affelnet_reverse_proxy
@@ -58,7 +57,7 @@ services:
       - VOEUX_AFFELNET_OUTPUT_DIR=/data
 
   mongodb:
-    image: mongo:5.0.7-focal
+    image: mongo:6.0.26
     container_name: voeux_affelnet_mongodb
     tty: true
     command: --wiredTigerCacheSizeGB 1 --port 27017
