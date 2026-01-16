@@ -163,8 +163,8 @@ async function importEtablissements(csv, options = {}) {
               ...formations.map((etablissement) => etablissement.etablissement_gestionnaire_courriel),
             ]);
 
-            if (emails.size === 1 && formations[0].etablissement_gestionnaire_courriel) {
-              existingEmail = formations[0].etablissement_gestionnaire_courriel;
+            if (emails.size === 1 && emails[0]) {
+              existingEmail = emails[0];
               logger.info(`Email trouvé pour l'établissement ${siret} : "${existingEmail}"`);
             } else {
               logger.warn(`Email non trouvé pour l'établissement ${siret} `);

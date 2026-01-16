@@ -166,7 +166,7 @@ class CatalogueApi extends RateLimitedApi {
 
     return this.execute(async () => {
       logger.debug(`[${this.name}] Fetching etablissement...`, query);
-      const params = convertQueryIntoParams(query, options);
+
       try {
         const response = await fetchJson(`${CatalogueApi.baseApiUrl}/entity/etablissement?${params}`, {
           headers: { Cookie: this.cookie },
@@ -177,6 +177,94 @@ class CatalogueApi extends RateLimitedApi {
         return response;
       } catch (e) {
         // console.log(params, e);
+      }
+    });
+  }
+
+  async getCandidatureRelation({ siret_responsable, siret_formateur }) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching relation...`, { siret_responsable, siret_formateur });
+
+      try {
+        const response = await fetchJson(
+          `${CatalogueApi.baseApiUrl}/entity/candidature/relation?${queryString.stringify({
+            siret_responsable,
+            siret_formateur,
+          })}`,
+          {
+            headers: { Cookie: this.cookie },
+          }
+        );
+
+        return response;
+      } catch (e) {
+        console.log({ siret_responsable, siret_formateur }, e);
+      }
+    });
+  }
+
+  async putCandidatureRelation({ siret_responsable, siret_formateur }) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching relation...`, { siret_responsable, siret_formateur });
+
+      try {
+        const response = await fetchJson(
+          `${CatalogueApi.baseApiUrl}/entity/candidature/relation?${queryString.stringify({
+            siret_responsable,
+            siret_formateur,
+          })}`,
+          {
+            headers: { Cookie: this.cookie },
+            method: "PUT",
+          }
+        );
+
+        return response;
+      } catch (e) {
+        console.log({ siret_responsable, siret_formateur }, e);
+      }
+    });
+  }
+
+  async getCandidatureRelations({ siret_responsable }) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching relation...`, { siret_responsable });
+
+      try {
+        const response = await fetchJson(
+          `${CatalogueApi.baseApiUrl}/entity/candidature/relations?${queryString.stringify({
+            siret_responsable,
+          })}`,
+          {
+            headers: { Cookie: this.cookie },
+          }
+        );
+
+        return response;
+      } catch (e) {
+        console.error({ siret_responsable }, e);
+      }
+    });
+  }
+
+  async putCandidatureRelations({ siret_responsable }) {
+    return this.execute(async () => {
+      logger.debug(`[${this.name}] Fetching relation...`, { siret_responsable });
+
+      try {
+        const response = await fetchJson(
+          `${CatalogueApi.baseApiUrl}/entity/candidature/relations?${queryString.stringify({
+            siret_responsable,
+          })}`,
+          {
+            headers: { Cookie: this.cookie },
+            method: "PUT",
+          }
+        );
+
+        return response;
+      } catch (e) {
+        console.error({ siret_responsable }, e);
       }
     });
   }

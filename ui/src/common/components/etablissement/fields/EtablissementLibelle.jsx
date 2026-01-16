@@ -3,7 +3,7 @@ import { Text } from "@chakra-ui/react";
 export const EtablissementRaisonSociale = ({ etablissement }) => {
   if (!etablissement) return <></>;
   return (
-    <Text display={"inline"}>
+    <Text as="span">
       {etablissement.raison_sociale ?? "Raison sociale inconnue"}
       {etablissement.enseigne && etablissement.raison_sociale !== etablissement.enseigne && (
         <Text as="i"> ({etablissement.enseigne})</Text>

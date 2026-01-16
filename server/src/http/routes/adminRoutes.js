@@ -30,6 +30,7 @@ const {
   markVoeuxAsDownloadedByAcademie,
   markVoeuxAsDownloadedByAdmin,
 } = require("../../common/actions/markVoeuxAsDownloaded");
+const CatalogueApi = require("../../common/api/CatalogueApi");
 
 const lookupRelations = {
   from: Relation.collection.name,
@@ -281,6 +282,7 @@ const addCountFields = {
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router();
   const { checkApiToken, checkIsAdminOrAcademie } = authMiddleware();
+  const catalogueApi = new CatalogueApi();
 
   function asCsvResponse(name, res) {
     const now = dateAsString(new Date());
@@ -704,6 +706,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
         `Délégation activée (${updatedDelegue.email}) pour le formateur ${siret_formateur} et le responsable ${siret_responsable}`
       );
 
+      try {
+        await catalogueApi.putCandidatureRelation({ siret_responsable, siret_formateur });
+      } catch (error) {
+        logger.error(error);
+      }
+
       res.json(updatedDelegue);
     })
   );
@@ -862,6 +870,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
         { sendEmail, resendEmail },
         { username: siret_responsable, force: true, sender: req.user }
       );
+
+      try {
+        await catalogueApi.putCandidatureRelations({ siret_responsable });
+      } catch (error) {
+        logger.error(error);
+      }
 
       res.json({});
     })
