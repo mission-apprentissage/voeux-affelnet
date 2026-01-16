@@ -479,7 +479,7 @@ export const Etablissements = () => {
             ) : (
               <FileDownloadLine verticalAlign={"middle"} />
             )}{" "}
-            Exporter par relations (csv)
+            Exporter par établissements (csv)
           </Link>
 
           <Link ml={4} onClick={downloadStatutByFormationToCSV}>
