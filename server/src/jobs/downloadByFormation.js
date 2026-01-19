@@ -263,8 +263,8 @@ async function downloadByFormation(output, options = {}) {
             "formation.affelnet_id": `${academie}/${code_offre}`,
           });
 
-          const lastVoeuxTelechargementDate = relation.voeux_telechargements?.length
-            ? new Date(relation.voeux_telechargements?.[relation.voeux_telechargements?.length - 1]?.date)
+          const lastVoeuxTelechargementDate = relation?.voeux_telechargements?.length
+            ? new Date(relation?.voeux_telechargements?.[relation?.voeux_telechargements?.length - 1]?.date)
             : null;
 
           const nombre_voeux_restant = lastVoeuxTelechargementDate
@@ -282,7 +282,7 @@ async function downloadByFormation(output, options = {}) {
           // console.log({
           //   affelnet_id: `${academie}/${code_offre}`,
 
-          //   voeux_telechargements: relation.voeux_telechargements,
+          //   voeux_telechargements: relation?.voeux_telechargements,
           //   lastVoeuxTelechargementDate,
 
           //   nombre_voeux,
@@ -319,8 +319,8 @@ async function downloadByFormation(output, options = {}) {
             "formation.affelnet_id": `${academie}/${code_offre}`,
           });
 
-          const lastVoeuxTelechargementDate = relation.voeux_telechargements?.length
-            ? new Date(relation.voeux_telechargements?.[relation.voeux_telechargements?.length - 1]?.date)
+          const lastVoeuxTelechargementDate = relation?.voeux_telechargements?.length
+            ? new Date(relation?.voeux_telechargements?.[relation?.voeux_telechargements?.length - 1]?.date)
             : null;
 
           const nombre_voeux_restant = lastVoeuxTelechargementDate
@@ -390,13 +390,13 @@ async function downloadByFormation(output, options = {}) {
         Téléchargement: async ({ relation, delegue }) => {
           if (delegue) {
             return ouiNon(
-              !!relation.voeux_telechargements.find(
+              !!relation?.voeux_telechargements.find(
                 (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
               )
             );
           } else {
             return ouiNon(
-              !!relation.voeux_telechargements.find(
+              !!relation?.voeux_telechargements.find(
                 (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
               )
             );
@@ -405,7 +405,7 @@ async function downloadByFormation(output, options = {}) {
 
         "Date du dernier téléchargement": ({ relation, delegue }) => {
           if (delegue) {
-            const voeuxTelechargementsDelegue = relation.voeux_telechargements.filter(
+            const voeuxTelechargementsDelegue = relation?.voeux_telechargements.filter(
               (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
             );
 
@@ -415,7 +415,7 @@ async function downloadByFormation(output, options = {}) {
 
             return date(lastVoeuxTelechargementDateByDelegue);
           } else {
-            const voeuxTelechargementsResponsable = relation.voeux_telechargements.filter(
+            const voeuxTelechargementsResponsable = relation?.voeux_telechargements.filter(
               (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
             );
 
@@ -429,7 +429,7 @@ async function downloadByFormation(output, options = {}) {
 
         "Vœux téléchargés par le destinataire principal": async ({ academie, code_offre, relation, delegue }) => {
           if (delegue) {
-            const voeuxTelechargementsDelegue = relation.voeux_telechargements.filter(
+            const voeuxTelechargementsDelegue = relation?.voeux_telechargements.filter(
               (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.DELEGUE
             );
 
@@ -458,7 +458,7 @@ async function downloadByFormation(output, options = {}) {
                 : 0
             );
           } else {
-            const voeuxTelechargementsResponsable = relation.voeux_telechargements.filter(
+            const voeuxTelechargementsResponsable = relation?.voeux_telechargements.filter(
               (telechargement) => telechargement.CONTACT_TYPE === CONTACT_TYPE.RESPONSABLE
             );
 
