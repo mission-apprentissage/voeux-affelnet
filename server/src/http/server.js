@@ -25,6 +25,7 @@ module.exports = async (actions) => {
   app.use(require("./routes/healthcheckRoutes")(actions));
   // app.use(require("./routes/relationRoutes.js")(actions));
   app.use(require("./routes/statsRoutes")(actions));
+  app.use(require("./routes/configRoutes")(actions));
   app.use(require("./routes/alertRoutes")(actions));
   app.use(require("./routes/adminRoutes")(actions));
   app.use(require("./routes/constantRoutes")(actions));

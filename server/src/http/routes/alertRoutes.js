@@ -39,6 +39,8 @@ module.exports = () => {
 
   router.put(
     "/api/admin/alert/:id",
+    checkApiToken(),
+    checkIsAdmin(),
     tryCatch(async ({ body, params }, res) => {
       const payload = sanitize(body);
       const { msg } = payload;
@@ -57,6 +59,8 @@ module.exports = () => {
 
   router.patch(
     "/api/admin/alert/:id",
+    checkApiToken(),
+    checkIsAdmin(),
     tryCatch(async ({ body, params }, res) => {
       const payload = sanitize(body);
       const result = await Alert.findOneAndUpdate({ _id: params.id }, payload, {
@@ -69,6 +73,8 @@ module.exports = () => {
 
   router.delete(
     "/api/admin/alert/:id",
+    checkApiToken(),
+    checkIsAdmin(),
     tryCatch(async (req, res) => {
       const result = await Alert.deleteOne({ _id: req.params.id });
       return res.json(result);

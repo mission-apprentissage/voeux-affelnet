@@ -27,8 +27,6 @@ import { EtablissementLibelle } from "../common/components/etablissement/fields/
 // function getDownloadStatus(responsable, formateur) {
 //   let statut;
 
-//   console.log({ responsable, formateur });
-
 //   if (!responsable || !formateur) {
 //     return;
 //   }
@@ -37,12 +35,6 @@ import { EtablissementLibelle } from "../common/components/etablissement/fields/
 //   const telechargements = responsable.voeux_telechargements_formateur
 //     ?.sort((a, b) => sortDescending(a.date, b.date))
 //     .filter((t) => t.uai === formateur?.uai);
-
-//   console.log(formateur?.uai, {
-//     etablissement,
-//     telechargements,
-//     telecharges: telechargements.find((v) => v.date > etablissement?.voeux_date),
-//   });
 
 //   switch (true) {
 //     case !etablissement.voeux_date:

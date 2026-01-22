@@ -1,10 +1,15 @@
 const assert = require("assert");
 // const { DateTime } = require("luxon");
-const { Admin, Etablissement, Delegue, Relation } = require("../../src/common/model");
+const { Admin, Etablissement, Delegue, Relation, Config } = require("../../src/common/model");
 // const { date } = require("../../src/common/utils/csvUtils.js");
 const { fakerFR: faker } = require("@faker-js/faker");
 
-const { insertEtablissement, insertRelation, insertDelegue /*, insertVoeu, insertLog*/ } = require("../utils/fakeData");
+const {
+  insertEtablissement,
+  insertRelation,
+  insertDelegue /*, insertVoeu, insertLog*/,
+  insertConfig,
+} = require("../utils/fakeData");
 const { startServer } = require("../utils/testUtils");
 const { omit } = require("lodash");
 
@@ -15,6 +20,9 @@ describe("adminRoutes", () => {
     await Etablissement.deleteMany({});
     await Delegue.deleteMany({});
     await Relation.deleteMany({});
+    await Config.deleteMany({});
+
+    await insertConfig({ diffusion: true });
   });
 
   it("Vérifie qu'on peut obtenir la liste des établissements responsables", async () => {
@@ -545,6 +553,7 @@ describe("adminRoutes", () => {
 
   it("Vérifie qu'il faut être admin pour changer l'email", async () => {
     const { httpClient, createAndLogUser } = await startServer();
+
     const { auth } = await createAndLogUser("admin", "password", { model: Etablissement });
 
     const response = await httpClient.put(

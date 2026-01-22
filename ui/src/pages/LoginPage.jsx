@@ -85,7 +85,7 @@ function LoginPage() {
   const username = decodeJWT(actionToken)?.sub || query.get("username");
   const [data, loading, error] = useFetch(`/api/login/status?username=${username}&token=${actionToken}`);
 
-  console.log("LoginPage", { actionToken, redirect, data, loading, error });
+  // console.log("LoginPage", { actionToken, redirect, data, loading, error });
 
   useEffect(() => {
     switch (data?.statut) {

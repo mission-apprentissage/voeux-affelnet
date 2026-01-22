@@ -117,7 +117,7 @@ const ConfirmationPage = () => {
     <>{`Veuillez confirmer ou modifier l’adresse courriel du directeur d’établissement`}</>
   );
 
-  console.log("ConfirmationPage", { actionToken, redirect, data, loading, error });
+  // console.log("ConfirmationPage", { actionToken, redirect, data, loading, error });
 
   const accept = async (values) => {
     try {

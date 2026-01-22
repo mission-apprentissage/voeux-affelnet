@@ -22,8 +22,10 @@ import { Formik, Form, Field } from "formik";
 import { _put } from "../../../httpClient";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
 import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
+import useConfig from "../../../hooks/useConfig";
 
 export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onClose }) => {
+  const config = useConfig();
   const toast = useToast();
 
   const updateEmail = useCallback(
@@ -101,11 +103,13 @@ export const UpdateResponsableEmailModal = ({ responsable, callback, isOpen, onC
                   </Text>
                 </Text>
               )}
-              <Text mb={4}>
-                Après modification, le nouveau contact sera automatiquement informé par courriel, et devra procéder à la
-                création de son mot de passe pour accéder à son espace de téléchargement. Si la personne ne reçoit pas
-                le courriel de confirmation de son adresse, invitez-la à vérifier dans ses spam.
-              </Text>
+              {config?.diffusion && (
+                <Text mb={4}>
+                  Après modification, le nouveau contact sera automatiquement informé par courriel, et devra procéder à
+                  la création de son mot de passe pour accéder à son espace de téléchargement. Si la personne ne reçoit
+                  pas le courriel de confirmation de son adresse, invitez-la à vérifier dans ses spam.
+                </Text>
+              )}
               <Box mb={8}>
                 <Field name="email" required>
                   {({ field, meta }) => {

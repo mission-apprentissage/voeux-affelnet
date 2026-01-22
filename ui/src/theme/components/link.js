@@ -28,6 +28,7 @@ const Link = {
     action: {
       color: "grey.800",
       textDecoration: "underline",
+      _disabled: { color: "grey.500", cursor: "not-allowed" },
     },
     primary: {
       ...commonButtonStyle,

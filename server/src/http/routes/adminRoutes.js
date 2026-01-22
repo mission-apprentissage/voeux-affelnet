@@ -2,7 +2,7 @@ const express = require("express");
 const { oleoduc, transformIntoCSV } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { User, Etablissement, Delegue, Relation } = require("../../common/model");
+const { User, Etablissement, Delegue, Relation, Config } = require("../../common/model");
 const { getAcademies } = require("../../common/academies");
 const { aggregate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
@@ -587,6 +587,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
@@ -700,7 +702,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
         await Delegue.updateOne({ email }, { $set: { statut: USER_STATUS.CONFIRME } });
       }
 
-      await sendActivationEmails({ sendEmail, resendEmail }, { username: email, force: true, sender: req.user });
+      config?.diffusion &&
+        (await sendActivationEmails({ sendEmail, resendEmail }, { username: email, force: true, sender: req.user }));
 
       logger.info(
         `Délégation activée (${updatedDelegue.email}) pour le formateur ${siret_formateur} et le responsable ${siret_responsable}`
@@ -851,6 +854,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const { siret_responsable, email } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
         email: Joi.string().email().required(),
@@ -866,10 +871,11 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       await Etablissement.updateOne({ siret: siret_responsable }, { $set: { statut: USER_STATUS.EN_ATTENTE } });
 
-      await sendConfirmationEmails(
-        { sendEmail, resendEmail },
-        { username: siret_responsable, force: true, sender: req.user }
-      );
+      config?.diffusion &&
+        (await sendConfirmationEmails(
+          { sendEmail, resendEmail },
+          { username: siret_responsable, force: true, sender: req.user }
+        ));
 
       try {
         await catalogueApi.putCandidatureRelations({ siret_responsable });
@@ -889,16 +895,20 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret_responsable);
 
-      const stats = await sendConfirmationEmails(
-        { sendEmail, resendEmail },
-        { username: siret_responsable, force: true, sender: req.user }
-      );
+      const stats =
+        config?.diffusion &&
+        (await sendConfirmationEmails(
+          { sendEmail, resendEmail },
+          { username: siret_responsable, force: true, sender: req.user }
+        ));
 
       res.json(stats);
     })
@@ -912,16 +922,20 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const { siret_responsable } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
       }).validateAsync(req.params, { abortEarly: false });
 
       await cancelUnsubscription(siret_responsable);
 
-      const stats = await sendActivationEmails(
-        { sendEmail, resendEmail },
-        { username: siret_responsable, force: true, sender: req.user }
-      );
+      const stats =
+        config?.diffusion &&
+        (await sendActivationEmails(
+          { sendEmail, resendEmail },
+          { username: siret_responsable, force: true, sender: req.user }
+        ));
 
       res.json(stats);
     })
@@ -935,13 +949,15 @@ module.exports = ({ sendEmail, resendEmail }) => {
   //   checkApiToken(),
   //   checkIsAdminOrAcademie(),
   //   tryCatch(async (req, res) => {
+  //   const config = await Config.findOne({});
+
   //     const { siret_responsable } = await Joi.object({
   //       siret_responsable: Joi.string().pattern(siretFormat).required(),
   //     }).validateAsync(req.params, { abortEarly: false });
 
   //     await cancelUnsubscription(siret_responsable);
 
-  //     const stats = await sendNotificationEmails(
+  //     const stats = config?.diffusion && await sendNotificationEmails(
   //       { sendEmail, resendEmail },
   //       { username: siret_responsable, force: true, sender: req.user }
   //     );
@@ -958,13 +974,15 @@ module.exports = ({ sendEmail, resendEmail }) => {
   //   checkApiToken(),
   //   checkIsAdminOrAcademie(),
   //   tryCatch(async (req, res) => {
+  //     const config = await Config.findOne({});
+
   //     const { siret_responsable } = await Joi.object({
   //       siret_responsable: Joi.string().pattern(siretFormat).required(),
   //     }).validateAsync(req.params, { abortEarly: false });
 
   //     await cancelUnsubscription(siret_responsable);
 
-  //     const stats = await sendUpdateEmails(
+  //     const stats = config?.diffusion && await sendUpdateEmails(
   //       { sendEmail, resendEmail },
   //       { username: siret_responsable, force: true, sender: req.user }
   //     );
@@ -1005,6 +1023,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const { siret_responsable, siret_formateur } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
         siret_formateur: Joi.string().pattern(siretFormat).required(),
@@ -1026,10 +1046,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       await cancelUnsubscription(delegue.username);
 
-      const stats = sendActivationEmails(
-        { sendEmail, resendEmail },
-        { username: delegue.username, force: true, sender: req.user }
-      );
+      const stats =
+        config?.diffusion &&
+        (await sendActivationEmails(
+          { sendEmail, resendEmail },
+          { username: delegue.username, force: true, sender: req.user }
+        ));
 
       res.json(stats);
     })
@@ -1043,6 +1065,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
   //   checkApiToken(),
   //   checkIsAdminOrAcademie(),
   //   tryCatch(async (req, res) => {
+  //     const config = await Config.findOne({});
+
   //     const { siret_responsable, siret_formateur } = await Joi.object({
   //       siret_responsable: Joi.string().pattern(siretFormat).required(),
   //       siret_formateur: Joi.string().pattern(siretFormat).required(),
@@ -1064,7 +1088,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
   //     await cancelUnsubscription(delegue.username);
 
-  //     const stats = await sendNotificationEmails(
+  //     const stats = config?.diffusion && await sendNotificationEmails(
   //       { sendEmail, resendEmail },
   //       { username: delegue.username, force: true, sender: req.user }
   //     );
@@ -1081,6 +1105,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
   //   checkApiToken(),
   //   checkIsAdminOrAcademie(),
   //   tryCatch(async (req, res) => {
+  //     const config = await Config.findOne({});
+
   //     const { siret_responsable, siret_formateur } = await Joi.object({
   //       siret_responsable: Joi.string().pattern(siretFormat).required(),
   //       siret_formateur: Joi.string().pattern(siretFormat).required(),
@@ -1102,7 +1128,7 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
   //     await cancelUnsubscription(delegue.username);
 
-  //     const stats = await sendUpdateEmails(
+  //     const stats = config?.diffusion && await sendUpdateEmails(
   //       { sendEmail, resendEmail },
   //       { username: delegue.username, force: true, sender: req.user }
   //     );
@@ -1121,6 +1147,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const { siret_responsable, siret_formateur } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
         siret_formateur: Joi.string().pattern(siretFormat).required(),
@@ -1149,16 +1177,18 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       await cancelUnsubscription(delegue ? delegue.username : responsable.username);
 
-      const stats = await sendNotificationEmails(
-        { sendEmail, resendEmail },
-        {
-          username: delegue ? delegue.username : responsable.username,
-          siret_responsable,
-          siret_formateur,
-          force: true,
-          sender: req.user,
-        }
-      );
+      const stats =
+        config?.diffusion &&
+        (await sendNotificationEmails(
+          { sendEmail, resendEmail },
+          {
+            username: delegue ? delegue.username : responsable.username,
+            siret_responsable,
+            siret_formateur,
+            force: true,
+            sender: req.user,
+          }
+        ));
       res.json(stats);
     })
   );
@@ -1171,6 +1201,8 @@ module.exports = ({ sendEmail, resendEmail }) => {
     checkApiToken(),
     checkIsAdminOrAcademie(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const { siret_responsable, siret_formateur } = await Joi.object({
         siret_responsable: Joi.string().pattern(siretFormat).required(),
         siret_formateur: Joi.string().pattern(siretFormat).required(),
@@ -1199,16 +1231,18 @@ module.exports = ({ sendEmail, resendEmail }) => {
 
       await cancelUnsubscription(delegue ? delegue.username : responsable.username);
 
-      const stats = await sendUpdateEmails(
-        { sendEmail, resendEmail },
-        {
-          username: delegue ? delegue.username : responsable.username,
-          siret_responsable,
-          siret_formateur,
-          force: true,
-          sender: req.user,
-        }
-      );
+      const stats =
+        config?.diffusion &&
+        (await sendUpdateEmails(
+          { sendEmail, resendEmail },
+          {
+            username: delegue ? delegue.username : responsable.username,
+            siret_responsable,
+            siret_formateur,
+            force: true,
+            sender: req.user,
+          }
+        ));
 
       res.json(stats);
     })

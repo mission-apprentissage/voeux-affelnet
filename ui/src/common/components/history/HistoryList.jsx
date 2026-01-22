@@ -44,8 +44,6 @@ export const getRelationHistory = (history, auth) => {
 export const HistoryList = ({ responsable, delegue, relation }) => {
   const [auth] = useAuth();
 
-  console.log(auth);
-
   const responsableHistories = responsable?.histories?.map((history) => getResponsableHistory(history, auth));
   const delegueHistories = delegue?.histories?.map((history) => getDelegueHistory(history, auth));
   const relationHistories = relation?.histories?.map((history) => getRelationHistory(history, auth));

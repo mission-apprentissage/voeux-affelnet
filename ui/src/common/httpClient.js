@@ -6,7 +6,7 @@ class AuthError extends Error {
     super(`Request rejected with status code ${statusCode}`);
     this.json = json;
     this.statusCode = statusCode;
-    this.prettyMessage = "Identifiant ou mot de passe invalide";
+    this.prettyMessage = statusCode === 403 ? json.message : "Identifiant ou mot de passe invalide";
   }
 }
 

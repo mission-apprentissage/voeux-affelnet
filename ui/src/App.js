@@ -1,10 +1,11 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter as Router, Navigate, Route, Routes, useSearchParams } from "react-router-dom";
+import { BrowserRouter as Router, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./common/components/layout/Layout";
 import useAuth from "./common/hooks/useAuth";
 import { getUserType } from "./common/utils/getUserType";
 import { isAcademie, isAdmin } from "./common/utils/aclUtils";
 import { USER_TYPE } from "./common/constants/UserType";
+import { RequireAuth } from "./common/components/layout/RequireAuth";
 
 const ForgottenPasswordPage = lazy(() => import("./pages/password/ForgottenPasswordPage"));
 const ActivationPage = lazy(() => import("./pages/ActivationPage"));
@@ -28,25 +29,6 @@ const Cookies = lazy(() => import("./pages/legal/Cookies"));
 const DonneesPersonnelles = lazy(() => import("./pages/legal/DonneesPersonnelles"));
 const MentionsLegales = lazy(() => import("./pages/legal/MentionsLegales"));
 const Accessibilite = lazy(() => import("./pages/legal/Accessibilite"));
-
-const RequireAuth = ({ children, allowed }) => {
-  const [auth] = useAuth();
-  const type = getUserType(auth);
-  const [searchParams] = useSearchParams();
-  const isNotAllowed = allowed && !allowed.map((v) => v.toLowerCase()).includes(type);
-
-  if (!auth || auth.sub === "anonymous" || isNotAllowed) {
-    const previousPath = window.location.pathname + window.location.search;
-
-    return (
-      <Navigate
-        to={`/login?actionToken=${searchParams.get("actionToken")}&redirect=${encodeURIComponent(previousPath)}`}
-      />
-    );
-  }
-
-  return <Layout>{children}</Layout>;
-};
 
 const App = () => {
   // TO FIX
@@ -87,7 +69,9 @@ const App = () => {
             element={
               <Suspense>
                 <RequireAuth allowed={[USER_TYPE.ADMIN, USER_TYPE.ACADEMIE]}>
-                  <AdminRoutes />
+                  <Layout>
+                    <AdminRoutes />
+                  </Layout>
                 </RequireAuth>
               </Suspense>
             }
@@ -97,7 +81,9 @@ const App = () => {
             element={
               <Suspense>
                 <RequireAuth allowed={[USER_TYPE.ETABLISSEMENT]}>
-                  <ResponsableRoutes />
+                  <Layout>
+                    <ResponsableRoutes />
+                  </Layout>
                 </RequireAuth>
               </Suspense>
             }
@@ -107,7 +93,9 @@ const App = () => {
             element={
               <Suspense>
                 <RequireAuth allowed={[USER_TYPE.ETABLISSEMENT]}>
-                  <ResponsableRoutes />
+                  <Layout>
+                    <ResponsableRoutes />
+                  </Layout>
                 </RequireAuth>
               </Suspense>
             }
@@ -118,7 +106,9 @@ const App = () => {
             element={
               <Suspense>
                 <RequireAuth allowed={[USER_TYPE.DELEGUE]}>
-                  <DelegueRoutes />
+                  <Layout>
+                    <DelegueRoutes />
+                  </Layout>
                 </RequireAuth>
               </Suspense>
             }

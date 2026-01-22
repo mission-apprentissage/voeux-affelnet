@@ -24,8 +24,10 @@ import { _post } from "../../../httpClient";
 import { emailConfirmationSchema } from "../../../utils/validationUtils";
 import { CONTACT_TYPE } from "../../../constants/ContactType";
 import { EtablissementLibelle } from "../../etablissement/fields/EtablissementLibelle";
+import useConfig from "../../../hooks/useConfig";
 
 export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
+  const config = useConfig();
   const toast = useToast();
 
   const responsable = relation.responsable ?? relation.etablissements_responsable;
@@ -120,11 +122,13 @@ export const DelegationModal = ({ relation, callback, isOpen, onClose }) => {
                   </>
                 )}
               </Text>
-              <Text mb={6}>
-                Après validation de cette délégation, le destinataire sera automatiquement informé par courriel, et
-                devra procéder à la création de son mot de passe pour accéder à son espace de téléchargement. Si la
-                personne ne reçoit pas le courriel de notification, invitez-la à vérifier dans ses spam.
-              </Text>
+              {config?.diffusion && (
+                <Text mb={6}>
+                  Après validation de cette délégation, le destinataire sera automatiquement informé par courriel, et
+                  devra procéder à la création de son mot de passe pour accéder à son espace de téléchargement. Si la
+                  personne ne reçoit pas le courriel de notification, invitez-la à vérifier dans ses spam.
+                </Text>
+              )}
               <Text mb={6}>
                 Vous pourrez également, si nécessaire, redonner le droit exclusif de réception des listes au
                 responsable, ou modifier l'email saisi.

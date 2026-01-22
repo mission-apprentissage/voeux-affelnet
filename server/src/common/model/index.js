@@ -1,4 +1,5 @@
 module.exports = {
+  Config: require("./Config"),
   User: require("./User"),
   Admin: require("./Admin"),
   Alert: require("./Alert"),

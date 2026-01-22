@@ -30,9 +30,9 @@ import { UpdateDelegationModal } from "../../common/components/admin/modals/Upda
 import { ContactStatut } from "../../common/components/admin/fields/ContactStatut";
 import { RelationStatut } from "../../common/components/admin/fields/RelationStatut";
 import { HistoryBlock } from "../../common/components/history/HistoryBlock";
-import { useDownloadVoeux } from "../../common/hooks/adminHooks";
 import { ConfirmDelegationModal } from "../../common/components/admin/modals/ConfirmDelegationModal";
 import { DownloadModal } from "../../common/components/admin/modals/DownloadModal";
+import useConfig from "../../common/hooks/useConfig";
 
 const RelationContact = ({ relation, callback }) => {
   const {
@@ -151,6 +151,8 @@ const RelationContact = ({ relation, callback }) => {
 };
 
 const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
+  const config = useConfig();
+
   const { isOpen: isOpenDownloadModal, onOpen: onOpenDownloadModal, onClose: onCloseDownloadModal } = useDisclosure();
 
   const toast = useToast();
@@ -158,7 +160,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
   const [sendingUpdateEmail, setSendingUpdateEmail] = useState(false);
 
   const resendNotificationEmail = useCallback(async () => {
-    if (sendingNotificationEmail) {
+    if (!config?.diffusion || sendingNotificationEmail) {
       return;
     }
     try {
@@ -198,10 +200,10 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
         isClosable: true,
       });
     }
-  }, [relation, toast, callback, sendingNotificationEmail]);
+  }, [relation, toast, callback, sendingNotificationEmail, config]);
 
   const resendUpdateEmail = useCallback(async () => {
-    if (sendingUpdateEmail) {
+    if (!config?.diffusion || sendingUpdateEmail) {
       return;
     }
     try {
@@ -241,7 +243,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
         isClosable: true,
       });
     }
-  }, [relation, toast, callback, sendingUpdateEmail]);
+  }, [relation, toast, callback, sendingUpdateEmail, config]);
 
   return (
     <Box>
@@ -265,7 +267,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
       <Box mt={8}>
         {/* Statut de diffusion des listes : */}
         <RelationStatut relation={relation} callback={callback} />{" "}
-        {!!relation?.nombre_voeux /*&& !!relation?.nombre_voeux_restant*/ && (
+        {config?.diffusion && !!relation?.nombre_voeux /*&& !!relation?.nombre_voeux_restant*/ && (
           <>
             {new Date(relation?.first_date_voeux)?.getTime() === new Date(relation?.last_date_voeux)?.getTime() ? (
               <Link

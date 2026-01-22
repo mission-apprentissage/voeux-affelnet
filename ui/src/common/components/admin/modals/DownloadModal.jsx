@@ -2,11 +2,9 @@ import { useCallback } from "react";
 import {
   Box,
   Button,
-  Checkbox,
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -18,7 +16,6 @@ import {
   RadioGroup,
   Spinner,
   Stack,
-  Switch,
   Text,
   Textarea,
   useToast,
@@ -44,11 +41,6 @@ export const DownloadModal = ({ relation, callback, isOpen, onClose }) => {
 
   const downloadAndClose = useCallback(
     async ({ form }) => {
-      console.log({
-        responsable: relation.responsable,
-        formateur: relation.formateur,
-        ...(form.mark_as_downloaded ? { mark_as_downloaded: form.mark_as_downloade, comment: form.comment } : {}),
-      });
       try {
         await downloadVoeux({
           responsable: relation.responsable,
@@ -114,7 +106,6 @@ export const DownloadModal = ({ relation, callback, isOpen, onClose }) => {
                   <Field name="mark_as_downloaded">
                     {({ field, meta }) => {
                       const { onChange, ...rest } = field;
-                      console.log({ field, meta });
 
                       return (
                         <FormControl isRequired isInvalid={meta.error && meta.touched} marginBottom="2w">

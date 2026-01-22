@@ -1,6 +1,17 @@
 const { fakerFR: faker } = require("@faker-js/faker");
 const { merge } = require("lodash");
-const { Etablissement, Voeu, User, Delegue, Mef, Log, Relation, Admin, Academie } = require("../../src/common/model");
+const {
+  Etablissement,
+  Voeu,
+  User,
+  Delegue,
+  Mef,
+  Log,
+  Relation,
+  Admin,
+  Academie,
+  Config,
+} = require("../../src/common/model");
 const { createUAI } = require("../../src/common/utils/validationUtils");
 // const { Csaio, Dossier } = require("../../src/common/model");
 
@@ -206,6 +217,18 @@ module.exports = {
           time: new Date(),
           level: 30,
           msg: "test",
+        },
+        custom
+      )
+    );
+  },
+
+  insertConfig: (custom = {}) => {
+    return Config.create(
+      merge(
+        {},
+        {
+          diffusion: true,
         },
         custom
       )

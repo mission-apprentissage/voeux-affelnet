@@ -70,7 +70,7 @@ function ActivationPage() {
 
   const redirect = searchParams.get("redirect") ? decodeURIComponent(searchParams.get("redirect")) : "/";
 
-  console.log("ActivationPage", { actionToken, redirect, data, loading, error });
+  // console.log("ActivationPage", { actionToken, redirect, data, loading, error });
 
   const activation = useCallback(
     async (values) => {

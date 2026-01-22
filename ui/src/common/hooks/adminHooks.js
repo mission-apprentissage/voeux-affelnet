@@ -63,7 +63,8 @@ export const useDownloadByFormationStatut = () => {
 
   const downloadStatut = useCallback(async (query) => {
     setIsDownloadingStatut(true);
-    const filename = `export-formations.csv`;
+    const now = new Date();
+    const filename = `export-formations-${now.toISOString().split("T")[0]}.csv`;
 
     try {
       const content = await fetch(`/api/admin/etablissements/export-formations.csv?${queryString.stringify(query)}`, {
@@ -92,8 +93,9 @@ export const useDownloadByRelationStatut = () => {
   const [isDownloadingStatut, setIsDownloadingStatut] = useState(false);
 
   const downloadStatut = useCallback(async (query) => {
+    const now = new Date();
     setIsDownloadingStatut(true);
-    const filename = `export-relations.csv`;
+    const filename = `export-etablissements-${now.toISOString().split("T")[0]}.csv`;
 
     try {
       const content = await fetch(`/api/admin/etablissements/export-relations.csv?${queryString.stringify(query)}`, {

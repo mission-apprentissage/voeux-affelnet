@@ -2,11 +2,18 @@ const assert = require("assert");
 const config = require("../../src/config");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
-const { insertUser } = require("../utils/fakeData");
+const { insertUser, insertConfig } = require("../utils/fakeData");
 const { activateUser } = require("../../src/common/actions/activateUser");
 const { startServer } = require("../utils/testUtils");
+const { Config } = require("../../src/common/model");
 
 describe("loginRoutes", () => {
+  beforeEach(async () => {
+    await Config.deleteMany({});
+
+    await insertConfig({ diffusion: true });
+  });
+
   it("Vérifie qu'on peut se connecter", async () => {
     const { httpClient } = await startServer();
     await insertUser({

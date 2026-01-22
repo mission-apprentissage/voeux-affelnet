@@ -3,8 +3,9 @@ const express = require("express");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { createApiToken } = require("../../common/utils/jwtUtils");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
-const { User } = require("../../common/model");
+const { User, Config } = require("../../common/model");
 const { sanitize } = require("../utils/sanitizeUtils");
+const { isAdmin, isAcademie } = require("../../common/utils/aclUtils");
 
 module.exports = () => {
   const router = express.Router(); // eslint-disable-line new-cap
@@ -15,9 +16,16 @@ module.exports = () => {
     checkUsernameAndPassword(),
     checkIsActive(),
     tryCatch(async (req, res) => {
+      const config = await Config.findOne({});
+
       const user = req.user;
 
+      if (!config?.diffusion && !(isAdmin(user) || isAcademie(user))) {
+        throw Boom.forbidden("La connexion au site de diffusion des candidatures n'est actuellement pas autorisée.");
+      }
+
       const token = createApiToken(user);
+
       return res.json({ token });
     })
   );

@@ -76,9 +76,13 @@ const Header = () => {
                       <MenuItem as={NavLink} to="/admin/alert">
                         Gestion des messages d'alerte
                       </MenuItem>
+                      <MenuItem as={NavLink} to="/admin/config">
+                        Configuration de l'application
+                      </MenuItem>
                       <MenuDivider />
                     </>
                   )}
+
                   <MenuItem onClick={logout}>Déconnexion</MenuItem>
                 </MenuList>
               </Menu>

@@ -17,11 +17,12 @@ import useAuth from "../../common/hooks/useAuth";
 import { Breadcrumb } from "../../common/components/Breadcrumb";
 import { CheckIcon, CloseIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import { Page } from "../../common/components/layout/Page";
+import { isAdmin } from "../../common/utils/aclUtils";
 
 export const Alert = () => {
   const [messages, setMessages] = useState([]);
   const toast = useToast();
-  const [user] = useAuth();
+  const [auth] = useAuth();
   const mountedRef = useRef(true);
 
   const getMessages = useCallback(async () => {
@@ -60,7 +61,7 @@ export const Alert = () => {
         try {
           const message = {
             msg,
-            name: user.email,
+            name: auth.email,
             enabled: true,
           };
           const messagePosted = await _post("/api/admin/alert", message);
@@ -69,7 +70,7 @@ export const Alert = () => {
           }
           await getMessages();
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
 
         setSubmitting(false);
@@ -148,6 +149,15 @@ export const Alert = () => {
     },
     [getMessages, toast]
   );
+
+  if (!isAdmin(auth)) {
+    return (
+      <>
+        <Breadcrumb items={[{ label: "Gestion des messages de maintenance", url: "/admin/alert" }]} />
+        <Page title="Accès refusé">Vous n'avez pas les droits suffisants pour accéder à cette page.</Page>
+      </>
+    );
+  }
 
   return (
     <>
