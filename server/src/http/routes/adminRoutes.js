@@ -776,6 +776,12 @@ module.exports = ({ sendEmail, resendEmail }) => {
         `Délégation désactivée (${delegue?.email}) pour le formateur ${siret_formateur} et le responsable ${siret_responsable}`
       );
 
+      try {
+        await catalogueApi.putCandidatureRelation({ siret_responsable, siret_formateur });
+      } catch (error) {
+        logger.error(error);
+      }
+
       res.json(updateDelegue);
     })
   );
