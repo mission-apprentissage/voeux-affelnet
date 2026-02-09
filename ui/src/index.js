@@ -20,7 +20,7 @@ if (process.env.REACT_APP_SENTRY_DSN) {
   console.log("Sentry enabled");
 }
 
-console.log(process.env);
+// console.log(process.env);
 
 const root = createRoot(document.getElementById("root"));
 
