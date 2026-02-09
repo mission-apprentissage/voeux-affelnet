@@ -31,7 +31,6 @@ const MentionsLegales = lazy(() => import("./pages/legal/MentionsLegales"));
 const Accessibilite = lazy(() => import("./pages/legal/Accessibilite"));
 
 const App = () => {
-  // TO FIX
   const [auth] = useAuth();
 
   const getDefaultRedirection = () => {

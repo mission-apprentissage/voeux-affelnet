@@ -11,6 +11,7 @@ process.on("uncaughtException", (e) => logger.error("An unexpected error occurre
   await connectToMongo();
   const actions = await createActions();
 
-  const http = await server(actions);
-  http.listen(5000, () => logger.info(`Server ready and listening on port ${5000}`));
+  const app = await server(actions);
+
+  app.listen(5000, () => logger.info(`Server ready and listening on port ${5000}`));
 })();

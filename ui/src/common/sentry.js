@@ -1,6 +1,6 @@
 import { captureException, init } from "@sentry/browser";
 
-const isEnabled = !!process.env.REACT_APP_VOEUX_AFFELNET_SENTRY_DSN;
+const isEnabled = !!process.env.REACT_APP_SENTRY_DSN;
 
 export const sendError = (e) => {
   if (!isEnabled) {
@@ -16,8 +16,8 @@ export const initialize = () => {
   }
 
   init({
-    dsn: process.env.REACT_APP_VOEUX_AFFELNET_SENTRY_DSN,
-    environment: process.env.REACT_APP_VOEUX_AFFELNET_ENV || "dev",
+    dsn: process.env.REACT_APP_SENTRY_DSN,
+    environment: process.env.REACT_APP_ENV || "local",
     beforeSend(event) {
       console.log(event);
       return event;

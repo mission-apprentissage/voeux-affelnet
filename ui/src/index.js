@@ -1,19 +1,29 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import * as Sentry from "@sentry/react";
 import { ChakraProvider } from "@chakra-ui/react";
 
 import "./common/utils/setYupLocale";
-import * as Sentry from "./common/sentry";
-
 import App from "./App";
 
 import theme from "./theme/index";
 import "./index.css";
 
-Sentry.initialize();
+if (process.env.REACT_APP_SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.REACT_APP_SENTRY_DSN,
+    // Setting this option to true will send default PII data to Sentry.
+    // For example, automatic IP address collection on events
+    sendDefaultPii: true,
+  });
 
-const container = document.getElementById("root");
-const root = createRoot(container);
+  console.log("Sentry enabled");
+}
+
+console.log(process.env);
+
+const root = createRoot(document.getElementById("root"));
+
 root.render(
   <StrictMode>
     <ChakraProvider theme={theme} resetCSS>

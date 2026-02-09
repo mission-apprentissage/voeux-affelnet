@@ -11,7 +11,22 @@ export const AlertMessage = () => {
   const getMessages = useCallback(async () => {
     try {
       const data = await _get("/api/alert");
-      setMessages(data?.filter((item) => item.enabled) ?? []);
+
+      setMessages([
+        ...(process.env.REACT_APP_ENV !== "production"
+          ? [
+              {
+                enabled: true,
+                msg: (
+                  <>
+                    Environnement : <Text as="b">{process.env.REACT_APP_ENV}</Text>
+                  </>
+                ),
+              },
+            ]
+          : []),
+        ...(data?.filter((item) => item.enabled) ?? []),
+      ]);
     } catch (e) {
       console.error(e);
     }

@@ -33,8 +33,8 @@ function ServerErrorMessage() {
       <Box>
         <Text>
           Une erreur est survenue, merci de prendre contact avec un administrateur en précisant votre identifiant via :{" "}
-          <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-            {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+          <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+            {process.env.REACT_APP_EMAIL}
           </Link>
           .
         </Text>
@@ -56,8 +56,8 @@ const StatusErrorMessage = ({ error, username, actionToken }) => {
             <Text>
               Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur en précisant votre
               Identifiant (<strong>{username}</strong>) via :{" "}
-              <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+              <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                {process.env.REACT_APP_EMAIL}
               </Link>
               .
             </Text>
@@ -88,8 +88,8 @@ const StatusErrorMessage = ({ error, username, actionToken }) => {
             </Text>
             <Text>
               Si vous pensez qu’il s’agit d’une erreur, veuillez le signaler en envoyant un courriel à :{" "}
-              <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+              <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                {process.env.REACT_APP_EMAIL}
               </Link>
               .
             </Text>

@@ -41,9 +41,7 @@ function StatusErrorMessage({ error, username }) {
         <Text>
           Ce lien est expiré ou invalide, merci de prendre contact avec un administrateur votre identifiant ({username})
           via :&nbsp;
-          <Link href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-            {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
-          </Link>
+          <Link href={`mailto:${process.env.REACT_APP_EMAIL}`}>{process.env.REACT_APP_EMAIL}</Link>
         </Text>
       </Alert>
     );

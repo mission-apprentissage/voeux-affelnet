@@ -1,13 +1,19 @@
 const { isEmpty } = require("lodash");
 const logger = require("../../common/logger");
 const config = require("../../config");
-const { init, captureException, configureScope } = require("@sentry/node");
+const { init, captureException, getCurrentScope } = require("@sentry/node");
 
 module.exports = () => {
   const isEnabled = !isEmpty(config.sentry.dsn);
 
+  logger.info({ type: "http" }, "Sentry activated " + (isEnabled ? "true" : "false"));
+
   if (isEnabled) {
-    init({ dsn: config.sentry.dsn, environment: config.env, tracesSampleRate: 1.0 });
+    init({
+      dsn: config.sentry.dsn,
+      environment: config.env,
+      tracesSampleRate: 1.0,
+    });
   }
 
   return {
@@ -23,12 +29,8 @@ module.exports = () => {
         : {};
 
       if (isEnabled) {
-        if (options) {
-          configureScope((scope) => {
-            if (options.user) {
-              scope.setUser(options.user);
-            }
-          });
+        if (options && options.user) {
+          getCurrentScope().setUser(options.user);
         }
         captureException(e);
       } else {

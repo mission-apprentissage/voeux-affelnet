@@ -39,7 +39,7 @@ import { AlertMessage } from "../common/components/layout/AlertMessage";
 import { EyeFill, EyeOffFill } from "../theme/components/icons";
 import { USER_STATUS } from "../common/constants/UserStatus";
 
-const mailVoeux = process.env.REACT_APP_VOEUX_AFFELNET_EMAIL;
+const mailVoeux = process.env.REACT_APP_EMAIL;
 
 const checkUsername = async (username, { path, createError }) => {
   try {
@@ -214,8 +214,8 @@ function LoginPage() {
               <Alert status="info">
                 <Text mb={4}>
                   Besoin d'aide ? Prenez contact avec un administrateur à l'adresse mail{" "}
-                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                    {process.env.REACT_APP_EMAIL}
                   </Link>{" "}
                   en précisant votre identifiant ({username})
                 </Text>
@@ -239,8 +239,8 @@ function LoginPage() {
 
                 <Text mb={4}>
                   L'expéditeur des différentes correspondance sera{" "}
-                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                    {process.env.REACT_APP_EMAIL}
                   </Link>
                   .
                 </Text>
@@ -248,8 +248,8 @@ function LoginPage() {
                 <Text mb={4}>
                   Les destinataires seront les mêmes qu'en 2024 . Si vous pensez que les contacts peuvent avoir changé,
                   vous pouvez adresser un signalement à{" "}
-                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                    {process.env.REACT_APP_EMAIL}
                   </Link>
                   , en indiquant votre numéro Siret et code UAI.
                 </Text>
@@ -260,8 +260,8 @@ function LoginPage() {
                     page support
                   </Link>
                   , ou contacter l’équipe de diffusion par courriel :{" "}
-                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                    {process.env.REACT_APP_EMAIL}
                   </Link>
                 </Text> */}
 
@@ -280,15 +280,15 @@ function LoginPage() {
                       {" "}
                       Veuillez vérifier dans vos spams, ou solliciter votre service informatique pour vérification.
                       L’émetteur du message est :{" "}
-                      <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                      <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                        {process.env.REACT_APP_EMAIL}
                       </Link>
                     </ListItem>
                     <ListItem>
                       {" "}
                       Après vérification des spams, vous pouvez faire un signalement en envoyant un message à{" "}
-                      <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                      <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                        {process.env.REACT_APP_EMAIL}
                       </Link>{" "}
                       en indiquant vos numéros Siret et UAI.
                     </ListItem>
@@ -310,8 +310,8 @@ function LoginPage() {
                     page support
                   </Link>
                   , ou contacter l’équipe de diffusion par courriel :{" "}
-                  <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                    {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                  <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                    {process.env.REACT_APP_EMAIL}
                   </Link>
                 </Text>
 

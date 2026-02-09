@@ -48,15 +48,15 @@ export const AnomaliePage = () => {
                   <ListItem>l’heure à laquelle le message aurait dû être reçu,</ListItem>
                   <ListItem>
                     l’expéditeur du message :{" "}
-                    <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
-                      {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}
+                    <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
+                      {process.env.REACT_APP_EMAIL}
                     </Link>
                   </ListItem>
                 </UnorderedList>
               </Text>
               <Text mb={4}>
                 Si le message reste introuvable, veuillez{" "}
-                <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
                   faire un signalement à l’équipe de diffusion
                 </Link>
                 , en indiquant votre numéro Siret et UAI, et l’adresse courriel sur laquelle vous auriez dû recevoir la
@@ -94,7 +94,7 @@ export const AnomaliePage = () => {
                 Si des relations sont manquantes :
                 <UnorderedList>
                   <ListItem>
-                    <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                    <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
                       Faites un signalement à l’équipe en charge de la diffusion des listes de candidats
                     </Link>
                     , en indiquant :
@@ -154,7 +154,7 @@ export const AnomaliePage = () => {
               </Text>
               <Text mb={4}>
                 Si vous pensez que les erreurs d'UAI impactent la diffusion des listes de candidats, veuillez en{" "}
-                <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
                   faire le signalement à l'équipe en charge de la diffusion des listes
                 </Link>
                 , en précisant toutes les informations utiles (UAI actuellement enregistrés, corrections attendues).
@@ -236,7 +236,7 @@ export const AnomaliePage = () => {
               </Text>
               <Text mb={4}>
                 Si le problème persiste, veuillez{" "}
-                <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
                   envoyer un message à l'équipe en charge de la diffusion des listes de candidats
                 </Link>{" "}
                 en indiquant :
@@ -318,7 +318,7 @@ export const AnomaliePage = () => {
                   <Text mb={4}>
                     Pour toute autre question relative au planning et aux modalités de diffusion des listes de
                     candidats, vous pouvez{" "}
-                    <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                    <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
                       adresser un courriel à l'équipe de diffusion
                     </Link>
                     , en indiquant vos numéros Siret et UAI.
@@ -340,7 +340,7 @@ export const AnomaliePage = () => {
             <AccordionPanel pb={4}>
               <Text mb={4}>
                 Pour les questions relatives à la diffusion des listes de candidats, contactez{" "}
-                <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+                <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
                   l'équipe de diffusion
                 </Link>{" "}
                 (Direction du numérique pour l'éducation).

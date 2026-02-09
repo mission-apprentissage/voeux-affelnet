@@ -20,7 +20,7 @@ export const Contact = () => {
 
           <Text mb={4}>
             Une remarque, un avis, une suggestion d’amélioration ?{" "}
-            <Link variant="action" href={`mailto:${process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}`}>
+            <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
               Contactez-nous !
             </Link>
           </Text>

@@ -11,15 +11,14 @@ services:
   ui:
     restart: "no"
     build:
+      context: ui
       dockerfile: Dockerfile.dev
-      args:
-        - VOEUX_AFFELNET_ENV=dev
-        - VOEUX_AFFELNET_EMAIL=candidats-apprentissage@education.gouv.fr
     mem_limit: 1g
     stdin_open: true
     environment:
-      - FAST_REFRESH=false
+      - FAST_REFRESH=true
       - WDS_SOCKET_PORT=0
+    env_file: ./ui/.env
     volumes:
       - ./ui:/app #Allows source folders to be watched
 
@@ -36,7 +35,7 @@ services:
       - ./.local/dne:/dne:z
     environment:
       - VOEUX_AFFELNET_PUBLIC_URL=http://localhost
-      - VOEUX_AFFELNET_ENV=dev
+      - VOEUX_AFFELNET_ENV=local
       - VOEUX_AFFELNET_AUTH_PASSWORD_HASH_ROUNDS=1000
       - VOEUX_AFFELNET_LOG_LEVEL=debug
       - VOEUX_AFFELNET_SMTP_HOST=smtp

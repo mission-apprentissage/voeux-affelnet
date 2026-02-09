@@ -332,7 +332,7 @@ const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, c
                         personne n'a pas reçu d'email de notification invitez-la à consulter ses spam, en lui
                         communiquant la date à laquelle la dernière notification lui a été envoyée (
                         {lastEmailDate?.toLocaleDateString()}) et l'expéditeur des notifications (
-                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
+                        {process.env.REACT_APP_EMAIL}).
                       </Text>
                       <Text mb={4}>
                         Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}
@@ -424,7 +424,7 @@ const DelegationAvecCandidaturesRestantesModal = ({ relation, isOpen, onClose, c
                         liste. Si la personne n'a pas reçu d'email de notification invitez-la à consulter ses spam, en
                         lui communiquant la date à laquelle la dernière notification lui a été envoyée (
                         {lastEmailDate?.toLocaleDateString()}) et l'expéditeur des notifications (
-                        {process.env.REACT_APP_VOEUX_AFFELNET_EMAIL}).
+                        {process.env.REACT_APP_EMAIL}).
                       </Text>
                       <Text mb={4}>
                         Si malgré tout la personne ne retrouve pas la notification, vous pouvez essayer de{" "}

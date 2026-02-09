@@ -1,10 +1,10 @@
 const express = require("express");
 const compression = require("compression");
 const bodyParser = require("body-parser");
+const passport = require("passport");
 const logMiddleware = require("./middlewares/logMiddleware");
 const errorMiddleware = require("./middlewares/errorMiddleware");
 // const corsMiddleware = require("./middlewares/corsMiddleware");
-const passport = require("passport");
 
 module.exports = async (actions) => {
   const app = express();
@@ -14,6 +14,7 @@ module.exports = async (actions) => {
   app.use(logMiddleware());
   // app.use(corsMiddleware());
   app.use(passport.initialize());
+
   app.use(require("./routes/loginRoutes")(actions));
   app.use(require("./routes/activationRoutes")(actions));
   app.use(require("./routes/confirmationRoutes")(actions));
@@ -29,6 +30,10 @@ module.exports = async (actions) => {
   app.use(require("./routes/alertRoutes")(actions));
   app.use(require("./routes/adminRoutes")(actions));
   app.use(require("./routes/constantRoutes")(actions));
+
+  app.get("/api/debug-sentry", () => {
+    throw new Error("Test sentry");
+  });
 
   app.use(errorMiddleware());
   app.use((req, res) => {
