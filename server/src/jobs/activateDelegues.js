@@ -4,13 +4,11 @@ const logger = require("../common/logger");
 async function activateDelegues(options) {
   const proceed = typeof options.proceed !== "undefined" ? options.proceed : true;
 
-  const existingRelations = await Relation.find({});
-
   const stats = {
     activated: 0,
   };
 
-  for await (const existingRelation of existingRelations) {
+  for await (const existingRelation of Relation.find()) {
     if (proceed) {
       const { modifiedCount } = await Delegue.updateMany(
         {

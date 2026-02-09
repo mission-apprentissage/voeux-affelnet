@@ -142,9 +142,7 @@ async function importEtablissementsRelations(relationsCsv) {
     )
   );
 
-  const existingRelations = await Relation.find({});
-
-  for await (const existingRelation of existingRelations) {
+  for await (const existingRelation of Relation.find()) {
     if (
       !relations.find(
         (relation) =>
