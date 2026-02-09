@@ -65,14 +65,7 @@ export const Logo = ({ size = "sm" }) => {
       >
         Ministère
         <br /> de l'éducation
-        <br />
-        nationale,
-        <br />
-        de l'enseignement
-        <br />
-        supérieur
-        <br />
-        et de la recherche
+        <br /> nationale
       </Text>
     </Box>
   );
