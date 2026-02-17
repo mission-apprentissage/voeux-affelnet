@@ -54,15 +54,18 @@ services:
 
   smtp:
     restart: "no"
-    image: mailhog/mailhog
+    image: axllent/mailpit
     container_name: voeux_affelnet_smtp
     mem_limit: 128m
     volumes:
-      - .local/mailhog:/data
+      - .local/mailpit:/data
     ports:
       - 1025:1025
+      - 8025:8025
     networks:
       - voeux_affelnet_network
     environment:
-      - MH_UI_WEB_PATH=smtp
-    # entrypoint: MailHog -auth-file=/data/auth.file
+      - MP_WEBROOT=smtp
+      - MP_DATABASE=/data/mailpit.db
+      - TZ=Europe/Paris
+      - MP_UI_AUTH_FILE=/data/auth.file
