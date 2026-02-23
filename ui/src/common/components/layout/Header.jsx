@@ -73,6 +73,9 @@ const Header = () => {
                 <MenuList>
                   {isAdmin(auth) && (
                     <>
+                      <MenuItem as={NavLink} to="/admin/users">
+                        Gestion des utilisateurs
+                      </MenuItem>
                       <MenuItem as={NavLink} to="/admin/alert">
                         Gestion des messages d'alerte
                       </MenuItem>

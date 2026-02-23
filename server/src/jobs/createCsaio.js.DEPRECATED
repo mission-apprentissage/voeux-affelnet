@@ -1,7 +1,7 @@
 const logger = require("../common/logger");
-const { Csaio } = require("../common/model");
+const { Csaio } = require("../common/model/index");
 const { some } = require("lodash");
-const { findAcademieByCode } = require("../common/academies.js");
+const { findAcademieByCode } = require("../common/academies");
 
 async function createCsaio(username, email, academies) {
   if (some(academies, (a) => findAcademieByCode(a.code) === null)) {

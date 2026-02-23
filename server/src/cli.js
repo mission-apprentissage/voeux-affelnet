@@ -344,7 +344,7 @@ cli
   .option("--mef", "Importe les mefs")
   .option("--responsable", "Ajoute un responsable")
   .option("--admin", "Ajoute un administrateur")
-  .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
+  // .option("--csaio", "Ajoute un utilisateur csasio et des dossiers du tableau de bord")
   .action((options) => {
     runScript((actions) => {
       return injectDataset(actions, options);

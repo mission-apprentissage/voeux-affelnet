@@ -8,10 +8,7 @@ module.exports.connectToMongo = (mongoUri = config.mongodb.uri) => {
     logger.debug(`MongoDB: Connection to ${mongoUri}`);
 
     // Set up default mongoose connection
-    mongoose.connect(mongoUri, {
-      // useNewUrlParser: true,
-      // useUnifiedTopology: true,
-    });
+    mongoose.connect(mongoUri, {});
 
     applySpeedGooseCacheLayer(mongoose, {
       // redisUri: process.env.REDIS_URI,

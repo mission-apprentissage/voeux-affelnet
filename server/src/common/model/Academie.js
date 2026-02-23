@@ -6,6 +6,7 @@ const { academieSchema } = require("./schemas/academieSchema");
 const schema = new Schema({
   academies: {
     type: [academieSchema],
+    required: true,
   },
 });
 

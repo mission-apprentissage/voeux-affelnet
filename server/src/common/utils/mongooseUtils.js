@@ -37,7 +37,7 @@ function raw(model) {
  * @returns {Promise<{find: Promise<import("mongoose").Model[]>, pagination: {page: Number, items_par_page: Number, nombre_de_page: Number, total: Number}}>
  */
 async function paginate(model, query, options = {}) {
-  const total = await model.count(query).cacheQuery();
+  const total = await model.countDocuments(query).cacheQuery();
   const page = options.page || 1;
   const limit = options.items_par_page || 10;
   const sort = options.sort || {};
@@ -75,11 +75,11 @@ async function aggregate(model, aggregation, options = {}) {
   const total = (await model.aggregate([...aggregation, { $count: "total" }]).cachePipeline())?.[0]?.total || 0;
   const page = options.page || 1;
   const limit = options.items_par_page || 10;
-  const sort = options.sort || {};
+  const sort = options.sort;
   const skip = (page - 1) * limit;
 
   const query = model
-    .aggregate([...aggregation, { $sort: sort }])
+    .aggregate([...aggregation, ...(sort ? [{ $sort: sort }] : [])])
     .allowDiskUse(true)
     .cachePipeline();
 

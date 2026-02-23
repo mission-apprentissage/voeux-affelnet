@@ -3,7 +3,7 @@ const { oleoduc, transformIntoCSV } = require("oleoduc");
 const Joi = require("@hapi/joi");
 const tryCatch = require("../middlewares/tryCatchMiddleware");
 const { User, Etablissement, Delegue, Relation, Config } = require("../../common/model");
-const { getAcademies } = require("../../common/academies");
+const { getAcademies, findAcademieByCode } = require("../../common/academies");
 const { aggregate } = require("../../common/utils/mongooseUtils");
 const authMiddleware = require("../middlewares/authMiddleware");
 const { changeEmail } = require("../../common/actions/changeEmail");
@@ -144,52 +144,6 @@ const lookupRelations = {
 };
 
 const addTypeFields = {
-  // is_responsable: {
-  //   $reduce: {
-  //     input: "$relations",
-  //     initialValue: false,
-  //     in: {
-  //       $cond: [
-  //         {
-  //           $or: [
-  //             {
-  //               $eq: ["$$this.etablissement_responsable.siret", "$siret"],
-  //             },
-  //             {
-  //               $eq: ["$$value", true],
-  //             },
-  //           ],
-  //         },
-  //         true,
-  //         false,
-  //       ],
-  //     },
-  //   },
-  // },
-
-  // is_formateur: {
-  //   $reduce: {
-  //     input: "$relations",
-  //     initialValue: false,
-  //     in: {
-  //       $cond: [
-  //         {
-  //           $or: [
-  //             {
-  //               $eq: ["$$this.etablissement_formateur.siret", "$siret"],
-  //             },
-  //             {
-  //               $eq: ["$$value", true],
-  //             },
-  //           ],
-  //         },
-  //         true,
-  //         false,
-  //       ],
-  //     },
-  //   },
-  // },
-
   is_formateur: {
     $reduce: {
       input: "$relations",
@@ -281,7 +235,7 @@ const addCountFields = {
 
 module.exports = ({ sendEmail, resendEmail }) => {
   const router = express.Router();
-  const { checkApiToken, checkIsAdminOrAcademie } = authMiddleware();
+  const { checkApiToken, checkIsAdminOrAcademie, checkIsAdmin } = authMiddleware();
   const catalogueApi = new CatalogueApi();
 
   function asCsvResponse(name, res) {
@@ -307,6 +261,177 @@ module.exports = ({ sendEmail, resendEmail }) => {
       const user = await User.findOne({ username }).lean();
 
       res.json(user);
+    })
+  );
+
+  /**
+   * Établissements (RESPONSABLES & FORMATEURS)
+   */
+
+  /**
+   * Permet de récupérer la liste des utilisateurs de type admin ou académie
+   */
+  router.get(
+    "/api/admin/users",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      // const { academie, text, type } = await Joi.object({
+      //   academie: Joi.string().valid(...[...getAcademies().map((academie) => academie.code)]),
+      //   text: Joi.string(),
+      //   type: Joi.string(),
+      // }).validateAsync(req.query, { abortEarly: false });
+
+      // const regex = "(.*" + text?.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*)+";
+      // const regexQuery = { $regex: regex, $options: "i" };
+
+      const pipeline = [
+        { $match: { type: { $in: [USER_TYPE.ADMIN, USER_TYPE.ACADEMIE] } } },
+
+        // ...(type
+        //   ? [
+        //       {
+        //         $match: { type },
+        //       },
+        //     ]
+        //   : []),
+
+        // ...(academie
+        //   ? [
+        //       {
+        //         $match: { "academie.code": { $in:  [academie] } },
+        //       },
+        //     ]
+        //   : []),
+
+        // ...(text
+        //   ? [
+        //       {
+        //         $match: {
+        //           $or: [{ username: regexQuery }, { email: regexQuery }],
+        //         },
+        //       },
+        //     ]
+        //   : []),
+      ];
+
+      const { results, pagination } = await aggregate(User, pipeline, {
+        page: 1,
+        items_par_page: 1000,
+        select: { password: 0 },
+        // sort: JSON.parse(/*sort*/ JSON.stringify({ username: 1 })),
+      });
+
+      res.json({
+        users: results,
+        pagination,
+      });
+    })
+  );
+
+  /**
+   * Permet de créer un utilisateur de type admin ou académie
+   */
+  router.post(
+    "/api/admin/users",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { username, type, email, academies } = await Joi.object()
+        .keys({
+          username: Joi.string().required(),
+          type: Joi.string().valid(USER_TYPE.ADMIN, USER_TYPE.ACADEMIE).required(),
+          email: Joi.string().email().required(),
+          academies:
+            req.body.type === USER_TYPE.ACADEMIE
+              ? Joi.array()
+                  .items(Joi.string().valid(...getAcademies().map((academie) => academie.code)))
+                  .required()
+              : Joi.any().allow(null),
+        })
+        .validateAsync(req.body, { abortEarly: false });
+
+      const formattedAcademies = academies
+        ?.map((academie) => findAcademieByCode(academie))
+        .map((academie) => ({ code: academie.code, nom: academie.nom }));
+
+      const user = await User.model(type).create({
+        username,
+        type,
+        email,
+        statut: USER_STATUS.CONFIRME,
+        ...(type === USER_TYPE.ACADEMIE ? { academies: formattedAcademies } : {}),
+      });
+
+      const stats = await sendActivationEmails(
+        { sendEmail, resendEmail },
+        { username, type, force: true, sender: req.user }
+      );
+
+      res.json({ message: `L'utilisateur ${user?.username} a été créé`, user, stats });
+    })
+  );
+
+  /**
+   * Permet de mettre à jour un utilisateur de type admin ou académie
+   */
+  router.put(
+    "/api/admin/users/:_id",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const { _id } = await Joi.object({
+        _id: Joi.string().required(),
+      }).validateAsync(req.params, { abortEarly: false });
+      const { username, type, email, academies } = await Joi.object()
+        .keys({
+          username: Joi.string().required(),
+          type: Joi.string().valid(USER_TYPE.ADMIN, USER_TYPE.ACADEMIE).required(),
+          email: Joi.string().email().required(),
+          academies:
+            req.body.type === USER_TYPE.ACADEMIE
+              ? Joi.array()
+                  .items(Joi.string().valid(...getAcademies().map((academie) => academie.code)))
+                  .required()
+              : Joi.any().allow(null),
+        })
+        .validateAsync(req.body, { abortEarly: false });
+
+      const formattedAcademies = academies
+        ?.map((academie) => findAcademieByCode(academie))
+        .map((academie) => ({ code: academie.code, nom: academie.nom }));
+
+      const user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $set: {
+            username,
+            type,
+            email,
+            ...(type === USER_TYPE.ACADEMIE ? { academies: formattedAcademies } : {}),
+          },
+          ...(type === USER_TYPE.ADMIN ? { $unset: { academies: 1 } } : {}),
+        },
+        { strict: false, new: true, runValidators: true }
+      );
+
+      res.json({ message: `L'utilisateur ${user?.username} a été mis à jour`, user });
+    })
+  );
+
+  /**
+   * Permet de mettre à jour un utilisateur de type admin ou académie
+   */
+  router.delete(
+    "/api/admin/users/:_id",
+    checkApiToken(),
+    checkIsAdmin(),
+    tryCatch(async (req, res) => {
+      const user = await User.findOne({ _id: req.params._id });
+
+      await User.model(user.type).deleteOne({ _id: req.params._id });
+
+      res.json({ message: `L'utilisateur ${user.username} a été supprimé`, user });
     })
   );
 
@@ -947,76 +1072,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
     })
   );
 
-  /**
-   * Permet de renvoyer un mail de notification à un responsable
-   */
-  // router.put(
-  //   "/api/admin/responsables/:siret_responsable/resendNotificationEmail",
-  //   checkApiToken(),
-  //   checkIsAdminOrAcademie(),
-  //   tryCatch(async (req, res) => {
-  //   const config = await Config.findOne({});
-
-  //     const { siret_responsable } = await Joi.object({
-  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
-  //     }).validateAsync(req.params, { abortEarly: false });
-
-  //     await cancelUnsubscription(siret_responsable);
-
-  //     const stats = config?.diffusion && await sendNotificationEmails(
-  //       { sendEmail, resendEmail },
-  //       { username: siret_responsable, force: true, sender: req.user }
-  //     );
-
-  //     res.json(stats);
-  //   })
-  // );
-
-  /**
-   * Permet de renvoyer un mail de mise à jour à un responsable
-   */
-  // router.put(
-  //   "/api/admin/responsables/:siret_responsable/resendUpdateEmail",
-  //   checkApiToken(),
-  //   checkIsAdminOrAcademie(),
-  //   tryCatch(async (req, res) => {
-  //     const config = await Config.findOne({});
-
-  //     const { siret_responsable } = await Joi.object({
-  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
-  //     }).validateAsync(req.params, { abortEarly: false });
-
-  //     await cancelUnsubscription(siret_responsable);
-
-  //     const stats = config?.diffusion && await sendUpdateEmails(
-  //       { sendEmail, resendEmail },
-  //       { username: siret_responsable, force: true, sender: req.user }
-  //     );
-
-  //     res.json(stats);
-  //   })
-  // );
-
-  // /**
-  //  * @deprecated
-  //  *
-  //  * Marque un responsable comme non concerné (permet de ne plus envoyer de courriels à ce responsable)
-  //  */
-  // router.put(
-  //   "/api/admin/responsables/:siret_responsable/markAsNonConcerne",
-  //   checkApiToken(),
-  //   checkIsAdminOrAcademie(),
-  //   tryCatch(async (req, res) => {
-  //     const { siret_responsable } = await Joi.object({
-  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
-  //     }).validateAsync(req.params, { abortEarly: false });
-
-  //     await markAsNonConcerne(siret_responsable);
-
-  //     res.json({ statut: "non concerné" });
-  //   })
-  // );
-
   /** DELEGUES
    * =============
    */
@@ -1062,86 +1117,6 @@ module.exports = ({ sendEmail, resendEmail }) => {
       res.json(stats);
     })
   );
-
-  /**
-   * Permet de renvoyer un mail de notification à un délégué
-   */
-  // router.put(
-  //   "/api/admin/delegues/:siret_responsable/:siret_formateur/resendNotificationEmail",
-  //   checkApiToken(),
-  //   checkIsAdminOrAcademie(),
-  //   tryCatch(async (req, res) => {
-  //     const config = await Config.findOne({});
-
-  //     const { siret_responsable, siret_formateur } = await Joi.object({
-  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
-  //       siret_formateur: Joi.string().pattern(siretFormat).required(),
-  //     }).validateAsync(req.params, { abortEarly: false });
-
-  //     const delegue = await Delegue.findOne({
-  //       relations: {
-  //         $elemMatch: {
-  //           "etablissement_responsable.siret": siret_responsable,
-  //           "etablissement_formateur.siret": siret_formateur,
-  //           active: true,
-  //         },
-  //       },
-  //     });
-
-  //     if (!delegue) {
-  //       throw Boom.notFound();
-  //     }
-
-  //     await cancelUnsubscription(delegue.username);
-
-  //     const stats = config?.diffusion && await sendNotificationEmails(
-  //       { sendEmail, resendEmail },
-  //       { username: delegue.username, force: true, sender: req.user }
-  //     );
-
-  //     res.json(stats);
-  //   })
-  // );
-
-  /**
-   * Permet de renvoyer un mail de mise à jour à un délégué
-   */
-  // router.put(
-  //   "/api/admin/delegues/:siret_responsable/:siret_formateur/resendUpdateEmail",
-  //   checkApiToken(),
-  //   checkIsAdminOrAcademie(),
-  //   tryCatch(async (req, res) => {
-  //     const config = await Config.findOne({});
-
-  //     const { siret_responsable, siret_formateur } = await Joi.object({
-  //       siret_responsable: Joi.string().pattern(siretFormat).required(),
-  //       siret_formateur: Joi.string().pattern(siretFormat).required(),
-  //     }).validateAsync(req.params, { abortEarly: false });
-
-  //     const delegue = await Delegue.findOne({
-  //       relations: {
-  //         $elemMatch: {
-  //           "etablissement_responsable.siret": siret_responsable,
-  //           "etablissement_formateur.siret": siret_formateur,
-  //           active: true,
-  //         },
-  //       },
-  //     });
-
-  //     if (!delegue) {
-  //       throw Boom.notFound();
-  //     }
-
-  //     await cancelUnsubscription(delegue.username);
-
-  //     const stats = config?.diffusion && await sendUpdateEmails(
-  //       { sendEmail, resendEmail },
-  //       { username: delegue.username, force: true, sender: req.user }
-  //     );
-
-  //     res.json(stats);
-  //   })
-  // );
 
   // RELATIONS
 

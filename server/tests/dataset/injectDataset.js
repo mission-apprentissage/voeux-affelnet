@@ -8,7 +8,7 @@ const { insertResponsable, insertFormateur, insertVoeu } = require("../utils/fak
 const { range } = require("lodash");
 const { insertDossier, createUsername, createEmail } = require("../utils/fakeData.js");
 const { createAdmin } = require("../../src/jobs/createAdmin.js");
-const { createCsaio } = require("../../src/jobs/createCsaio.js");
+// const { createCsaio } = require("../../src/jobs/createCsaio.js");
 const logger = require("../../src/common/logger.js");
 
 async function generateFormateurs(uais) {
@@ -75,12 +75,12 @@ async function generateAdmin(sendEmail) {
   await sendActivationEmails(sendEmail, { username });
 }
 
-async function generateCsaio(sendEmail) {
-  const username = createUsername();
+// async function generateCsaio(sendEmail) {
+//   const username = createUsername();
 
-  await createCsaio(username, createEmail(), "11");
-  await sendActivationEmails(sendEmail, { username });
-}
+//   await createCsaio(username, createEmail(), "11");
+//   await sendActivationEmails(sendEmail, { username });
+// }
 
 async function injectDataset(actions, options = {}) {
   let { sendEmail } = actions;
@@ -94,9 +94,9 @@ async function injectDataset(actions, options = {}) {
     await generateAdmin(sendEmail);
   }
 
-  if (options.csaio) {
-    await generateCsaio(sendEmail);
-  }
+  // if (options.csaio) {
+  //   await generateCsaio(sendEmail);
+  // }
 
   if (options.responsable) {
     await generateResponsable(sendEmail, uais);

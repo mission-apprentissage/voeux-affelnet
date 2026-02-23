@@ -15,21 +15,24 @@ module.exports = async (actions) => {
   // app.use(corsMiddleware());
   app.use(passport.initialize());
 
+  app.use(require("./routes/configRoutes")(actions));
+  app.use(require("./routes/alertRoutes")(actions));
+  app.use(require("./routes/constantRoutes")(actions));
+
   app.use(require("./routes/loginRoutes")(actions));
+  app.use(require("./routes/passwordRoutes")(actions));
   app.use(require("./routes/activationRoutes")(actions));
   app.use(require("./routes/confirmationRoutes")(actions));
+
+  app.use(require("./routes/adminRoutes")(actions));
   app.use(require("./routes/responsablesRoutes.js")(actions));
   app.use(require("./routes/deleguesRoutes.js")(actions));
   // app.use(require("./routes/csaioRoutes.js")(actions));
-  app.use(require("./routes/passwordRoutes")(actions));
+
   app.use(require("./routes/emailsRoutes")(actions));
   app.use(require("./routes/healthcheckRoutes")(actions));
   // app.use(require("./routes/relationRoutes.js")(actions));
   app.use(require("./routes/statsRoutes")(actions));
-  app.use(require("./routes/configRoutes")(actions));
-  app.use(require("./routes/alertRoutes")(actions));
-  app.use(require("./routes/adminRoutes")(actions));
-  app.use(require("./routes/constantRoutes")(actions));
 
   app.get("/api/debug-sentry", () => {
     throw new Error("Test sentry");

@@ -10,17 +10,18 @@ module.exports = () => {
   router.get(
     "/api/healthcheck",
     tryCatch(async (req, res) => {
-      let mongodbStatus;
-      await mongoose.connection.db
-        .collection("voeux")
-        .stats()
-        .then(() => {
-          mongodbStatus = true;
-        })
-        .catch((e) => {
-          mongodbStatus = false;
-          logger.error("Healthcheck failed", e);
-        });
+      const mongodbStatus = mongoose.connection.readyState === 1;
+
+      switch (mongodbStatus) {
+        case true:
+          logger.info("Healthcheck OK");
+          break;
+        case false:
+          logger.error("Healthcheck KO : MongoDB connection is not ready");
+          break;
+        default:
+          logger.error("Healthcheck KO : MongoDB connection status is unknown");
+      }
 
       return res.json({
         healthcheck: mongodbStatus,

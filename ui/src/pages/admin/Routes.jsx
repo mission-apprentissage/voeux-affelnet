@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 
+import { Users } from "./Users";
 import { Etablissements } from "./Etablissements";
 import { Etablissement } from "./Etablissement";
 
@@ -28,6 +29,15 @@ function AdminRoutes() {
         element={
           <RequireAuth allowed={[USER_TYPE.ADMIN]}>
             <Config />
+          </RequireAuth>
+        }
+      ></Route>
+
+      <Route
+        path="users"
+        element={
+          <RequireAuth allowed={[USER_TYPE.ADMIN]}>
+            <Users />
           </RequireAuth>
         }
       ></Route>
