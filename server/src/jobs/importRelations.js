@@ -23,7 +23,7 @@ const schema = Joi.object({
   siret_formateurs: arrayOf(Joi.string().pattern(siretFormat)).required(),
 }).unknown();
 
-async function importEtablissementsRelations(relationsCsv) {
+async function importRelations(relationsCsv) {
   const stats = {
     total: 0,
     created: 0,
@@ -187,4 +187,4 @@ async function importEtablissementsRelations(relationsCsv) {
   return stats;
 }
 
-module.exports = { importEtablissementsRelations };
+module.exports = { importRelations };

@@ -12,9 +12,10 @@ const sendConfirmationEmails = require("./jobs/sendConfirmationEmails");
 const sendActivationEmails = require("./jobs/sendActivationEmails");
 const sendNotificationEmails = require("./jobs/sendNotificationEmails");
 const sendUpdateEmails = require("./jobs/sendUpdateEmails");
+const sendWarningEmails = require("./jobs/sendWarningEmails");
 const { importEtablissements } = require("./jobs/importEtablissements");
 const { cleanEtablissements } = require("./jobs/cleanEtablissements");
-const { importEtablissementsRelations } = require("./jobs/importEtablissementsRelations");
+const { importRelations } = require("./jobs/importRelations");
 const importFormations = require("./jobs/importFormations");
 const computeStats = require("./jobs/computeStats");
 const exportResponsables = require("./jobs/exportResponsables");
@@ -116,13 +117,13 @@ cli
   });
 
 cli
-  .command("importEtablissementsRelations <relationsCsv>")
+  .command("importRelations <relationsCsv>")
   .description("Importe les relations entre établissements")
   .action((relationsCsv) => {
     runScript(() => {
       const relationsInput = relationsCsv ? createReadStream(relationsCsv) : null;
 
-      return importEtablissementsRelations(relationsInput);
+      return importRelations(relationsInput);
     });
   });
 
@@ -214,6 +215,20 @@ cli
   .action((options) => {
     runScript(({ sendEmail, resendEmail }) => {
       return sendUpdateEmails({ sendEmail, resendEmail }, options);
+    });
+  });
+
+cli
+  .command("sendWarningEmails")
+  .option("--username <username>", "Permet d'envoyer l'email à un seul utilisateur")
+  .option("--limit <limit>", "Nombre maximum d'emails envoyés (défaut: 0)", parseInt)
+  .option("--skip <skip>", "Nombre d'éléments à ignorer en début de liste (défaut: 0)", parseInt)
+  .option("--resend", "Permet le renvoi d'un rappel", false)
+  .option("--force", "Ignore les règles d'envoi habituelles", false)
+  .option("--proceed", "Procède à l'envoi des courriers", false)
+  .action((options) => {
+    runScript(({ sendEmail, resendEmail }) => {
+      return sendWarningEmails({ sendEmail, resendEmail }, options);
     });
   });
 

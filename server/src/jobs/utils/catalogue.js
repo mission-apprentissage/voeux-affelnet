@@ -16,6 +16,15 @@ const catalogue = async () => {
         return null;
       }
     },
+    findEtablissement: async (params) => {
+      try {
+        const etablissement = await catalogueApi.getFormation(params);
+
+        return etablissement;
+      } catch (e) {
+        return null;
+      }
+    },
   };
 };
 

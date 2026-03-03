@@ -88,7 +88,7 @@ function filterConflicts(onConflict = () => ({})) {
 }
 
 async function streamOffreDeFormation(options = {}) {
-  const { findFormation } = await catalogue();
+  const { findFormation, findEtablissement } = await catalogue();
 
   const { onConflict = () => ({}), affelnet, overwrite } = options;
 
@@ -159,6 +159,29 @@ async function streamOffreDeFormation(options = {}) {
             logger.debug(`${affelnet_id} / Recherche catalogue`);
 
             let formation;
+
+            if (!formation) {
+              formation = await findFormation({
+                published: true,
+                catalogue_published: true,
+                affelnet_perimetre: true,
+                affelnet_session: true,
+                affelnet_id,
+              });
+            }
+
+            if (!formation) {
+              formation = await findFormation({
+                published: true,
+                catalogue_published: true,
+                affelnet_perimetre: true,
+                affelnet_id,
+              });
+            }
+
+            if (!formation) {
+              formation = await findFormation({ published: true, catalogue_published: true, affelnet_id });
+            }
 
             if (!formation) {
               formation = await findFormation({ published: true, affelnet_id });
@@ -246,34 +269,32 @@ async function streamOffreDeFormation(options = {}) {
             };
           }
 
-          if (siret_responsable) {
-            const responsable = await Etablissement.findOne({ siret: siret_responsable });
+          try {
+            if (siret_responsable) {
+              let responsable = await Etablissement.findOne({ siret: siret_responsable });
+              let formation;
 
-            if (responsable) {
-              return {
-                siret_responsable: responsable.siret,
+              !responsable && (responsable = await findEtablissement({ siret: siret_responsable }));
+
+              !responsable &&
+                (formation = await findFormation({
+                  affelnet_id,
+                }));
+
+              logger.info("Informations trouvées : ", {
+                siret_responsable: responsable.siret ?? formation?.etablissement_gestionnaire_siret,
                 siret_formateurs: siret_formateur?.toUpperCase(),
-                email_responsable: responsable.email?.toLowerCase(),
+                email_responsable:
+                  responsable.email?.toLowerCase() ?? formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
+              });
+
+              return {
+                siret_responsable: responsable.siret ?? formation?.etablissement_gestionnaire_siret,
+                siret_formateurs: siret_formateur?.toUpperCase(),
+                email_responsable:
+                  responsable.email?.toLowerCase() ?? formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
               };
             }
-          }
-
-          try {
-            const formation = await findFormation({
-              affelnet_id,
-            });
-
-            // logger.info("Informations trouvées : ", {
-            //   siret_formateurs: siret_formateur?.toUpperCase(),
-            //   siret_responsable: formation?.etablissement_gestionnaire_siret,
-            //   email_responsable: formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
-            // });
-
-            return {
-              siret_responsable: siret_responsable ?? formation?.etablissement_gestionnaire_siret,
-              siret_formateurs: siret_formateur?.toUpperCase(),
-              email_responsable: formation?.etablissement_gestionnaire_courriel?.toLowerCase(),
-            };
           } catch (e) {
             return {
               siret_responsable: null,

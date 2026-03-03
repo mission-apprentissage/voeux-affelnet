@@ -76,7 +76,7 @@ const RelationContact = ({ relation, callback }) => {
             {!relation.delegue.relations.active ? (
               <>
                 <Text>
-                  Contact délégué habilité en 2024 à réceptionner les listes de candidats :
+                  Contact délégué habilité en 2025 à réceptionner les listes de candidats :
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
                 </Text>
                 <Box mt={3}>
@@ -678,7 +678,7 @@ const RelationBlock = ({ relation, callback, isResponsableFormateur }) => {
             )
           )}
         </Box>
-      ) : new Date().getTime() <= new Date("2025/06/07").getTime() ? (
+      ) : new Date().getTime() <= new Date("2026/06/07").getTime() ? (
         <Box mt={8}>
           <Text>
             Les candidatures exprimées en mai seront rendues disponibles dans la première semaine de juin. Un courriel

@@ -61,7 +61,7 @@ const RelationContact = ({ relation, callback }) => {
             {!relation.delegue.relations.active ? (
               <>
                 <Text>
-                  Contact délégué habilité en 2024 à réceptionner les listes de candidats :
+                  Contact délégué habilité en 2025 à réceptionner les listes de candidats :
                   <Text as="b"> {relation.delegue?.email}</Text>.{" "}
                 </Text>
                 <Box mt={3}>

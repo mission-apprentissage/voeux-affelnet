@@ -17,6 +17,10 @@ const historySchema = new Schema(
       type: Object,
       default: {},
     },
+    old: {
+      type: Boolean,
+      default: false,
+    },
   },
   { _id: false }
 );

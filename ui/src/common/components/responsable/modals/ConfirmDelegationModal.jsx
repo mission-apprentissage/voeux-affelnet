@@ -75,8 +75,8 @@ export const ConfirmDelegationModal = ({ relation, callback, isOpen, onClose }) 
         <ModalBody>
           <Text fontSize="lg" mb={6}>
             Vous vous apprêtez à confirmer <Text as="b">{delegue.email}</Text>, précédemment destinataire de la
-            délégation de droits 2024 au sein de l'organisme formateur{" "}
-            <EtablissementLibelle etablissement={formateur} /> comme destinataire pour cette campagne 2025.
+            délégation de droits 2025 au sein de l'organisme formateur{" "}
+            <EtablissementLibelle etablissement={formateur} /> comme destinataire pour cette campagne 2026.
           </Text>
 
           <Formik

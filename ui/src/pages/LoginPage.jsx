@@ -223,9 +223,9 @@ function LoginPage() {
             ) : (
               <Alert display={"flex"} flexDirection={"column"}>
                 {/* <Text mb={4}>
-                  Le service de diffusion des candidatures sera accessible dans la semaine du 21 mai 2024 : un courriel
+                  Le service de diffusion des candidatures sera accessible dans la semaine du 21 mai 2025 : un courriel
                   sera envoyé aux organismes responsables des offres pour leur permettre de confirmer l'adresse courriel
-                  de la personne habilitée, et créer le mot de passe d'accès au service pour 2024.
+                  de la personne habilitée, et créer le mot de passe d'accès au service pour 2025.
                 </Text>
 
                 <Text mb={4}>
@@ -246,7 +246,7 @@ function LoginPage() {
                 </Text>
 
                 <Text mb={4}>
-                  Les destinataires seront les mêmes qu'en 2024 . Si vous pensez que les contacts peuvent avoir changé,
+                  Les destinataires seront les mêmes qu'en 2025 . Si vous pensez que les contacts peuvent avoir changé,
                   vous pouvez adresser un signalement à{" "}
                   <Link variant="action" href={`mailto:${process.env.REACT_APP_EMAIL}`}>
                     {process.env.REACT_APP_EMAIL}
@@ -266,13 +266,13 @@ function LoginPage() {
                 </Text> */}
 
                 {/* <Text mb={4}>
-                  Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2024, puis ont été mises à
+                  Les listes de candidatures ont été rendues disponibles le mardi 4 juin 2025, puis ont été mises à
                   jour, selon les organismes, le 20 juin, le 24 juin ou le 27 juin. Des courriels ont été diffusés aux
                   contacts habilités : directeur·trices au sein des organismes responsables, ou personnes ayant reçu une
                   délégation de droit d’accès au sein des organismes formateurs.
                 </Text>
 
-                <Text mb={4}>Aucune autre mise à jour ne sera diffusée pour 2024.</Text>
+                <Text mb={4}>Aucune autre mise à jour ne sera diffusée pour 2025.</Text>
                 <Text mb={4}>
                   Si vous n’avez pas été destinataires de ces listes et que vous pensez qu’il s’agit d’une erreur :
                   <UnorderedList>
@@ -297,7 +297,7 @@ function LoginPage() {
 
                 <Text mb={4}>
                   <strong>
-                    Les mots de passe utilisés en 2024 ne sont plus valables, de nouveaux comptes doivent être créés.
+                    Les mots de passe utilisés en 2025 ne sont plus valables, de nouveaux comptes doivent être créés.
                     Des courriels vont être diffusés aux organismes de formation en apprentissage la dernière semaine de
                     mai, pour permettre de créer leur compte et définir leur mot de passe de connexion. Seuls les
                     organismes responsables des offres sont destinataires de ces premières correspondances.
@@ -333,7 +333,7 @@ function LoginPage() {
                             <ListItem>
                               Dernière semaine de mai: une première campagne sera diffusée par courriel pour identifier
                               les directeurs d’organismes responsables, confirmer l’adresse email de réception, créer le
-                              mot de passe de connexion (les mots de passe créés en 2024 ne seront pas utilisables).
+                              mot de passe de connexion (les mots de passe créés en 2025 ne seront pas utilisables).
                             </ListItem>
                             <ListItem>
                               Première semaine de juin: diffusion des listes de candidats sur l’adresse courriel

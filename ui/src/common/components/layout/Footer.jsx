@@ -110,7 +110,7 @@ const Footer = () => {
               </ListItem>
             </List>
             <Text textStyle="xs" mt={[2, 2, 0]}>
-              © République française 2025
+              © République française {new Date().getFullYear()}
             </Text>
           </Flex>
         </Container>

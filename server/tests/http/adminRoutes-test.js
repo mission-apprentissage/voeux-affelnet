@@ -615,8 +615,8 @@ describe("adminRoutes", () => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      `[Rappel] Affelnet 2025  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (siret : ${etablissement.siret})`
-      // "Affelnet 2025  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (siret : ${etablissement1.siret})"
+      `[Rappel] Affelnet 2026  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (siret : ${etablissement.siret})`
+      // "Affelnet 2026  – Action requise pour la transmission des listes de candidats aux offres de formation en apprentissage (siret : ${etablissement1.siret})"
     );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
@@ -700,8 +700,8 @@ describe("adminRoutes", () => {
     assert.deepStrictEqual(sent[0].to, "test1@apprentissage.beta.gouv.fr");
     assert.deepStrictEqual(
       sent[0].subject,
-      `[Rappel] Affelnet 2025  – Veuillez activer votre compte pour l'accès aux listes de candidats (siret : ${etablissement.siret})`
-      // `Affelnet 2025  – Veuillez activer votre compte pour l'accès aux listes de candidats (siret : ${etablissement1.siret})`
+      `[Rappel] Affelnet 2026  – Veuillez activer votre compte pour l'accès aux listes de candidats (siret : ${etablissement.siret})`
+      // `Affelnet 2026  – Veuillez activer votre compte pour l'accès aux listes de candidats (siret : ${etablissement1.siret})`
     );
     assert.strictEqual(response.status, 200);
     assert.deepStrictEqual(response.data, {
