@@ -33,7 +33,7 @@ module.exports = {
       .collection("users")
       .updateMany(
         { type: USER_TYPE.ETABLISSEMENT },
-        { $set: { statut: USER_STATUS.EN_ATTENTE, "histories.$[].old": true }, $unset: { password: 1 } }
+        { $set: { statut: USER_STATUS.EN_ATTENTE, emails: [], "histories.$[].old": true }, $unset: { password: 1 } }
       );
 
     // Réinitialisation de l'activation des comptes délégués
@@ -41,7 +41,7 @@ module.exports = {
       .collection("users")
       .updateMany(
         { type: USER_TYPE.DELEGUE },
-        { $set: { statut: USER_STATUS.CONFIRME, "histories.$[].old": true }, $unset: { password: 1 } }
+        { $set: { statut: USER_STATUS.CONFIRME, emails: [], "histories.$[].old": true }, $unset: { password: 1 } }
       );
 
     // Suppression des délégations désactivées.

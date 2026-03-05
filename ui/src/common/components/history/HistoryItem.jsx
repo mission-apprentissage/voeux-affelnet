@@ -9,14 +9,16 @@ export const HistoryItem = ({ history }) => {
 
   return (
     <Flex alignItems={"center"}>
-      <Text color="gray.500" minW={"174px"} align={"right"}>
+      <Text color={history.old ? "gray.400" : "gray.500"} minW={"174px"} align={"right"}>
         {date.toLocaleDateString()} à {date.toLocaleTimeString()}
       </Text>
-      <Text borderLeft="2px solid black" ml={4} pl={4}>
-        {history.value}{" "}
+      <Text borderLeft={history.old ? "2px solid gray" : "2px solid black"} ml={4} pl={4}>
+        <Text as="span" color={history.old ? "gray.500" : "black"}>
+          {history.value}
+        </Text>{" "}
         {isAdmin(auth) && (
           <Tooltip label={history.action}>
-            <Icon name="info" color="gray.500" />
+            <Icon name="info" color={history.old ? "gray.400" : "gray.500"} />
           </Tooltip>
         )}
       </Text>

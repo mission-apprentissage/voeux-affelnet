@@ -65,28 +65,6 @@ const relationPipelines = [
       ],
     },
   },
-  {
-    $lookup: {
-      from: Etablissement.collection.name,
-      localField: "etablissement_responsable.siret",
-      foreignField: "siret",
-      as: "responsable",
-      pipeline: [
-        {
-          $project: {
-            _id: 0,
-            siret: 1,
-            uai: 1,
-            academie: 1,
-            raison_sociale: 1,
-            libelle_ville: 1,
-            enseigne: 1,
-            statut: 1,
-          },
-        },
-      ],
-    },
-  },
 
   {
     $lookup: {

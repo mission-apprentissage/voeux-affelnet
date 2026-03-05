@@ -2,8 +2,7 @@ const { Schema } = require("mongoose");
 // const { nested } = require("../utils/mongooseUtils");
 const { USER_TYPE } = require("../constants/UserType");
 const { academieSchema } = require("./schemas/academieSchema");
-const { historySchema: historyResponsableSchema } = require("./schemas/responsableHistorySchema");
-// const { historySchema: historyFormateurSchema } = require("./schemas/formateurHistorySchema");
+const { historySchema } = require("./schemas/responsableHistorySchema");
 const User = require("./User");
 
 const schema = new Schema({
@@ -42,13 +41,8 @@ const schema = new Schema({
 
   histories: {
     default: [],
-    type: [historyResponsableSchema],
+    type: [historySchema],
   },
-
-  // histories_formateur: {
-  //   default: [],
-  //   type: [historyFormateurSchema],
-  // },
 });
 
 schema.index(
