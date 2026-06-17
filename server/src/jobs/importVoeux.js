@@ -91,7 +91,7 @@ const fixCodePostal = (code) => {
 };
 
 const fixPhoneNumber = (phone) => {
-  return phone ? phone.replace(/^\+[0-9]{2}/, "0").replace(/ /, "") : phone;
+  return phone?.replace(/^\+[0-9]{2}/, "0")?.replace(/ /, "");
 };
 
 const findFormationDiplome = async (code) => {
@@ -129,12 +129,12 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
     transformData(async (line) => {
       // logger.info({ line });
       const { mef, code_formation_diplome } = (await findFormationDiplome(line["Code MEF"])) || {};
-      const uaiEtablissementOrigine = line["Code UAI étab. origine"]?.toUpperCase();
-      const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase();
+      const uaiEtablissementOrigine = line["Code UAI étab. origine"]?.toUpperCase()?.replace(/\s+/g, "");
+      const uaiEtablissementAccueil = line["Code UAI étab. Accueil"]?.toUpperCase()?.replace(/\s+/g, "");
       const cle_ministere_educatif = line["clé ministère éducatif"]?.toUpperCase();
 
-      const uaiEtablissementResponsable = line["UAI Établissement responsable"]?.toUpperCase();
-      const uaiEtablissementFormateur = line["UAI Établissement formateur"]?.toUpperCase();
+      const uaiEtablissementResponsable = line["UAI Établissement responsable"]?.toUpperCase()?.replace(/\s+/g, "");
+      const uaiEtablissementFormateur = line["UAI Établissement formateur"]?.toUpperCase()?.replace(/\s+/g, "");
 
       const overwrite = line["OVERWRITE"];
 
@@ -154,7 +154,7 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
               line["SIRET UAI formateur"]?.toUpperCase()
             );
 
-      const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase();
+      const uaiCIO = line["Code UAI CIO origine"]?.toUpperCase()?.replace(/\s+/g, "")?.replace(/,00/g, "");
       const academieDuVoeu = pickAcademie(
         findAcademieByName(line["Académie possédant le dossier élève et l'offre de formation"])
       );
@@ -186,9 +186,9 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
 
         if (formation) {
           siretResponsable ??= formation.etablissement_gestionnaire_siret;
-          uaiResponsable ??= formation.etablissement_gestionnaire_uai;
+          uaiResponsable ??= formation.etablissement_gestionnaire_uai?.replace(/\s+/g, "");
           siretFormateur ??= formation.etablissement_formateur_siret;
-          uaiFormateur ??= formation.etablissement_formateur_uai;
+          uaiFormateur ??= formation.etablissement_formateur_uai?.replace(/\s+/g, "");
         }
       }
 
@@ -197,13 +197,13 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
         const formateur = await Etablissement.findOne({ siret: siretFormateur }).lean();
 
         // siretResponsable ??= responsable?.siret;
-        uaiResponsable ??= responsable?.uai;
+        uaiResponsable ??= responsable?.uai?.replace(/\s+/g, "");
         // siretFormateur ??= formateur?.siret;
-        uaiFormateur ??= formateur?.uai;
+        uaiFormateur ??= formateur?.uai?.replace(/\s+/g, "");
       }
 
       // TODO : Retirer deepOmitEmpty to allo empty adress fields, without it being detected as an update on the field.
-      return deepOmitEmpty({
+      const formattedData = deepOmitEmpty({
         academie: academieDuVoeu,
         apprenant: {
           ine: line["INE"],
@@ -259,6 +259,10 @@ const parseVoeuxCsv = async (sourceCsv, overwriteCsv) => {
           uai: uaiResponsable,
         },
       });
+
+      console.log(formattedData);
+
+      return formattedData;
     }),
     { promisify: false }
   );
@@ -321,6 +325,9 @@ const importVoeux = async (voeuxCsvStream, overwriteFile, options = {}) => {
 
   await oleoduc(
     await parseVoeuxCsv(voeuxCsvStream, overwriteFile),
+    // transformData((data) => {
+    //   return fixData(data);
+    // }),
     writeData(
       async (data) => {
         const key = JSON.stringify({
