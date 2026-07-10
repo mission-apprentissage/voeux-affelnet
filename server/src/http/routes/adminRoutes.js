@@ -54,18 +54,20 @@ const lookupRelations = {
     {
       $lookup: {
         from: Etablissement.collection.name,
-        localField: "etablissement_formateur.siret",
+        localField: "etablissement_responsable.siret",
         foreignField: "siret",
-        as: "formateur",
+        as: "responsable",
+        pipeline: [{ $project: { emails: 0, histories: 0 } }],
       },
     },
 
     {
       $lookup: {
         from: Etablissement.collection.name,
-        localField: "etablissement_responsable.siret",
+        localField: "etablissement_formateur.siret",
         foreignField: "siret",
-        as: "responsable",
+        as: "formateur",
+        pipeline: [{ $project: { emails: 0, histories: 0 } }],
       },
     },
 
